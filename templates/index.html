@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Triage Prediction</title>
+  <link rel="stylesheet" href="styles.css"> <!-- External CSS -->
+  <script>
+    async function getPrediction() {
+      const data = {
+        "SBP": document.getElementById("SBP").value,
+        "DBP": document.getElementById("DBP").value,
+        "HR": document.getElementById("HR").value,
+        "RR": document.getElementById("RR").value,
+        "BT": document.getElementById("BT").value,
+        "SpO2": document.getElementById("SpO2").value,
+        "Age": document.getElementById("Age").value,
+        "Gender": document.getElementById("Gender").value,
+        "GCS": document.getElementById("GCS").value,
+        "Na": document.getElementById("Na").value,
+        "K": document.getElementById("K").value,
+        "Cl": document.getElementById("Cl").value,
+        "Urea": document.getElementById("Urea").value,
+        "Ceratinine": document.getElementById("Ceratinine").value,
+        "Alcoholic": document.getElementById("Alcoholic").value,
+        "Smoke": document.getElementById("Smoke").value,
+        "FHCD": document.getElementById("FHCD").value,
+        "TriageScore": document.getElementById("TriageScore").value
+      };
+
+      const response = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      document.getElementById("output").innerHTML =
+        "<b>Prediction:</b> " + result.prediction +
+        "<br><b>Explanation:</b> " + result.explanation;
+    }
+  </script>
+</head>
+<body>
+  <h2>Patient Triage Prediction System</h2>
+  <p>Enter patient parameters below:</p>
+
+<div class="form-container">
+  <label for="SBP">SBP (Systolic BP):</label>
+  <input type="number" id="SBP" name="SBP" placeholder="Enter SBP" title="Enter systolic blood pressure"><br>
+
+  <label for="DBP">DBP (Diastolic BP):</label>
+  <input type="number" id="DBP" name="DBP" placeholder="Enter DBP" title="Enter diastolic blood pressure"><br>
+
+  <label for="HR">Heart Rate (HR):</label>
+  <input type="number" id="HR" name="HR" placeholder="Enter HR" title="Enter heart rate"><br>
+
+  <label for="RR">Respiratory Rate (RR):</label>
+  <input type="number" id="RR" name="RR" placeholder="Enter RR" title="Enter respiratory rate"><br>
+
+  <label for="BT">Temperature (BT °C):</label>
+  <input type="number" step="0.1" id="BT" name="BT" placeholder="Enter temperature" title="Enter body temperature"><br>
+
+  <label for="SpO2">SpO₂ (%):</label>
+  <input type="number" id="SpO2" name="SpO2" placeholder="Enter SpO₂" title="Enter oxygen saturation"><br>
+
+  <label for="Age">Age:</label>
+  <input type="number" id="Age" name="Age" placeholder="Enter age" title="Enter patient age"><br>
+
+  <label for="Gender">Gender:</label>
+  <input type="number" id="Gender" name="Gender" placeholder="1=Male, 0=Female" title="Enter gender"><br>
+
+  <label for="GCS">Glasgow Coma Scale (GCS):</label>
+  <input type="number" id="GCS" name="GCS" placeholder="Enter GCS" title="Enter GCS score"><br>
+
+  <label for="Na">Sodium (Na):</label>
+  <input type="number" id="Na" name="Na" placeholder="Enter Na" title="Enter sodium level"><br>
+
+  <label for="K">Potassium (K):</label>
+  <input type="number" id="K" name="K" placeholder="Enter K" title="Enter potassium level"><br>
+
+  <label for="Cl">Chloride (Cl):</label>
+  <input type="number" id="Cl" name="Cl" placeholder="Enter Cl" title="Enter chloride level"><br>
+
+  <label for="Urea">Urea:</label>
+  <input type="number" id="Urea" name="Urea" placeholder="Enter Urea" title="Enter urea level"><br>
+
+  <label for="Ceratinine">Creatinine:</label>
+  <input type="number" id="Ceratinine" name="Ceratinine" placeholder="Enter Creatinine" title="Enter creatinine level"><br>
+
+  <label for="Alcoholic">Alcoholic:</label>
+  <input type="number" id="Alcoholic" name="Alcoholic" placeholder="1=Yes, 0=No" title="Alcoholic history"><br>
+
+  <label for="Smoke">Smoke:</label>
+  <input type="number" id="Smoke" name="Smoke" placeholder="1=Yes, 0=No" title="Smoking history"><br>
+
+  <label for="FHCD">Family History of Chronic Disease (FHCD):</label>
+  <input type="number" id="FHCD" name="FHCD" placeholder="1=Yes, 0=No" title="Family history of chronic disease"><br>
+
+  <label for="TriageScore">Triage Score:</label>
+  <input type="number" id="TriageScore" name="TriageScore" placeholder="Enter score" title="Enter triage score"><br><br>
+
+  <button onclick="getPrediction()">Predict</button>
+</div>
+
+
+  <h3>Result:</h3>
+  <div id="output"></div>
+</body>
+</html>
