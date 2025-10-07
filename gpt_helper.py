@@ -1,17 +1,32 @@
-import openai
+import os
 from dotenv import load_dotenv
+from openai import OpenAI
+
 load_dotenv()
-openai.api_key = API # get from .env file
+client = OpenAI(api_key=os.getenv("API"))
 
-def explain_prediction(prediction):
-    response = openai.ChatCompletion.create(
+def get_gpt_explanation(prediction, patient_data):
+    """
+    Returns short explanation:
+    - Where to admit (ICU, OT, Emergency, Resuscitation)
+    - Possible disease
+    - Suggested treatment
+    """
+    messages = [
+        {"role": "system", "content": "You are a medical assistant AI. Reply in max 3 lines."},
+        {"role": "user", "content": f"""
+        ML model predicts: {prediction}.
+        Patient data: {patient_data}.
+        Provide:
+        1. Admission place (ICU, OT, Emergency OR Resuscitation).
+        2. Possible disease.
+        3. Treatment suggestion.
+        """}
+    ]
+    response = client.chat.completions.create(
         model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a medical assistant AI."},
-            {"role": "user", "content": f"The ML model predicts {prediction}. Please explain what this means for the doctor and patient."}
-        ]
+        messages=messages,
+        max_tokens=120,
+        temperature=0.6
     )
-    return response["choices"][0]["message"]["content"]
-
-if __name__ == "__main__":
-    print(explain_prediction("ICU"))
+    return response.choices[0].message.content.strip()
