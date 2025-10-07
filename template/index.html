@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Patient Triage Prediction System</title>
+  <link rel="stylesheet" href="./static/style.css">
+</head>
+<body>
+
+<header>
+  <h1>🩺 Patient Triage Prediction System</h1>
+  <p class="subtitle">Enter patient vitals to predict triage outcome</p>
+</header>
+
+<main>
+  <!-- Input Form -->
+  <section class="form-section">
+    <h2>Patient Information</h2>
+    <form id="triageForm">
+      <div class="form-grid">
+        {% for col in features %}
+          <div>
+            <label>{{ col }}:</label>
+            <input type="text" name="{{ col }}" id="{{ col }}">
+          </div>
+        {% endfor %}
+      </div>
+      <button type="submit">🔍 Predict</button>
+    </form>
+    <!-- Add upload and retrain buttons -->
+    <form action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".csv">
+      <button type="submit">Upload Dataset</button>
+    </form>
+    <form action="/retrain" method="post">
+      <button type="submit">Retrain Model</button>
+    </form>
+  </section>
+
+  <!-- Prediction Result -->
+  <section id="result-section" class="result-box" style="display:none;">
+    <h2>Prediction Result</h2>
+    <p><strong>Admission Place:</strong> <span id="place"></span></p>
+    <p><strong>Possible Disease:</strong> <span id="disease"></span></p>
+    <p><strong>Treatment Suggestion:</strong> <span id="treatment"></span></p>
+  </section>
+
+  <!-- History -->
+  <section class="history-section">
+    <h2>📜 Prediction History</h2>
+    <button onclick="loadHistory()">Show History</button>
+    <div id="history-table" style="display:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Age</th><th>Gender</th><th>SBP</th><th>DBP</th><th>HR</th><th>RR</th>
+            <th>SpO₂</th><th>Prediction</th><th>Explanation</th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+document.getElementById("triageForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const data = {
+    SBP: document.getElementById("SBP").value,
+    DBP: document.getElementById("DBP").value,
+    HR: document.getElementById("HR").value,
+    RR: document.getElementById("RR").value,
+    BT: document.getElementById("BT").value,
+    SpO2: document.getElementById("SpO2").value,
+    Age: document.getElementById("Age").value,
+    Gender: document.getElementById("Gender").value,
+    GCS: document.getElementById("GCS").value,
+    Na: document.getElementById("Na").value,
+    K: document.getElementById("K").value,
+    Cl: document.getElementById("Cl").value,
+    Urea: document.getElementById("Urea").value,
+    Ceratinine: document.getElementById("Ceratinine").value,
+    Alcoholic: document.getElementById("Alcoholic").value,
+    Smoke: document.getElementById("Smoke").value,
+    FHCD: document.getElementById("FHCD").value,
+    TriageScore: document.getElementById("TriageScore").value
+  };
+
+  const response = await fetch("/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  document.getElementById("result-section").style.display = "block";
+  document.getElementById("place").textContent = result.Prediction || "N/A";
+  document.getElementById("disease").textContent = (result.Explanation || "").split("\n")[1] || "N/A";
+  document.getElementById("treatment").textContent = (result.Explanation || "").split("\n")[2] || "N/A";
+});
+
+async function loadHistory() {
+  const res = await fetch("/history");
+  const history = await res.json();
+  const tbody = document.getElementById("history-body");
+  tbody.innerHTML = "";
+  history.forEach(row => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${row.Age}</td>
+        <td>${row.Gender}</td>
+        <td>${row.SBP}</td>
+        <td>${row.DBP}</td>
+        <td>${row.HR}</td>
+        <td>${row.RR}</td>
+        <td>${row.SpO2}</td>
+        <td>${row.Prediction}</td>
+        <td>${row.Explanation}</td>
+      </tr>`;
+  });
+  document.getElementById("history-table").style.display = "block";
+}
+</script>
+
+</body>
+</html>
