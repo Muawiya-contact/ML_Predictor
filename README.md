@@ -1,168 +1,176 @@
+# 🏥 MedGemma-Powered Digital Health Platform
 
-# Adaptive Medical Triage Prediction System
+## 📖 Project Overview
 
-A Flask-based intelligent prediction system for medical triage, featuring:
+This repository hosts a comprehensive **Digital Health AI Platform** that leverages **Google’s MedGemma** foundation models for advanced **clinical decision support**.  
+The platform is built around two complementary components:
 
-- **Automatic model training** from any uploaded medical dataset (CSV)
-- **Dynamic web form generation** based on detected features
-- **Dataset merging** with duplicate removal
-- **Outcome prediction** (e.g., admission place, triage level) even with partial inputs
-- **AI-generated explanations** (via GPT)
-- **Prediction history** and on-demand retraining
+### 1. **Diagnosys: Rare Disease Navigator AI**
+A **multimodal AI agent** that synthesizes unstructured **clinical notes and medical images** to generate evidence-based **Rare Disease Differential Diagnoses (RD-DDx)**.
+
+### 2. **Patient Triage Prediction System**
+A **classical Machine Learning model** for **initial patient assessment**, predicting patient outcomes (e.g., *ICU, OT, Ward*) using **structured clinical and lab parameters**.
+
+Together, these systems provide **end-to-end diagnostic reasoning and operational triage support** — bridging ML efficiency with LLM-based interpretability.
 
 ---
 
 ## 👨‍💻 Developed By
-
-**Muawiya Amir** — AI Student at NFC IET Multan  
+**Muawiya Amir** — AI Student, NFC IET Multan  
 **Research Collaboration:** Wasiq Siddiqui (BMT)
 
 ---
 
-## 🚀 Features
+## 🚀 Getting Started
 
-- **Upload Dataset:** Upload any CSV; system merges and retrains automatically.
-- **Dynamic Input Form:** Web form updates to match model features.
-- **Prediction:** Handles missing values, predicts outcomes, and provides GPT-based suggestions.
-- **History:** Stores and displays last 10 predictions.
-- **Retrain:** Retrain model on demand.
-
----
-
-## 🧠 Tech Stack
-
-- **Frontend:** HTML, CSS, Jinja2
-- **Backend:** Flask
-- **ML:** scikit-learn, pandas, joblib
-- **AI Explanation:** OpenAI GPT (optional)
-- **Storage:** CSV
+### 🔧 Prerequisites
+- **Google Cloud Vertex AI Access** — for deploying and serving MedGemma models  
+- **Hugging Face Credentials** — for accessing MedGemma model weights  
+- **Secure Datasets** — both:
+  - Rare-disease data (for LLM fine-tuning)  
+  - Structured clinical/lab data (for ML model training)
 
 ---
 
-## ⚙️ Usage
+### ⚙️ Installation & Setup
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-2. **Run the app:**
-   ```bash
-   python app.py
-   ```
-
-3. **Open in your browser:**  
-   [http://127.0.0.1:5000](http://127.0.0.1:5000)
-
-4. **Workflow:**
-   - Upload a dataset (CSV)
-   - Fill in the dynamically generated form
-   - Click "Predict" to get triage results and AI suggestions
-
----
-
-## 📁 File Structure
+#### 1. Clone the Repository
+```bash
+git clone https://github.com/YourStartup/diagnosys-medgemma-ai.git
+cd diagnosys-medgemma-ai
+```
+#### 2. Set Up Virtual Environment
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
 ```
-├── app.py                # Main Flask app
-├── templates/
-│   └── index.html        # Dynamic frontend
-├── static/
-│   └── style.css         # UI styling
-├── train_model.py        # Dataset merging & model training
-├── predict.py            # Model loading & prediction
-├── gpt_helper.py         # GPT-based explanations
-└── requirements.txt      # Dependencies
+### 3. Configure Environment Variables
+
+Create a `.env` file in the root directory and populate it with:
+```bash
+GCP_PROJECT_ID=your_project_id
+VERTEX_ENDPOINT_URL=https://your-model-endpoint
+HUGGINGFACE_TOKEN=your_hf_token
 ```
+### 📂 Project Structure
+
+The architecture separates the **MedGemma-based diagnostic system** and the **classical ML triage predictor** for modular development.
+```bash
+diagnosys-medgemma-ai/
+│
+├── data/
+│   ├── llm_tuning/           # Rare Disease data for MedGemma (text/images)
+│   └── ml_training/          # Structured data for Triage ML model (CSV/Parquet)
+│
+├── diagnosys/                # Multimodal LLM System (Rare Disease Navigator)
+│   ├── models/               # MedGemma fine-tuning code and adapter weights
+│   ├── agents/               # Core agentic orchestration logic
+│   └── knowledge_base/       # RAG documents for clinical reasoning
+│
+├── triage_ml/                # Classical ML System (Patient Triage Prediction)
+│   ├── notebooks/            # Exploratory Data Analysis & feature engineering
+│   ├── prediction_model/     # Model code and serialized files (e.g., model.pkl)
+│   └── scripts/              # Training and evaluation scripts
+│
+├── app/                      # Unified API & Frontend Layer
+│   ├── api/                  # Flask/FastAPI routes for both components
+│   ├── webapp/               # Web interface for clinicians
+│   │   ├── public/           # Static assets (CSS, JS)
+│   │   └── src/              # Source code (HTML templates, React/Vue optional)
+│   └── utils/                # Helper functions (validation, cleaning, etc.)
+│
+├── infrastructure/           # Deployment configs (Terraform, CI/CD)
+├── .env.example
+├── requirements.txt
+└── README.md
+```
+## 🖥 User Interface (UI)
+
+The unified **Diagnosys UI** provides clinicians with two main panels:
+
+| **Panel** | **Function** |
+|------------|--------------|
+| **Triage View (Top Panel)** | Quick entry of structured labs/vitals → Predicts immediate disposition *(ICU / OT / Ward)* |
+| **Diagnostic View (Main Panel)** | Input for EMR text + medical images → Generates rare disease differential diagnoses and explanations |
+
+*(Image preview placeholder: `assets/ui_overview.png`)*
 
 ---
 
-## 🧾 Example Dataset Columns
+## 🛠 Component Details
 
-`SBP, DBP, HR, RR, BT, SpO2, Age, Gender, GCS, Na, K, Cl, Urea, Ceratinine, Alcoholic, Smoke, FHCD, TriageScore, Outcome`
+### 🧬 1. Diagnosys: Rare Disease Navigator AI (LLM)
+
+- **Model:** MedGemma-27B-Multimodal  
+- **Deployment:** Google Vertex AI Endpoint  
+- **Fine-tuning:** LoRA adapters using curated rare-disease datasets in `data/llm_tuning/`
+
+**Pipeline:**
+1. Extract findings from clinical text & images  
+2. Query knowledge base (RAG) for relevant literature  
+3. Generate structured reasoning and RD-DDx explanation  
 
 ---
 
+### 🧠 2. Patient Triage Prediction System (ML)
+
+- **Model Type:** Gradient Boosting / Random Forest / MLP (scikit-learn or TensorFlow)  
+- **Input:** Structured clinical parameters *(vitals, lab values, symptoms)*  
+- **Output:** Predicted care destination *(ICU / OT / Ward)*  
+
+**Features:**
+- Automatic duplicate removal & column alignment for custom datasets  
+- Re-trainable model on new datasets  
+- Integrated GPT/MedGemma reasoning for interpretability  
+
+---
+
+## 🚢 Deployment
+
+We use **Terraform** for reproducible and scalable deployment across **Google Cloud**.
+
+```bash
+cd infrastructure/terraform/
+terraform init
+terraform apply
+```
+## Deployed Components
+
++ 🧠 MedGemma endpoint on Vertex AI
+
++ ⚙️ ML model hosted on Cloud Run
+
++ 🌐 Unified API Gateway connecting both services
+
+---
 ## 📚 Research & Credits
 
-Developed by **Muawiya Amir** (AI Student, NFC IET Multan)  
-In collaboration with **Wasiq Siddiqui** (BMT)
-# Patient Triage Prediction System
++ Developed by: Muawiya Amir (AI Student, NFC IET Multan)
 
-A Machine Learning-based system to predict patient outcomes (e.g., ICU, OT, Ward) from clinical and lab parameters. The system also integrates GPT-based suggestions for patient care recommendations.
++ In Collaboration With: Wasiq Siddiqui (BMT — Biomedical Engineering)
 
----
-
-## 🗂 Project Structure
-
-```txt
-BMT/
-│── templates/
-│ └── index.html # Frontend HTML form
-│
-│── static/
-│ └── styles.css # External CSS for styling
-│
-│── .env # Environment variables (e.g., API keys)
-│── .gitignore
-│── app.py # Flask app serving the web interface and prediction API
-│── gpt_helper.py # GPT helper functions for explanation/suggestions
-│── main.py # Optional entry point for testing or future features
-│── prepare_data.py # Data cleaning, merging, preprocessing
-│── train_model.py # Train ML model and save .pkl file
-│── predict.py # Predict function for single patient input
-│── merged_dataset.csv # Merged dataset from multiple sources
-│── patient_triage_model.pkl # Trained RandomForest model
-│── balanced_triage_dataset.csv # Optional balanced dataset
-│── 30 patients dataset.csv # Sample dataset for testing
-
-```
++ Affiliation: BMT-201 Research Series — Explainable AI for Healthcare
 
 ---
+## 🧩 Future Enhancements
 
-## ⚡ Features (Planned / Skeleton)
+ + 🩻 Add image-based diagnosis support (X-ray, MRI integration)
 
-- Predict patient outcome (ICU, OT, Ward) from clinical parameters
-- Preprocessing of multiple datasets into a merged dataset
-- RandomForest ML model for prediction
-- GPT-based suggestions for patient care (via API)
-- Web interface with HTML form for doctors to input patient data
-- Responsive and accessible form design (labels, placeholders, title attributes)
+  🧬 Fine-tune MedGemma on local hospital data
+
+ + 🔒 Add Federated Learning for data privacy
+
+ + 📊 Build interactive visual dashboard for predictions
 
 ---
+## 💡 Summary
 
-## 📝 How to Run
+BMT-201 represents a fusion of structured ML and LLM reasoning, enabling transparent, explainable AI for healthcare.
+This approach aligns with modern clinical AI trends — balancing automation with accountability, and accuracy with explainability.
 
-1. **Install dependencies**  
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Run the Flask app
-```bash
-python app.py
-```
-
-3. Open the web interface
-```
-http://127.0.0.1:5000/
-
-```
-4. Enter patient parameters and click ***Predict*** to get outcome + GPT suggestion.
-
-----
-
-### 🔧 Next Steps / TODO
-
-+ Add more datasets and merge intelligently
-
-+ Improve ML model accuracy with hyperparameter tuning
-
-+ Enhance GPT suggestions based on patient context
-
-+ Add user authentication for doctors
-
-+ Improve web interface UX (responsive design, error handling)
-
-+ Dockerize the project for deployment
-
-----
+> "Where machine intelligence meets clinical empathy."
+> — BMT Research Initiative 2025
+>
+> ---
