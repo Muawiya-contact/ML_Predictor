@@ -1,176 +1,153 @@
-# 🏥 MedGemma-Powered Digital Health Platform
+# MedGemma-Powered Digital Health Platform: Intelligent Rare Disease Diagnosis and Triage
 
-## 📖 Project Overview
+## 1. Project Overview
 
-This repository hosts a comprehensive **Digital Health AI Platform** that leverages **Google’s MedGemma** foundation models for advanced **clinical decision support**.  
-The platform is built around two complementary components:
+This platform addresses two core challenges in clinical workflow: **delayed diagnosis for rare diseases** and **inefficient patient triage** in high-volume settings.  
+We propose a novel, multimodal, dual-model architecture to handle both problems simultaneously.
 
-### 1. **Diagnosys: Rare Disease Navigator AI**
-A **multimodal AI agent** that synthesizes unstructured **clinical notes and medical images** to generate evidence-based **Rare Disease Differential Diagnoses (RD-DDx)**.
+The system uses a **specialized, fine-tuned MedGemma Large Multimodal Model (LMM)** for complex, multimodal diagnostic reasoning (text + image), and a **classical Machine Learning (ML) model** for rapid, operational patient triage prediction.
 
-### 2. **Patient Triage Prediction System**
-A **classical Machine Learning model** for **initial patient assessment**, predicting patient outcomes (e.g., *ICU, OT, Ward*) using **structured clinical and lab parameters**.
+### Key Contributions
 
-Together, these systems provide **end-to-end diagnostic reasoning and operational triage support** — bridging ML efficiency with LLM-based interpretability.
+1. **Agentic Orchestration Framework:**  
+   A unified system that intelligently routes requests to the optimal AI component (Triage ML vs. MedGemma LMM) based on the input type and complexity.
 
----
+2. **Specialized MedGemma Tuning:**  
+   Implementation of a Parameter-Efficient Fine-Tuning (PEFT) method (e.g., LoRA) on MedGemma, specifically targeting a class of rare diseases (e.g., specific genetic or dermatological conditions) for enhanced diagnostic accuracy.
 
-## 👨‍💻 Developed By
-**Muawiya Amir** — AI Student, NFC IET Multan  
-**Research Collaboration:** Wasiq Siddiqui (BMT)
-
----
-
-## 🚀 Getting Started
-
-### 🔧 Prerequisites
-- **Google Cloud Vertex AI Access** — for deploying and serving MedGemma models  
-- **Hugging Face Credentials** — for accessing MedGemma model weights  
-- **Secure Datasets** — both:
-  - Rare-disease data (for LLM fine-tuning)  
-  - Structured clinical/lab data (for ML model training)
+3. **Real-time Dual-Task Validation:**  
+   A comprehensive evaluation methodology for both the precision-focused LMM and the speed-focused ML model using distinct clinical metrics.
 
 ---
 
-### ⚙️ Installation & Setup
+## 2. Technical Stack
 
-#### 1. Clone the Repository
-```bash
-git clone https://github.com/YourStartup/diagnosys-medgemma-ai.git
-cd diagnosys-medgemma-ai
-```
-#### 2. Set Up Virtual Environment
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+| Component | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Multimodal LLM** | MedGemma (Fine-tuned) | Rare Disease Differential Diagnosis & Clinical Reasoning. |
+| **Triage Model** | Scikit-learn / TensorFlow (e.g., Random Forest) | High-speed prediction for Triage Urgency/Priority. |
+| **API Backend** | FastAPI | High-performance, asynchronous REST API to serve both models. |
+| **LLM Orchestration** | LangChain / Custom Python Agents | Manages prompt injection, RAG integration, and multi-step reasoning. |
+| **Frontend/Demo** | Streamlit / Gradio | Interactive web interface for end-user testing and presentation. |
+| **Dependencies** | Python 3.10+, PyTorch, Hugging Face `transformers` | Core libraries for ML and LLM operations. |
 
-```
-### 3. Configure Environment Variables
+---
 
-Create a `.env` file in the root directory and populate it with:
-```bash
-GCP_PROJECT_ID=your_project_id
-VERTEX_ENDPOINT_URL=https://your-model-endpoint
-HUGGINGFACE_TOKEN=your_hf_token
-```
-### 📂 Project Structure
+## 3. Project Structure
 
-The architecture separates the **MedGemma-based diagnostic system** and the **classical ML triage predictor** for modular development.
+A clean, modular structure is essential for an ML/LLM project of this complexity.
+
 ```bash
-diagnosys-medgemma-ai/
-│
+medgemma-health-platform/
+├── app/
+│ ├── api/
+│ │ ├── init.py
+│ │ ├── triage_router.py # FastAPI routes for the Triage ML model
+│ │ └── diagnosis_router.py # FastAPI routes for the MedGemma Agent
+│ ├── core/
+│ │ ├── config.py # Environment variables and model paths
+│ │ ├── logging.py
+│ │ └── exceptions.py
+│ ├── services/
+│ │ ├── llm_agent.py # Logic for MedGemma prompting, RAG, and image processing
+│ │ └── triage_service.py # Logic for loading/running the Triage ML model
+│ └── main.py # FastAPI entry point (combines routers)
 ├── data/
-│   ├── llm_tuning/           # Rare Disease data for MedGemma (text/images)
-│   └── ml_training/          # Structured data for Triage ML model (CSV/Parquet)
-│
-├── diagnosys/                # Multimodal LLM System (Rare Disease Navigator)
-│   ├── models/               # MedGemma fine-tuning code and adapter weights
-│   ├── agents/               # Core agentic orchestration logic
-│   └── knowledge_base/       # RAG documents for clinical reasoning
-│
-├── triage_ml/                # Classical ML System (Patient Triage Prediction)
-│   ├── notebooks/            # Exploratory Data Analysis & feature engineering
-│   ├── prediction_model/     # Model code and serialized files (e.g., model.pkl)
-│   └── scripts/              # Training and evaluation scripts
-│
-├── app/                      # Unified API & Frontend Layer
-│   ├── api/                  # Flask/FastAPI routes for both components
-│   ├── webapp/               # Web interface for clinicians
-│   │   ├── public/           # Static assets (CSS, JS)
-│   │   └── src/              # Source code (HTML templates, React/Vue optional)
-│   └── utils/                # Helper functions (validation, cleaning, etc.)
-│
-├── infrastructure/           # Deployment configs (Terraform, CI/CD)
-├── .env.example
-├── requirements.txt
-└── README.md
+│ ├── raw/ # Original, untouched data (e.g., clinical notes, X-rays)
+│ ├── processed/ # Cleaned, de-identified data for ML/LLM training
+│ └── knowledge_base/ # RAG documents (e.g., Rare Disease literature PDFs)
+├── models/
+│ ├── triage_model.pkl # Saved Triage ML model (e.g., Random Forest)
+│ └── medgemma_lora_weights/ # LoRA/PEFT weights for MedGemma fine-tuning
+├── notebooks/
+│ ├── 1.0-EDA.ipynb
+│ ├── 2.0-Triage_Model_Training.ipynb
+│ └── 3.0-MedGemma_FineTuning.ipynb # Detailed steps for LoRA/PEFT
+├── tests/
+│ ├── test_api.py # Unit tests for FastAPI endpoints
+│ └── test_models.py # Unit tests for core model prediction logic
+├── research_paper/
+│ ├── paper.docx / paper.tex # The final research paper document
+│ └── figures/ # Diagrams, charts, and architecture visuals
+├── requirements.txt # Project dependencies (pip freeze > requirements.txt)
+├── Dockerfile # For containerizing the application
+└── README.md # This file
 ```
-## 🖥 User Interface (UI)
-
-The unified **Diagnosys UI** provides clinicians with two main panels:
-
-| **Panel** | **Function** |
-|------------|--------------|
-| **Triage View (Top Panel)** | Quick entry of structured labs/vitals → Predicts immediate disposition *(ICU / OT / Ward)* |
-| **Diagnostic View (Main Panel)** | Input for EMR text + medical images → Generates rare disease differential diagnoses and explanations |
-
-*(Image preview placeholder: `assets/ui_overview.png`)*
 
 ---
 
-## 🛠 Component Details
+## 4. Getting Started
 
-### 🧬 1. Diagnosys: Rare Disease Navigator AI (LLM)
+### 4.1. Prerequisites
 
-- **Model:** MedGemma-27B-Multimodal  
-- **Deployment:** Google Vertex AI Endpoint  
-- **Fine-tuning:** LoRA adapters using curated rare-disease datasets in `data/llm_tuning/`
+- Python 3.10 or higher  
+- GPU access (e.g., Google Colab Enterprise, or local setup with NVIDIA CUDA) is **highly recommended** for fine-tuning and running MedGemma 27B  
+- A Hugging Face or Google Cloud API key if using cloud-based MedGemma APIs or hosted models
 
-**Pipeline:**
-1. Extract findings from clinical text & images  
-2. Query knowledge base (RAG) for relevant literature  
-3. Generate structured reasoning and RD-DDx explanation  
+### 4.2. Installation
+
+1. **Clone the repository:**
+    ```bash
+    git clone [Your Repository URL]
+    cd medgemma-health-platform
+    ```
+
+2. **Create and activate a virtual environment:**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
+    ```
+
+3. **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+### 4.3. Model Setup
+
+1. **Triage Model:**  
+   The trained ML model (`triage_model.pkl`) must be placed in the `models/` directory.  
+   Run `notebooks/2.0-Triage_Model_Training.ipynb` to train it if missing.
+
+2. **MedGemma:**  
+   - **Weights:** Download fine-tuned LoRA weights into `models/medgemma_lora_weights/`  
+   - **RAG:** Place the clinical/rare disease PDF or text files into `data/knowledge_base/`  
+     (`app/services/llm_agent.py` will handle embedding and retrieval.)
+
+### 4.4. Running the API
+
+1. **Set Environment Variables:**  
+   Create a `.env` file in the root directory and add necessary keys (e.g., API keys, model path configs).
+
+2. **Start the FastAPI Server:**
+    ```bash
+    uvicorn app.main:app --reload
+    ```
+    API docs available at **`http://127.0.0.1:8000/docs`**
+
+---
+
+## 5. Paper Submission Checklist
+
+| Task | Status | Notes |
+| :--- | :--- | :--- |
+| **Data Card** | [ ] | Document the size, source, and PHI de-identification status of the dataset. |
+| **Reproducibility** | [ ] | Ensure `requirements.txt` is complete and all setup steps are clear. |
+| **LLM Tuning Details** | [ ] | Explicitly state MedGemma version, LoRA rank (r), and training data size. |
+| **Evaluation Metrics** | [ ] | Report **Accuracy/F1-score** for Triage model AND **Top-K Accuracy/Clinical Utility** for MedGemma. |
+| **Architecture Diagram** | [ ] | Include a clear figure showing the flow from input → dual-model output. |
 
 ---
 
-### 🧠 2. Patient Triage Prediction System (ML)
+## 6. Contact and Authorship
 
-- **Model Type:** Gradient Boosting / Random Forest / MLP (scikit-learn or TensorFlow)  
-- **Input:** Structured clinical parameters *(vitals, lab values, symptoms)*  
-- **Output:** Predicted care destination *(ICU / OT / Ward)*  
-
-**Features:**
-- Automatic duplicate removal & column alignment for custom datasets  
-- Re-trainable model on new datasets  
-- Integrated GPT/MedGemma reasoning for interpretability  
+| Name | Role | Contact |
+| :--- | :--- | :--- |
+| **Muawiya Amir** | Lead Developer — Responsible for model development and implementation | contactmuawia@gmail.com |
+| **Wasiq Siddiqui** | Research Lead — Responsible for literature review and research paper preparation | [Your Email/LinkedIn] |
 
 ---
 
-## 🚢 Deployment
-
-We use **Terraform** for reproducible and scalable deployment across **Google Cloud**.
-
-```bash
-cd infrastructure/terraform/
-terraform init
-terraform apply
-```
-## Deployed Components
-
-+ 🧠 MedGemma endpoint on Vertex AI
-
-+ ⚙️ ML model hosted on Cloud Run
-
-+ 🌐 Unified API Gateway connecting both services
-
+### 🧩 Next Step
+Start by populating `app/core/config.py` and creating the initial files in the `app/api/` and `app/services/` directories.
 ---
-## 📚 Research & Credits
-
-+ Developed by: Muawiya Amir (AI Student, NFC IET Multan)
-
-+ In Collaboration With: Wasiq Siddiqui (BMT — Biomedical Engineering)
-
-+ Affiliation: BMT-201 Research Series — Explainable AI for Healthcare
-
----
-## 🧩 Future Enhancements
-
- + 🩻 Add image-based diagnosis support (X-ray, MRI integration)
-
-  🧬 Fine-tune MedGemma on local hospital data
-
- + 🔒 Add Federated Learning for data privacy
-
- + 📊 Build interactive visual dashboard for predictions
-
----
-## 💡 Summary
-
-BMT-201 represents a fusion of structured ML and LLM reasoning, enabling transparent, explainable AI for healthcare.
-This approach aligns with modern clinical AI trends — balancing automation with accountability, and accuracy with explainability.
-
-> "Where machine intelligence meets clinical empathy."
-> — BMT Research Initiative 2025
->
-> ---
