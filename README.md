@@ -1,40 +1,74 @@
-# 🏥 MedGemma-Sentinel: AI-Driven ICU Sepsis Monitor
+# MedGemma-Sentinel: AI-Driven ICU Sepsis Monitor
 
-**MedGemma-Sentinel** is an intelligent clinical agent designed to bridge the gap between Biomedical Technology (BMT) and Artificial Intelligence. It monitors real-time ICU patient vitals to provide early warnings for Sepsis using a dual-path architecture.
+**MedGemma-Sentinel** is an intelligent clinical agent designed to bridge the gap between Biomedical Technology (BMT) and Artificial Intelligence. It monitors real-time ICU patient vitals to provide early warnings for Sepsis using a bilingual generative-reasoning architecture.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Muawiya-contact/ML_Predictor/blob/main/MedGemma.ipynb)
+---
 
-## 🌟 Project Overview
-Early detection of Sepsis is critical in ICU environments. This project implements an **Agentic AI** that analyzes patient data through:
-1. **Clinical Reasoning:** Utilizing the Gemma-2-2b-it model to interpret medical trends.
-2. **Safety Fallback:** A deterministic rule-based system based on SIRS (Systemic Inflammatory Response Syndrome) and SOFA criteria.
+## Project Overview
 
+Early detection of Sepsis is critical in ICU environments. This project implements an Agentic AI system that analyzes patient data through:
 
+### Clinical Reasoning  
+Utilizes google/gemma-2-2b-it (Gemma 2 architecture) to interpret complex medical trends using structured reasoning.
 
-## 🛠️ Monitored Parameters
-The agent evaluates the following clinical metrics to assess patient stability:
-- **Heart Rate (HR):** Identification of Tachycardia (>100 bpm).
-- **Blood Pressure (BP):** Monitoring for Hypotension (e.g., <90/60 mmHg).
-- **Temperature:** Tracking Fever (>101°F) or Hypothermia (<96.8°F).
-- **WBC Count:** Analyzing immune response markers.
+### Bilingual Context Understanding  
+Native support for clinical notes in English and Urdu (e.g., "saans ka masla"), tailored for the Pakistani healthcare landscape.
 
-## 🏗️ Technical Architecture
-- **Model:** `google/gemma-2-2b-it` (Gemma 2 Architecture).
-- **Precision:** 16-bit Floating Point (`bfloat16`) for GPU efficiency.
-- **Framework:** Hugging Face `transformers` & `torch`.
-- **Fail-Safe:** Implemented a `try-except` logic that defaults to a Rule-Based Expert System if LLM inference is unavailable, ensuring 100% monitoring uptime.
+### Interactive GUI  
+A Streamlit-based interface allows doctors and nurses to input patient data and receive instant, explainable triage results.
 
-## 📊 Sample Results
-| Patient Case | Status | Reasoning |
-| :--- | :--- | :--- |
-| **Case A** | ✅ STABLE | Vitals within normal physiological ranges. |
-| **Case B** | ⚠️ ELEVATED | Rising HR and borderline BP; early intervention suggested. |
-| **Case C** | 🚨 CRITICAL | Tachycardia + Hypotension detected. High risk of Septic Shock. |
+---
 
-## 🚀 Future Roadmap
-- [ ] **MIMIC-IV Integration:** Validate agent logic against 40,000+ real ICU cases.
-- [ ] **Longitudinal Analysis:** Track vitals over 6-12 hour windows for trend prediction.
-- [ ] **Multimodal Inputs:** Incorporate lab results (Lactate, Creatinine) for more accurate SOFA scoring.
+## Monitored Parameters
 
-## ⚖️ Ethical Considerations
-This project was developed following **CITI/RCR training guidelines**. It is designed as a **Decision Support Tool** to assist clinicians, not to replace human medical judgment. Data privacy is maintained by utilizing secure, localizable model weights.
+The agent evaluates clinical metrics against SIRS (Systemic Inflammatory Response Syndrome) and SOFA criteria:
+
+- **Heart Rate (HR):** Detects Tachycardia (> 90 bpm)
+- **Blood Pressure (BP):** Monitors Hypotension (< 90/60 mmHg)
+- **Temperature:**  
+  - Fever (> 100.4°F)  
+  - Hypothermia (< 96.8°F)
+- **WBC Count:** Assesses immune response abnormalities
+- **Qualitative Notes:** Parses linguistic cues for:
+  - Respiratory distress  
+  - Altered mental status  
+  - Systemic weakness  
+
+---
+
+## Technical Architecture
+
+- **Core Model:** google/gemma-2-2b-it  
+- **Precision:** 16-bit Floating Point (bfloat16) for GPU efficiency  
+- **Reasoning Method:** Chain-of-Thought (CoT) prompting — forces the AI to explain its logic before producing a status  
+- **Frontend Layer:** Streamlit Web Framework served via secure port-forwarding  
+- **Fail-Safe Mechanism:** Logic-gate layer ensures 100% monitoring uptime even if LLM inference experiences latency  
+
+---
+
+## Deployment Results (Bilingual Capabilities)
+
+| Patient Input | Clinical Note (English/Urdu) | AI Status | Reasoning Excerpt |
+|--------------|------------------------------|------------|------------------|
+| HR 75, Temp 98.6 | Routine recovery | STABLE | Vitals are within normal physiological ranges. |
+| HR 130, BP 85/50 | Saan lenay mein masla hai | CRITICAL | Tachycardia + Hypotension + Respiratory Distress detected. |
+| HR 110, Temp 101.5 | Bohot kamzoori hai | ELEVATED | SIRS positive (HR + Temp). Weakness indicates systemic infection. |
+
+---
+
+## Future Roadmap
+
+- [ ] MIMIC-IV Integration: Validate agent logic against 40,000+ real ICU cases  
+- [ ] Multi-Modal Support: Incorporate Chest X-Rays and ECG waveforms  
+- [ ] Local Deployment: Optimize quantized execution for low-resource rural clinics in Pakistan  
+
+---
+
+## Ethical Considerations
+
+This project follows CITI/RCR research training guidelines.
+
+- Designed strictly as a Clinical Decision Support Tool  
+- Does not replace human medical judgment  
+- Ensures data privacy using secure, localizable model weights  
+- No external cloud storage required  
