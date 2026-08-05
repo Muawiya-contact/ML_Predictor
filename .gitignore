@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+env/
+
+# Hugging Face / sentence-transformers model cache (if downloaded into the project)
+.cache/
+hf_cache/
+huggingface/
+models--*/
+
+# Generated prediction outputs (recreated by predict_batch.py)
+*_predictions.csv
+*_predictions.xlsx
+
+# OS noise
+Thumbs.db
+.DS_Store

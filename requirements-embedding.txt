@@ -1,0 +1,10 @@
+# Extra dependency ONLY for embedding_experiment.py (the optional AI-embedding test).
+# The core triage system does NOT need this - keep it separate so the main
+# project stays lightweight.
+#
+# Install once (needs internet to download the library + model the first time):
+#     pip install -r requirements-embedding.txt
+#
+# After the first run the embedding model is cached locally and works offline.
+
+sentence-transformers>=3.0.0

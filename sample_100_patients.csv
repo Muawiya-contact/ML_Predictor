@@ -1,0 +1,101 @@
+Complaint_Text,Age,Gender,Mode_of_Arrival,Heart_Rate,Systolic_BP,Diastolic_BP,Temperature,SpO2,AVPU,ECG_Status
+acchanak pasina aur seena mein burn,66,Male,Ambulance,122,155,90,37.0,91,A,ST elevation
+kabhi kabhi seenay mein choobhan hoti hai,53,Male,Wheelchair,94,140,81,36.8,96,A,Normal
+seena mein halki dard aur thakan zyada hai,43,Female,Walk-in,100,138,86,37.1,96,A,Abnormal
+asthma,42,Female,Wheelchair,124,138,86,37.0,90,V,Arrhythmia
+tezi se dard badh raha hai seenay mein,81,Male,Ambulance,148,178,101,37.0,88,A,ST elevation
+seena dard aur paseena bohat aa raha hai,68,Female,Ambulance,126,158,96,36.8,91,V,ST elevation
+gastritis,33,Female,Walk-in,90,118,76,37.0,99,A,Normal
+seena mein dard aur left bazu mein jalan ho rahi hai,47,Male,Walk-in,102,140,86,37.1,96,A,Abnormal
+bohat zyada paseena aur seenay mein bhaaree pan,74,Male,Ambulance,140,171,95,36.8,90,A,ST elevation
+sore throat aur mild fever,22,Male,Walk-in,88,116,74,37.8,99,A,Normal
+seena dard aur both arms pain,78,Male,Ambulance,148,175,101,36.5,88,V,ST elevation
+cut injury bleeding,34,Male,Wheelchair,106,122,80,37.2,99,P,Normal
+food poisoning vomiting aur dehydration,35,Female,Walk-in,110,120,76,38.2,96,A,Normal
+taang mein soojan aur dard,55,Male,Wheelchair,94,136,84,36.7,95,A,Abnormal
+behoshi ki shikayat aur seenay mein pain,80,Male,Ambulance,142,171,95,36.9,89,A,ST elevation
+saans phoolna aur khansi raat ko,54,Male,Wheelchair,115,148,85,37.0,90,A,Abnormal
+sweeting raat ko bohat chest light pain,77,Female,Wheelchair,116,154,88,36.9,93,A,Abnormal
+dil ki dhadkan slow hai thakan bohat,45,Male,Wheelchair,62,120,76,36.7,95,A,Bradycardia
+seena mein dard aur jaw mein pain,63,Female,Ambulance,112,158,92,37.1,93,A,T wave inversion
+vomiting pregnancy,28,Female,Walk-in,98,114,70,37.3,98,A,Normal
+thakawat aur seenay mein bhaari pan,69,Female,Walk-in,98,142,84,36.9,96,A,Normal
+jabde mein dardd aur seenay mein jalaan,64,Male,Ambulance,134,170,95,36.9,90,A,ST elevation
+khaansi ke saath seenay mein dardd,55,Male,Walk-in,88,134,79,36.8,96,A,Normal
+behoshi aur girna bathroom mein,82,Male,Ambulance,88,175,96,36.6,92,V,Atrial fibrillation
+seena mein bhaari pan aur kaanpna,55,Male,Ambulance,130,160,94,37.0,91,A,ST elevation
+heat exhaustion weakness,18,Female,Walk-in,90,110,70,38.3,98,A,Normal
+pasina thanda aur seenay mein tees upar ki taraf,64,Female,Ambulance,130,158,89,36.8,91,A,ST elevation
+baayin taraf seenay mein halka dardd aur jalaan,65,Female,Wheelchair,106,152,88,36.9,93,A,Normal
+patient unconscious chest pain history,81,Male,Ambulance,130,175,101,36.4,86,V,ST elevation
+cough fever sore throat,38,Female,Walk-in,96,124,80,38.3,97,A,Normal
+seena mein dard lekin walking se better hota hai,42,Female,Walk-in,95,125,78,36.9,98,A,Normal
+confusion BP high,70,Male,Ambulance,94,168,100,36.6,93,P,Abnormal
+chest mein halka bleeding jaisa dard kabhi kabhi,69,Female,Walk-in,96,138,80,36.8,96,A,Normal
+seena dard aur left arm mein jalan ho rahi hai,47,Female,Ambulance,118,150,92,36.9,92,V,ST elevation
+left chest pain radiating,56,Female,Ambulance,118,150,92,36.9,92,V,ST elevation
+behoshi aur baad mein shaky,80,Male,Ambulance,88,182,97,36.6,91,V,Arrhythmia
+saanss bohat mushkil se aa rahi seenay tight hai,68,Male,Ambulance,148,162,88,36.8,87,A,Abnormal
+ulta aana sai na mein dard ke saat,60,Male,Ambulance,110,140,85,37.1,91,V,ST elevation
+burn injury arm,53,Male,Ambulance,120,130,84,36.9,95,P,Normal
+severe breathlessness,72,Male,Ambulance,132,150,90,36.8,87,V,Arrhythmia
+paani peene se bhi saans phool jaati hai,77,Male,Wheelchair,108,152,86,36.8,95,A,Normal
+shortness breath,41,Female,Walk-in,100,132,84,37.2,95,A,Normal
+saans nahi aa rahi seenay mein bichu kaat raha hai,79,Male,Ambulance,155,190,105,37.1,86,A,ST elevation
+chest palpitations after tea,47,Male,Walk-in,102,135,80,36.9,97,A,Normal
+seena mein chubhan jaise sooi chubh rahi,48,Male,Walk-in,100,130,80,37.0,98,A,Normal
+thakan bohat hai zara sa kaam karo to seenay pain,72,Female,Walk-in,92,135,80,36.9,96,A,Normal
+saansein bohat slow ho gayi hain seenay dardd,69,Male,Ambulance,100,187,96,36.8,88,A,ST elevation
+seena mein dard baayein kankhar mein ja raha hai,59,Female,Wheelchair,128,158,92,36.8,93,V,ST elevation
+seenay mein buchan aur saanss rok raha hai,57,Male,Ambulance,154,151,83,36.9,88,A,Abnormal
+bohat kamzori hai seenay mein buchan,82,Male,Wheelchair,108,158,89,36.9,94,A,Normal
+seena dard aur qay aa rahi hai,52,Female,Ambulance,134,160,93,36.7,90,V,Inferior MI
+seena mein dardd aur ulti do baar ho chuki,71,Female,Ambulance,116,108,66,36.4,89,V,ST elevation
+heat stroke,24,Female,Walk-in,96,112,70,38.4,97,A,Normal
+dil ki dhadkan tez hai BP normal hai,58,Male,Wheelchair,148,140,86,37.0,95,A,Sinus tachycardia
+gastritis,34,Female,Walk-in,90,118,76,37.0,99,A,Normal
+behosh ho gaye chest pain kay baad,86,Male,Ambulance,136,178,102,36.4,86,V,ST elevation
+seena tight aur paseena aa raha hai lagatar,66,Male,Wheelchair,120,152,94,36.8,91,V,ST elevation
+sans foolna aur pair mein sujan dono taraf,51,Male,Wheelchair,115,160,92,36.8,86,A,Abnormal
+behoshi aa gayi walking karte waqt,62,Male,Ambulance,98,170,95,36.7,93,V,LBBB
+seena mein dardd jo left shoulder mein ja raha tha,80,Male,Ambulance,118,170,95,37.1,91,A,ST elevation
+abdominal pain nausea,33,Female,Walk-in,94,118,74,37.5,98,A,Normal
+diabetes ka mareez hoon sugar high hai,67,Female,Ambulance,96,155,88,36.7,98,A,Normal
+dono kandhon mein dardd aur seenay bhaaree,80,Female,Walk-in,102,147,86,36.8,94,A,Normal
+typhoid treatment ongoing fever,39,Female,Walk-in,106,130,82,39.0,94,A,Abnormal
+dono haath aur pair thanday seenay dard,75,Female,Ambulance,135,169,94,36.9,90,A,ST elevation
+palpitaiten bohot tez heart beating,73,Female,Ambulance,145,165,90,36.8,89,A,Atrial fibrillation
+pair toot gaya girnay se,28,Male,Wheelchair,108,122,78,37.1,99,P,Normal
+dil ki dhadkan ruk ruk ke ho rahi hai,70,Female,Ambulance,88,165,90,36.8,94,A,Atrial fibrillation
+chest tightness walking karnay se,64,Male,Wheelchair,122,152,88,36.8,94,A,Normal
+thakan choti si walk se bhi,50,Male,Wheelchair,112,150,88,36.8,92,A,Abnormal
+seena bhaari lag raha hai,71,Male,Wheelchair,98,142,86,36.7,95,A,Abnormal
+chest pressure aur saans lene mein takleef,72,Female,Ambulance,128,158,92,36.5,91,A,ST elevation
+dardd jabde mein shuru hota hai seenay ki taraf,81,Female,Wheelchair,110,157,89,36.8,92,A,Normal
+dono haath aur pair thanday seenay dardd,76,Female,Ambulance,137,171,95,36.9,89,A,ST elevation
+gardan aur seenay mein akar halki,61,Female,Walk-in,94,138,80,36.8,96,A,Normal
+seenay mein dabao jaisa mehsoos ho raha hai aur pasina thanda thanda aa raha hai,69,Male,Ambulance,134,172,96,37.0,88,A,ST elevation
+chest tightness,72,Male,Wheelchair,98,140,86,36.7,95,A,Abnormal
+puranay marz ke sath saans phoolna,62,Male,Ambulance,132,148,90,36.8,88,V,Arrhythmia
+dhadkan tez aur chakkar ana,49,Female,Walk-in,130,135,82,37.0,96,A,Sinus tachycardia
+saanss phoolna aur gabrahat bohat zyada,59,Male,Wheelchair,130,164,92,36.8,90,A,Abnormal
+confusion BP high,69,Male,Ambulance,94,168,100,36.6,93,P,Abnormal
+chest tightness walking kay baad,60,Male,Wheelchair,118,148,86,36.8,93,A,Normal
+dil ki dhadkan irregular palpitations,55,Male,Wheelchair,104,135,80,36.8,96,A,Arrhythmia
+baar baar peshab aana aur seenay mein bucha,70,Female,Wheelchair,100,142,80,36.8,96,A,Normal
+bike slip knee injury,28,Male,Wheelchair,104,122,80,37.1,99,P,Normal
+seena bhaari aur saans mein sakht takleef ho rahi hai,72,Male,Ambulance,130,155,96,36.8,88,V,Arrhythmia
+seena mein chubhan si hoti hai kabhi kabhar,43,Male,Walk-in,96,130,80,36.9,98,A,Normal
+paseena aur seenay mein buchan bohat,87,Male,Ambulance,149,187,104,36.9,86,A,ST elevation
+vomitting ke sath behoshi chest pain,82,Male,Ambulance,150,184,106,37.0,85,A,ST elevation
+teen din se bohat takleef aur saanss mein dikkat,82,Male,Wheelchair,106,152,88,36.8,94,A,Normal
+chest pain aur ghabrahat bohat zyada,62,Male,Wheelchair,144,155,88,36.9,93,V,ST depression
+back pain,38,Male,Wheelchair,96,126,80,37.1,99,A,Normal
+dono haath sunn ho gaye seenay pain,57,Male,Wheelchair,130,160,90,36.9,90,A,Abnormal
+cardiac pain,57,Male,Ambulance,124,150,94,36.9,91,V,ST elevation
+severe chest pressure aur pasina,62,Male,Ambulance,122,158,96,37.1,92,V,ST elevation
+seena mein shadeed dard baayein arm mein numbness,82,Male,Ambulance,150,175,101,36.4,87,V,ST elevation
+sweating thanda aur chest pain jaw tak,79,Female,Ambulance,138,170,94,36.8,88,A,ST elevation
+behoshi ke baad ulti aayi,70,Female,Ambulance,92,175,95,36.6,92,V,Arrhythmia
+fever mild,22,Male,Walk-in,88,116,72,37.7,99,A,Normal
+asthma attack,43,Female,Wheelchair,124,138,86,37.0,90,V,Arrhythmia

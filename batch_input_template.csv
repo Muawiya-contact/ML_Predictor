@@ -1,0 +1,6 @@
+Complaint_Text,Age,Gender,Mode_of_Arrival,Heart_Rate,Systolic_BP,Diastolic_BP,Temperature,SpO2,AVPU,ECG_Status
+seena mein dard aur saans phool rahi hai,62,Male,Ambulance,120,158,96,37.1,93,A,ST elevation
+mirgi ka daura para behosh ho gaya,30,Male,Ambulance,98,132,84,37.0,95,P,Normal
+bukhar aur dast do din se kamzori,22,Female,Walk-in,104,110,70,39.2,98,A,Normal
+accident mein haddi toot gayi khoon beh raha hai,27,Male,Ambulance,115,100,65,36.5,96,A,Sinus tachycardia
+halka sar dard aur thakan,35,Female,Walk-in,78,122,80,36.8,99,A,Normal

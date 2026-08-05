@@ -1,0 +1,1205 @@
+Age,Gender,Mode_of_Arrival,Complaint_Text,Heart_Rate,Systolic_BP,Diastolic_BP,ECG_Status,Temperature,SpO2,AVPU,Triage_Level,Category
+65,Male,Ambulance,seena mein shadeed dard aur pasina aa raha hai,118,160,95,ST elevation,37.2,94,A,1,Cardiac
+45,Female,Wheelchair,saans phool rahi hai lekin baat kar sakti hai,112,145,88,Abnormal,36.8,91,V,2,Respiratory
+28,Male,Walk-in,bukhar aur body pain do din se,102,128,78,Normal,38.9,97,A,3,Infectious_Disease
+72,Female,Ambulance,behosh ho gayi thi ab hosh mein hai kamzori hai,88,165,92,Arrhythmia,36.5,94,V,2,Neurological
+34,Male,Wheelchair,bike accident ke baad pair mein bleeding,124,118,72,Normal,37.1,98,P,2,Trauma
+19,Female,Walk-in,ulta raha hai subah se pait kharab hai,96,110,65,Normal,37.6,99,A,3,Gastrointestinal
+58,Male,Ambulance,left side chest pain radiation to arm,134,155,98,ST elevation,36.9,93,V,1,Cardiac
+41,Female,Wheelchair,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,104,145,85,Abnormal,37.3,96,A,2,Neurological
+23,Male,Walk-in,garmi mein kaam karte hue chakkar aa gaye,88,118,70,Normal,38.2,97,P,3,Heat_Related
+67,Female,Ambulance,diabetes ka mareez hoon sugar high hai,96,155,88,Normal,36.7,98,A,2,Metabolic_Cardiovascular
+31,Male,Wheelchair,roadside khana khaya tha ab ulti aur dast lag gaye,110,122,75,Abnormal,37.9,96,A,3,Gastrointestinal
+52,Female,Walk-in,seena bhaari lag raha hai aur thakan bohat hai,86,148,85,Normal,36.6,97,V,2,Cardiac
+17,Male,Ambulance,head injury girnay ke baad unconscious tha ab alert hai,72,118,68,Abnormal,36.5,96,A,2,Trauma
+44,Female,Wheelchair,saans lene mein takleef wheezing ho rahi hai,128,135,82,Arrhythmia,37.1,89,V,2,Respiratory
+76,Male,Walk-in,patient ko pehle heart attack ho chuka hai ab chest tightness hai,102,140,85,ST elevation,36.8,94,A,1,Cardiac
+29,Female,Ambulance,pregnancy mein bleeding ho rahi hai 8 months ki hain,118,110,70,Normal,37.2,97,P,1,Gyne_Obstetric
+63,Male,Wheelchair,bohat zyada kamzori aur bhook nahi lag rahi do din se,92,125,78,Normal,36.9,95,A,4,Non_Specific
+38,Female,Walk-in,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,108,130,82,Abnormal,39.1,93,A,3,Infectious_Disease
+55,Male,Ambulance,aag se burn ho gaya kitchen mein,130,125,80,Normal,36.8,96,P,1,Burn_Emergency
+22,Female,Wheelchair,gir gaya seedhiyon se sar phut gaya,98,115,72,Normal,37,97,V,2,Trauma
+61,Male,Ambulance,tez seena dard aur ulti jaisa mehsoos ho raha hai,120,150,92,ST elevation,37,93,V,1,Cardiac
+37,Female,Walk-in,gala kharab aur bukhar teen din se,98,120,76,Normal,38.5,97,A,3,Infectious_Disease
+49,Male,Wheelchair,right side body kamzor ho gayi achanak,110,160,100,Abnormal,36.7,95,V,1,Neurological
+26,Female,Walk-in,pait mein dard aur loose motions,92,112,70,Normal,37.8,98,A,3,Gastrointestinal
+70,Male,Ambulance,saans lene mein bohat mushkil aur chest tightness,132,148,90,Arrhythmia,36.9,88,V,1,Respiratory
+33,Male,Wheelchair,construction site par chot lagi haath mein fracture shak hai,105,125,80,Normal,37.2,99,P,2,Trauma
+21,Female,Walk-in,headache aur light sensitivity migraine jaisa,84,118,74,Normal,36.6,99,A,4,Neurological
+56,Male,Ambulance,high sugar levels aur confusion,102,150,88,Abnormal,37.1,96,V,2,Metabolic_Cardiovascular
+43,Female,Wheelchair,asthma ka attack aur wheezing,126,138,84,Arrhythmia,37,90,V,2,Respiratory
+18,Male,Walk-in,khelte hue gir gaya ankle mein swelling,88,116,72,Normal,36.8,99,A,4,Trauma
+64,Female,Ambulance,behoshi aur BP bohat high,90,170,100,Abnormal,36.5,94,P,1,Neurological
+39,Male,Walk-in,fever aur rash body par,104,124,78,Normal,38.7,97,A,3,Infectious_Disease
+27,Female,Wheelchair,pregnancy ke douran lower abdomen pain,100,118,75,Normal,37.1,98,V,2,Gyne_Obstetric
+74,Male,Ambulance,previous cardiac history aur ab severe chest pain,128,155,95,ST elevation,36.9,92,V,1,Cardiac
+35,Female,Walk-in,food poisoning vomiting aur dehydration,110,120,76,Normal,38.2,96,A,3,Gastrointestinal
+59,Male,Wheelchair,left leg mein swelling aur dard DVT shak,96,135,85,Abnormal,36.8,95,A,2,Cardiac
+24,Female,Walk-in,heat exhaustion chakkar aur weakness,90,110,68,Normal,38.3,97,A,3,Heat_Related
+68,Male,Ambulance,burn injury haath aur chest par,122,130,82,Normal,37,95,P,1,Burn_Emergency
+42,Female,Wheelchair,blurred vision aur BP high,108,150,90,Abnormal,36.9,96,A,2,Neurological
+30,Male,Walk-in,back pain heavy weight uthate hue,86,122,80,Normal,36.7,99,A,4,Non_Specific
+62,Male,Ambulance,severe chest pressure aur pasina,122,158,96,ST elevation,37.1,92,V,1,Cardiac
+48,Female,Walk-in,khansi aur bukhar 4 din se,96,126,80,Normal,38.4,96,A,3,Infectious_Disease
+35,Male,Wheelchair,right arm fracture fall ke baad,108,124,82,Normal,37,99,P,2,Trauma
+27,Female,Walk-in,lower abdomen pain aur nausea,94,118,72,Normal,37.5,98,A,3,Gastrointestinal
+71,Male,Ambulance,breathlessness aur wheezing severe,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+54,Female,Wheelchair,dizziness aur blurred vision,102,148,88,Abnormal,36.9,95,A,2,Neurological
+22,Male,Walk-in,sore throat aur mild fever,88,116,74,Normal,37.8,99,A,4,Infectious_Disease
+66,Female,Ambulance,unconscious episode ab confusion,92,162,94,Abnormal,36.6,93,P,1,Neurological
+31,Male,Wheelchair,leg injury sports mein,100,120,78,Normal,37.2,99,A,3,Trauma
+44,Female,Walk-in,vomiting aur dehydration,112,118,76,Normal,38.1,96,A,3,Gastrointestinal
+59,Male,Ambulance,known cardiac patient severe pain,126,152,98,ST elevation,36.9,91,V,1,Cardiac
+18,Female,Walk-in,heat exhaustion weakness,90,110,70,Normal,38.3,98,A,3,Heat_Related
+73,Male,Wheelchair,chest tightness mild,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,typhoid treatment ongoing fever,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+28,Male,Wheelchair,bike slip knee injury,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,shortness of breath severe,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,epigastric pain after food,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+33,Female,Wheelchair,pregnancy 7 months abdominal pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury hand aur face,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+24,Female,Walk-in,migraine severe headache,86,118,74,Normal,36.7,99,A,4,Neurological
+69,Male,Ambulance,confusion aur high BP,94,168,100,Abnormal,36.6,93,P,1,Neurological
+41,Female,Wheelchair,asthma exacerbation wheeze,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+29,Male,Walk-in,food poisoning loose motions,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,left chest pain radiating,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+20,Male,Walk-in,ankle sprain sports,84,116,72,Normal,36.8,99,A,4,Trauma
+74,Female,Ambulance,collapse aur unconscious,88,170,102,Abnormal,36.5,92,P,1,Neurological
+36,Male,Wheelchair,back injury lifting weight,96,126,80,Normal,37.1,99,A,3,Non_Specific
+45,Female,Walk-in,fever rash dengue suspect,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+63,Male,Ambulance,severe breathlessness COPD history,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+27,Female,Walk-in,vomiting pregnancy early,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+50,Male,Wheelchair,leg swelling pain possible clot,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+32,Female,Walk-in,gastritis burning pain,90,118,76,Normal,37,99,A,4,Gastrointestinal
+68,Male,Ambulance,previous MI chest discomfort,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+23,Female,Walk-in,heat stroke dizziness,96,112,70,Normal,38.4,97,A,3,Heat_Related
+57,Male,Wheelchair,head injury mild confusion,88,130,82,Abnormal,36.8,96,V,2,Trauma
+42,Female,Walk-in,shortness breath mild,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,cardiac arrest revived,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+34,Female,Wheelchair,abdominal cramps severe,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,burns kitchen accident,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral fever fatigue,92,118,76,Normal,38,98,A,4,Infectious_Disease
+60,Male,Ambulance,severe chest pain sweating,124,156,94,ST elevation,37,92,V,1,Cardiac
+42,Female,Walk-in,cough fever 5 days,98,128,82,Normal,38.6,96,A,3,Infectious_Disease
+29,Male,Wheelchair,leg fracture fall,110,122,78,Normal,37.1,99,P,2,Trauma
+33,Female,Walk-in,abdominal pain nausea,94,118,74,Normal,37.5,98,A,3,Gastrointestinal
+75,Male,Ambulance,severe dyspnea,132,150,90,Arrhythmia,36.8,87,V,1,Respiratory
+51,Female,Wheelchair,dizziness blurred vision,104,148,88,Abnormal,36.9,95,A,2,Neurological
+19,Male,Walk-in,sore throat mild fever,88,116,72,Normal,37.8,99,A,4,Infectious_Disease
+68,Female,Ambulance,collapse confusion,90,164,96,Abnormal,36.6,93,P,1,Neurological
+36,Male,Wheelchair,hand injury cut bleeding,108,120,78,Normal,37.2,99,P,2,Trauma
+47,Female,Walk-in,vomiting dehydration,112,120,76,Normal,38.2,96,A,3,Gastrointestinal
+58,Male,Ambulance,cardiac pain severe,126,152,96,ST elevation,36.9,91,V,1,Cardiac
+21,Female,Walk-in,heat exhaustion weakness,92,112,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,chest tightness mild,100,142,86,Abnormal,36.7,95,A,2,Cardiac
+40,Female,Walk-in,fever typhoid suspect,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+31,Male,Wheelchair,knee injury sports,104,122,80,Normal,37.1,99,P,2,Trauma
+66,Female,Ambulance,shortness severe,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+45,Male,Walk-in,gastritis burning pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+34,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+53,Male,Ambulance,burn injury arm,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine headache,86,118,74,Normal,36.7,99,A,4,Neurological
+69,Male,Ambulance,confusion high BP,94,168,100,Abnormal,36.6,93,P,1,Neurological
+43,Female,Wheelchair,asthma attack,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+30,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+57,Female,Ambulance,chest pain radiation,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+22,Male,Walk-in,ankle sprain,84,116,72,Normal,36.8,99,A,4,Trauma
+74,Female,Ambulance,unconscious collapse,88,170,102,Abnormal,36.5,92,P,1,Neurological
+37,Male,Wheelchair,back pain lifting,96,126,80,Normal,37.1,99,A,3,Non_Specific
+46,Female,Walk-in,fever rash dengue,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+62,Male,Ambulance,COPD breathlessness,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+28,Female,Walk-in,vomiting pregnancy,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+55,Male,Wheelchair,leg swelling clot,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+33,Female,Walk-in,gastritis,90,118,76,Normal,37,99,A,4,Gastrointestinal
+67,Male,Ambulance,MI history chest pain,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+24,Female,Walk-in,heat stroke,96,112,70,Normal,38.4,97,A,3,Heat_Related
+58,Male,Wheelchair,head injury confusion,88,130,82,Abnormal,36.8,96,V,2,Trauma
+41,Female,Walk-in,dyspnea mild,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,cardiac arrest revived,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+35,Female,Wheelchair,abdominal cramps,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,burn injury,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral fever,92,118,76,Normal,38,98,A,4,Infectious_Disease
+63,Male,Ambulance,chest pain severe,122,154,92,ST elevation,36.9,91,V,1,Cardiac
+44,Female,Walk-in,cold cough,96,124,80,Normal,37.9,97,A,3,Infectious_Disease
+27,Male,Wheelchair,fracture wrist,108,120,78,Normal,37,99,P,2,Trauma
+32,Female,Walk-in,abdominal pain,92,118,72,Normal,37.6,98,A,3,Gastrointestinal
+71,Male,Ambulance,dyspnea severe,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+49,Female,Wheelchair,vertigo dizziness,102,146,88,Abnormal,36.9,95,A,2,Neurological
+20,Male,Walk-in,fever mild,88,116,72,Normal,37.7,99,A,4,Infectious_Disease
+69,Female,Ambulance,collapse,90,166,98,Abnormal,36.6,93,P,1,Neurological
+34,Male,Wheelchair,cut injury bleeding,106,122,80,Normal,37.2,99,P,2,Trauma
+48,Female,Walk-in,vomiting,110,118,76,Normal,38.1,96,A,3,Gastrointestinal
+57,Male,Ambulance,cardiac pain,124,150,94,ST elevation,36.9,91,V,1,Cardiac
+23,Female,Walk-in,heat exhaustion,92,110,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,chest tightness,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,fever typhoid,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+30,Male,Wheelchair,injury knee,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,shortness severe,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,gastric pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+36,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine,86,118,74,Normal,36.7,99,A,4,Neurological
+70,Male,Ambulance,confusion BP high,94,168,100,Abnormal,36.6,93,P,1,Neurological
+42,Female,Wheelchair,asthma,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+31,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,chest pain,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+21,Male,Walk-in,sprain ankle,84,116,72,Normal,36.8,99,A,4,Trauma
+73,Female,Ambulance,collapse unconscious,88,170,102,Abnormal,36.5,92,P,1,Neurological
+38,Male,Wheelchair,back pain,96,126,80,Normal,37.1,99,A,3,Non_Specific
+45,Female,Walk-in,dengue suspect,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+62,Male,Ambulance,COPD severe,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+28,Female,Walk-in,vomiting pregnancy,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+54,Male,Wheelchair,leg swelling,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+33,Female,Walk-in,gastritis,90,118,76,Normal,37,99,A,4,Gastrointestinal
+67,Male,Ambulance,MI pain,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+24,Female,Walk-in,heat stroke,96,112,70,Normal,38.4,97,A,3,Heat_Related
+58,Male,Wheelchair,head injury,88,130,82,Abnormal,36.8,96,V,2,Trauma
+41,Female,Walk-in,dyspnea,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,cardiac arrest,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+35,Female,Wheelchair,abdominal pain,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,burn,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral fever,92,118,76,Normal,38,98,A,4,Infectious_Disease
+64,Male,Ambulance,severe chest pain,122,154,92,ST elevation,36.9,91,V,1,Cardiac
+43,Female,Walk-in,cough fever,96,124,80,Normal,37.9,97,A,3,Infectious_Disease
+29,Male,Wheelchair,fracture,108,120,78,Normal,37,99,P,2,Trauma
+32,Female,Walk-in,abdominal pain,92,118,72,Normal,37.6,98,A,3,Gastrointestinal
+71,Male,Ambulance,dyspnea,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+50,Female,Wheelchair,vertigo,102,146,88,Abnormal,36.9,95,A,2,Neurological
+22,Male,Walk-in,fever,88,116,72,Normal,37.7,99,A,4,Infectious_Disease
+69,Female,Ambulance,collapse,90,166,98,Abnormal,36.6,93,P,1,Neurological
+34,Male,Wheelchair,cut injury,106,122,80,Normal,37.2,99,P,2,Trauma
+48,Female,Walk-in,vomiting,110,118,76,Normal,38.1,96,A,3,Gastrointestinal
+57,Male,Ambulance,cardiac pain,124,150,94,ST elevation,36.9,91,V,1,Cardiac
+23,Female,Walk-in,heat exhaustion,92,110,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,chest tightness,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,fever,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+30,Male,Wheelchair,knee injury,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,shortness,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,gastric pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+36,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine,86,118,74,Normal,36.7,99,A,4,Neurological
+70,Male,Ambulance,confusion,94,168,100,Abnormal,36.6,93,P,1,Neurological
+42,Female,Wheelchair,asthma,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+31,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,chest pain,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+21,Male,Walk-in,ankle sprain,84,116,72,Normal,36.8,99,A,4,Trauma
+64,Male,Ambulance,severe chest pain sweating,126,158,94,ST elevation,37,91,V,1,Cardiac
+38,Female,Walk-in,cough fever sore throat,96,124,80,Normal,38.3,97,A,3,Infectious_Disease
+27,Male,Wheelchair,leg fracture fall,108,122,78,Normal,37.1,99,P,2,Trauma
+31,Female,Walk-in,abdominal cramps nausea,94,118,74,Normal,37.6,98,A,3,Gastrointestinal
+72,Male,Ambulance,severe breathlessness,132,150,90,Arrhythmia,36.8,87,V,1,Respiratory
+49,Female,Wheelchair,dizziness blurred vision,102,148,88,Abnormal,36.9,95,A,2,Neurological
+20,Male,Walk-in,viral fever fatigue,88,116,72,Normal,37.9,99,A,4,Infectious_Disease
+67,Female,Ambulance,collapse confusion,90,166,98,Abnormal,36.6,93,P,1,Neurological
+35,Male,Wheelchair,hand injury bleeding,106,122,80,Normal,37.2,99,P,2,Trauma
+46,Female,Walk-in,vomiting dehydration,110,120,76,Normal,38.2,96,A,3,Gastrointestinal
+59,Male,Ambulance,cardiac pain severe,124,152,96,ST elevation,36.9,91,V,1,Cardiac
+22,Female,Walk-in,heat exhaustion,92,110,70,Normal,38.3,98,A,3,Heat_Related
+71,Male,Wheelchair,chest tightness,98,142,86,Abnormal,36.7,95,A,2,Cardiac
+40,Female,Walk-in,fever dengue suspect,106,130,82,Normal,39.1,95,A,3,Infectious_Disease
+29,Male,Wheelchair,knee injury,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,severe dyspnea,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,gastric pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+33,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury arm,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine,86,118,74,Normal,36.7,99,A,4,Neurological
+69,Male,Ambulance,confusion BP high,94,168,100,Abnormal,36.6,93,P,1,Neurological
+43,Female,Wheelchair,asthma wheezing,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+30,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+57,Female,Ambulance,chest pain radiation,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+23,Male,Walk-in,ankle sprain,84,116,72,Normal,36.8,99,A,4,Trauma
+74,Female,Ambulance,unconscious collapse,88,170,102,Abnormal,36.5,92,P,1,Neurological
+36,Male,Wheelchair,back pain lifting,96,126,80,Normal,37.1,99,A,3,Non_Specific
+45,Female,Walk-in,fever rash,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+62,Male,Ambulance,COPD severe,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+28,Female,Walk-in,vomiting pregnancy,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+55,Male,Wheelchair,leg swelling,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+34,Female,Walk-in,gastritis,90,118,76,Normal,37,99,A,4,Gastrointestinal
+67,Male,Ambulance,MI chest pain,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+24,Female,Walk-in,heat stroke,96,112,70,Normal,38.4,97,A,3,Heat_Related
+58,Male,Wheelchair,head injury,88,130,82,Abnormal,36.8,96,V,2,Trauma
+41,Female,Walk-in,shortness breath,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,cardiac arrest revived,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+35,Female,Wheelchair,abdominal pain,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,burn injury,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral fever,92,118,76,Normal,38,98,A,4,Infectious_Disease
+60,Male,Ambulance,severe chest pain,122,156,92,ST elevation,36.9,91,V,1,Cardiac
+44,Female,Walk-in,cough fever,96,124,80,Normal,38,97,A,3,Infectious_Disease
+28,Male,Wheelchair,fracture wrist,108,120,78,Normal,37,99,P,2,Trauma
+32,Female,Walk-in,abdominal pain,92,118,72,Normal,37.6,98,A,3,Gastrointestinal
+71,Male,Ambulance,dyspnea severe,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+50,Female,Wheelchair,vertigo,102,146,88,Abnormal,36.9,95,A,2,Neurological
+22,Male,Walk-in,fever mild,88,116,72,Normal,37.7,99,A,4,Infectious_Disease
+69,Female,Ambulance,collapse,90,166,98,Abnormal,36.6,93,P,1,Neurological
+34,Male,Wheelchair,cut injury,106,122,80,Normal,37.2,99,P,2,Trauma
+48,Female,Walk-in,vomiting,110,118,76,Normal,38.1,96,A,3,Gastrointestinal
+57,Male,Ambulance,cardiac pain,124,150,94,ST elevation,36.9,91,V,1,Cardiac
+23,Female,Walk-in,heat exhaustion,92,110,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,chest tightness,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,fever,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+30,Male,Wheelchair,knee injury,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,shortness,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,gastric pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+36,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine,86,118,74,Normal,36.7,99,A,4,Neurological
+70,Male,Ambulance,confusion,94,168,100,Abnormal,36.6,93,P,1,Neurological
+42,Female,Wheelchair,asthma,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+31,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,chest pain,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+21,Male,Walk-in,ankle sprain,84,116,72,Normal,36.8,99,A,4,Trauma
+61,Male,Ambulance,seena mein shadeed dard aur pasina,122,158,94,ST elevation,37,92,V,1,Cardiac
+34,Female,Walk-in,khansi aur bukhar teen din se,96,124,80,Normal,38.3,97,A,3,Infectious_Disease
+28,Male,Wheelchair,pair toot gaya girnay se,108,122,78,Normal,37.1,99,P,2,Trauma
+45,Female,Walk-in,pait mein dard aur ulti,94,118,74,Normal,37.6,98,A,3,Gastrointestinal
+72,Male,Ambulance,saans lene mein bohat mushkil,132,150,90,Arrhythmia,36.8,87,V,1,Respiratory
+50,Female,Wheelchair,sar ghoom raha hai aur aankhen dhundli,102,148,88,Abnormal,36.9,95,A,2,Neurological
+19,Male,Walk-in,halka bukhar aur thakan,88,116,72,Normal,37.9,99,A,4,Infectious_Disease
+67,Female,Ambulance,behoshi aur hosh kam,90,166,98,Abnormal,36.6,93,P,1,Neurological
+36,Male,Wheelchair,haath mein gehri chot aur khoon,106,122,80,Normal,37.2,99,P,2,Trauma
+41,Female,Walk-in,ulti aur pani ki kami,110,120,76,Normal,38.2,96,A,3,Gastrointestinal
+59,Male,Ambulance,seena dard aur bazu tak dard,124,152,96,ST elevation,36.9,91,V,1,Cardiac
+23,Female,Walk-in,garmi se chakkar aur kamzori,92,110,70,Normal,38.3,98,A,3,Heat_Related
+71,Male,Wheelchair,seena bhaari lag raha hai,98,142,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,tez bukhar aur jism dard,106,130,82,Normal,39.1,95,A,3,Infectious_Disease
+30,Male,Wheelchair,ghutnay mein chot,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,saans ruk ruk kar aa rahi hai,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,pet mein jalan aur dard,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+33,Female,Wheelchair,hamal ke douran pait dard,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,jalne ki chot haath par,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,sar dard migraine jaisa,86,118,74,Normal,36.7,99,A,4,Neurological
+69,Male,Ambulance,zehni uljhan aur BP zyada,94,168,100,Abnormal,36.6,93,P,1,Neurological
+44,Female,Wheelchair,saans mein seeti ki awaaz,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+31,Male,Walk-in,bazari khana kha kar ulti dast,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,seena dard left side,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+22,Male,Walk-in,pair mur gaya khelte hue,84,116,72,Normal,36.8,99,A,4,Trauma
+74,Female,Ambulance,achanak behoshi,88,170,102,Abnormal,36.5,92,P,1,Neurological
+37,Male,Wheelchair,wazan uthate hue kamar dard,96,126,80,Normal,37.1,99,A,3,Non_Specific
+46,Female,Walk-in,jild par daane aur bukhar,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+62,Male,Ambulance,puranay marz ke sath saans phoolna,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+28,Female,Walk-in,hamal ke douran ulti,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+55,Male,Wheelchair,taang mein soojan aur dard,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+33,Female,Walk-in,pet ki jalan,90,118,76,Normal,37,99,A,4,Gastrointestinal
+67,Male,Ambulance,dil ka dard aur history,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+24,Female,Walk-in,garmi ki wajah se behoshi jaisi,96,112,70,Normal,38.4,97,A,3,Heat_Related
+58,Male,Wheelchair,sar par chot aur chakkar,88,130,82,Abnormal,36.8,96,V,2,Trauma
+41,Female,Walk-in,saans kam aana,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,dil band hua tha revive hua,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+35,Female,Wheelchair,pait ke dard ki shiddat,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,jalne ki chot,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral bukhar aur thakan,92,118,76,Normal,38,98,A,4,Infectious_Disease
+63,Male,Ambulance,bohat tez seena dard,122,154,92,ST elevation,36.9,91,V,1,Cardiac
+42,Female,Walk-in,khansi bukhar,96,124,80,Normal,38,97,A,3,Infectious_Disease
+29,Male,Wheelchair,kalai toot gayi,108,120,78,Normal,37,99,P,2,Trauma
+32,Female,Walk-in,pait dard,92,118,72,Normal,37.6,98,A,3,Gastrointestinal
+71,Male,Ambulance,saans ki takleef,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+50,Female,Wheelchair,sar chakkar,102,146,88,Abnormal,36.9,95,A,2,Neurological
+22,Male,Walk-in,halka bukhar,88,116,72,Normal,37.7,99,A,4,Infectious_Disease
+69,Female,Ambulance,gir kar behosh,90,166,98,Abnormal,36.6,93,P,1,Neurological
+34,Male,Wheelchair,chot lag kar khoon,106,122,80,Normal,37.2,99,P,2,Trauma
+48,Female,Walk-in,bar bar ulti,110,118,76,Normal,38.1,96,A,3,Gastrointestinal
+57,Male,Ambulance,dil ka dard,124,150,94,ST elevation,36.9,91,V,1,Cardiac
+23,Female,Walk-in,garmi se kamzori,92,110,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,seena tight,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+40,Female,Walk-in,bukhar,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+30,Male,Wheelchair,ghutna chot,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,saans ki kami,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,pet ka dard,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+36,Female,Wheelchair,hamal dard,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,jalne ki chot,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,sar dard,86,118,74,Normal,36.7,99,A,4,Neurological
+70,Male,Ambulance,zehni uljhan,94,168,100,Abnormal,36.6,93,P,1,Neurological
+44,Female,Wheelchair,asthma ka attack,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+31,Male,Walk-in,khana kharab ho gaya,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,seena dard,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+65,Male,Ambulance,seena mein bohat tez dard aur pasina aa raha hai,124,158,94,ST elevation,37,91,V,1,Cardiac
+58,Female,Ambulance,left seena mein dard aur bazu tak phail raha hai,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+72,Male,Ambulance,seena bhaari aur saans mein sakht takleef ho rahi hai,130,155,96,Arrhythmia,36.8,88,V,1,Cardiac
+61,Female,Walk-in,seena mein jalan aur bhari pan mehsoos ho raha hai,102,145,88,Abnormal,37.1,95,A,2,Cardiac
+55,Male,Wheelchair,chest tightness aur left arm mein dard ho raha hai,110,148,90,ST elevation,36.9,93,V,1,Cardiac
+67,Female,Ambulance,seena dard ke sath saans phool rahi hai,122,152,94,ST elevation,36.8,91,V,1,Cardiac
+49,Male,Walk-in,physical activity ke baad seena mein dard shuru hua hai,98,140,86,Abnormal,37,96,A,2,Cardiac
+73,Female,Ambulance,seena mein dabao aur behoshi jaisa ehsaas ho raha hai,126,160,98,Arrhythmia,36.7,90,V,1,Cardiac
+60,Male,Wheelchair,seena mein dard aur paseena bohat aa raha hai,120,150,92,ST elevation,36.9,92,V,1,Cardiac
+45,Female,Walk-in,seena mein halki dard lekin lagatar barh rahi hai,104,142,88,Abnormal,37.1,95,A,2,Cardiac
+69,Male,Ambulance,seena dard left side se gardan tak ja raha hai,128,158,96,ST elevation,36.8,91,V,1,Cardiac
+52,Female,Wheelchair,seena bhaari aur thakan bohat zyada mehsoos ho rahi hai,108,146,90,Abnormal,37,94,A,2,Cardiac
+74,Male,Ambulance,achanak seena mein bohat shadeed dard shuru ho gaya hai,132,162,100,ST elevation,36.6,89,V,1,Cardiac
+63,Female,Walk-in,seena mein dabao aur saans lene mein mushkil ho rahi hai,116,148,92,Arrhythmia,37,92,V,1,Cardiac
+57,Male,Wheelchair,seena dard ke sath matli aur paseena aa raha hai,112,150,94,ST elevation,36.9,93,V,1,Cardiac
+66,Female,Ambulance,left seena mein dard aur bechaini mehsoos ho rahi hai,124,154,96,ST elevation,36.8,91,V,1,Cardiac
+48,Male,Walk-in,seena mein tightness aur chalne par dard barhta hai,100,140,86,Abnormal,37.1,96,A,2,Cardiac
+71,Female,Ambulance,seena dard aur behoshi ka halka sa ehsaas ho raha hai,126,160,98,Arrhythmia,36.7,90,V,1,Cardiac
+59,Male,Wheelchair,seena mein pressure aur saans phoolne ki shikayat hai,114,148,92,ST elevation,36.9,92,V,1,Cardiac
+53,Female,Walk-in,seena dard rest ke bawajood kam nahi ho raha hai,106,142,88,Abnormal,37,95,A,2,Cardiac
+68,Male,Ambulance,seena mein achanak dard aur paseena zyada aa raha hai,130,160,100,ST elevation,36.8,90,V,1,Cardiac
+62,Female,Wheelchair,seena bhaari aur dil ki dhadkan tez ho gayi hai,118,150,92,Arrhythmia,37,92,V,1,Cardiac
+47,Male,Walk-in,seena mein dard aur left bazu mein jalan ho rahi hai,102,140,86,Abnormal,37.1,96,A,2,Cardiac
+75,Female,Ambulance,seena dard ke sath saans bohat tez chal rahi hai,132,162,100,ST elevation,36.6,89,V,1,Cardiac
+56,Male,Wheelchair,seena mein pressure aur halki bechaini mehsoos ho rahi hai,110,146,90,Abnormal,37,94,A,2,Cardiac
+64,Female,Walk-in,seena mein dard aur thakan bohat zyada ho rahi hai,108,144,88,Abnormal,37.1,95,A,2,Cardiac
+70,Male,Ambulance,seena dard aur gardan tak dard phail raha hai,128,158,96,ST elevation,36.8,91,V,1,Cardiac
+51,Female,Wheelchair,seena tight aur saans lene mein mushkil ho rahi hai,112,148,92,Arrhythmia,37,92,V,1,Cardiac
+43,Male,Walk-in,seena mein halki dard magar barh rahi hai,100,138,86,Abnormal,37.1,96,A,2,Cardiac
+67,Female,Ambulance,seena dard aur paseena behad zyada aa raha hai,124,156,94,ST elevation,36.8,91,V,1,Cardiac
+60,Male,Wheelchair,seena mein pressure aur thakan mehsoos ho rahi hai,114,148,92,Abnormal,37,93,V,1,Cardiac
+55,Female,Walk-in,seena dard aur chalne par zyada mehsoos hota hai,106,142,88,Abnormal,37.1,95,A,2,Cardiac
+73,Male,Ambulance,seena mein achanak bohat tez dard shuru hua hai,132,162,100,ST elevation,36.7,89,V,1,Cardiac
+49,Female,Wheelchair,seena bhaari aur saans lene mein mushkil ho rahi hai,110,146,90,Arrhythmia,37,92,V,1,Cardiac
+62,Male,Walk-in,seena dard aur halki chakkar ki shikayat hai,104,140,86,Abnormal,37.1,95,A,2,Cardiac
+58,Female,Ambulance,seena mein pressure aur left arm dard ho raha hai,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+66,Male,Wheelchair,seena tight aur paseena aa raha hai lagatar,120,152,94,ST elevation,36.8,91,V,1,Cardiac
+45,Female,Walk-in,seena mein dard aur kamzori mehsoos ho rahi hai,102,140,86,Abnormal,37.1,96,A,2,Cardiac
+71,Male,Ambulance,seena dard aur behoshi jaisa lag raha hai,128,160,98,Arrhythmia,36.7,90,V,1,Cardiac
+53,Female,Wheelchair,seena bhaari aur saans phool rahi hai,112,148,92,ST elevation,37,92,V,1,Cardiac
+60,Male,Walk-in,seena mein halki dard barh kar tez ho rahi hai,106,142,88,Abnormal,37.1,95,A,2,Cardiac
+68,Female,Ambulance,seena dard aur paseena bohat aa raha hai,126,158,96,ST elevation,36.8,91,V,1,Cardiac
+57,Male,Wheelchair,seena tight aur left bazu dard ho raha hai,110,146,90,Abnormal,37,93,V,1,Cardiac
+74,Female,Ambulance,seena mein bohat tez dard aur saans phool rahi hai,132,162,100,ST elevation,36.6,89,V,1,Cardiac
+61,Male,Walk-in,seena mein pressure aur thakan barh rahi hai,108,144,88,Abnormal,37.1,95,A,2,Cardiac
+50,Female,Wheelchair,seena dard aur halki chakkar ki shikayat hai,104,140,86,Abnormal,37,96,A,2,Cardiac
+69,Male,Ambulance,seena mein achanak dard aur paseena beh raha hai,128,160,98,ST elevation,36.8,90,V,1,Cardiac
+52,Female,Walk-in,seena bhaari aur chalne par dard barhta hai,106,142,88,Abnormal,37.1,95,A,2,Cardiac
+63,Male,Wheelchair,seena tight aur saans lene mein takleef hai,112,148,92,Arrhythmia,37,92,V,1,Cardiac
+47,Female,Ambulance,seena dard aur left arm mein jalan ho rahi hai,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+75,Male,Walk-in,seena mein bohat tez dard aur kamzori ho rahi hai,130,162,100,ST elevation,36.7,89,V,1,Cardiac
+56,Female,Wheelchair,seena pressure aur saans phool rahi hai,110,146,90,Abnormal,37,93,V,1,Cardiac
+64,Male,Ambulance,seena dard aur paseena lagatar aa raha hai,124,156,94,ST elevation,36.8,91,V,1,Cardiac
+43,Female,Walk-in,seena mein halki dard aur thakan zyada hai,100,138,86,Abnormal,37.1,96,A,2,Cardiac
+70,Male,Wheelchair,seena tight aur chakkar ki shikayat hai,118,150,92,Arrhythmia,37,92,V,1,Cardiac
+58,Female,Ambulance,seena dard aur behoshi jaisa lag raha hai,126,160,98,ST elevation,36.7,90,V,1,Cardiac
+65,Male,Walk-in,seena bhaari aur saans mein mushkil ho rahi hai,114,148,92,Abnormal,37,93,V,1,Cardiac
+51,Female,Wheelchair,seena mein pressure aur dard barh raha hai,108,144,88,Abnormal,37.1,95,A,2,Cardiac
+72,Male,Ambulance,seena mein bohat tez dard aur paseena aa raha hai,132,162,100,ST elevation,36.6,89,V,1,Cardiac
+60,Female,Walk-in,seena tight aur halki chakkar mehsoos ho rahi hai,106,142,88,Abnormal,37,95,A,2,Cardiac
+55,Male,Wheelchair,seena dard aur left arm tak dard phail raha hai,110,146,90,ST elevation,36.9,92,V,1,Cardiac
+68,Female,Ambulance,seena mein pressure aur saans phool rahi hai,124,158,96,Arrhythmia,36.8,91,V,1,Cardiac
+73,Male,Walk-in,seena bhaari aur thakan bohat zyada hai,108,144,88,Abnormal,37.1,95,A,2,Cardiac
+49,Female,Wheelchair,seena dard aur paseena zyada aa raha hai,112,148,92,ST elevation,37,92,V,1,Cardiac
+62,Male,Ambulance,seena mein achanak dard aur kamzori mehsoos ho rahi hai,128,160,98,ST elevation,36.8,90,V,1,Cardiac
+41,Female,Walk-in,seena tight aur saans lene mein mushkil ho rahi hai,100,138,86,Abnormal,37.1,96,A,2,Cardiac
+57,Male,Wheelchair,seena mein pressure aur chakkar aa raha hai,110,146,90,Arrhythmia,37,92,V,1,Cardiac
+66,Female,Ambulance,seena dard aur behoshi jaisa lag raha hai,126,160,98,ST elevation,36.7,90,V,1,Cardiac
+45,Male,Walk-in,seena bhaari aur chalne par dard barhta hai,104,140,86,Abnormal,37.1,96,A,2,Cardiac
+74,Female,Ambulance,seena mein bohat tez dard aur saans phool rahi hai,132,162,100,ST elevation,36.6,89,V,1,Cardiac
+68,Male,Ambulance,seena mein jalan jaisa dard hai baayein taraf,132,165,95,ST elevation,36.8,94,A,1,Cardiac
+72,Female,Ambulance,chest pressure aur saans lene mein takleef,128,158,92,ST elevation,36.5,91,A,1,Cardiac
+55,Male,Wheelchair,seena mein shadeed dard baazu tak ja raha hai,145,170,98,Anterior MI,36.9,95,A,1,Cardiac
+61,Female,Ambulance,patient ko heart attack ka dour para tha ghar par,118,155,88,ST elevation,36.7,93,V,1,Cardiac
+48,Male,Ambulance,dil ki dhadkan bohat tez hai aur ghabrahat ho rahi hai,152,145,85,Sinus tachycardia,37.1,96,A,2,Cardiac
+59,Male,Wheelchair,seena mein bhaari pan aur pasina aa raha hai thanda,112,160,94,ST depression,36.6,92,A,1,Cardiac
+73,Female,Ambulance,left arm mein dard seena kay saath,125,170,96,ST elevation,36.9,93,A,1,Cardiac
+45,Male,Walk-in,seena mein chubhan si ho rahi hai kabhi kabhi,98,135,82,Normal,37,97,A,3,Cardiac
+82,Male,Ambulance,behosh ho gaye achanak seena dard kay baad,136,180,100,ST elevation,36.4,89,V,1,Cardiac
+51,Female,Wheelchair,dil ghabra raha hai saath hi saans phool rahi hai,142,160,91,Arrhythmia,37.2,93,A,2,Cardiac
+64,Male,Ambulance,chest pain radiation to jaw aur neck,130,162,94,ST elevation,36.7,90,A,1,Cardiac
+70,Male,Wheelchair,seena mein dard kay saath qay aa rahi hai,125,155,89,ST elevation,36.9,92,V,1,Cardiac
+43,Male,Walk-in,dil ki dhadkan bohat slow hai kamzori hai,52,110,70,Bradycardia,36.8,96,A,2,Cardiac
+77,Female,Ambulance,seena dard aur dono baazuon mein dard,138,168,97,Anterior MI,36.6,90,A,1,Cardiac
+56,Male,Wheelchair,pasina bohat aa raha hai seena dard kay saath,144,158,93,ST elevation,36.9,94,V,1,Cardiac
+62,Female,Ambulance,saans nahi aa rahi seena cum raha hai,135,162,90,ST elevation,37.1,88,V,1,Cardiac
+49,Male,Walk-in,seena mein occasional pain naachta hai,92,128,78,Normal,36.8,98,A,4,Cardiac
+71,Male,Ambulance,patient ko heart failure hai feet mein swelling,110,165,95,Abnormal,36.7,91,A,2,Cardiac
+58,Female,Wheelchair,chest tightness aur dizziness,118,148,86,ST depression,37,94,A,2,Cardiac
+67,Male,Ambulance,seena mein shadeed dard peeth ki taraf ja raha hai,140,172,99,Inferior MI,36.5,89,V,1,Cardiac
+44,Male,Walk-in,dil ki dhadkan irregular lagti hai,88,130,82,Arrhythmia,36.9,97,A,3,Cardiac
+79,Female,Ambulance,seena dard aur kanpton mein dard,126,160,92,ST elevation,36.8,92,V,1,Cardiac
+53,Male,Wheelchair,chest pain aur epigastric area mein jalan,108,145,88,Normal,37,95,A,2,Cardiac
+75,Male,Ambulance,heart attack ki family history hai achanak seena dard,142,168,98,Anterior MI,36.6,91,A,1,Cardiac
+42,Female,Walk-in,seena mein dard lekin walking se better hota hai,95,125,78,Normal,36.9,98,A,3,Cardiac
+81,Male,Ambulance,patient unconscious chest pain history,130,175,101,ST elevation,36.4,86,V,1,Cardiac
+54,Female,Wheelchair,dil tez dharakta hai anxiety hai lekin ECG abnormal,168,155,88,Sinus tachycardia,37.2,96,A,2,Cardiac
+66,Male,Ambulance,seena mein dard 15 minutes se hai,134,162,94,ST elevation,36.8,93,V,1,Cardiac
+47,Male,Walk-in,chest palpitations after tea,102,135,80,Normal,36.9,97,A,3,Cardiac
+83,Female,Ambulance,behosh ho gayi chest pain kay baad,128,172,99,ST elevation,36.7,88,V,1,Cardiac
+60,Male,Wheelchair,seena mein dard kay saath left arm numbness,122,158,90,ST depression,36.9,94,A,2,Cardiac
+69,Female,Ambulance,saans lena mushkil flat lay karnay se,118,160,92,Abnormal,36.8,89,V,2,Cardiac
+52,Male,Walk-in,seena mein halka dard lekin rep kah raha hai,96,130,80,Normal,36.9,98,A,4,Cardiac
+76,Male,Ambulance,seena mein shadeed dard aur vomiting,148,175,102,Inferior MI,36.5,87,V,1,Cardiac
+41,Female,Wheelchair,dil ki dhadkan tez par BP normal hai,156,140,85,Sinus tachycardia,37.1,96,A,2,Cardiac
+65,Male,Ambulance,chest pain aur sweating since 1 hour,138,165,96,ST elevation,36.7,92,A,1,Cardiac
+74,Female,Wheelchair,seena mein dard baayein shoulder mein,124,158,89,ST elevation,36.9,93,V,1,Cardiac
+50,Male,Walk-in,seena mein chubhan exercise kay baad,110,142,84,Normal,36.8,97,A,3,Cardiac
+78,Male,Ambulance,patient ko cardiac arrest hua tha ghar par,155,180,102,ST elevation,36.3,85,V,1,Cardiac
+63,Female,Ambulance,seena mein tightness aur throat mein pressure,132,160,93,ST depression,36.9,91,V,2,Cardiac
+46,Male,Wheelchair,dil ki dhadkan irregular aur kamzori,72,118,76,Bradycardia,36.7,94,A,2,Cardiac
+84,Male,Ambulance,seena dard aur back pain intense,140,170,98,Anterior MI,36.6,89,V,1,Cardiac
+57,Female,Walk-in,chest pain anxiety attack jaisa lekin ECG abnormal,122,148,86,Abnormal,37,95,A,2,Cardiac
+73,Male,Ambulance,heart patient hoon insuline leta hon seena dard,136,162,94,ST elevation,36.8,92,V,1,Cardiac
+39,Male,Walk-in,dil ki dhadkan tez caffeine ki wajah se,112,135,82,Normal,36.9,98,A,4,Cardiac
+80,Female,Ambulance,seena mein dard jaw tak ja raha hai,130,168,96,ST elevation,36.7,90,A,1,Cardiac
+62,Male,Wheelchair,chest pain aur ghabrahat bohat zyada,144,155,88,ST depression,36.9,93,V,2,Cardiac
+55,Female,Ambulance,saans nahi aa rahi lay karnay se,125,158,90,ST elevation,36.8,89,V,1,Cardiac
+48,Male,Walk-in,seena mein halka dard par rest se theek,98,128,78,Normal,36.9,97,A,4,Cardiac
+77,Male,Ambulance,seena mein shadeed dard aur left arm numbness,150,172,100,Inferior MI,36.5,88,V,1,Cardiac
+44,Female,Wheelchair,dil ki dhadkan tez hai menopause related,148,138,84,Sinus tachycardia,37.1,96,A,3,Cardiac
+68,Male,Ambulance,chest pain history of MI,134,160,94,ST elevation,36.7,91,A,1,Cardiac
+71,Female,Walk-in,seena mein jalan gas jaisa lekin antacids se nahi theek,108,145,86,Normal,36.8,95,A,2,Cardiac
+59,Male,Ambulance,seena dard aur shoulder pain left side,140,165,96,Anterior MI,36.6,92,V,1,Cardiac
+47,Female,Wheelchair,dil ki dhadkan irregular palpitations,98,130,80,Arrhythmia,36.9,97,A,3,Cardiac
+82,Male,Ambulance,patient collapsing chest pain history,146,178,102,ST elevation,36.4,87,V,1,Cardiac
+54,Male,Walk-in,seena mein dard lekin ECG normal hai,102,140,82,Normal,36.8,98,A,4,Cardiac
+76,Female,Ambulance,seena mein shadeed dard aur shortness of breath,138,162,94,ST elevation,36.7,90,V,1,Cardiac
+61,Male,Wheelchair,chest pain aur diaphoresis,142,158,89,ST depression,36.9,93,A,2,Cardiac
+49,Female,Walk-in,dil ki dhadkan slow hai thyroid patient hoon,58,115,72,Bradycardia,36.8,96,A,3,Cardiac
+79,Male,Ambulance,seena dard aur qay aa rahi hai,152,170,98,Inferior MI,36.5,89,V,1,Cardiac
+53,Female,Ambulance,chest tightness aur jaw pain,128,155,92,ST elevation,36.9,91,A,1,Cardiac
+67,Male,Wheelchair,seena mein dard baayein side aur weakness,132,162,94,ST elevation,36.7,92,V,1,Cardiac
+42,Male,Walk-in,seena mein occasional discomfort,94,125,78,Normal,36.8,98,A,4,Cardiac
+75,Female,Ambulance,patient unconscious seena dard kay baad,130,172,100,ST elevation,36.6,88,V,1,Cardiac
+60,Male,Wheelchair,chest pain aur epigastric burning,118,148,86,Normal,36.9,95,A,2,Cardiac
+81,Male,Ambulance,seena mein shadeed dard neck tak,144,168,97,Anterior MI,36.4,90,V,1,Cardiac
+46,Female,Walk-in,dil tez dharakta hai anemia hai,162,132,82,Sinus tachycardia,36.9,96,A,3,Cardiac
+70,Male,Ambulance,chest pain history of bypass surgery,135,160,92,ST elevation,36.8,92,A,1,Cardiac
+56,Female,Wheelchair,seena mein tightness aur ghabrahat,122,150,88,ST depression,37,94,A,2,Cardiac
+78,Male,Ambulance,seena dard aur both arms pain,148,175,101,ST elevation,36.5,88,V,1,Cardiac
+51,Male,Walk-in,seena chubhan stress kay waqt,108,138,80,Normal,36.8,97,A,4,Cardiac
+84,Female,Ambulance,patient cardiac arrest ho gaya,160,185,105,ST elevation,36.3,85,V,1,Cardiac
+63,Male,Wheelchair,chest pain aur dizziness standing,130,155,88,Normal,36.9,94,A,2,Cardiac
+73,Female,Ambulance,seena mein dard baayein arm aur jaw,138,165,94,ST elevation,36.7,91,V,1,Cardiac
+44,Male,Walk-in,dil ki dhadkan irregular caffeine,104,132,80,Arrhythmia,36.8,97,A,3,Cardiac
+80,Male,Ambulance,seena mein shadeed dard pasina thanda,152,172,100,ST elevation,36.4,87,V,1,Cardiac
+58,Female,Wheelchair,chest pressure aur nausea,126,155,89,ST depression,36.9,93,A,2,Cardiac
+67,Male,Ambulance,heart patient seena dard medicine se theek nahi,140,162,94,ST elevation,36.8,91,A,1,Cardiac
+49,Male,Walk-in,seena mein occasional pain walking se,100,130,78,Normal,36.9,98,A,4,Cardiac
+76,Female,Ambulance,seena dard aur back pain,134,168,96,ST elevation,36.6,90,V,1,Cardiac
+62,Male,Wheelchair,chest tightness aur shortness of breath on exertion,118,148,86,Normal,36.8,94,A,2,Cardiac
+55,Female,Ambulance,seena mein shadeed dard aur left arm tingling,142,160,92,ST elevation,36.7,89,V,1,Cardiac
+47,Male,Walk-in,dil ki dhadkan fast anxiety,158,138,84,Sinus tachycardia,36.9,96,A,3,Cardiac
+83,Male,Ambulance,patient unconscious arrested,148,180,103,ST elevation,36.3,85,V,1,Cardiac
+59,Female,Wheelchair,chest pain aur fatigue,112,148,86,Normal,36.9,95,A,2,Cardiac
+71,Male,Ambulance,seena dard aur indigestion jaisa,130,158,92,ST depression,36.8,92,A,2,Cardiac
+38,Male,Walk-in,seena mein jab pain hota hai,96,128,80,Normal,36.8,98,A,4,Cardiac
+77,Female,Ambulance,seena mein shadeed dard aur qay,144,170,98,Inferior MI,36.5,88,V,1,Cardiac
+64,Male,Wheelchair,chest tightness walking karnay se,122,152,88,Normal,36.8,94,A,2,Cardiac
+52,Female,Ambulance,seena dard aur saans phoolna,132,158,90,ST elevation,36.9,92,V,1,Cardiac
+69,Male,Ambulance,heart failure history feet swelling seena dard,115,160,92,Abnormal,36.7,91,A,2,Cardiac
+41,Male,Walk-in,dil ki dhadkan tez exercise kay baad,168,142,86,Sinus tachycardia,36.8,97,A,3,Cardiac
+85,Male,Ambulance,seena mein shadeed dard unconscious,150,178,102,ST elevation,36.4,86,V,1,Cardiac
+60,Female,Wheelchair,chest pain aur gas jaisa lekin ECG abnormal,125,152,88,Abnormal,36.9,94,A,2,Cardiac
+74,Male,Ambulance,patient chest pain history of MI on aspirin,138,165,94,ST elevation,36.7,91,A,1,Cardiac
+45,Male,Walk-in,seena mein occasional discomfort stress,98,128,80,Normal,36.8,98,A,4,Cardiac
+79,Female,Ambulance,seena dard aur jaw pain,140,168,96,ST elevation,36.6,90,V,1,Cardiac
+66,Male,Ambulance,seena mein dhak dhak bohat tez ho rahi hai,162,148,86,Sinus tachycardia,37.1,95,A,2,Cardiac
+59,Female,Wheelchair,seena mein dard baayein kankhar mein ja raha hai,128,158,92,ST elevation,36.8,93,V,1,Cardiac
+73,Male,Ambulance,saans lena mushkil ho raha hai seena bojhal hai,118,165,94,ST depression,36.7,89,V,2,Cardiac
+48,Male,Walk-in,chaltay huay seena mein pain ho jata hai ruknay se aaram,102,138,82,Normal,36.9,97,A,3,Cardiac
+81,Female,Ambulance,patient ko pehle bhi attack ho chuka hai ab phir dard,142,172,98,Anterior MI,36.5,88,V,1,Cardiac
+52,Male,Wheelchair,dil ki dhadkan ruk ruk kar ho rahi hai,68,125,78,Arrhythmia,36.8,94,A,2,Cardiac
+77,Male,Ambulance,seena mein shadeed dard aur left shoulder mein bhi,155,178,102,ST elevation,36.4,86,V,1,Cardiac
+44,Female,Walk-in,dil ghabra raha hai jaise kuch ho jaye ga,118,142,84,Normal,36.9,98,A,3,Cardiac
+64,Male,Ambulance,seena mein dard 20 minute se hai door nahi ho raha,136,162,94,ST elevation,36.7,92,V,1,Cardiac
+70,Female,Wheelchair,chest pain kay saath pasina bohat aa raha hai,144,160,91,ST elevation,36.8,90,V,1,Cardiac
+43,Male,Walk-in,seena mein chubhan si hoti hai kabhi kabhar,96,130,80,Normal,36.9,98,A,4,Cardiac
+85,Male,Ambulance,behosh ho gaye achanak floor par gir gaye,132,178,100,ST elevation,36.3,85,V,1,Cardiac
+56,Female,Ambulance,seena mein bhaari pan aur gala band ho raha hai,126,155,89,ST depression,37,92,V,2,Cardiac
+62,Male,Wheelchair,dil ki dhadkan slow hai kamzori bohat hai,55,118,74,Bradycardia,36.7,95,A,2,Cardiac
+79,Female,Ambulance,seena dard aur dono baazu sun ho gaye,138,168,96,Anterior MI,36.6,89,V,1,Cardiac
+49,Male,Walk-in,seena mein dard exercise kay baad hota hai,108,140,82,Normal,36.8,97,A,3,Cardiac
+71,Male,Ambulance,chest pain jaw mein bhi dard ho raha hai,135,165,94,ST elevation,36.7,91,A,1,Cardiac
+54,Female,Wheelchair,dil tez dharakta hai BP high hai,158,165,92,Sinus tachycardia,37.1,96,A,2,Cardiac
+68,Male,Ambulance,seena mein shadeed dard woh bhi achanak,148,172,98,Inferior MI,36.6,88,V,1,Cardiac
+41,Male,Walk-in,seena mein jalan gas jaisi lekin dawaa se farq nahi,104,135,80,Normal,36.8,98,A,3,Cardiac
+83,Female,Ambulance,patient unconscious mila seena dard ki history,140,180,103,ST elevation,36.4,86,V,1,Cardiac
+60,Male,Wheelchair,chest pressure aur saans phool rahi hai,122,152,88,Normal,36.9,93,A,2,Cardiac
+76,Female,Ambulance,seena mein dard qay aa rahi hai bohat,146,170,97,Inferior MI,36.5,89,V,1,Cardiac
+47,Male,Walk-in,dil ki dhadkan irregular hai lekin dard nahi,88,128,78,Arrhythmia,36.8,96,A,3,Cardiac
+82,Male,Ambulance,seena mein shadeed dard baayein arm mein numbness,150,175,101,ST elevation,36.4,87,V,1,Cardiac
+55,Female,Wheelchair,chest tightness aur ghabrahat bohat zyada,132,155,90,ST depression,37,94,A,2,Cardiac
+69,Male,Ambulance,heart attack symptoms hain pehle jaisay,138,165,94,ST elevation,36.7,91,V,1,Cardiac
+42,Male,Walk-in,seena mein occasional pain stress mein,98,128,78,Normal,36.9,98,A,4,Cardiac
+78,Female,Ambulance,seena dard aur peeth mein dard saath,134,168,96,ST elevation,36.6,90,V,1,Cardiac
+58,Male,Wheelchair,dil ki dhadkan tez hai BP normal hai,148,140,86,Sinus tachycardia,37,95,A,2,Cardiac
+65,Female,Ambulance,saans nahi aa rahi seena bojhal hai flat lay karnay se,128,160,92,ST elevation,36.8,89,V,1,Cardiac
+46,Male,Walk-in,seena mein halka dard rest se theek ho jata hai,100,132,80,Normal,36.8,97,A,4,Cardiac
+84,Male,Ambulance,cardiac arrest hua ghar par CPR diya,158,185,105,ST elevation,36.3,84,V,1,Cardiac
+53,Female,Wheelchair,chest pain aur left arm pain saath,130,158,91,ST elevation,36.9,92,V,2,Cardiac
+72,Male,Ambulance,seena mein dard neck tak ja raha hai,140,168,96,Anterior MI,36.6,90,V,1,Cardiac
+40,Male,Walk-in,dil ghabra raha hai caffeine ki wajah se,112,135,82,Normal,36.9,98,A,4,Cardiac
+75,Female,Ambulance,seena mein shadeed dard pasina thanda,144,172,99,ST elevation,36.5,88,V,1,Cardiac
+61,Male,Wheelchair,chest pressure aur epigastric burning,118,148,86,Normal,36.8,94,A,2,Cardiac
+50,Female,Ambulance,seena dard aur jaw pain dono taraf,132,160,93,ST elevation,36.7,91,V,1,Cardiac
+67,Male,Walk-in,seena mein chubhan si walking karnay se,108,138,80,Normal,36.8,97,A,3,Cardiac
+80,Female,Ambulance,patient ko heart failure hai seena dard,122,162,92,Abnormal,36.7,90,A,2,Cardiac
+45,Male,Wheelchair,dil ki dhadkan slow hai thakan bohat,62,120,76,Bradycardia,36.7,95,A,2,Cardiac
+74,Male,Ambulance,seena mein shadeed dard aur qay,148,170,98,Inferior MI,36.5,89,V,1,Cardiac
+39,Female,Walk-in,seena mein jalan anxiety attack jaisi,108,132,82,Normal,36.9,98,A,4,Cardiac
+86,Male,Ambulance,behosh ho gaye chest pain kay baad,136,178,102,ST elevation,36.4,86,V,1,Cardiac
+57,Male,Wheelchair,chest pain aur sweating 30 minute se,142,162,94,ST elevation,36.7,92,V,1,Cardiac
+64,Female,Ambulance,seena mein tightness aur shortness of breath,126,155,89,ST depression,37,93,A,2,Cardiac
+49,Male,Walk-in,seena mein occasional discomfort stress se,98,128,78,Normal,36.8,98,A,4,Cardiac
+77,Female,Ambulance,seena dard aur both shoulders pain,144,170,97,Anterior MI,36.6,89,V,1,Cardiac
+55,Male,Wheelchair,dil ki dhadkan irregular palpitations,104,135,80,Arrhythmia,36.8,96,A,3,Cardiac
+83,Male,Ambulance,seena mein shadeed dard unconscious horahe,152,178,101,ST elevation,36.4,85,V,1,Cardiac
+62,Female,Ambulance,chest pressure aur nausea saath,128,158,91,ST depression,36.9,92,V,2,Cardiac
+71,Male,Wheelchair,seena mein dard baayein arm tak,138,165,94,ST elevation,36.7,91,A,1,Cardiac
+43,Female,Walk-in,dil tez dharakta hai thyroid patient hoon,156,142,86,Sinus tachycardia,36.9,97,A,3,Cardiac
+79,Male,Ambulance,patient collapse ho gaya seena dard history,146,175,100,ST elevation,36.4,87,V,1,Cardiac
+58,Female,Wheelchair,seena mein bhaari pan aur ghabrahat,122,152,88,Normal,36.8,94,A,2,Cardiac
+68,Male,Ambulance,chest pain history of MI 2 saal pehle,140,162,94,ST elevation,36.7,91,A,1,Cardiac
+46,Male,Walk-in,seena mein halka dard coffee kay baad,104,132,80,Normal,36.8,98,A,4,Cardiac
+85,Female,Ambulance,seena mein shadeed dard jaw pain,142,172,98,ST elevation,36.5,88,V,1,Cardiac
+60,Male,Wheelchair,chest tightness walking kay baad,118,148,86,Normal,36.8,93,A,2,Cardiac
+54,Female,Ambulance,seena dard aur left arm tingling,132,158,92,ST elevation,36.7,91,V,1,Cardiac
+72,Male,Walk-in,dil ki dhadkan slow hai weakness,60,118,74,Bradycardia,36.7,95,A,2,Cardiac
+82,Male,Ambulance,seena mein shadeed dard unconscious near,150,180,102,ST elevation,36.3,86,V,1,Cardiac
+48,Female,Wheelchair,chest pain aur anxiety bohat,112,145,86,Normal,36.9,96,A,3,Cardiac
+67,Male,Ambulance,seena dard aur back pain intense,138,165,94,ST elevation,36.6,90,V,1,Cardiac
+41,Male,Walk-in,seena mein occasional pain anger say hota hai,100,130,80,Normal,36.8,98,A,4,Cardiac
+78,Female,Ambulance,patient congestive heart failure seena dard,126,162,92,Abnormal,36.7,89,A,2,Cardiac
+59,Male,Wheelchair,chest pressure aur dizziness saath,132,155,88,Normal,36.9,93,A,2,Cardiac
+65,Female,Ambulance,seena mein shadeed dard aur pasina,144,168,96,ST elevation,36.5,89,V,1,Cardiac
+44,Male,Walk-in,dil ki dhadkan irregular palpitations,92,128,78,Arrhythmia,36.8,97,A,3,Cardiac
+84,Male,Ambulance,cardiac arrest ghar par hua tha,156,182,104,ST elevation,36.3,84,V,1,Cardiac
+56,Female,Wheelchair,seena mein tightness aur saans mushkil,128,158,90,ST depression,36.9,92,V,2,Cardiac
+73,Male,Ambulance,chest pain jaw aur neck mein bhi,142,168,96,Anterior MI,36.6,90,V,1,Cardiac
+47,Male,Walk-in,seena mein chubhan si stress test chahiye,106,135,82,Normal,36.8,98,A,3,Cardiac
+80,Female,Ambulance,seena mein shadeed dard left arm numbness,148,172,99,ST elevation,36.5,87,V,1,Cardiac
+61,Male,Wheelchair,chest pain aur epigastric pain dono,122,152,88,Normal,36.8,94,A,2,Cardiac
+52,Female,Ambulance,seena dard aur qay aa rahi hai,134,160,93,Inferior MI,36.7,90,V,1,Cardiac
+69,Male,Walk-in,dil ki dhadkan tez hai BP high hai,164,162,92,Sinus tachycardia,37,96,A,2,Cardiac
+42,Female,Walk-in,seena mein jalan gas jaisi lekin ECG normal,98,128,78,Normal,36.9,98,A,4,Cardiac
+86,Male,Ambulance,patient unconscious chest pain history,144,180,103,ST elevation,36.3,85,V,1,Cardiac
+58,Male,Wheelchair,seena mein dard baayein shoulder mein,128,155,89,ST elevation,36.8,92,V,2,Cardiac
+76,Female,Ambulance,chest tightness aur ghabrahat bohat,138,165,94,ST depression,36.9,90,A,2,Cardiac
+49,Male,Walk-in,seena mein occasional pain walking say,102,132,80,Normal,36.8,97,A,4,Cardiac
+81,Male,Ambulance,seena shadeed dard neck jaw tak,150,175,100,ST elevation,36.4,86,V,1,Cardiac
+55,Female,Wheelchair,dil ki dhadkan irregular hai dard nahi,108,138,82,Arrhythmia,36.8,96,A,3,Cardiac
+70,Male,Ambulance,chest pain history of bypass 5 saal pehle,136,162,94,ST elevation,36.7,91,A,1,Cardiac
+45,Female,Walk-in,seena mein halka dard anxiety say,96,125,78,Normal,36.9,98,A,4,Cardiac
+83,Male,Ambulance,seena mein shadeed dard unconscious ho rahe,152,178,102,ST elevation,36.4,85,V,1,Cardiac
+62,Female,Wheelchair,chest pressure aur vomiting saath,126,158,91,Inferior MI,36.9,89,V,2,Cardiac
+74,Male,Ambulance,seena dard aur both arms pain dono,142,168,96,Anterior MI,36.6,90,V,1,Cardiac
+48,Female,Walk-in,dil tez dharakta hai menopause,158,138,84,Sinus tachycardia,36.9,97,A,3,Cardiac
+77,Male,Ambulance,patient collapse seena dard kay baad,146,172,99,ST elevation,36.5,87,V,1,Cardiac
+60,Female,Wheelchair,seena mein tightness aur fatigue,122,152,88,Normal,36.8,94,A,2,Cardiac
+68,Male,Ambulance,chest pain aur cold sweat,140,165,94,ST elevation,36.7,91,V,1,Cardiac
+43,Male,Walk-in,seena mein occasional pain exercise say,104,135,80,Normal,36.8,98,A,4,Cardiac
+79,Female,Ambulance,seena shadeed dard jaw left arm,148,170,97,ST elevation,36.5,88,V,1,Cardiac
+56,Male,Wheelchair,dil ki dhadkan slow kamzori,58,118,74,Bradycardia,36.7,95,A,2,Cardiac
+71,Female,Ambulance,seena dard aur saans lena mushkil,132,162,92,ST elevation,36.8,90,V,1,Cardiac
+72,Male,Ambulance,seenay mein bhaari pan aur baayin baazu mein dard jo jabde tak ja raha hai,132,170,92,ST elevation,36.9,92,A,1,Cardiac
+68,Female,Ambulance,saans bilkul nahi aa rahi aur seenay mein jalan jaisa lag raha hai,140,185,98,ST elevation,37,89,V,1,Cardiac
+58,Male,Ambulance,achaanak behosh ho gaya aur seenay mein tees,122,150,85,ST elevation,36.8,90,A,1,Cardiac
+71,Female,Ambulance,peeth aur gardan mein dard seenay tak phail raha hai,128,168,94,ST elevation,37.1,91,A,1,Cardiac
+63,Male,Ambulance,dil ki dhadkan bohat tez aur irregular hai saans bhi phool rahi hai,156,142,80,Abnormal,36.9,93,A,1,Cardiac
+69,Male,Ambulance,seenay mein dabao jaisa mehsoos ho raha hai aur pasina thanda thanda aa raha hai,134,172,96,ST elevation,37,88,A,1,Cardiac
+77,Female,Ambulance,matli aa rahi hai seenay mein dard aur bohat kamzori,118,165,90,ST elevation,36.8,91,A,1,Cardiac
+55,Male,Ambulance,saath ghante se seenay mein tees ruk ruk kar hoti hai ab lagatar hai,144,178,100,ST elevation,37.2,89,A,1,Cardiac
+82,Male,Ambulance,let nahi sakta saans phoolti hai seenay mein pain,130,160,88,Abnormal,36.9,90,A,1,Cardiac
+61,Female,Ambulance,seenay mein choobhan aur galay mein guthli jaisa mehsoos,126,155,85,ST elevation,37,92,A,1,Cardiac
+73,Male,Ambulance,bohat ziada pasina aur seenay mein bhari pan,138,169,93,ST elevation,36.8,89,A,1,Cardiac
+59,Female,Ambulance,nikki si saans pe bhi saans toot rahi hai aur khansi,124,148,84,Abnormal,37.1,90,A,1,Cardiac
+66,Male,Ambulance,seenay ke beech mein jalan aur mu mein khatta pan,120,164,91,ST elevation,36.9,91,A,1,Cardiac
+70,Male,Ambulance,bohat tej dhadkan aur seenay mein dhak dhak,148,152,86,Abnormal,37,92,A,1,Cardiac
+74,Female,Ambulance,seenay mein dard aur dono kandhay mein dard,136,166,92,ST elevation,36.8,88,A,1,Cardiac
+80,Male,Ambulance,behoshi ki shikayat aur seenay mein pain,142,171,95,ST elevation,36.9,89,A,1,Cardiac
+67,Male,Ambulance,saans bohat mushkil se aa rahi hai seenay tight hai,146,160,87,Abnormal,37,87,A,1,Cardiac
+64,Female,Ambulance,pasina thanda aur seenay mein tees upar ki taraf,130,158,89,ST elevation,36.8,91,A,1,Cardiac
+79,Male,Ambulance,peechle chaar ghante se ruk ruk kar pain ab lagatar hai,128,177,99,ST elevation,36.9,90,A,1,Cardiac
+56,Male,Ambulance,seenay mein buchan aur saans rok raha hai,152,149,82,Abnormal,37,89,A,1,Cardiac
+75,Female,Ambulance,ultee jaisa mehsoos seenay mein dard aur charhata hua pain,124,162,90,ST elevation,36.8,92,A,1,Cardiac
+62,Male,Ambulance,dono haathon mein sunapan seenay mein jalan,134,174,97,ST elevation,36.9,90,A,1,Cardiac
+83,Male,Ambulance,bohat kamzori seenay mein jalan aur saans phoolna,140,168,94,ST elevation,37.1,88,A,1,Cardiac
+60,Female,Ambulance,neend se utha hoon seenay mein tees aur ghabrahat,116,155,86,ST elevation,36.8,91,A,1,Cardiac
+78,Male,Ambulance,takleef baazu mein shuru hui ab seenay mein,122,163,92,ST elevation,36.9,89,V,1,Cardiac
+53,Male,Ambulance,chakkar aa rahe hain saans bohat tez hai seenay pain,150,148,84,Abnormal,37,90,A,1,Cardiac
+76,Female,Ambulance,moun khusk ho raha hai pasina thanda seenay bhaari,132,170,96,ST elevation,36.8,89,A,1,Cardiac
+81,Male,Ambulance,saans letay hi dard hota hai seenay mein,144,165,91,ST elevation,36.9,92,A,1,Cardiac
+54,Female,Ambulance,choti si movement pe saans phool jaati hai seenay tight,138,155,88,Abnormal,37,90,A,1,Cardiac
+85,Male,Ambulance,seenay mein dard aur gardan mein akar,126,172,95,ST elevation,36.8,89,A,1,Cardiac
+57,Male,Ambulance,bohat ziada thandak mehsoos ho rahi hai seenay dard,130,158,87,ST elevation,36.9,91,A,1,Cardiac
+84,Female,Ambulance,let kar saans nahi aa sakti baith kar aaram hai,148,166,93,Abnormal,37,88,A,1,Cardiac
+65,Male,Wheelchair,dil ki dhadkan ruk ruk kar chal rahi hai jhatkay lagte hain,158,138,78,Abnormal,36.9,93,A,2,Cardiac
+71,Female,Wheelchair,paanch din se seenay mein halka dard aur thakan,102,145,85,Normal,36.8,96,A,3,Cardiac
+59,Male,Wheelchair,chaltay huay saans phoolti hai ruknay se aaram,98,152,88,Normal,36.9,94,A,3,Cardiac
+73,Male,Wheelchair,raat ko seenay mein dard se neend toot gayi ab halka hai,110,148,86,Normal,36.8,95,A,3,Cardiac
+67,Female,Wheelchair,seena aur peeth mein dard char ghante se,118,158,90,Abnormal,36.9,92,A,2,Cardiac
+80,Male,Wheelchair,bohat kamzori hai chakkar aate hain seenay mein bhaari pan,112,168,94,Abnormal,36.8,91,A,2,Cardiac
+55,Male,Wheelchair,daant aur jabde mein dard seenay tak aata hai,125,155,87,Abnormal,36.9,93,A,2,Cardiac
+74,Female,Wheelchair,saans phoolna aur seenay mein tightness,115,148,84,Normal,36.8,94,A,3,Cardiac
+62,Male,Wheelchair,bayin haath mein sunapan aur seenay ki jalan,130,162,91,Abnormal,36.9,92,A,2,Cardiac
+77,Male,Wheelchair,paani peene se bhi saans phool jaati hai,108,152,86,Normal,36.8,95,A,3,Cardiac
+58,Female,Wheelchair,chakkar aur seenay mein dard naak say halka khoon,122,158,89,Abnormal,36.9,91,A,2,Cardiac
+69,Male,Wheelchair,khansi aur seenay mein dard saath mein,114,146,83,Normal,36.8,94,A,3,Cardiac
+76,Female,Wheelchair,seenay mein pain halka hai lekin bohat pareshan hai,120,155,88,Abnormal,36.9,92,A,2,Cardiac
+51,Male,Wheelchair,pet ke upar dard seenay tak ja raha hai,128,160,92,Abnormal,36.8,91,A,2,Cardiac
+83,Male,Wheelchair,teen din se bohat takleef aur saans mein dikkat,104,150,87,Normal,36.9,95,A,3,Cardiac
+70,Female,Wheelchair,baar baar peshab aana aur seenay mein bucha,100,142,80,Normal,36.8,96,A,3,Cardiac
+68,Male,Wheelchair,bohat garmi mehsoos ho rahi hai seenay dard,132,170,96,Abnormal,37,90,A,2,Cardiac
+56,Female,Wheelchair,haath paon thanday ho gaye seenay mein tees,126,165,93,Abnormal,36.8,89,A,2,Cardiac
+79,Male,Wheelchair,ghabrahat bohat ziada aur seenay mein jalan,110,148,85,Normal,36.9,94,A,3,Cardiac
+64,Male,Wheelchair,sardiyon mein bhi pasina aa raha hai seenay pain,135,172,98,Abnormal,36.8,90,A,2,Cardiac
+81,Female,Wheelchair,dard jabde mein shuru hota hai seenay ki taraf,108,155,88,Normal,36.9,93,A,3,Cardiac
+60,Male,Wheelchair,kaam karte waqt saans phoolti hai aaram se theek,95,140,82,Normal,36.8,96,A,3,Cardiac
+75,Male,Wheelchair,neend mein saans ruk jaati hai seenay dard,130,162,90,Abnormal,36.9,91,A,2,Cardiac
+54,Female,Wheelchair,dono paaon mein sujan aur seenay bhaari,116,158,89,Abnormal,36.8,92,A,2,Cardiac
+82,Male,Wheelchair,raat ko uठना padta hai saans ke liye seenay tight,124,168,94,Abnormal,36.9,90,A,2,Cardiac
+63,Female,Wheelchair,halka mazdoori se bhi dhak dhak bohat,142,145,83,Abnormal,36.8,93,A,2,Cardiac
+78,Male,Wheelchair,pet phoola hua hai aur seenay mein pain,106,152,86,Normal,36.9,95,A,3,Cardiac
+57,Male,Walk-in,chand roz se seenay mein halka dard aur khansi,88,130,78,Normal,36.8,97,A,3,Cardiac
+72,Female,Walk-in,thakan bohat hai zara sa kaam karo to seenay pain,92,135,80,Normal,36.9,96,A,3,Cardiac
+66,Male,Walk-in,rozana seenay mein halki si choobhan ho jaati hai,98,140,82,Normal,36.8,97,A,3,Cardiac
+74,Male,Walk-in,chakkar aate hain khade hone par seenay halka,102,148,85,Normal,36.9,95,A,3,Cardiac
+61,Female,Walk-in,gardan aur seenay mein akar halki,94,138,80,Normal,36.8,96,A,3,Cardiac
+85,Male,Walk-in,chaal mein thakan bohat aur seenay bhaari,100,142,84,Normal,36.9,94,A,3,Cardiac
+53,Female,Walk-in,dil ki dhadkan tez hoti hai kabhi kabhi,112,150,88,Abnormal,36.8,93,A,2,Cardiac
+68,Male,Walk-in,seena aur baazu mein dard aata hai kabhi,108,152,86,Abnormal,36.9,94,A,2,Cardiac
+79,Female,Walk-in,raat ko seenay mein jalan aur neend na aana,104,148,84,Normal,36.8,95,A,3,Cardiac
+55,Male,Walk-in,maidani ilaqay mein bhi saans phool jaati hai,96,138,80,Normal,36.9,96,A,3,Cardiac
+70,Female,Walk-in,seenay mein halka dard aur ulti jaisa,110,155,88,Abnormal,36.8,92,A,2,Cardiac
+62,Male,Walk-in,dum mein kamzori aur seenay mein bhaari pan,90,135,78,Normal,36.9,97,A,3,Cardiac
+76,Male,Walk-in,neend mein saans atakti hai seenay dard,118,160,90,Abnormal,36.8,91,A,2,Cardiac
+49,Female,Walk-in,bohat thakawat aur seenay mein dard kabhi,86,128,76,Normal,36.9,98,A,3,Cardiac
+65,Male,Walk-in,khana khane ke baad seenay mein jalan hoti hai,94,140,82,Normal,36.8,96,A,3,Cardiac
+81,Female,Walk-in,dono kandhon mein dard aur seenay bhaari,100,145,85,Normal,36.9,95,A,3,Cardiac
+58,Male,Walk-in,tez chalne se saans phoolti hai seenay tight,108,150,87,Abnormal,36.8,93,A,2,Cardiac
+73,Female,Walk-in,ghabrahat hoti hai seenay mein dard ke saath,112,148,86,Normal,36.9,94,A,3,Cardiac
+67,Male,Walk-in,haath kapkapaate hain seenay mein jalan,120,158,90,Abnormal,36.8,91,A,2,Cardiac
+84,Male,Walk-in,sard mausam mein seenay dard hota hai,98,142,83,Normal,36.9,95,A,3,Cardiac
+52,Female,Walk-in,bohat ziada pasina aata hai raat ko seenay pain,106,152,88,Abnormal,36.8,92,A,2,Cardiac
+77,Male,Walk-in,pet aur seenay mein ek saath dard,104,148,85,Normal,36.9,94,A,3,Cardiac
+60,Female,Walk-in,chakkar aur saans rokna seenay bhaari,114,156,89,Abnormal,36.8,91,A,2,Cardiac
+69,Male,Ambulance,seenay mein tees aur galay mein guthli phasne jaisa,145,175,98,ST elevation,36.9,89,A,1,Cardiac
+80,Female,Ambulance,letay hi saans ruk jaati hai seenay pain,150,185,102,ST elevation,37,87,A,1,Cardiac
+73,Male,Ambulance,ultiyan hoti hain seenay mein dard bohat ziada,138,172,96,ST elevation,36.8,90,V,1,Cardiac
+66,Female,Ambulance,baayin baazu mein bohat dard seenay tak,142,168,93,ST elevation,36.9,89,A,1,Cardiac
+79,Male,Ambulance,saans nahi aa rahi seenay mein bichu kaat raha hai,155,190,105,ST elevation,37.1,86,A,1,Cardiac
+64,Male,Ambulance,behoshi ke baad hosh aaya hai seenay mein dard,130,162,91,ST elevation,36.8,90,A,1,Cardiac
+77,Female,Ambulance,pasina thanda aur seenay mein buchan,128,165,92,ST elevation,36.9,91,A,1,Cardiac
+81,Male,Ambulance,tezi se dard badh raha hai seenay mein,148,178,101,ST elevation,37,88,A,1,Cardiac
+68,Male,Ambulance,sansein bohat slow ho gayi hain seenay dard,98,185,95,ST elevation,36.8,89,A,1,Cardiac
+75,Female,Ambulance,dono haath aur pair thanday seenay dard,135,169,94,ST elevation,36.9,90,A,1,Cardiac
+82,Male,Ambulance,muuh se jhaag aaya aur seenay mein tees,152,180,103,ST elevation,37.2,87,A,1,Cardiac
+60,Female,Ambulance,gir gayi behoshi mein seenay mein pain,125,158,89,ST elevation,36.8,91,V,1,Cardiac
+76,Male,Ambulance,zaher khane jaisa mehsoos ho raha hai seenay jalan,140,170,96,ST elevation,36.9,89,A,1,Cardiac
+63,Female,Ambulance,raat bhar neend nahi aayi seenay dard se,120,155,88,ST elevation,36.8,92,A,1,Cardiac
+77,Male,Ambulance,saans lena dardnaak ho gaya hai seenay mein,147,172,98,ST elevation,37,88,A,1,Cardiac
+54,Female,Ambulance,khoon ki ulti hui aur seenay mein tees,155,165,92,ST elevation,36.9,89,A,1,Cardiac
+83,Male,Ambulance,hosh khoya aur seenay mein buchan,132,178,100,ST elevation,36.8,87,A,1,Cardiac
+69,Female,Ambulance,rozana isi tarah hota hai lekin aaj bohat ziada,138,170,95,ST elevation,36.9,90,A,1,Cardiac
+74,Male,Wheelchair,seena aur peeth dono jagah dard kar raha hai,112,155,88,Abnormal,36.8,92,A,2,Cardiac
+58,Male,Wheelchair,saans phoolna aur ghabrahat bohat ziada,128,162,91,Abnormal,36.9,91,A,2,Cardiac
+67,Female,Wheelchair,dard baazu mein shuru hota hai seenay tak jaata hai,118,158,89,Abnormal,36.8,93,A,2,Cardiac
+72,Male,Wheelchair,chakkar aate hain seenay mein pain ke saath,122,166,94,Abnormal,36.9,90,A,2,Cardiac
+55,Female,Wheelchair,saans letay hi khansi aur seenay dard,108,148,85,Normal,36.8,95,A,3,Cardiac
+79,Male,Wheelchair,neend mein chonk uthta hoon seenay tight,130,170,96,Abnormal,36.9,89,A,2,Cardiac
+64,Female,Wheelchair,bayin taraf seenay mein halka dard aur jalan,104,150,87,Normal,36.8,94,A,3,Cardiac
+81,Male,Wheelchair,chaltay huay saans tootna band ho jaata hai,98,142,83,Normal,36.9,96,A,3,Cardiac
+53,Male,Wheelchair,seena aur jabda dono mein dard,126,160,90,Abnormal,36.8,92,A,2,Cardiac
+76,Female,Wheelchair,tez dhadkan aur seenay mein jalan bohat,140,155,86,Abnormal,36.9,91,A,2,Cardiac
+68,Male,Wheelchair,thakawat bohat hai seenay mein bhaari pan,100,145,84,Normal,36.8,95,A,3,Cardiac
+85,Female,Wheelchair,khana khaate waqt saans phoolti hai seenay dard,112,158,88,Abnormal,36.9,92,A,2,Cardiac
+60,Male,Wheelchair,garmi mein bohat pasina aur seenay tight,120,165,92,Abnormal,36.8,90,A,2,Cardiac
+73,Female,Wheelchair,halka bukhar aur seenay mein dard,106,148,85,Normal,37.2,94,A,3,Cardiac
+52,Male,Wheelchair,kabhi kabhi seenay mein choobhan hoti hai,92,138,80,Normal,36.8,97,A,3,Cardiac
+78,Male,Wheelchair,saans bohat mushkil se aa rahi hai seenay pain,135,172,95,Abnormal,36.9,89,A,2,Cardiac
+59,Female,Wheelchair,gardan mein akar seenay tak phaili,114,152,87,Abnormal,36.8,93,A,2,Cardiac
+82,Male,Wheelchair,bohat kamzori hai seenay mein buchan,108,158,89,Normal,36.9,94,A,3,Cardiac
+66,Female,Walk-in,raat ko seenay mein jalan hoti hai kabhi kabhi,96,140,82,Normal,36.8,96,A,3,Cardiac
+71,Male,Walk-in,chalte chalte saans ruk jaati hai,90,135,79,Normal,36.9,97,A,3,Cardiac
+58,Female,Walk-in,seena aur peeth mein dard kabhi kabhi,100,142,84,Normal,36.8,95,A,3,Cardiac
+75,Male,Walk-in,so kar uthne par seenay mein bhaari pan,88,138,80,Normal,36.9,96,A,3,Cardiac
+63,Female,Walk-in,chakkar aur halka seenay dard,104,148,86,Normal,36.8,94,A,3,Cardiac
+80,Male,Walk-in,pareshan rahta hoon kabhi kabhi seenay pain,92,140,82,Normal,36.9,95,A,3,Cardiac
+54,Male,Walk-in,khansi ke saath seenay mein dard,86,132,78,Normal,36.8,97,A,3,Cardiac
+69,Female,Walk-in,thakawat aur seenay mein bhaari pan,98,142,84,Normal,36.9,96,A,3,Cardiac
+77,Male,Walk-in,baazu mein dard seenay tak jaata hai kabhi,110,150,88,Abnormal,36.8,93,A,2,Cardiac
+62,Female,Walk-in,seena aur pet ke darmiyan dard,102,145,85,Normal,36.9,94,A,3,Cardiac
+84,Male,Walk-in,ghabrahat aur seenay mein tightness,108,152,86,Normal,36.8,93,A,3,Cardiac
+51,Female,Walk-in,haath paon mein jalan seenay dard ke saath,114,155,89,Abnormal,36.9,92,A,2,Cardiac
+73,Male,Wheelchair,let kar saans nahi aa sakti baithna parta hai,125,162,91,Abnormal,36.8,90,A,2,Cardiac
+65,Female,Wheelchair,gardan mein dard seenay mein bucha,118,155,88,Abnormal,36.9,92,A,2,Cardiac
+80,Male,Wheelchair,raat ko uठna padta hai saans ke liye,122,168,94,Abnormal,36.8,91,A,2,Cardiac
+57,Male,Wheelchair,dono haath sunn ho gaye seenay pain,130,160,90,Abnormal,36.9,90,A,2,Cardiac
+74,Female,Wheelchair,chakkar aur matli seenay dard,112,152,87,Normal,36.8,93,A,3,Cardiac
+68,Male,Wheelchair,tez chakkar aaye aur gir gaye seenay tight,135,170,96,Abnormal,36.9,89,A,2,Cardiac
+83,Female,Wheelchair,bayin paaon mein sujan aur seenay bhaari,108,148,85,Normal,36.8,94,A,3,Cardiac
+61,Male,Wheelchair,bohat ziada pasina aata hai raat ko,120,158,89,Abnormal,36.9,92,A,2,Cardiac
+77,Female,Wheelchair,seena aur kalaai mein dard,104,145,84,Normal,36.8,95,A,3,Cardiac
+70,Male,Wheelchair,saans phoolna aur seenay mein jalan,115,160,90,Abnormal,36.9,91,A,2,Cardiac
+56,Female,Wheelchair,ghabrahat ke saath seenay mein choobhan,110,152,87,Normal,36.8,93,A,3,Cardiac
+64,Male,Ambulance,seenay mein bohat tej dard aur pasina,148,180,102,ST elevation,36.9,88,A,1,Cardiac
+78,Female,Ambulance,behoshi aur seenay mein dard baazu mein,135,172,96,ST elevation,36.8,89,A,1,Cardiac
+59,Male,Ambulance,saans ruk ruk kar aa rahi hai seenay pain,155,185,104,ST elevation,37,86,A,1,Cardiac
+72,Female,Ambulance,ultiyan aur seenay mein tees bohat,140,170,95,ST elevation,36.9,89,A,1,Cardiac
+85,Male,Ambulance,hosh khone lagta hai seenay mein dard,128,165,92,ST elevation,36.8,90,A,1,Cardiac
+67,Female,Ambulance,thanda thanda pasina aur seenay bhaari,142,175,98,ST elevation,36.9,88,A,1,Cardiac
+80,Male,Ambulance,let nahi sakta pain badhta hai,150,188,106,ST elevation,37.1,87,A,1,Cardiac
+63,Male,Ambulance,jabde mein dard aur seenay mein jalan,132,168,94,ST elevation,36.8,91,A,1,Cardiac
+76,Female,Ambulance,saans bilkul nahi aa rahi halak tight,145,178,100,ST elevation,36.9,86,V,1,Cardiac
+71,Male,Ambulance,chakkar aana aur seenay mein dardnaak tees,138,172,97,ST elevation,36.8,89,A,1,Cardiac
+55,Female,Ambulance,garmi bohat mehsoos ho rahi hai seenay pain,125,160,90,ST elevation,37,90,A,1,Cardiac
+82,Male,Ambulance,khoon ki ulti aur seenay tees,152,190,108,ST elevation,36.9,85,A,1,Cardiac
+69,Male,Ambulance,behoshi ka sa pata nahi seenay mein pain,130,165,92,ST elevation,36.8,91,A,1,Cardiac
+74,Female,Ambulance,peeth aur seenay dono mein dard,136,170,95,ST elevation,36.9,89,A,1,Cardiac
+78,Male,Ambulance,hosh aaya hai lekin seenay tight,143,178,100,ST elevation,37,88,A,1,Cardiac
+61,Female,Ambulance,sard mausam mein bohat ziada seenay dard,128,162,91,ST elevation,36.8,90,A,1,Cardiac
+86,Male,Ambulance,pasina aur seenay mein buchan bohat,147,185,103,ST elevation,36.9,87,A,1,Cardiac
+70,Female,Ambulance,saans letay hi dard hota hai,140,172,96,ST elevation,36.8,89,A,1,Cardiac
+65,Male,Ambulance,dono haath kapkapa rahe hain seenay jalan,150,178,99,ST elevation,37,88,A,1,Cardiac
+79,Female,Ambulance,neend se uthi to seenay mein dard,130,168,93,ST elevation,36.9,91,A,1,Cardiac
+83,Male,Ambulance,saans rok raha hai seenay mein bichu,154,192,107,ST elevation,37.1,85,A,1,Cardiac
+68,Male,Ambulance,seenay mein bhaaree pan aur baayin baazu mein dardd jo jabde tak ja raha hai,130,168,94,ST elevation,36.9,91,A,1,Cardiac
+72,Female,Ambulance,saanss bilkul nahi aa rahi aur seena mein jalaan jaisa lag raha hai,142,186,99,ST elevation,37,88,V,1,Cardiac
+59,Male,Ambulance,achaanak behoshi aur seenay mein teesaa,124,152,86,ST elevation,36.8,90,A,1,Cardiac
+70,Female,Ambulance,peeth aur gardan mein dardd seenay tak phail raha hai,126,166,93,ST elevation,36.9,91,A,1,Cardiac
+64,Male,Ambulance,dil ki dhadkan bohat tez aur irregular saanss bhi phool rahi hai,158,144,82,Abnormal,36.8,92,A,1,Cardiac
+66,Male,Ambulance,seenay mein dabao jaisa aur paseena thanda aa raha hai,136,174,97,ST elevation,37,89,A,1,Cardiac
+78,Female,Ambulance,matli aur seenay mein dardd bohat kamzoori,120,167,91,ST elevation,36.9,90,A,1,Cardiac
+56,Male,Ambulance,saath ghante se seenay mein tees ruk-ruk kar ab lagataar hai,146,179,101,ST elevation,37.1,88,A,1,Cardiac
+81,Male,Ambulance,let nahi sakta saanss phoolti hai seena mein pain,132,162,89,Abnormal,36.8,91,A,1,Cardiac
+62,Female,Ambulance,seenay mein choobhan aur galay mein guthli jaisa mehsoos,128,157,86,ST elevation,36.9,92,A,1,Cardiac
+74,Male,Ambulance,bohat zyada paseena aur seenay mein bhaaree pan,140,171,95,ST elevation,36.8,90,A,1,Cardiac
+60,Female,Ambulance,nikki si saans pe bhi saanss toot rahi aur khansi,125,150,85,Abnormal,37,91,A,1,Cardiac
+67,Male,Ambulance,seenay ke beech mein jalaan aur mu mein khatta pan,122,165,92,ST elevation,36.9,90,A,1,Cardiac
+71,Male,Ambulance,bohat tej dhadkan aur seenay mein dhak-dhak,150,154,87,Abnormal,36.8,91,A,1,Cardiac
+75,Female,Ambulance,seenay mein dardd aur dono kandhay mein dardd,138,168,94,ST elevation,36.9,89,A,1,Cardiac
+79,Male,Ambulance,behoshi ki shikaayat aur seena mein pain,144,173,96,ST elevation,37,88,A,1,Cardiac
+68,Male,Ambulance,saanss bohat mushkil se aa rahi seenay tight hai,148,162,88,Abnormal,36.8,87,A,1,Cardiac
+65,Female,Ambulance,paseena thanda aur seenay mein tees upar ki taraf,132,160,90,ST elevation,36.9,90,A,1,Cardiac
+80,Male,Ambulance,peechle chaar ghante se ruk-ruk kar pain ab lagataar hai,130,179,100,ST elevation,36.8,89,A,1,Cardiac
+57,Male,Ambulance,seenay mein buchan aur saanss rok raha hai,154,151,83,Abnormal,36.9,88,A,1,Cardiac
+76,Female,Ambulance,ultee jaisa mehsoos seenay mein dardd aur charhta hua pain,126,164,91,ST elevation,36.8,91,A,1,Cardiac
+63,Male,Ambulance,dono haathon mein sunapan seenay mein jalaan,136,176,98,ST elevation,36.9,90,A,1,Cardiac
+82,Male,Ambulance,bohat kamzoori seenay mein jalaan aur saanss phoolna,142,170,95,ST elevation,37,89,A,1,Cardiac
+61,Female,Ambulance,neend se utha to seenay mein tees aur gabrahat,118,157,87,ST elevation,36.8,90,A,1,Cardiac
+77,Male,Ambulance,takleef baazu mein shuru hui ab seenay mein,124,165,93,ST elevation,36.9,88,A,1,Cardiac
+54,Male,Ambulance,chakkaray aa rahe hain saanss bohat tez hai seenay pain,152,150,85,Abnormal,36.8,89,A,1,Cardiac
+73,Female,Ambulance,muuh khusk ho raha hai paseena thanda seenay bhaaree,134,172,97,ST elevation,36.9,88,A,1,Cardiac
+83,Male,Ambulance,saanss letay hi dardd hota hai seenay mein,146,167,92,ST elevation,37,91,A,1,Cardiac
+55,Female,Ambulance,choti si movement pe saanss phool jaati hai seenay tight,140,157,89,Abnormal,36.8,89,A,1,Cardiac
+84,Male,Ambulance,seenay mein dardd aur gardan mein akar,128,174,96,ST elevation,36.9,90,A,1,Cardiac
+58,Male,Ambulance,bohat zyada thandak mehsoos ho rahi hai seenay dardd,132,160,88,ST elevation,36.8,90,A,1,Cardiac
+85,Female,Ambulance,let kar saanss nahi aa sakti baith kar aaraam hai,150,168,94,Abnormal,36.9,87,A,1,Cardiac
+69,Male,Wheelchair,dil ki dhadkan ruk-ruk kar chal rahi hai jhatkay lagte hain,160,140,79,Abnormal,36.8,92,A,2,Cardiac
+73,Female,Wheelchair,paanch din se seenay mein halka dardd aur thakaan,104,147,86,Normal,36.9,95,A,3,Cardiac
+60,Male,Wheelchair,chaltay huay saanss phoolti hai ruknay se aaraam,100,154,89,Normal,36.8,93,A,3,Cardiac
+74,Male,Wheelchair,raat ko seenay mein dardd se neend toot gayi ab halka hai,112,150,87,Normal,36.9,94,A,3,Cardiac
+68,Female,Wheelchair,seena aur peeth mein dardd chaar ghante se,120,160,91,Abnormal,36.8,91,A,2,Cardiac
+79,Male,Wheelchair,bohat kamzoori hai chakkar aate hain seenay mein bhaaree pan,114,170,95,Abnormal,36.9,90,A,2,Cardiac
+56,Male,Wheelchair,daant aur jabde mein dardd seenay tak aata hai,127,157,88,Abnormal,36.8,92,A,2,Cardiac
+75,Female,Wheelchair,saanss phoolna aur seenay mein tightness,117,150,85,Normal,36.9,93,A,3,Cardiac
+63,Male,Wheelchair,baayin haath mein sunapan aur seenay ki jalaan,132,164,92,Abnormal,36.8,91,A,2,Cardiac
+78,Male,Wheelchair,paani peene se bhi saanss phool jaati hai,110,154,87,Normal,36.9,94,A,3,Cardiac
+59,Female,Wheelchair,chakkar aur seenay mein dardd naak say halka khoon,124,160,90,Abnormal,36.8,90,A,2,Cardiac
+70,Male,Wheelchair,khaansi aur seenay mein dardd saath mein,116,148,84,Normal,36.9,93,A,3,Cardiac
+77,Female,Wheelchair,seenay mein pain halka hai lekin bohat pareshan hai,122,157,89,Abnormal,36.8,91,A,2,Cardiac
+52,Male,Wheelchair,pet ke upar dardd seenay tak ja raha hai,130,162,93,Abnormal,36.9,90,A,2,Cardiac
+82,Male,Wheelchair,teen din se bohat takleef aur saanss mein dikkat,106,152,88,Normal,36.8,94,A,3,Cardiac
+71,Female,Wheelchair,baar baar peshaab aana aur seenay mein bucha,102,144,81,Normal,36.9,95,A,3,Cardiac
+67,Male,Wheelchair,bohat garmi mehsoos ho rahi hai seenay dardd,134,172,97,Abnormal,36.8,89,A,2,Cardiac
+57,Female,Wheelchair,haath paon thanday ho gaye seenay mein tees,128,167,94,Abnormal,36.9,88,A,2,Cardiac
+80,Male,Wheelchair,gabrahat bohat zyada aur seenay mein jalaan,112,150,86,Normal,36.8,93,A,3,Cardiac
+65,Male,Wheelchair,sardiyon mein bhi paseena aa raha hai seenay pain,137,174,99,Abnormal,36.9,89,A,2,Cardiac
+81,Female,Wheelchair,dardd jabde mein shuru hota hai seenay ki taraf,110,157,89,Normal,36.8,92,A,3,Cardiac
+61,Male,Wheelchair,kaam karte waqt saanss phoolti hai aaraam se theek,97,142,83,Normal,36.9,95,A,3,Cardiac
+76,Male,Wheelchair,neend mein saanss ruk jaati hai seenay dardd,132,164,91,Abnormal,36.8,90,A,2,Cardiac
+55,Female,Wheelchair,dono paaon mein sujan aur seenay bhaaree,118,160,90,Abnormal,36.9,91,A,2,Cardiac
+83,Male,Wheelchair,raat ko uthna padta hai saanss ke liye seenay tight,126,170,95,Abnormal,36.8,89,A,2,Cardiac
+64,Female,Wheelchair,halka majdoori se bhi dhak-dhak bohat,144,147,84,Abnormal,36.9,92,A,2,Cardiac
+79,Male,Wheelchair,pet phoola hai aur seenay mein pain,108,154,87,Normal,36.8,94,A,3,Cardiac
+58,Male,Walk-in,chand roz se seenay mein halka dardd aur khaansi,90,132,79,Normal,36.9,96,A,3,Cardiac
+73,Female,Walk-in,thakaan bohat hai zara sa kaam karo to seenay pain,94,137,81,Normal,36.8,95,A,3,Cardiac
+67,Male,Walk-in,rozana seenay mein halki si choobhan ho jaati hai,100,142,83,Normal,36.9,96,A,3,Cardiac
+75,Male,Walk-in,chakkar aate hain khade hone par seenay halka,104,150,86,Normal,36.8,94,A,3,Cardiac
+62,Female,Walk-in,gardan aur seenay mein akar halki,96,140,81,Normal,36.9,95,A,3,Cardiac
+84,Male,Walk-in,chaal mein thakaan bohat aur seenay bhaaree,102,144,85,Normal,36.8,93,A,3,Cardiac
+54,Female,Walk-in,dil ki dhadkan tez hoti hai kabhi kabhi,114,152,89,Abnormal,36.9,92,A,2,Cardiac
+69,Male,Walk-in,seena aur baazu mein dardd aata hai kabhi,110,154,87,Abnormal,36.8,93,A,2,Cardiac
+78,Female,Walk-in,raat ko seenay mein jalaan aur neend na aana,106,150,85,Normal,36.9,94,A,3,Cardiac
+56,Male,Walk-in,maidani ilaaqay mein bhi saanss phool jaati hai,98,140,81,Normal,36.8,95,A,3,Cardiac
+71,Female,Walk-in,seenay mein halka dardd aur ulti jaisa,112,157,89,Abnormal,36.9,91,A,2,Cardiac
+63,Male,Walk-in,dum mein kamzoori aur seenay mein bhaaree pan,92,137,79,Normal,36.8,96,A,3,Cardiac
+77,Male,Walk-in,neend mein saanss atakti hai seenay dardd,120,162,91,Abnormal,36.9,90,A,2,Cardiac
+50,Female,Walk-in,bohat thakawat aur seenay mein dardd kabhi,88,130,77,Normal,36.8,97,A,3,Cardiac
+66,Male,Walk-in,khana khane ke baad seenay mein jalaan hoti hai,96,142,83,Normal,36.9,95,A,3,Cardiac
+80,Female,Walk-in,dono kandhon mein dardd aur seenay bhaaree,102,147,86,Normal,36.8,94,A,3,Cardiac
+59,Male,Walk-in,tez chalne se saanss phoolti hai seenay tight,110,152,88,Abnormal,36.9,92,A,2,Cardiac
+74,Female,Walk-in,gabrahat hoti hai seenay mein dardd ke saath,114,150,87,Normal,36.8,93,A,3,Cardiac
+68,Male,Walk-in,haath kapkapaate hain seenay mein jalaan,122,160,91,Abnormal,36.9,90,A,2,Cardiac
+85,Male,Walk-in,sard mausam mein seenay dardd hota hai,100,144,84,Normal,36.8,94,A,3,Cardiac
+53,Female,Walk-in,bohat zyada paseena aata hai raat ko seenay pain,108,154,89,Abnormal,36.9,91,A,2,Cardiac
+78,Male,Walk-in,pet aur seenay mein ek saath dardd,106,150,86,Normal,36.8,93,A,3,Cardiac
+61,Female,Walk-in,chakkar aur saanss rokna seenay bhaaree,116,158,90,Abnormal,36.9,90,A,2,Cardiac
+70,Male,Ambulance,seenay mein tees aur galay mein guthli phasne jaisa,147,177,99,ST elevation,36.8,88,A,1,Cardiac
+81,Female,Ambulance,letay hi saanss ruk jaati hai seenay pain,151,187,103,ST elevation,36.9,86,A,1,Cardiac
+74,Male,Ambulance,ultiyaan hoti hain seenay mein dardd bohat zyada,140,174,97,ST elevation,36.8,89,V,1,Cardiac
+67,Female,Ambulance,baayin baazu mein bohat dardd seenay tak,144,170,94,ST elevation,36.9,88,A,1,Cardiac
+80,Male,Ambulance,saanss nahi aa rahi seenay mein bichhu kaat raha hai,157,192,106,ST elevation,37,85,A,1,Cardiac
+65,Male,Ambulance,behoshi ke baad hosh aaya hai seenay mein dardd,132,164,92,ST elevation,36.8,89,A,1,Cardiac
+78,Female,Ambulance,paseena thanda aur seenay mein buchan,130,167,93,ST elevation,36.9,90,A,1,Cardiac
+82,Male,Ambulance,tezi se dardd badh raha hai seenay mein,150,180,102,ST elevation,36.9,87,A,1,Cardiac
+69,Male,Ambulance,saansein bohat slow ho gayi hain seenay dardd,100,187,96,ST elevation,36.8,88,A,1,Cardiac
+76,Female,Ambulance,dono haath aur pair thanday seenay dardd,137,171,95,ST elevation,36.9,89,A,1,Cardiac
+83,Male,Ambulance,muuh se jhaag aaya aur seenay mein tees,153,182,104,ST elevation,37.1,86,A,1,Cardiac
+61,Female,Ambulance,gir gayi behoshi mein seenay mein pain,127,160,90,ST elevation,36.8,90,V,1,Cardiac
+77,Male,Ambulance,zeher khane jaisa mehsoos ho raha hai seenay jalaan,142,172,97,ST elevation,36.9,88,A,1,Cardiac
+64,Female,Ambulance,raat bhar neend nahi aayi seenay dardd se,122,157,89,ST elevation,36.8,91,A,1,Cardiac
+78,Male,Ambulance,saanss lena dardnaak ho gaya hai seenay mein,149,174,99,ST elevation,36.9,87,A,1,Cardiac
+55,Female,Ambulance,khoon ki ulti hui aur seenay mein tees,156,167,93,ST elevation,36.8,88,A,1,Cardiac
+84,Male,Ambulance,hosh khoya aur seenay mein buchan,134,180,101,ST elevation,36.9,86,A,1,Cardiac
+70,Female,Ambulance,rozana isi tarah hota hai lekin aaj bohat zyada,140,172,96,ST elevation,36.8,89,A,1,Cardiac
+75,Male,Wheelchair,seena aur peeth dono jagah dardd kar raha hai,114,157,89,Abnormal,36.9,91,A,2,Cardiac
+59,Male,Wheelchair,saanss phoolna aur gabrahat bohat zyada,130,164,92,Abnormal,36.8,90,A,2,Cardiac
+68,Female,Wheelchair,dardd baazu mein shuru hota hai seenay tak jaata hai,120,160,90,Abnormal,36.9,92,A,2,Cardiac
+73,Male,Wheelchair,chakkar aate hain seenay mein pain ke saath,124,168,95,Abnormal,36.8,89,A,2,Cardiac
+56,Female,Wheelchair,saanss letay hi khaansi aur seenay dardd,110,150,86,Normal,36.9,94,A,3,Cardiac
+80,Male,Wheelchair,neend mein chonk uthta hoon seenay tight,132,172,97,Abnormal,36.8,88,A,2,Cardiac
+65,Female,Wheelchair,baayin taraf seenay mein halka dardd aur jalaan,106,152,88,Normal,36.9,93,A,3,Cardiac
+82,Male,Wheelchair,chaltay huay saanss tootna band ho jaata hai,100,144,84,Normal,36.8,95,A,3,Cardiac
+54,Male,Wheelchair,seena aur jabda dono mein dardd,128,162,91,Abnormal,36.9,91,A,2,Cardiac
+77,Female,Wheelchair,tez dhadkan aur seenay mein jalaan bohat,142,157,87,Abnormal,36.8,90,A,2,Cardiac
+69,Male,Wheelchair,thakawat bohat hai seenay mein bhaaree pan,102,147,85,Normal,36.9,94,A,3,Cardiac
+84,Female,Wheelchair,khana khaate waqt saanss phoolti hai seenay dardd,114,160,89,Abnormal,36.8,91,A,2,Cardiac
+61,Male,Wheelchair,garmi mein bohat paseena aur seenay tight,122,167,93,Abnormal,36.9,89,A,2,Cardiac
+74,Female,Wheelchair,halka bukhaar aur seenay mein dardd,108,150,86,Normal,37.1,93,A,3,Cardiac
+53,Male,Wheelchair,kabhi kabhi seenay mein choobhan hoti hai,94,140,81,Normal,36.8,96,A,3,Cardiac
+79,Male,Wheelchair,saanss bohat mushkil se aa rahi hai seenay pain,137,174,96,Abnormal,36.9,88,A,2,Cardiac
+60,Female,Wheelchair,gardan mein akar seenay tak phaili,116,154,88,Abnormal,36.8,92,A,2,Cardiac
+83,Male,Wheelchair,bohat kamzoori hai seenay mein buchan,110,160,90,Normal,36.9,93,A,3,Cardiac
+67,Female,Walk-in,raat ko seenay mein jalaan hoti hai kabhi kabhi,98,142,83,Normal,36.8,95,A,3,Cardiac
+72,Male,Walk-in,chalte chalte saanss ruk jaati hai,92,137,80,Normal,36.9,96,A,3,Cardiac
+59,Female,Walk-in,seena aur peeth mein dardd kabhi kabhi,102,144,85,Normal,36.8,94,A,3,Cardiac
+76,Male,Walk-in,so kar uthne par seenay mein bhaaree pan,90,140,81,Normal,36.9,95,A,3,Cardiac
+64,Female,Walk-in,chakkar aur halka seenay dardd,106,150,87,Normal,36.8,93,A,3,Cardiac
+81,Male,Walk-in,pareshan rahta hoon kabhi kabhi seenay pain,94,142,83,Normal,36.9,94,A,3,Cardiac
+55,Male,Walk-in,khaansi ke saath seenay mein dardd,88,134,79,Normal,36.8,96,A,3,Cardiac
+70,Female,Walk-in,thakawat aur seenay mein bhaaree pan,100,144,85,Normal,36.9,95,A,3,Cardiac
+78,Male,Walk-in,baazu mein dardd seenay tak jaata hai kabhi,112,152,89,Abnormal,36.8,92,A,2,Cardiac
+63,Female,Walk-in,seena aur pet ke darmiyaan dardd,104,147,86,Normal,36.9,93,A,3,Cardiac
+85,Male,Walk-in,gabrahat aur seenay mein tightness,110,154,87,Normal,36.8,92,A,3,Cardiac
+52,Female,Walk-in,haath paon mein jalaan seenay dardd ke saath,116,157,90,Abnormal,36.9,91,A,2,Cardiac
+74,Male,Wheelchair,let kar saanss nahi aa sakti baithna parta hai,127,164,92,Abnormal,36.8,89,A,2,Cardiac
+66,Female,Wheelchair,gardan mein dardd seenay mein bucha,120,157,89,Abnormal,36.9,91,A,2,Cardiac
+79,Male,Wheelchair,raat ko uthna padta hai saanss ke liye,124,170,95,Abnormal,36.8,90,A,2,Cardiac
+58,Male,Wheelchair,dono haath sunn ho gaye seenay pain,132,162,91,Abnormal,36.9,89,A,2,Cardiac
+75,Female,Wheelchair,chakkar aur matli seenay dardd,114,154,88,Normal,36.8,92,A,3,Cardiac
+69,Male,Wheelchair,tez chakkar aaye aur gir gaye seenay tight,137,172,97,Abnormal,36.9,88,A,2,Cardiac
+82,Female,Wheelchair,baayin paaon mein sujan aur seenay bhaaree,110,150,86,Normal,36.8,93,A,3,Cardiac
+62,Male,Wheelchair,bohat zyada paseena aata hai raat ko,122,160,90,Abnormal,36.9,91,A,2,Cardiac
+78,Female,Wheelchair,seena aur kalai mein dardd,106,147,85,Normal,36.8,94,A,3,Cardiac
+71,Male,Wheelchair,saanss phoolna aur seenay mein jalaan,117,162,91,Abnormal,36.9,90,A,2,Cardiac
+57,Female,Wheelchair,gabrahat ke saath seenay mein choobhan,112,154,88,Normal,36.8,92,A,3,Cardiac
+65,Male,Ambulance,seenay mein bohat tej dardd aur paseena,150,182,103,ST elevation,36.8,87,A,1,Cardiac
+79,Female,Ambulance,behoshi aur seenay mein dardd baazu mein,137,174,97,ST elevation,36.9,88,A,1,Cardiac
+60,Male,Ambulance,saanss ruk-ruk kar aa rahi hai seenay pain,157,187,105,ST elevation,36.9,85,A,1,Cardiac
+73,Female,Ambulance,ultiyaan aur seenay mein tees bohat,142,172,96,ST elevation,36.8,88,A,1,Cardiac
+86,Male,Ambulance,hosh khone lagta hai seenay mein dardd,130,167,93,ST elevation,36.9,89,A,1,Cardiac
+68,Female,Ambulance,thanda thanda paseena aur seenay bhaaree,144,177,99,ST elevation,36.8,87,A,1,Cardiac
+81,Male,Ambulance,let nahi sakti pain badhta hai,152,190,107,ST elevation,37,86,A,1,Cardiac
+64,Male,Ambulance,jabde mein dardd aur seenay mein jalaan,134,170,95,ST elevation,36.9,90,A,1,Cardiac
+77,Female,Ambulance,saanss bilkul nahi aa rahi halaq tight,147,180,101,ST elevation,36.8,85,V,1,Cardiac
+72,Male,Ambulance,chakkar aana aur seenay mein dardnaak tees,140,174,98,ST elevation,36.9,88,A,1,Cardiac
+56,Female,Ambulance,garmi bohat mehsoos ho rahi hai seenay pain,127,162,91,ST elevation,36.9,89,A,1,Cardiac
+83,Male,Ambulance,khoon ki ulti aur seenay tees,154,192,109,ST elevation,36.8,84,A,1,Cardiac
+70,Male,Ambulance,behoshi ka sa pata nahi seenay mein pain,132,167,93,ST elevation,36.9,90,A,1,Cardiac
+75,Female,Ambulance,peeth aur seenay dono mein dardd,138,172,96,ST elevation,36.8,88,A,1,Cardiac
+79,Male,Ambulance,hosh aaya hai lekin seenay tight,145,180,101,ST elevation,36.9,87,A,1,Cardiac
+62,Female,Ambulance,sard mausam mein bohat zyada seenay dardd,130,164,92,ST elevation,36.8,89,A,1,Cardiac
+87,Male,Ambulance,paseena aur seenay mein buchan bohat,149,187,104,ST elevation,36.9,86,A,1,Cardiac
+71,Female,Ambulance,saanss letay hi dardd hota hai,142,174,97,ST elevation,36.8,88,A,1,Cardiac
+66,Male,Ambulance,dono haath kapkapa rahe hain seenay jalaan,152,180,100,ST elevation,36.9,87,A,1,Cardiac
+80,Female,Ambulance,neend se uthi to seenay mein dardd,132,170,94,ST elevation,36.8,90,A,1,Cardiac
+84,Male,Ambulance,saanss rok raha hai seenay mein bichhu,156,194,108,ST elevation,37,84,A,1,Cardiac
+62,Male,Ambulance,chest mein bleeding jaise dard aur left arm mein bhi,144,170,96,ST elevation,36.9,89,A,1,Cardiac
+71,Female,Ambulance,khoon behna nahi lekin chest mein tees aur vomiting,138,166,93,ST elevation,36.8,90,A,1,Cardiac
+58,Male,Ambulance,sweeting bohat ziada aur chest tight,152,178,100,ST elevation,37,87,A,1,Cardiac
+69,Male,Ambulance,bleading kisam ka dard chest mein baar baar,130,165,91,ST elevation,36.9,90,A,1,Cardiac
+74,Female,Ambulance,vomitting aur chest mein jalan gardan tak,142,172,95,ST elevation,36.8,88,A,1,Cardiac
+55,Male,Ambulance,pressur bohat high aur chest pain sudden,148,185,102,ST elevation,37.1,86,A,1,Cardiac
+67,Male,Ambulance,breath nahi aa rahi chest atak gaya hai,156,180,98,ST elevation,36.9,85,A,1,Cardiac
+80,Female,Ambulance,stomak ke upar dard aur chest tak phail raha,134,168,92,ST elevation,36.8,89,A,1,Cardiac
+63,Male,Ambulance,shouldar aur jaban mein dard chest ke saath,140,172,94,ST elevation,36.9,90,A,1,Cardiac
+77,Male,Ambulance,heart attack jaisa mehsoos pasena thanda,146,176,97,ST elevation,36.8,88,A,1,Cardiac
+59,Female,Ambulance,bleading nahi lekin andar se phatne jaisa pain,128,160,89,ST elevation,36.9,91,A,1,Cardiac
+72,Male,Ambulance,vomitting stop nahi ho rahi chest dard ke saath,150,182,103,ST elevation,37,86,A,1,Cardiac
+66,Female,Ambulance,sweeting raat ko bhi aur chest mein buchan,136,164,90,ST elevation,36.8,90,A,1,Cardiac
+81,Male,Ambulance,breth lena mushkil chest tightness severe,154,188,105,ST elevation,37.1,84,A,1,Cardiac
+54,Male,Ambulance,pressur gir raha hai chest pain ke saath behoshi,124,155,86,ST elevation,36.9,91,A,1,Cardiac
+70,Female,Ambulance,chest mein bleding type dard left side main,143,174,96,ST elevation,36.8,89,A,1,Cardiac
+64,Male,Ambulance,heart ruk ruk kar chal raha vomiting bhi,160,145,82,Abnormal,36.9,90,A,1,Cardiac
+79,Female,Ambulance,sweating thanda aur chest pain jaw tak,138,170,94,ST elevation,36.8,88,A,1,Cardiac
+56,Male,Ambulance,bleading nahi lekin andar se foot raha hai,132,162,91,ST elevation,36.9,90,A,1,Cardiac
+75,Male,Ambulance,vomitting ke sath chest mein chubhan,145,176,98,ST elevation,37,87,A,1,Cardiac
+68,Female,Ambulance,breath atakti hai letay hi chest heavy,148,178,100,ST elevation,36.8,86,A,1,Cardiac
+82,Male,Ambulance,pressur 200 se upar chest dard severe,152,190,108,ST elevation,37.1,85,A,1,Cardiac
+60,Female,Ambulance,sweeting bohat aur chest main jalaan,134,166,92,ST elevation,36.9,89,A,1,Cardiac
+73,Male,Ambulance,stomak dard upar se chest mein shift kiya,128,164,90,ST elevation,36.8,91,A,1,Cardiac
+65,Female,Ambulance,shouldar dono mein dard chest ke bina bhi,126,158,88,Abnormal,36.9,92,A,2,Cardiac
+78,Male,Wheelchair,chest mein minor bleeding type pain rozana,110,150,86,Normal,36.8,94,A,3,Cardiac
+57,Female,Wheelchair,vomiting nahi lekin nausea aur chest pressure,115,155,89,Abnormal,36.9,92,A,2,Cardiac
+70,Male,Wheelchair,sweeting sirf raat ko chest halka heavy,108,148,85,Normal,36.8,95,A,3,Cardiac
+61,Female,Wheelchair,bleading koi nahi lekin chest mein akar,120,158,90,Abnormal,36.9,91,A,2,Cardiac
+84,Male,Wheelchair,pressur high rehta hai chest pain kabhi kabhi,112,160,88,Normal,36.8,93,A,3,Cardiac
+55,Female,Wheelchair,breath short hoti hai walking se chest tight,118,152,87,Abnormal,36.9,92,A,2,Cardiac
+76,Male,Wheelchair,heart ki dhadkan fast aur chest main dardd,130,165,92,Abnormal,36.8,90,A,2,Cardiac
+63,Female,Wheelchair,stomak bloating aur chest tak pain,106,146,84,Normal,36.9,95,A,3,Cardiac
+80,Male,Wheelchair,shouldar left mein pain chest se pehle,114,155,88,Abnormal,36.8,92,A,2,Cardiac
+59,Male,Wheelchair,sweeting ziada aur chest halki jalan,102,144,83,Normal,36.9,94,A,3,Cardiac
+72,Female,Wheelchair,vomitting ke baghair chest mein matli,116,152,89,Abnormal,36.8,91,A,2,Cardiac
+68,Male,Wheelchair,bleading type sensation chest left side,124,160,91,Abnormal,36.9,90,A,2,Cardiac
+77,Female,Wheelchair,breath phoolna chest tightness ke saath,110,150,86,Normal,36.8,93,A,3,Cardiac
+53,Male,Wheelchair,pressur low aur chest mein buchan,104,148,85,Normal,36.9,94,A,3,Cardiac
+81,Female,Wheelchair,chest pain eating ke baad hota hai,100,142,82,Normal,36.8,95,A,3,Cardiac
+64,Male,Wheelchair,sweeting night sweats aur chest mild pain,98,140,81,Normal,36.9,96,A,3,Cardiac
+75,Female,Wheelchair,stomak gas jaise lekin chest tak,112,152,88,Abnormal,36.8,92,A,2,Cardiac
+58,Male,Wheelchair,heart irregular lagta hai chest bhaari,128,162,90,Abnormal,36.9,91,A,2,Cardiac
+69,Female,Walk-in,chest mein halka bleeding jaisa dard kabhi kabhi,96,138,80,Normal,36.8,96,A,3,Cardiac
+52,Male,Walk-in,vomitting nahi lekin ghabrahat chest pain,108,148,86,Abnormal,36.9,93,A,2,Cardiac
+73,Male,Walk-in,sweeting normal se ziada chest mein jalan,100,142,83,Normal,36.8,95,A,3,Cardiac
+60,Female,Walk-in,breath lene mein takleef chest tight,114,152,88,Abnormal,36.9,92,A,2,Cardiac
+82,Male,Walk-in,pressur check kiya 150 se upar chest dard,118,158,90,Abnormal,36.8,91,A,2,Cardiac
+55,Female,Walk-in,bleading koi nahi lekin chest mein tees,92,136,79,Normal,36.9,97,A,3,Cardiac
+77,Male,Walk-in,stomak pain upar se chest mein gaya,104,146,85,Normal,36.8,94,A,3,Cardiac
+66,Female,Walk-in,shouldar right mein dard chest tak,106,148,86,Normal,36.9,94,A,3,Cardiac
+71,Male,Walk-in,heart rate fast hai chest mild pain,122,158,89,Abnormal,36.8,92,A,2,Cardiac
+54,Female,Walk-in,sweeting chadar bheeg jati hai chest pain,110,152,87,Abnormal,36.9,93,A,2,Cardiac
+79,Male,Walk-in,chest mein chubhan aur vomiting nahi,98,140,82,Normal,36.8,95,A,3,Cardiac
+62,Female,Walk-in,breath short rest se theek ho jati hai,94,138,80,Normal,36.9,96,A,3,Cardiac
+83,Male,Walk-in,pressur high hai lekin chest mild,112,155,88,Normal,36.8,94,A,3,Cardiac
+57,Female,Wheelchair,bleeding type pain chest left arm mein,126,160,91,Abnormal,36.9,91,A,2,Cardiac
+74,Male,Wheelchair,vomitting aur chest dono saath mein,132,168,94,Abnormal,36.8,90,A,2,Cardiac
+65,Female,Wheelchair,sweeting bohat aur chest tightness,120,158,89,Abnormal,36.9,92,A,2,Cardiac
+80,Male,Wheelchair,breth atakta hai neend mein chest pain,134,170,95,Abnormal,36.8,89,A,2,Cardiac
+59,Male,Wheelchair,stomak bleeding nahi lekin chest dard,108,150,86,Normal,36.9,94,A,3,Cardiac
+76,Female,Wheelchair,shouldar pain chest se start hota hai,116,154,88,Abnormal,36.8,92,A,2,Cardiac
+67,Male,Wheelchair,heart attack ka dar hai chest bhaari,130,164,92,Abnormal,36.9,90,A,2,Cardiac
+51,Female,Wheelchair,pressur kam ho gaya chest pain ke saath,100,142,83,Normal,36.8,95,A,3,Cardiac
+78,Male,Wheelchair,bleading type sensation nahi lekin dard,112,152,87,Normal,36.9,93,A,3,Cardiac
+63,Female,Ambulance,chest mein bleding aur left arm sunn,146,174,97,ST elevation,36.8,88,A,1,Cardiac
+70,Male,Ambulance,vomitting aur sweating dono chest pain,152,180,102,ST elevation,37,86,A,1,Cardiac
+55,Female,Ambulance,breath bilkul nahi aa rahi chest lock,158,185,104,ST elevation,37.1,84,A,1,Cardiac
+81,Male,Ambulance,pressur 180/100 chest tees severe,148,178,100,ST elevation,36.9,87,A,1,Cardiac
+64,Female,Ambulance,stomak ke oper bleeding type pain chest tak,136,168,93,ST elevation,36.8,90,A,1,Cardiac
+77,Male,Ambulance,shouldar aur jaban dono sunn chest pain,142,170,95,ST elevation,36.9,89,A,1,Cardiac
+60,Female,Ambulance,heart rukta hai jaise chest mein,154,176,98,Abnormal,36.8,88,A,1,Cardiac
+73,Male,Ambulance,sweeting thanda pasina chest tight,138,172,96,ST elevation,36.9,89,A,1,Cardiac
+68,Female,Ambulance,bleading nahi lekin andar se foot raha,144,169,94,ST elevation,36.8,90,A,1,Cardiac
+82,Male,Ambulance,vomitting ke sath behoshi chest pain,150,184,106,ST elevation,37,85,A,1,Cardiac
+56,Male,Wheelchair,chest mein mild bleeding type roz,108,148,85,Normal,36.8,94,A,3,Cardiac
+75,Female,Wheelchair,sweeting sirf din mein chest heavy,112,152,88,Abnormal,36.9,92,A,2,Cardiac
+61,Male,Wheelchair,breth short kabhi kabhi chest mild,100,144,83,Normal,36.8,95,A,3,Cardiac
+79,Female,Wheelchair,pressur 140/90 chest pain nahi bas bhaari,106,148,86,Normal,36.9,94,A,3,Cardiac
+54,Male,Wheelchair,stomak gas chest tak jaati hai,98,140,81,Normal,36.8,96,A,3,Cardiac
+72,Female,Wheelchair,shouldar dono dardte hain chest bhi,116,156,89,Abnormal,36.9,91,A,2,Cardiac
+65,Male,Wheelchair,heart beat fast chest pain nahi,124,160,90,Abnormal,36.8,92,A,2,Cardiac
+83,Female,Wheelchair,bleading type pain nahi lekin dard,104,146,84,Normal,36.9,95,A,3,Cardiac
+58,Male,Walk-in,chest mein halka bleeding jaisa kabhi,90,134,78,Normal,36.8,97,A,3,Cardiac
+70,Female,Walk-in,vomitting nahi lekin matli chest pain,110,150,87,Abnormal,36.9,93,A,2,Cardiac
+62,Male,Walk-in,sweeting normal nahi chest tight,106,148,85,Normal,36.8,94,A,3,Cardiac
+76,Female,Walk-in,breath lene mein dard chest mein,114,154,88,Abnormal,36.9,92,A,2,Cardiac
+55,Male,Walk-in,pressur high hai dawai se bhi,118,158,90,Abnormal,36.8,91,A,2,Cardiac
+80,Female,Walk-in,stomak ki jalan chest tak gayi,96,140,82,Normal,36.9,95,A,3,Cardiac
+66,Male,Walk-in,shouldar left pain chest se related,108,148,86,Normal,36.8,94,A,3,Cardiac
+73,Female,Walk-in,heart slow lagta hai chest bhaari,92,138,80,Normal,36.9,96,A,3,Cardiac
+59,Male,Wheelchair,bleading nahi lekin chest mein chubhan,122,158,90,Abnormal,36.8,92,A,2,Cardiac
+77,Female,Wheelchair,sweeting raat ko bohat chest light pain,116,154,88,Abnormal,36.9,93,A,2,Cardiac
+64,Male,Wheelchair,breth atakti hai chest tightness,128,164,92,Abnormal,36.8,90,A,2,Cardiac
+81,Female,Wheelchair,pressur 160/95 chest dard mild,120,160,89,Normal,36.9,92,A,3,Cardiac
+56,Male,Wheelchair,stomak upar dard chest mein bhi,102,146,84,Normal,36.8,94,A,3,Cardiac
+69,Female,Walk-in,shouldar left mein akar chest tak,112,152,88,Abnormal,36.9,92,A,2,Cardiac
+65,Male,Ambulance,seena mein shdeed dard aur pasina aa raha hai,118,160,95,ST elevation,37.2,94,A,1,Cardiac
+58,Male,Ambulance,chene mein bhari pan aur sans lene mein takleef,122,155,90,ST elevation,37,93,A,1,Cardiac
+71,Female,Ambulance,dil mein jalan jaise kuch dab raha hai,110,170,88,ST depression,36.9,95,A,1,Cardiac
+49,Male,Walk-in,seenay mein chubhan jo bazu mein ja rahi hai,98,145,85,T wave inversion,37.1,97,A,2,Cardiac
+63,Female,Ambulance,achanak kamzori aur thanda pasina,130,85,60,ST elevation,36.5,90,V,1,Cardiac
+55,Male,Wheelchair,saans phoolna raat ko neend se utha ke,125,150,92,Abnormal,37,88,A,2,Cardiac
+68,Male,Ambulance,seena mein dard jaisay koi bhaari cheez rakh di,115,165,94,LBBB,36.8,93,A,1,Cardiac
+44,Female,Walk-in,dhadkan tez aur bechaini bohot zyada,132,148,86,Sinus tachycardia,37,98,A,3,Cardiac
+77,Male,Ambulance,behoshi jo aayi aur gayi ab bhi kamzori,90,170,95,Atrial fibrillation,36.7,92,A,2,Cardiac
+52,Female,Wheelchair,seenay mein dardd jab chalti hun to badta hai,104,155,88,ST depression,36.9,94,A,2,Cardiac
+60,Male,Ambulance,ulta aana sai na mein dard ke saat,110,140,85,ST elevation,37.1,91,V,1,Cardiac
+73,Female,Ambulance,palpitaiten bohot tez heart beating,145,165,90,Atrial fibrillation,36.8,89,A,2,Cardiac
+48,Male,Walk-in,seena mein chubhan jaise sooi chubh rahi,100,130,80,Normal,37,98,A,3,Cardiac
+69,Male,Ambulance,saans lena mushkil lete hi paseena aa gaya,128,155,92,ST elevation,37.2,90,A,1,Cardiac
+41,Female,Wheelchair,dil ghabra raha hai jaise kuch ho jayega,115,140,85,Sinus tachycardia,36.9,96,A,3,Cardiac
+80,Male,Ambulance,seena mein dard peeth ki taraf ja raha tha,95,180,95,ST depression,36.6,93,A,2,Cardiac
+54,Male,Walk-in,left hand mein sunapan aur seena tight,112,150,88,T wave inversion,37,96,A,2,Cardiac
+62,Female,Ambulance,pasina thanda aur ulti jaisa mehsoos,120,100,60,ST elevation,36.4,89,V,1,Cardiac
+47,Male,Wheelchair,raat ko neend se utha saans nahi aa rahi thi,130,160,94,Abnormal,36.9,91,A,2,Cardiac
+70,Female,Ambulance,dil ki dhadkan ruk ruk ke ho rahi hai,88,165,90,Atrial fibrillation,36.8,94,A,2,Cardiac
+53,Male,Walk-in,seena mein halka dard magar pasina bohat,108,145,82,ST depression,37.1,96,A,2,Cardiac
+66,Male,Ambulance,behoshi ho gayi thodi der pehle,98,170,92,LBBB,36.7,94,V,2,Cardiac
+42,Female,Wheelchair,dhadakn tez raat se subah tak,125,135,80,Sinus tachycardia,36.9,97,A,3,Cardiac
+75,Male,Ambulance,seena mein bhaari pan aur khansi nahi,115,165,94,ST elevation,37,91,A,1,Cardiac
+50,Female,Walk-in,gardan aur jabre mein dard seenay ke saath,102,148,86,T wave inversion,37,95,A,2,Cardiac
+79,Male,Ambulance,saans phool gayi roz zyada hoti ja rahi,115,170,95,Atrial fibrillation,36.7,88,A,2,Cardiac
+44,Male,Walk-in,chest mein jalan after eating,98,130,78,Normal,37.1,98,A,3,Cardiac
+67,Female,Ambulance,poori raat so nahi sakay dard ki wajah se,115,160,92,ST depression,36.8,93,A,2,Cardiac
+56,Male,Wheelchair,seena mein chubhan saat ghanto se,110,150,88,Abnormal,37,94,A,2,Cardiac
+72,Male,Ambulance,dard jo bazu aur kandhe mein ja raha hai,120,165,94,ST elevation,37.1,90,A,1,Cardiac
+39,Female,Walk-in,dil ki dhadkan skip ho rahi hai,105,125,78,Normal,36.9,98,A,3,Cardiac
+64,Male,Ambulance,acchaanak pasina aur seena tight,125,155,90,ST elevation,37,92,A,1,Cardiac
+46,Female,Wheelchair,thakan bohot zyada chote se kaam se saans phoolna,118,148,88,Abnormal,36.8,93,A,2,Cardiac
+78,Male,Ambulance,behoshi aur baad mein confusion,92,175,96,Atrial fibrillation,36.6,91,V,2,Cardiac
+51,Male,Walk-in,seena mein dard like a pressure,106,142,84,T wave inversion,37,96,A,2,Cardiac
+69,Female,Ambulance,sans ki takleef aur pair mein sujan,122,165,92,ST depression,36.9,89,A,2,Cardiac
+57,Male,Wheelchair,seena mein chubhan jo left hand mein ja rahi hai,115,152,88,ST elevation,37,93,A,1,Cardiac
+74,Male,Ambulance,ultiyan aur pasina thanda achanak,110,100,65,ST elevation,36.5,89,V,1,Cardiac
+43,Female,Walk-in,dhadkan tez tension ke waqt aur zyada,128,138,82,Sinus tachycardia,36.9,97,A,3,Cardiac
+81,Male,Ambulance,seena mein dard aur koi faida nahi nitroglycerin se,108,170,95,ST elevation,37.1,91,A,1,Cardiac
+49,Female,Wheelchair,saans phoolna aur neend na ana letay huay,120,158,90,Atrial fibrillation,36.8,90,A,2,Cardiac
+60,Male,Walk-in,chest mein burning sensation sitting down,100,135,80,Normal,37,97,A,3,Cardiac
+76,Female,Ambulance,behoshi aa gayi kitchen mein,88,180,98,Arrhythmia,36.7,93,V,2,Cardiac
+55,Male,Ambulance,seena mein bhaari pan aur kaanpna,130,160,94,ST elevation,37,91,A,1,Cardiac
+38,Female,Walk-in,dil ghabra raha hai achanak dar lagta hai,112,130,82,Sinus tachycardia,36.9,98,A,3,Cardiac
+70,Male,Wheelchair,pair mein sujan aur saans lena mushkil,105,165,92,ST depression,36.8,85,A,2,Cardiac
+62,Female,Ambulance,seena mein tez dard piercing type,118,145,88,T wave inversion,37.1,93,A,2,Cardiac
+45,Male,Walk-in,heart beating very fast without reason,135,140,85,Sinus tachycardia,37,96,A,3,Cardiac
+83,Female,Ambulance,achanak weak ho gayi aur pasina aa gaya,115,170,95,Atrial fibrillation,36.6,91,A,2,Cardiac
+53,Male,Ambulance,seena mein dard jo jawline mein ja raha hai,110,155,90,ST elevation,37,92,A,1,Cardiac
+48,Female,Wheelchair,raat ko saans li nahi ja rahi thi letay huay,125,150,88,Abnormal,36.9,90,A,2,Cardiac
+67,Male,Walk-in,thakan aur chakkar aana daily basis pe,98,145,84,Normal,37,97,A,3,Cardiac
+59,Female,Ambulance,seena mein dard aur ulti bahot zyada,115,110,65,ST elevation,36.4,89,V,1,Cardiac
+72,Male,Ambulance,behoshi ke baad ab hosh hai magar kamzori,90,172,94,LBBB,36.7,93,A,2,Cardiac
+41,Male,Wheelchair,chest tightness after climbing stairs,120,148,86,ST depression,37.1,92,A,2,Cardiac
+77,Female,Ambulance,dil ki dhadkan irregular bohot din se,105,160,92,Atrial fibrillation,36.8,94,A,2,Cardiac
+50,Male,Walk-in,seena mein dardd weightlifting karte waqt,108,140,82,T wave inversion,37,96,A,2,Cardiac
+64,Female,Ambulance,sans ki nali mein jalan aur seena tight,118,155,90,ST elevation,37,91,A,1,Cardiac
+46,Male,Wheelchair,acche se so nahi sakta saans ki wajah se,112,150,88,Abnormal,36.9,89,A,2,Cardiac
+73,Male,Ambulance,thanda pasina aur heart rate fast,130,165,94,ST elevation,37.1,90,A,1,Cardiac
+39,Male,Walk-in,palpitations jaisay heart bahar aa jayega,128,135,80,Sinus tachycardia,37,98,A,3,Cardiac
+68,Female,Ambulance,seena mein dard jo peeth mein ja raha hai,110,160,92,ST depression,36.8,93,A,2,Cardiac
+54,Male,Wheelchair,saans phoolna aur khansi raat ko,115,148,85,Abnormal,37,90,A,2,Cardiac
+80,Female,Ambulance,achanak confusion aur weak,95,180,96,Atrial fibrillation,36.6,91,A,2,Cardiac
+47,Male,Walk-in,chest mein needle jaisa dard seconds mein thik,100,132,78,Normal,37,98,A,3,Cardiac
+61,Male,Ambulance,seena mein dard aur left arm pain,125,158,92,ST elevation,37,92,A,1,Cardiac
+52,Female,Wheelchair,thakan itni ki baat karna mushkil,118,155,90,ST depression,36.9,88,A,2,Cardiac
+75,Male,Ambulance,behoshi ho gaya subah uthne ke baad,92,168,95,Arrhythmia,36.7,94,V,2,Cardiac
+44,Male,Walk-in,dhadkan tez coffee peene ke baad,130,138,82,Sinus tachycardia,37,97,A,3,Cardiac
+69,Female,Ambulance,seena mein dard aur ghabrahat,112,150,88,T wave inversion,37.1,93,A,2,Cardiac
+58,Male,Wheelchair,pair sujan aur pet mein bhaari pan,105,160,92,ST depression,36.8,86,A,2,Cardiac
+66,Male,Ambulance,acchanak pasina aur seena mein burn,122,155,90,ST elevation,37,91,A,1,Cardiac
+42,Female,Walk-in,heart skip beats often,102,128,80,Normal,36.9,98,A,3,Cardiac
+79,Male,Ambulance,sans ki takleef roz badhti ja rahi,115,170,94,Atrial fibrillation,36.7,89,A,2,Cardiac
+51,Female,Wheelchair,seena mein dard stress ke time zyada,108,145,86,T wave inversion,37,95,A,2,Cardiac
+63,Male,Ambulance,ulti aur seena dard bohot shiddat se,118,105,65,ST elevation,36.5,89,V,1,Cardiac
+48,Female,Walk-in,dil ki dhadkan rukti hai phir tez,115,135,82,Sinus tachycardia,36.9,96,A,3,Cardiac
+74,Male,Ambulance,seena mein bhaari pan aur jaw pain,110,162,93,ST elevation,37,92,A,1,Cardiac
+56,Female,Wheelchair,neend mein saans rookti hai,120,148,88,Abnormal,36.8,90,A,2,Cardiac
+82,Male,Ambulance,behoshi aur girna bathroom mein,88,175,96,Atrial fibrillation,36.6,92,V,2,Cardiac
+43,Male,Walk-in,chest pain moving to right arm,106,140,84,Normal,37,97,A,3,Cardiac
+65,Female,Ambulance,seena mein dard aur cold sweat,125,158,92,ST elevation,37,91,A,1,Cardiac
+50,Male,Wheelchair,thakan bohot walking thodi door,115,150,88,ST depression,36.9,88,A,2,Cardiac
+77,Female,Ambulance,saans phoolna letay huay hi hota hai,110,165,94,Atrial fibrillation,36.8,89,A,2,Cardiac
+59,Male,Walk-in,heart racing raat ko neend nahi aati,132,142,85,Sinus tachycardia,37,96,A,3,Cardiac
+70,Male,Ambulance,seena mein dard aur pasina thanda bohot,128,160,94,ST elevation,37.1,90,A,1,Cardiac
+45,Female,Wheelchair,gardan aur seenay mein akkad,112,148,88,Abnormal,36.9,94,A,2,Cardiac
+62,Male,Ambulance,behoshi aa gayi walking karte waqt,98,170,95,LBBB,36.7,93,V,2,Cardiac
+38,Male,Walk-in,palpitations without any reason,125,130,78,Normal,37,98,A,3,Cardiac
+73,Female,Ambulance,seena mein dard jo dono bazuon mein ja raha hai,115,162,92,ST depression,36.8,91,A,2,Cardiac
+55,Male,Wheelchair,saans phoolna aur pair mein pani,118,155,90,Atrial fibrillation,36.9,85,A,2,Cardiac
+81,Male,Ambulance,acchaanak ulti aur seena tight,120,110,65,ST elevation,36.4,89,V,1,Cardiac
+49,Female,Walk-in,dhadkan tez aur chakkar ana,130,135,82,Sinus tachycardia,37,96,A,3,Cardiac
+64,Male,Ambulance,seena mein severe dard 1 ghante se,122,160,94,ST elevation,37,91,A,1,Cardiac
+52,Female,Wheelchair,thakan neend poori hone ke baad bhi,110,150,88,Abnormal,36.8,93,A,2,Cardiac
+76,Male,Ambulance,behoshi aur shaky,92,178,96,Arrhythmia,36.7,92,V,2,Cardiac
+47,Male,Walk-in,chest mein chubhan breathing deeply,104,136,80,Normal,37,97,A,3,Cardiac
+68,Female,Ambulance,seena mein dard aur ghabrahat ka attack,118,155,90,ST depression,37.1,92,A,2,Cardiac
+57,Male,Wheelchair,sans lena mushkil baitha huay bhi,125,160,92,ST elevation,37,88,A,1,Cardiac
+71,Male,Ambulance,thanda pasina aur dizziness,130,165,94,ST elevation,37,90,A,1,Cardiac
+40,Female,Walk-in,heart beat fast after eating,128,132,80,Sinus tachycardia,36.9,98,A,3,Cardiac
+84,Male,Ambulance,seena mein dard aur peeth mein spread,110,172,95,ST depression,36.8,92,A,2,Cardiac
+68,Male,Ambulance,seena mein bhoot bhaari pan jaise koi baitha hai,116,162,94,ST elevation,37.1,92,A,1,Cardiac
+59,Female,Wheelchair,dil mein dardd jab mai chalti hun to hota hai,108,148,86,ST depression,36.9,94,A,2,Cardiac
+73,Male,Ambulance,achanak behoshi aur girna kitchen mein,92,178,96,Atrial fibrillation,36.6,91,V,2,Cardiac
+44,Male,Walk-in,dhadkan itni tez ki nind na aai raat bhar,132,140,84,Sinus tachycardia,37,97,A,3,Cardiac
+62,Female,Ambulance,seena mein jalan aur ulti aana,120,155,90,ST elevation,37,89,A,1,Cardiac
+51,Male,Wheelchair,sans foolna aur pair mein sujan dono taraf,115,160,92,Abnormal,36.8,86,A,2,Cardiac
+70,Female,Ambulance,chest mein pressure jaise koi chod raha hai,110,165,94,T wave inversion,36.9,93,A,2,Cardiac
+47,Male,Walk-in,heart ruk ruk ke dhadakta hai kuch seconds ke liye,98,128,78,Normal,37,98,A,3,Cardiac
+80,Male,Ambulance,seena mein dardd jo left shoulder mein ja raha tha,118,170,95,ST elevation,37.1,91,A,1,Cardiac
+55,Female,Wheelchair,saans letay huay gati hai jaise kuch atak gaya,125,152,88,Atrial fibrillation,36.9,89,A,2,Cardiac
+64,Male,Walk-in,thakan extreme aur chakkar daily,104,138,82,Normal,37,96,A,3,Cardiac
+77,Female,Ambulance,behoshi ke baad ab hosh hai magar kuch yaad nahi,88,180,98,Arrhythmia,36.7,92,V,2,Cardiac
+49,Male,Ambulance,seena mein teer ki tarah dard,122,158,92,ST elevation,37,90,A,1,Cardiac
+41,Female,Wheelchair,dil ghabra raha hai aur haath kaanp rahe,115,135,82,Sinus tachycardia,36.9,96,A,3,Cardiac
+66,Male,Ambulance,ulta aana aur seena mein jalan,110,105,65,ST elevation,36.5,88,V,1,Cardiac
+53,Female,Walk-in,chest mein chubhan jo right arm mein bhi,108,145,86,T wave inversion,37,95,A,2,Cardiac
+72,Male,Wheelchair,pair sujan bohot zyada aur saans lena mushkil,105,168,94,ST depression,36.8,84,A,2,Cardiac
+45,Male,Ambulance,seena mein dardd gym karte waqt aaya,118,150,88,Abnormal,37.1,94,A,2,Cardiac
+82,Female,Ambulance,acchaanak confusion aur behoshi jaisa,95,185,96,Atrial fibrillation,36.6,90,V,2,Cardiac
+38,Male,Walk-in,heart rate 150 jaisa mehsoos hota hai,140,130,80,Sinus tachycardia,37,97,A,3,Cardiac
+69,Male,Ambulance,seena mein dard aur thanda pasina dono,126,162,94,ST elevation,37,91,A,1,Cardiac
+56,Female,Wheelchair,sans ki takleef raat ko letnay se hoti hai,120,155,90,Abnormal,36.9,89,A,2,Cardiac
+75,Male,Ambulance,behoshi ho gayi subah nahaate waqt,90,175,96,LBBB,36.7,93,V,2,Cardiac
+50,Male,Walk-in,dhadkan fast aur breath short,128,142,84,Sinus tachycardia,37,96,A,3,Cardiac
+63,Female,Ambulance,seena mein dard aur jaw mein pain,112,158,92,T wave inversion,37.1,93,A,2,Cardiac
+48,Male,Wheelchair,chest tightness after eating heavy meal,110,148,86,ST depression,36.9,94,A,2,Cardiac
+79,Female,Ambulance,saans foolna baat karte huay bhi,115,170,94,Atrial fibrillation,36.8,87,A,2,Cardiac
+54,Male,Walk-in,palpitations aur chakkar akar,108,135,82,Normal,37,97,A,3,Cardiac
+67,Male,Ambulance,seena mein bhaari pan jo peeth mein gaya,120,160,94,ST elevation,37,90,A,1,Cardiac
+42,Female,Wheelchair,thakan jo subah uthne se hi hoti hai,118,140,85,Abnormal,36.8,95,A,2,Cardiac
+84,Male,Ambulance,behoshi aur girna toilet mein,88,182,97,Arrhythmia,36.6,91,V,2,Cardiac
+46,Male,Walk-in,heart skipping beats frequently,102,130,80,Normal,37,98,A,3,Cardiac
+71,Female,Ambulance,seena mein dardd aur ulti do baar ho chuki,116,108,66,ST elevation,36.4,89,V,1,Cardiac
+58,Male,Wheelchair,sans ki nali mein gurguri awaz,125,155,90,ST depression,36.9,88,A,2,Cardiac
+65,Female,Ambulance,acchaanak pasina thanda aur dar lag raha,122,160,92,ST elevation,37,91,A,1,Cardiac
+39,Male,Walk-in,heart beat irregular sometimes,130,132,82,Sinus tachycardia,37,97,A,3,Cardiac
+74,Male,Ambulance,seena mein dard 2 din se ruk ruk ke,110,165,94,T wave inversion,36.9,93,A,2,Cardiac
+52,Female,Wheelchair,pair mein sujan aur pet bhi bhara lagta hai,108,158,90,Atrial fibrillation,36.8,86,A,2,Cardiac
+60,Male,Walk-in,chest mein halka dard jo jaata nahi,106,142,84,Normal,37,96,A,3,Cardiac
+83,Female,Ambulance,behoshi aur baad mein ulti,92,180,96,Arrhythmia,36.7,92,V,2,Cardiac
+47,Male,Ambulance,seena mein tez dard left hand mein bhi,124,160,94,ST elevation,37.1,90,A,1,Cardiac
+43,Female,Wheelchair,dhadkan tez aur pair mein jan nahi,120,138,85,Sinus tachycardia,36.9,95,A,3,Cardiac
+76,Male,Ambulance,sans foolna roz zyada ho raha hai,115,170,95,ST depression,36.8,87,A,2,Cardiac
+49,Female,Walk-in,seena mein jalan khana khane ke baad,104,140,82,Normal,37,97,A,3,Cardiac
+68,Male,Ambulance,acchaanak kamzori aur chehra sun ho gaya,118,165,94,ST elevation,37,91,A,1,Cardiac
+55,Female,Wheelchair,saans lena mushkil letay huay bhi nahi,125,160,92,Atrial fibrillation,36.9,85,A,2,Cardiac
+70,Male,Ambulance,behoshi aayi aur phir thik ho gaya,90,172,95,LBBB,36.7,94,V,2,Cardiac
+41,Male,Walk-in,heart racing anxiety ke time par,135,135,80,Sinus tachycardia,37,97,A,3,Cardiac
+64,Female,Ambulance,seena mein dard aur pasina thanda,120,155,90,ST elevation,37,90,A,1,Cardiac
+50,Male,Wheelchair,thakan choti si walk se bhi,112,150,88,Abnormal,36.8,92,A,2,Cardiac
+78,Female,Ambulance,achanak ulti aur seena mein dard,110,110,65,ST elevation,36.5,89,V,1,Cardiac
+53,Male,Walk-in,dhadkan rukti hai phir tez chalti hai,108,132,82,Normal,37,96,A,3,Cardiac
+72,Female,Ambulance,seena mein bhaari pan aur gardan mein akkad,115,168,94,ST depression,36.9,92,A,2,Cardiac
+44,Male,Wheelchair,chest pain after smoking,118,145,86,T wave inversion,37.1,94,A,2,Cardiac
+81,Male,Ambulance,behoshi ho gayi walking karte waqt,94,180,96,Atrial fibrillation,36.6,91,V,2,Cardiac
+46,Female,Walk-in,heart beat fast without exercise,130,138,84,Sinus tachycardia,37,97,A,3,Cardiac
+67,Male,Ambulance,seena mein dardd jaise dabaya ja raha hai,122,162,94,ST elevation,37,91,A,1,Cardiac
+56,Female,Wheelchair,sans foolna aur khansi raat ko,118,155,90,Abnormal,36.8,88,A,2,Cardiac
+73,Male,Ambulance,acchaanak behoshi aur confusion,90,176,95,Arrhythmia,36.7,92,V,2,Cardiac
+40,Male,Walk-in,palpitations daily basis pe,128,130,80,Sinus tachycardia,37,98,A,3,Cardiac
+62,Female,Ambulance,seena mein dard aur left arm sunapan,115,158,92,ST elevation,37.1,93,A,1,Cardiac
+49,Male,Wheelchair,pair sujan aur raat ko neend na aana,108,152,88,ST depression,36.9,85,A,2,Cardiac
+77,Female,Ambulance,thanda pasina aur chakkar,110,170,94,Atrial fibrillation,36.8,90,A,2,Cardiac
+52,Male,Walk-in,chest mein chubhan breathing karne se,106,138,82,Normal,37,96,A,3,Cardiac
+69,Female,Ambulance,seena mein dard aur ulti aane ka mehsoos,120,108,66,ST elevation,36.4,89,V,1,Cardiac
+54,Male,Wheelchair,saans lena mushkil bed se uthne par,125,160,92,Abnormal,36.9,89,A,2,Cardiac
+80,Male,Ambulance,behoshi aur baad mein shaky,88,182,97,Arrhythmia,36.6,91,V,2,Cardiac
+45,Female,Walk-in,dhadkan tez aur haath thande ho gaye,132,140,85,Sinus tachycardia,37,96,A,3,Cardiac
+66,Male,Ambulance,seena mein dard jo dono bazuon mein gaya,118,165,94,ST elevation,37,90,A,1,Cardiac
+51,Female,Wheelchair,thakan bohot zyada baal comb karte waqt,112,148,88,ST depression,36.8,93,A,2,Cardiac
+74,Male,Ambulance,acchaanak confusion aur weak,115,172,95,LBBB,36.7,92,A,2,Cardiac
+42,Male,Walk-in,heart skipping beats after tea,104,130,80,Normal,37,98,A,3,Cardiac
+60,Female,Ambulance,seena mein dard aur jaw mein bhi,122,158,92,T wave inversion,37,93,A,2,Cardiac
+48,Male,Wheelchair,sans ki takleef letay hi hoti hai,120,155,90,Atrial fibrillation,36.9,86,A,2,Cardiac
+71,Female,Ambulance,ulta aana aur seena tight bohot,110,106,65,ST elevation,36.5,89,V,1,Cardiac
+55,Male,Walk-in,heart beating very fast at rest,135,142,84,Sinus tachycardia,37,96,A,3,Cardiac
+83,Female,Ambulance,behoshi ho gayi aur gir gayi,92,185,98,Arrhythmia,36.6,90,V,2,Cardiac
+47,Male,Ambulance,seena mein bhaari pan aur pasina,126,162,94,ST elevation,37.1,91,A,1,Cardiac
+39,Female,Wheelchair,dil ghabra raha hai jaise marega,118,135,82,Sinus tachycardia,36.9,96,A,3,Cardiac
+76,Male,Ambulance,sans foolna aur pair mein pani,115,170,94,ST depression,36.8,84,A,2,Cardiac
+50,Female,Walk-in,chest mein burning like acid,108,140,86,Normal,37,97,A,3,Cardiac
+64,Male,Ambulance,seena mein tez dard left hand mein,120,160,92,ST elevation,37,90,A,1,Cardiac
+53,Female,Wheelchair,thakan aur neend bohot aati hai din mein,112,150,88,Abnormal,36.8,94,A,2,Cardiac
+79,Male,Ambulance,achanak behoshi aur kaanpna,90,178,96,Atrial fibrillation,36.7,91,V,2,Cardiac
+44,Male,Walk-in,palpitations nighttime worse,130,132,82,Sinus tachycardia,37,97,A,3,Cardiac
+67,Female,Ambulance,seena mein dard aur gardan mein pain,115,158,92,T wave inversion,37.1,93,A,2,Cardiac
+56,Male,Wheelchair,saans lena mushkil lying down,125,162,94,ST depression,36.9,87,A,2,Cardiac
+70,Female,Ambulance,behoshi ke baad ulti aayi,92,175,95,Arrhythmia,36.6,92,V,2,Cardiac
+41,Male,Walk-in,heart rate fast and irregular,138,128,80,Sinus tachycardia,37,98,A,3,Cardiac
+65,Male,Ambulance,seena mein dardd jo right shoulder mein gaya,118,165,94,ST elevation,37,91,A,1,Cardiac
+49,Female,Wheelchair,sans foolna aur pair mein sujan dono,110,155,90,Atrial fibrillation,36.8,86,A,2,Cardiac
+82,Male,Ambulance,acchaanak confusion aur behoshi jaisa,88,180,96,Arrhythmia,36.6,90,V,2,Cardiac
+46,Male,Walk-in,chest mein chubhan seconds mein thik,100,128,78,Normal,37,98,A,3,Cardiac
+72,Female,Ambulance,seena mein dard aur pasina thanda,120,160,94,ST elevation,37,92,A,1,Cardiac
+58,Male,Wheelchair,thakan walking 10 steps mein,115,158,88,ST depression,36.9,89,A,2,Cardiac
+61,Female,Ambulance,behoshi ho gayi aur gir gayi bathroom mein,94,172,96,Atrial fibrillation,36.7,91,V,2,Cardiac
+43,Male,Walk-in,dhadkan tez aur saans bhi fast,132,138,84,Sinus tachycardia,37,96,A,3,Cardiac
+68,Female,Ambulance,seena mein dard aur jawline mein pain,110,162,92,T wave inversion,37.1,93,A,2,Cardiac
+52,Male,Wheelchair,saans lena mushkil baithay baithay,122,155,90,Abnormal,36.8,88,A,2,Cardiac
+77,Female,Ambulance,acchaanak pasina thanda aur kamzori,115,170,94,ST elevation,37,90,A,1,Cardiac
+48,Male,Walk-in,heart skipping beats many times,105,130,80,Normal,37,97,A,3,Cardiac
