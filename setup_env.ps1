@@ -30,7 +30,8 @@ Write-Host "Upgrading pip and installing dependencies from requirements.txt..."
 python -m pip install --upgrade pip
 python -m pip install -r (Join-Path $PSScriptRoot 'requirements.txt')
 
-Write-Host "\nSetup complete." -ForegroundColor Green
+# PowerShell escapes with a backtick, not a backslash - "\n" printed literally.
+Write-Host "`nSetup complete." -ForegroundColor Green
 Write-Host "To activate the venv in a new PowerShell session:" -ForegroundColor Yellow
 Write-Host "  .\.venv\Scripts\Activate.ps1" -ForegroundColor Cyan
 Write-Host "To run the batch example now:" -ForegroundColor Yellow
