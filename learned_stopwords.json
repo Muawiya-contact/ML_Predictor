@@ -775,5 +775,26 @@
       "clinically_protected": false,
       "is_stopword": false
     }
+  ],
+  "note": "Learned on the full dataset for deployment. The evaluation in train_embedding_pipeline.py uses a training-split-only list to avoid label leakage; see 'training_split_stopwords' for that list.",
+  "training_split_stopwords": [
+    "baad",
+    "bhi",
+    "bohat",
+    "gaya",
+    "jaisa",
+    "kar",
+    "ki",
+    "ko",
+    "lekin",
+    "mein",
+    "nahi",
+    "neend",
+    "ruk",
+    "saath",
+    "se",
+    "tak",
+    "tez",
+    "zyada"
   ]
 }

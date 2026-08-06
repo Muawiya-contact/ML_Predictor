@@ -1,0 +1,88 @@
+{
+  "winning_method": "D) Hybrid: dictionary + embeddings",
+  "selection_rule": "Lowest under-triage first (within 0.5 points), accuracy as tie-breaker. Under-triage outranks accuracy because it is the error that harms patients.",
+  "most_accurate_method": "C) Embeddings + preprocessing",
+  "most_accurate_not_selected": true,
+  "text_representation": "hybrid",
+  "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "embedding_dim": 384,
+  "accuracy": 91.7,
+  "under_triage_pct": 3.32,
+  "over_triage_pct": 4.98,
+  "safety_grade": "A+",
+  "efficiency_grade": "A",
+  "n_features": 1094,
+  "confusion_matrix": [
+    [
+      89,
+      5,
+      0,
+      0
+    ],
+    [
+      8,
+      65,
+      2,
+      0
+    ],
+    [
+      0,
+      1,
+      58,
+      1
+    ],
+    [
+      0,
+      2,
+      1,
+      9
+    ]
+  ],
+  "n_train": 963,
+  "n_test": 241,
+  "random_state": 42,
+  "preprocessing": "clean -> fuzzy normalize -> learned stop-word removal",
+  "n_stopwords_deployed": 10,
+  "all_methods": [
+    {
+      "method": "A) Dictionary + BoW (current)",
+      "accuracy": 90.87,
+      "under_triage_pct": 3.32,
+      "over_triage_pct": 5.81,
+      "safety_grade": "A+",
+      "efficiency_grade": "A",
+      "n_features": 710,
+      "text_representation": "dictionary_bow"
+    },
+    {
+      "method": "B) Embeddings, raw text",
+      "accuracy": 91.29,
+      "under_triage_pct": 4.56,
+      "over_triage_pct": 4.15,
+      "safety_grade": "A+",
+      "efficiency_grade": "A",
+      "n_features": 394,
+      "text_representation": "embeddings_raw"
+    },
+    {
+      "method": "C) Embeddings + preprocessing",
+      "accuracy": 92.12,
+      "under_triage_pct": 4.56,
+      "over_triage_pct": 3.32,
+      "safety_grade": "A+",
+      "efficiency_grade": "A",
+      "n_features": 394,
+      "text_representation": "embeddings_preprocessed"
+    },
+    {
+      "method": "D) Hybrid: dictionary + embeddings",
+      "accuracy": 91.7,
+      "under_triage_pct": 3.32,
+      "over_triage_pct": 4.98,
+      "safety_grade": "A+",
+      "efficiency_grade": "A",
+      "n_features": 1094,
+      "text_representation": "hybrid"
+    }
+  ]
+}

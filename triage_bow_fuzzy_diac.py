@@ -24,10 +24,17 @@ from collections import Counter
 from triage_pipeline import (
     normalize_roman_urdu,
     build_attention_weights,
+    make_console_safe,
     NUMERICAL_FEATURES,
 )
 
 warnings.filterwarnings('ignore')
+
+# This script prints the diacritized vocabulary ('bukhār', 'dárd', 'sēna'),
+# which the default Windows console codepage cannot encode. Without this the
+# run dies with UnicodeEncodeError partway through the word-frequency table,
+# before the model is ever saved.
+make_console_safe()
 
 os.makedirs('triage_model', exist_ok=True)
 os.makedirs('visualizations', exist_ok=True)
