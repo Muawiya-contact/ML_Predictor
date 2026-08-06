@@ -16,6 +16,11 @@ models--*/
 *_predictions.csv
 *_predictions.xlsx
 
+# Captured console logs from local runs (the CSV results files are the
+# real deliverables and ARE tracked)
+eval_out.txt
+eval_raw.txt
+
 # OS noise
 Thumbs.db
 .DS_Store

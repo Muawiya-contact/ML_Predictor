@@ -1,0 +1,100 @@
+complaint,true_cluster,nearest_neighbour,neighbour_cluster,similarity,same_meaning,open_pool_neighbour,open_pool_same_meaning
+seena mein shadeed dard aur pasina aa raha hai,chest_pain,saans lene mein takleef wheezing ho rahi hai,breathing_difficulty,0.9401,False,seena mein shdeed dard aur pasina aa raha hai,False
+left side chest pain radiation to arm,chest_pain,chest pain radiation,chest_pain,0.8572,True,chest pain radiation to jaw aur neck,False
+seena bhaari lag raha hai aur thakan bohat hai,chest_pain,ulta raha hai subah se pait kharab hai,vomiting_diarrhea,0.7419,False,seena bhaari aur thakan bohat zyada hai,False
+patient ko pehle heart attack ho chuka hai ab chest tightness hai,chest_pain,heat exhaustion chakkar aur weakness,dizziness_weakness,0.7392,False,patient ko heart attack ka dour para tha ghar par,False
+previous cardiac history aur ab severe chest pain,chest_pain,MI history chest pain,chest_pain,0.8482,True,MI history chest pain,True
+left chest pain radiating,chest_pain,chest pain radiation,chest_pain,0.8686,True,chest pain radiation,True
+severe chest pain sweating,chest_pain,MI history chest pain,chest_pain,0.8283,True,chest pain severe,False
+chest pain radiation,chest_pain,left chest pain radiating,chest_pain,0.8686,True,chest pain radiation to jaw aur neck,False
+MI history chest pain,chest_pain,previous cardiac history aur ab severe chest pain,chest_pain,0.8482,True,MI chest pain,False
+chest tightness mild,chest_pain,severe chest pain sweating,chest_pain,0.6934,True,chest tightness,False
+saans phool rahi hai lekin baat kar sakti hai,breathing_difficulty,haath mein gehri chot aur khoon,bleeding_wound,0.8458,False,nikki si saans pe bhi saans toot rahi hai aur khansi,False
+saans lene mein takleef wheezing ho rahi hai,breathing_difficulty,seena mein shadeed dard aur pasina aa raha hai,chest_pain,0.9401,False,seena mein dabao aur behoshi jaisa ehsaas ho raha hai,False
+asthma ka attack aur wheezing,breathing_difficulty,asthma exacerbation wheeze,breathing_difficulty,0.8481,True,asthma wheezing,False
+breathlessness aur wheezing severe,breathing_difficulty,COPD breathlessness,breathing_difficulty,0.8619,True,severe breathlessness,False
+shortness of breath severe,breathing_difficulty,shortness breath mild,breathing_difficulty,0.8287,True,shortness severe,False
+asthma exacerbation wheeze,breathing_difficulty,asthma ka attack aur wheezing,breathing_difficulty,0.8481,True,asthma wheezing,False
+severe breathlessness COPD history,breathing_difficulty,COPD breathlessness,breathing_difficulty,0.8144,True,COPD breathlessness,True
+shortness breath mild,breathing_difficulty,shortness of breath severe,breathing_difficulty,0.8287,True,shortness,False
+severe dyspnea,breathing_difficulty,severe chest pain sweating,chest_pain,0.5946,False,dyspnea severe,False
+COPD breathlessness,breathing_difficulty,breathlessness aur wheezing severe,breathing_difficulty,0.8619,True,severe breathlessness,False
+behosh ho gayi thi ab hosh mein hai kamzori hai,unconsciousness,behoshi aur hosh kam,unconsciousness,0.8769,True,behoshi ho gayi subah nahaate waqt,False
+behoshi aur BP bohat high,unconsciousness,behoshi aur hosh kam,unconsciousness,0.7957,True,dil ki dhadkan tez hai BP high hai,False
+unconscious episode ab confusion,unconsciousness,achanak behoshi,unconsciousness,0.8276,True,achanak behoshi,True
+collapse aur unconscious,unconsciousness,collapse unconscious,unconsciousness,0.9457,True,collapse unconscious,True
+unconscious collapse,unconsciousness,collapse unconscious,unconsciousness,0.9841,True,collapse unconscious,True
+behoshi aur hosh kam,unconsciousness,achanak behoshi,unconsciousness,0.9277,True,behoshi ke baad ab hosh hai magar kamzori,False
+achanak behoshi,unconsciousness,gir kar behosh,unconsciousness,0.9425,True,acchaanak confusion aur behoshi jaisa,False
+gir kar behosh,unconsciousness,achanak behoshi,unconsciousness,0.9425,True,acchaanak confusion aur behoshi jaisa,False
+collapse unconscious,unconsciousness,unconscious collapse,unconsciousness,0.9841,True,unconscious collapse,True
+collapse,unconsciousness,collapse unconscious,unconsciousness,0.7073,True,collapse confusion,False
+bukhar aur body pain do din se,fever,gala kharab aur bukhar teen din se,fever,0.8723,True,gala kharab aur bukhar teen din se,True
+typhoid ka ilaaj chal raha hai bukhar utar nahi raha,fever,ulta raha hai subah se pait kharab hai,vomiting_diarrhea,0.8614,False,dil ghabra raha hai saath hi saans phool rahi hai,False
+gala kharab aur bukhar teen din se,fever,bukhar aur body pain do din se,fever,0.8723,True,bukhar aur body pain do din se,True
+fever aur rash body par,fever,garmi se kamzori,dizziness_weakness,0.8529,False,jild par daane aur bukhar,False
+khansi aur bukhar 4 din se,fever,gala kharab aur bukhar teen din se,fever,0.8247,True,khansi aur bukhar teen din se,False
+sore throat aur mild fever,fever,severe chest pain sweating,chest_pain,0.6126,False,sore throat mild fever,False
+viral fever fatigue,fever,shortness of breath severe,breathing_difficulty,0.375,False,viral fever,False
+cough fever 5 days,fever,khansi aur bukhar 4 din se,fever,0.795,True,cough fever,False
+fever typhoid suspect,fever,achanak behoshi,unconsciousness,0.3753,False,fever typhoid,False
+fever rash dengue,fever,fever aur rash body par,fever,0.5271,True,fever rash dengue suspect,False
+pregnancy ke douran lower abdomen pain,abdominal_pain,lower abdomen pain aur nausea,abdominal_pain,0.8899,True,lower abdomen pain aur nausea,True
+lower abdomen pain aur nausea,abdominal_pain,pregnancy ke douran lower abdomen pain,abdominal_pain,0.8899,True,pregnancy ke douran lower abdomen pain,True
+pregnancy 7 months abdominal pain,abdominal_pain,abdominal pain,abdominal_pain,0.8336,True,abdominal pain,True
+abdominal cramps severe,abdominal_pain,abdominal cramps,abdominal_pain,0.9721,True,abdominal cramps,True
+abdominal pain nausea,abdominal_pain,abdominal pain,abdominal_pain,0.9068,True,abdominal pain,True
+abdominal cramps,abdominal_pain,abdominal cramps severe,abdominal_pain,0.9721,True,abdominal cramps severe,True
+abdominal pain,abdominal_pain,abdominal pain nausea,abdominal_pain,0.9068,True,abdominal pain nausea,True
+abdominal cramps nausea,abdominal_pain,abdominal pain nausea,abdominal_pain,0.8978,True,abdominal pain nausea,True
+pet mein jalan aur dard,abdominal_pain,hamal ke douran pait dard,abdominal_pain,0.8751,True,pet aur seenay mein ek saath dard,False
+hamal ke douran pait dard,abdominal_pain,pet mein jalan aur dard,abdominal_pain,0.8751,True,pait ke dard ki shiddat,False
+ulta raha hai subah se pait kharab hai,vomiting_diarrhea,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,fever,0.8614,False,dil ghabra raha hai aur haath kaanp rahe,False
+roadside khana khaya tha ab ulti aur dast lag gaye,vomiting_diarrhea,garmi mein kaam karte hue chakkar aa gaye,dizziness_weakness,0.7519,False,garmi mein kaam karte hue chakkar aa gaye,False
+food poisoning vomiting aur dehydration,vomiting_diarrhea,food poisoning loose motions,vomiting_diarrhea,0.7734,True,food poisoning,False
+vomiting aur dehydration,vomiting_diarrhea,vomiting dehydration,vomiting_diarrhea,0.986,True,vomiting dehydration,True
+food poisoning loose motions,vomiting_diarrhea,food poisoning vomiting aur dehydration,vomiting_diarrhea,0.7734,True,food poisoning,False
+vomiting pregnancy early,vomiting_diarrhea,vomiting pregnancy,vomiting_diarrhea,0.7599,True,vomiting pregnancy,True
+vomiting dehydration,vomiting_diarrhea,vomiting aur dehydration,vomiting_diarrhea,0.986,True,vomiting aur dehydration,True
+vomiting pregnancy,vomiting_diarrhea,hamal ke douran ulti,vomiting_diarrhea,0.9574,True,hamal ke douran ulti,True
+vomiting,vomiting_diarrhea,vomiting pregnancy,vomiting_diarrhea,0.9107,True,vomiting pregnancy,True
+hamal ke douran ulti,vomiting_diarrhea,vomiting pregnancy,vomiting_diarrhea,0.9574,True,vomiting pregnancy,True
+bike accident ke baad pair mein bleeding,bleeding_wound,bike slip knee injury,fracture_sprain,0.5489,False,bike slip knee injury,False
+pregnancy mein bleeding ho rahi hai 8 months ki hain,bleeding_wound,haath mein gehri chot aur khoon,bleeding_wound,0.9245,True,haath mein gehri chot aur khoon,True
+hand injury cut bleeding,bleeding_wound,cut injury bleeding,bleeding_wound,0.8547,True,cut injury bleeding,True
+cut injury bleeding,bleeding_wound,hand injury cut bleeding,bleeding_wound,0.8547,True,hand injury cut bleeding,True
+hand injury bleeding,bleeding_wound,hand injury cut bleeding,bleeding_wound,0.8057,True,hand injury cut bleeding,True
+haath mein gehri chot aur khoon,bleeding_wound,khoon ki ulti hui aur seenay mein tees,bleeding_wound,0.9329,True,khoon ki ulti hui aur seenay mein tees,True
+chot lag kar khoon,bleeding_wound,cut injury bleeding,bleeding_wound,0.5904,True,dil ki dhadkan slow kamzori,False
+cut injury,bleeding_wound,cut injury bleeding,bleeding_wound,0.8147,True,cut injury bleeding,True
+gir gaya seedhiyon se sar phut gaya,bleeding_wound,pair toot gaya girnay se,fracture_sprain,0.7385,False,pair toot gaya girnay se,False
+khoon ki ulti hui aur seenay mein tees,bleeding_wound,haath mein gehri chot aur khoon,bleeding_wound,0.9329,True,khoon behna nahi lekin chest mein tees aur vomiting,False
+construction site par chot lagi haath mein fracture shak hai,fracture_sprain,fever aur rash body par,fever,0.5702,False,head injury girnay ke baad unconscious tha ab alert hai,False
+khelte hue gir gaya ankle mein swelling,fracture_sprain,pair toot gaya girnay se,fracture_sprain,0.6308,True,ankle sprain,False
+right arm fracture fall ke baad,fracture_sprain,burn injury arm,burn,0.8527,False,burn injury arm,False
+leg injury sports mein,fracture_sprain,jalne ki chot haath par,burn,0.7116,False,seena mein dardd gym karte waqt aaya,False
+bike slip knee injury,fracture_sprain,bike accident ke baad pair mein bleeding,bleeding_wound,0.5489,False,knee injury,False
+ankle sprain sports,fracture_sprain,khelte hue gir gaya ankle mein swelling,fracture_sprain,0.5594,True,ankle sprain,False
+leg fracture fall,fracture_sprain,jalne ki chot haath par,burn,0.9073,False,jalne ki chot haath par,False
+fracture wrist,fracture_sprain,hand injury bleeding,bleeding_wound,0.6576,False,hand injury bleeding,False
+pair toot gaya girnay se,fracture_sprain,leg fracture fall,fracture_sprain,0.7487,True,saans lena mushkil lete hi paseena aa gaya,False
+kalai toot gayi,fracture_sprain,hamal ke douran pait dard,abdominal_pain,0.6056,False,saans bilkul nahi aa rahi halak tight,False
+sar ghoom raha hai aur aankhen dhundlee ho rahi hain,dizziness_weakness,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,fever,0.7914,False,sar ghoom raha hai aur aankhen dhundli,False
+garmi mein kaam karte hue chakkar aa gaye,dizziness_weakness,khoon ki ulti hui aur seenay mein tees,bleeding_wound,0.7986,False,seena dard aur dono baazu sun ho gaye,False
+heat exhaustion chakkar aur weakness,dizziness_weakness,patient ko pehle heart attack ho chuka hai ab chest tightness hai,chest_pain,0.7392,False,heat exhaustion weakness,False
+dizziness aur blurred vision,dizziness_weakness,dizziness blurred vision,dizziness_weakness,0.9783,True,dizziness blurred vision,True
+heat stroke dizziness,dizziness_weakness,vertigo dizziness,dizziness_weakness,0.8772,True,thanda pasina aur dizziness,False
+dizziness blurred vision,dizziness_weakness,dizziness aur blurred vision,dizziness_weakness,0.9783,True,dizziness aur blurred vision,True
+vertigo dizziness,dizziness_weakness,heat stroke dizziness,dizziness_weakness,0.8772,True,heat stroke dizziness,True
+garmi se chakkar aur kamzori,dizziness_weakness,garmi se kamzori,dizziness_weakness,0.9103,True,garmi se kamzori,True
+garmi se kamzori,dizziness_weakness,garmi se chakkar aur kamzori,dizziness_weakness,0.9103,True,garmi se chakkar aur kamzori,True
+vertigo,dizziness_weakness,vertigo dizziness,dizziness_weakness,0.8723,True,vertigo dizziness,True
+aag se burn ho gaya kitchen mein,burn,seena mein shadeed dard aur pasina aa raha hai,chest_pain,0.7684,False,achanak behoshi aur girna kitchen mein,False
+burn injury haath aur chest par,burn,jalne ki chot haath par,burn,0.9138,True,jalne ki chot haath par,True
+burn injury hand aur face,burn,hand injury bleeding,bleeding_wound,0.6936,False,garmi ki wajah se behoshi jaisi,False
+burns kitchen accident,burn,collapse,unconsciousness,0.3192,False,collapse,False
+burn injury arm,burn,burn injury,burn,0.8592,True,acchaanak behoshi aur confusion,False
+burn injury,burn,jalne ki chot,burn,1.0,True,jalne ki chot,True
+burn,burn,burn injury,burn,0.8631,True,halka bukhar,False
+jalne ki chot haath par,burn,burn injury haath aur chest par,burn,0.9138,True,burn injury haath aur chest par,True
+jalne ki chot,burn,burn injury,burn,1.0,True,burn injury,True

@@ -1,0 +1,163 @@
+{
+  "_README": [
+    "Manual meaning-clusters for the embedding-effectiveness study",
+    "(ARCHITECTURE.md Task 4a / Contribution 2).",
+    "",
+    "Every complaint below is a REAL complaint taken from",
+    "triage_mixed_language_dataset.csv - nothing here is invented, so the",
+    "study measures the embedding model on the language the system will",
+    "actually meet in the ED.",
+    "",
+    "Clusters are grouped by MEANING, not by the dataset's Category column.",
+    "A complaint belongs to exactly one cluster, otherwise the",
+    "nearest-neighbour fidelity test in Task 4c is not well defined.",
+    "",
+    "EDIT THIS FILE FREELY - add, remove or move complaints between",
+    "clusters and re-run embedding_evaluation.py. Cluster sizes do not have",
+    "to be equal; the script computes C(n,2) pairs for whatever size it",
+    "finds. A cluster of 10 gives exactly 45 pairs, which is the figure",
+    "quoted in the design document.",
+    "",
+    "NOTE on 'burn': the dataset contains only 9 distinct burn complaints,",
+    "so that cluster has 9 members (36 pairs) rather than 10. Padding it",
+    "with invented text would corrupt the measurement.",
+    "",
+    "NOTE on seizures: the design document suggests a seizure cluster, but",
+    "the dataset contains no genuine seizure complaints (the vocabulary in",
+    "triage_pipeline.py covers daura/mirgi/fit, yet no patient record uses",
+    "them). 'dizziness_weakness' is used instead. This gap is worth",
+    "raising - the model cannot be evaluated on a complaint type that was",
+    "never collected."
+  ],
+
+  "clusters": {
+    "chest_pain": [
+      "seena mein shadeed dard aur pasina aa raha hai",
+      "left side chest pain radiation to arm",
+      "seena bhaari lag raha hai aur thakan bohat hai",
+      "patient ko pehle heart attack ho chuka hai ab chest tightness hai",
+      "previous cardiac history aur ab severe chest pain",
+      "left chest pain radiating",
+      "severe chest pain sweating",
+      "chest pain radiation",
+      "MI history chest pain",
+      "chest tightness mild"
+    ],
+
+    "breathing_difficulty": [
+      "saans phool rahi hai lekin baat kar sakti hai",
+      "saans lene mein takleef wheezing ho rahi hai",
+      "asthma ka attack aur wheezing",
+      "breathlessness aur wheezing severe",
+      "shortness of breath severe",
+      "asthma exacerbation wheeze",
+      "severe breathlessness COPD history",
+      "shortness breath mild",
+      "severe dyspnea",
+      "COPD breathlessness"
+    ],
+
+    "unconsciousness": [
+      "behosh ho gayi thi ab hosh mein hai kamzori hai",
+      "behoshi aur BP bohat high",
+      "unconscious episode ab confusion",
+      "collapse aur unconscious",
+      "unconscious collapse",
+      "behoshi aur hosh kam",
+      "achanak behoshi",
+      "gir kar behosh",
+      "collapse unconscious",
+      "collapse"
+    ],
+
+    "fever": [
+      "bukhar aur body pain do din se",
+      "typhoid ka ilaaj chal raha hai bukhar utar nahi raha",
+      "gala kharab aur bukhar teen din se",
+      "fever aur rash body par",
+      "khansi aur bukhar 4 din se",
+      "sore throat aur mild fever",
+      "viral fever fatigue",
+      "cough fever 5 days",
+      "fever typhoid suspect",
+      "fever rash dengue"
+    ],
+
+    "abdominal_pain": [
+      "pregnancy ke douran lower abdomen pain",
+      "lower abdomen pain aur nausea",
+      "pregnancy 7 months abdominal pain",
+      "abdominal cramps severe",
+      "abdominal pain nausea",
+      "abdominal cramps",
+      "abdominal pain",
+      "abdominal cramps nausea",
+      "pet mein jalan aur dard",
+      "hamal ke douran pait dard"
+    ],
+
+    "vomiting_diarrhea": [
+      "ulta raha hai subah se pait kharab hai",
+      "roadside khana khaya tha ab ulti aur dast lag gaye",
+      "food poisoning vomiting aur dehydration",
+      "vomiting aur dehydration",
+      "food poisoning loose motions",
+      "vomiting pregnancy early",
+      "vomiting dehydration",
+      "vomiting pregnancy",
+      "vomiting",
+      "hamal ke douran ulti"
+    ],
+
+    "bleeding_wound": [
+      "bike accident ke baad pair mein bleeding",
+      "pregnancy mein bleeding ho rahi hai 8 months ki hain",
+      "hand injury cut bleeding",
+      "cut injury bleeding",
+      "hand injury bleeding",
+      "haath mein gehri chot aur khoon",
+      "chot lag kar khoon",
+      "cut injury",
+      "gir gaya seedhiyon se sar phut gaya",
+      "khoon ki ulti hui aur seenay mein tees"
+    ],
+
+    "fracture_sprain": [
+      "construction site par chot lagi haath mein fracture shak hai",
+      "khelte hue gir gaya ankle mein swelling",
+      "right arm fracture fall ke baad",
+      "leg injury sports mein",
+      "bike slip knee injury",
+      "ankle sprain sports",
+      "leg fracture fall",
+      "fracture wrist",
+      "pair toot gaya girnay se",
+      "kalai toot gayi"
+    ],
+
+    "dizziness_weakness": [
+      "sar ghoom raha hai aur aankhen dhundlee ho rahi hain",
+      "garmi mein kaam karte hue chakkar aa gaye",
+      "heat exhaustion chakkar aur weakness",
+      "dizziness aur blurred vision",
+      "heat stroke dizziness",
+      "dizziness blurred vision",
+      "vertigo dizziness",
+      "garmi se chakkar aur kamzori",
+      "garmi se kamzori",
+      "vertigo"
+    ],
+
+    "burn": [
+      "aag se burn ho gaya kitchen mein",
+      "burn injury haath aur chest par",
+      "burn injury hand aur face",
+      "burns kitchen accident",
+      "burn injury arm",
+      "burn injury",
+      "burn",
+      "jalne ki chot haath par",
+      "jalne ki chot"
+    ]
+  }
+}

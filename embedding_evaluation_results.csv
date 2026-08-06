@@ -1,0 +1,12 @@
+cluster,n_complaints,n_pairs,mean_cosine_similarity,min_cosine_similarity,max_cosine_similarity,mean_pearson_correlation,mean_euclidean_distance,pairs_above_0.5,pct_above_0.5,across_cluster_similarity,separation_gap,nn_efficiency_closed_pool_pct,nn_efficiency_open_pool_pct,embedding_model,embedding_dim,preprocessing
+chest_pain,10,45,0.463,0.0,0.8686,0.4591,4.6762,25,55.6,,,,,,,
+breathing_difficulty,10,45,0.3807,0.0761,0.8619,0.3807,5.018,11,24.4,,,,,,,
+unconsciousness,10,45,0.6721,0.1242,0.9841,0.6721,3.1482,37,82.2,,,,,,,
+fever,10,45,0.3997,0.0948,0.8723,0.3997,3.9271,15,33.3,,,,,,,
+abdominal_pain,10,45,0.5017,0.0,0.9721,0.501,4.389,25,55.6,,,,,,,
+vomiting_diarrhea,10,45,0.5401,0.0331,0.986,0.5401,3.3629,25,55.6,,,,,,,
+bleeding_wound,10,45,0.5099,0.2382,0.9329,0.5099,3.7115,16,35.6,,,,,,,
+fracture_sprain,10,45,0.375,0.0383,0.8014,0.3751,4.3633,12,26.7,,,,,,,
+dizziness_weakness,10,45,0.3736,0.0,0.9783,0.3734,4.7432,16,35.6,,,,,,,
+burn,9,36,0.5681,0.0,1.0,0.5657,3.3826,27,75.0,,,,,,,
+OVERALL,99,441,0.4766,0.0,1.0,0.4777,4.0722,209,47.4,0.3174,0.1592,71.7,39.4,sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2,384.0,fuzzy + learned stop-word removal

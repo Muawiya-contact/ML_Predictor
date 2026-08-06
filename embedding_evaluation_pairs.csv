@@ -1,0 +1,442 @@
+cluster,complaint_a,complaint_b,cosine_similarity,pearson_correlation,euclidean_distance,above_threshold
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,left side chest pain radiation to arm,0.0675,0.0675,5.8759,False
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,seena bhaari lag raha hai aur thakan bohat hai,0.6966,0.6966,2.8844,True
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,patient ko pehle heart attack ho chuka hai ab chest tightness hai,0.4312,0.4312,4.3072,False
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,previous cardiac history aur ab severe chest pain,0.1816,0.1816,5.5522,False
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,left chest pain radiating,0.0389,0.039,6.3383,False
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,severe chest pain sweating,0.0842,0.0842,5.2296,False
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,chest pain radiation,0.0455,0.0456,6.7929,False
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,MI history chest pain,0.0888,0.0888,6.0252,False
+chest_pain,seena mein shadeed dard aur pasina aa raha hai,chest tightness mild,0.1023,0.1023,6.2384,False
+chest_pain,left side chest pain radiation to arm,seena bhaari lag raha hai aur thakan bohat hai,0.0,-0.0013,6.0134,False
+chest_pain,left side chest pain radiation to arm,patient ko pehle heart attack ho chuka hai ab chest tightness hai,0.4656,0.4656,4.7008,False
+chest_pain,left side chest pain radiation to arm,previous cardiac history aur ab severe chest pain,0.6411,0.6411,4.0694,True
+chest_pain,left side chest pain radiation to arm,left chest pain radiating,0.8082,0.8082,3.1391,True
+chest_pain,left side chest pain radiation to arm,severe chest pain sweating,0.6332,0.6333,3.8164,True
+chest_pain,left side chest pain radiation to arm,chest pain radiation,0.8572,0.8572,3.0121,True
+chest_pain,left side chest pain radiation to arm,MI history chest pain,0.65,0.65,4.1218,True
+chest_pain,left side chest pain radiation to arm,chest tightness mild,0.4574,0.4574,5.3157,False
+chest_pain,seena bhaari lag raha hai aur thakan bohat hai,patient ko pehle heart attack ho chuka hai ab chest tightness hai,0.3916,0.3916,4.4008,False
+chest_pain,seena bhaari lag raha hai aur thakan bohat hai,previous cardiac history aur ab severe chest pain,0.1099,0.1098,5.7195,False
+chest_pain,seena bhaari lag raha hai aur thakan bohat hai,left chest pain radiating,0.0,-0.0762,6.6178,False
+chest_pain,seena bhaari lag raha hai aur thakan bohat hai,severe chest pain sweating,0.0,-0.0243,5.4524,False
+chest_pain,seena bhaari lag raha hai aur thakan bohat hai,chest pain radiation,0.0,-0.0679,7.0848,False
+chest_pain,seena bhaari lag raha hai aur thakan bohat hai,MI history chest pain,0.0,-0.0068,6.2524,False
+chest_pain,seena bhaari lag raha hai aur thakan bohat hai,chest tightness mild,0.0462,0.0462,6.3565,False
+chest_pain,patient ko pehle heart attack ho chuka hai ab chest tightness hai,previous cardiac history aur ab severe chest pain,0.6725,0.6725,3.718,True
+chest_pain,patient ko pehle heart attack ho chuka hai ab chest tightness hai,left chest pain radiating,0.4677,0.4678,4.9874,False
+chest_pain,patient ko pehle heart attack ho chuka hai ab chest tightness hai,severe chest pain sweating,0.6385,0.6385,3.5166,True
+chest_pain,patient ko pehle heart attack ho chuka hai ab chest tightness hai,chest pain radiation,0.4593,0.4593,5.4224,False
+chest_pain,patient ko pehle heart attack ho chuka hai ab chest tightness hai,MI history chest pain,0.562,0.5621,4.4215,True
+chest_pain,patient ko pehle heart attack ho chuka hai ab chest tightness hai,chest tightness mild,0.6714,0.6714,4.0417,True
+chest_pain,previous cardiac history aur ab severe chest pain,left chest pain radiating,0.6876,0.6876,4.0029,True
+chest_pain,previous cardiac history aur ab severe chest pain,severe chest pain sweating,0.7938,0.7938,2.9384,True
+chest_pain,previous cardiac history aur ab severe chest pain,chest pain radiation,0.6563,0.6563,4.5127,True
+chest_pain,previous cardiac history aur ab severe chest pain,MI history chest pain,0.8482,0.8482,2.732,True
+chest_pain,previous cardiac history aur ab severe chest pain,chest tightness mild,0.5732,0.5732,4.7399,True
+chest_pain,left chest pain radiating,severe chest pain sweating,0.7681,0.7681,3.3643,True
+chest_pain,left chest pain radiating,chest pain radiation,0.8686,0.8686,2.8962,True
+chest_pain,left chest pain radiating,MI history chest pain,0.7523,0.7523,3.6326,True
+chest_pain,left chest pain radiating,chest tightness mild,0.5299,0.5299,5.156,True
+chest_pain,severe chest pain sweating,chest pain radiation,0.7202,0.7202,4.0533,True
+chest_pain,severe chest pain sweating,MI history chest pain,0.8283,0.8283,2.841,True
+chest_pain,severe chest pain sweating,chest tightness mild,0.6934,0.6934,3.8833,True
+chest_pain,chest pain radiation,MI history chest pain,0.7329,0.7329,4.0446,True
+chest_pain,chest pain radiation,chest tightness mild,0.5231,0.5231,5.4895,True
+chest_pain,MI history chest pain,chest tightness mild,0.5927,0.5927,4.7179,True
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,saans lene mein takleef wheezing ho rahi hai,0.8119,0.8119,2.5354,True
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,asthma ka attack aur wheezing,0.2172,0.2172,5.0943,False
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,breathlessness aur wheezing severe,0.2521,0.2521,5.2337,False
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,shortness of breath severe,0.3769,0.3769,3.8461,False
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,asthma exacerbation wheeze,0.0761,0.0761,5.5684,False
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,severe breathlessness COPD history,0.2031,0.2032,5.4028,False
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,shortness breath mild,0.3863,0.3862,3.9246,False
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,severe dyspnea,0.1003,0.1003,5.2358,False
+breathing_difficulty,saans phool rahi hai lekin baat kar sakti hai,COPD breathlessness,0.3069,0.307,5.2891,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,asthma ka attack aur wheezing,0.2491,0.2491,5.6243,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,breathlessness aur wheezing severe,0.2759,0.2759,5.7132,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,shortness of breath severe,0.2784,0.2784,4.8799,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,asthma exacerbation wheeze,0.1164,0.1163,6.1924,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,severe breathlessness COPD history,0.1167,0.1167,6.3252,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,shortness breath mild,0.3359,0.3359,4.757,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,severe dyspnea,0.0802,0.0803,6.0817,False
+breathing_difficulty,saans lene mein takleef wheezing ho rahi hai,COPD breathlessness,0.2348,0.2349,6.0396,False
+breathing_difficulty,asthma ka attack aur wheezing,breathlessness aur wheezing severe,0.7034,0.7034,3.9247,True
+breathing_difficulty,asthma ka attack aur wheezing,shortness of breath severe,0.2052,0.2052,5.6626,False
+breathing_difficulty,asthma ka attack aur wheezing,asthma exacerbation wheeze,0.8481,0.8481,2.7694,True
+breathing_difficulty,asthma ka attack aur wheezing,severe breathlessness COPD history,0.4651,0.4652,5.2901,False
+breathing_difficulty,asthma ka attack aur wheezing,shortness breath mild,0.1152,0.1152,6.0428,False
+breathing_difficulty,asthma ka attack aur wheezing,severe dyspnea,0.2843,0.2843,5.8183,False
+breathing_difficulty,asthma ka attack aur wheezing,COPD breathlessness,0.5158,0.5158,5.1391,True
+breathing_difficulty,breathlessness aur wheezing severe,shortness of breath severe,0.4223,0.4223,5.0417,False
+breathing_difficulty,breathlessness aur wheezing severe,asthma exacerbation wheeze,0.619,0.619,4.4999,True
+breathing_difficulty,breathlessness aur wheezing severe,severe breathlessness COPD history,0.7471,0.7472,3.7284,True
+breathing_difficulty,breathlessness aur wheezing severe,shortness breath mild,0.287,0.287,5.6281,False
+breathing_difficulty,breathlessness aur wheezing severe,severe dyspnea,0.5554,0.5554,4.7276,True
+breathing_difficulty,breathlessness aur wheezing severe,COPD breathlessness,0.8619,0.8619,2.8146,True
+breathing_difficulty,shortness of breath severe,asthma exacerbation wheeze,0.147,0.147,5.9615,False
+breathing_difficulty,shortness of breath severe,severe breathlessness COPD history,0.3528,0.3528,5.3508,False
+breathing_difficulty,shortness of breath severe,shortness breath mild,0.8287,0.8287,2.3524,True
+breathing_difficulty,shortness of breath severe,severe dyspnea,0.4371,0.4371,4.6773,False
+breathing_difficulty,shortness of breath severe,COPD breathlessness,0.4241,0.4241,5.2026,False
+breathing_difficulty,asthma exacerbation wheeze,severe breathlessness COPD history,0.4488,0.4489,5.4363,False
+breathing_difficulty,asthma exacerbation wheeze,shortness breath mild,0.0868,0.0867,6.2392,False
+breathing_difficulty,asthma exacerbation wheeze,severe dyspnea,0.2466,0.2466,6.0557,False
+breathing_difficulty,asthma exacerbation wheeze,COPD breathlessness,0.4753,0.4754,5.4083,False
+breathing_difficulty,severe breathlessness COPD history,shortness breath mild,0.2186,0.2186,5.9147,False
+breathing_difficulty,severe breathlessness COPD history,severe dyspnea,0.4824,0.4824,5.1234,False
+breathing_difficulty,severe breathlessness COPD history,COPD breathlessness,0.8144,0.8144,3.2704,True
+breathing_difficulty,shortness breath mild,severe dyspnea,0.2273,0.2273,5.5295,False
+breathing_difficulty,shortness breath mild,COPD breathlessness,0.3415,0.3415,5.5863,False
+breathing_difficulty,severe dyspnea,COPD breathlessness,0.5533,0.5533,4.8706,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,behoshi aur BP bohat high,0.6716,0.6716,2.826,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,unconscious episode ab confusion,0.7132,0.7132,2.6345,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,collapse aur unconscious,0.6339,0.6339,3.106,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,unconscious collapse,0.5356,0.5357,3.7961,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,behoshi aur hosh kam,0.8769,0.8769,1.8074,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,achanak behoshi,0.8065,0.8065,2.1886,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,gir kar behosh,0.8069,0.8069,2.1468,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,collapse unconscious,0.5921,0.5921,3.4315,True
+unconsciousness,behosh ho gayi thi ab hosh mein hai kamzori hai,collapse,0.2149,0.2149,6.5055,False
+unconsciousness,behoshi aur BP bohat high,unconscious episode ab confusion,0.6422,0.6422,2.7787,True
+unconsciousness,behoshi aur BP bohat high,collapse aur unconscious,0.6163,0.6163,3.0491,True
+unconsciousness,behoshi aur BP bohat high,unconscious collapse,0.425,0.425,4.0815,False
+unconsciousness,behoshi aur BP bohat high,behoshi aur hosh kam,0.7957,0.7958,2.2475,True
+unconsciousness,behoshi aur BP bohat high,achanak behoshi,0.7661,0.7661,2.2757,True
+unconsciousness,behoshi aur BP bohat high,gir kar behosh,0.7537,0.7537,2.2015,True
+unconsciousness,behoshi aur BP bohat high,collapse unconscious,0.4977,0.4977,3.6719,False
+unconsciousness,behoshi aur BP bohat high,collapse,0.1242,0.1242,6.6824,False
+unconsciousness,unconscious episode ab confusion,collapse aur unconscious,0.7234,0.7234,2.5856,True
+unconsciousness,unconscious episode ab confusion,unconscious collapse,0.6343,0.6343,3.2912,True
+unconsciousness,unconscious episode ab confusion,behoshi aur hosh kam,0.7892,0.7892,2.2761,True
+unconsciousness,unconscious episode ab confusion,achanak behoshi,0.8276,0.8276,1.9443,True
+unconsciousness,unconscious episode ab confusion,gir kar behosh,0.7892,0.7892,2.0255,True
+unconsciousness,unconscious episode ab confusion,collapse unconscious,0.6881,0.6881,2.913,True
+unconsciousness,unconscious episode ab confusion,collapse,0.2955,0.2955,6.1235,False
+unconsciousness,collapse aur unconscious,unconscious collapse,0.9143,0.9143,1.7058,True
+unconsciousness,collapse aur unconscious,behoshi aur hosh kam,0.7575,0.7575,2.5354,True
+unconsciousness,collapse aur unconscious,achanak behoshi,0.7827,0.7827,2.3145,True
+unconsciousness,collapse aur unconscious,gir kar behosh,0.7805,0.7805,2.2677,True
+unconsciousness,collapse aur unconscious,collapse unconscious,0.9457,0.9457,1.2855,True
+unconsciousness,collapse aur unconscious,collapse,0.645,0.645,4.7803,True
+unconsciousness,unconscious collapse,behoshi aur hosh kam,0.5988,0.5988,3.5412,True
+unconsciousness,unconscious collapse,achanak behoshi,0.6752,0.6752,3.1295,True
+unconsciousness,unconscious collapse,gir kar behosh,0.6632,0.6632,3.1312,True
+unconsciousness,unconscious collapse,collapse unconscious,0.9841,0.9841,0.7639,True
+unconsciousness,unconscious collapse,collapse,0.6969,0.6969,4.4737,True
+unconsciousness,behoshi aur hosh kam,achanak behoshi,0.9277,0.9277,1.3642,True
+unconsciousness,behoshi aur hosh kam,gir kar behosh,0.9246,0.9246,1.4857,True
+unconsciousness,behoshi aur hosh kam,collapse unconscious,0.6748,0.6748,3.0738,True
+unconsciousness,behoshi aur hosh kam,collapse,0.2652,0.2652,6.3347,False
+unconsciousness,achanak behoshi,gir kar behosh,0.9425,0.9425,1.1593,True
+unconsciousness,achanak behoshi,collapse unconscious,0.7469,0.7469,2.6521,True
+unconsciousness,achanak behoshi,collapse,0.2907,0.2907,6.1598,False
+unconsciousness,gir kar behosh,collapse unconscious,0.7454,0.7454,2.6288,True
+unconsciousness,gir kar behosh,collapse,0.3555,0.3555,5.8621,False
+unconsciousness,collapse unconscious,collapse,0.7073,0.7073,4.4318,True
+fever,bukhar aur body pain do din se,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,0.4612,0.4613,2.816,False
+fever,bukhar aur body pain do din se,gala kharab aur bukhar teen din se,0.8723,0.8723,1.3818,True
+fever,bukhar aur body pain do din se,fever aur rash body par,0.5252,0.5252,2.98,True
+fever,bukhar aur body pain do din se,khansi aur bukhar 4 din se,0.7998,0.7998,1.5925,True
+fever,bukhar aur body pain do din se,sore throat aur mild fever,0.3125,0.3126,3.9526,False
+fever,bukhar aur body pain do din se,viral fever fatigue,0.1964,0.1964,4.8207,False
+fever,bukhar aur body pain do din se,cough fever 5 days,0.5245,0.5245,2.7551,True
+fever,bukhar aur body pain do din se,fever typhoid suspect,0.2094,0.2094,4.2237,False
+fever,bukhar aur body pain do din se,fever rash dengue,0.247,0.2471,4.9632,False
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,gala kharab aur bukhar teen din se,0.5273,0.5273,2.7906,True
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,fever aur rash body par,0.7094,0.7094,2.4543,True
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,khansi aur bukhar 4 din se,0.67,0.67,2.2465,True
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,sore throat aur mild fever,0.3032,0.3032,4.1403,False
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,viral fever fatigue,0.0998,0.0998,5.2393,False
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,cough fever 5 days,0.6553,0.6554,2.4916,True
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,fever typhoid suspect,0.3364,0.3364,4.069,False
+fever,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,fever rash dengue,0.3553,0.3553,4.7768,False
+fever,gala kharab aur bukhar teen din se,fever aur rash body par,0.5148,0.5149,3.1143,True
+fever,gala kharab aur bukhar teen din se,khansi aur bukhar 4 din se,0.8247,0.8247,1.6147,True
+fever,gala kharab aur bukhar teen din se,sore throat aur mild fever,0.2192,0.2192,4.3281,False
+fever,gala kharab aur bukhar teen din se,viral fever fatigue,0.1561,0.1561,5.0552,False
+fever,gala kharab aur bukhar teen din se,cough fever 5 days,0.5618,0.5618,2.7727,True
+fever,gala kharab aur bukhar teen din se,fever typhoid suspect,0.1764,0.1764,4.4607,False
+fever,gala kharab aur bukhar teen din se,fever rash dengue,0.182,0.182,5.2429,False
+fever,fever aur rash body par,khansi aur bukhar 4 din se,0.7165,0.7166,2.3829,True
+fever,fever aur rash body par,sore throat aur mild fever,0.3462,0.3462,4.2359,False
+fever,fever aur rash body par,viral fever fatigue,0.0948,0.0948,5.5049,False
+fever,fever aur rash body par,cough fever 5 days,0.7145,0.7145,2.4717,True
+fever,fever aur rash body par,fever typhoid suspect,0.3075,0.3076,4.3774,False
+fever,fever aur rash body par,fever rash dengue,0.5271,0.5271,4.2898,True
+fever,khansi aur bukhar 4 din se,sore throat aur mild fever,0.2949,0.2949,4.029,False
+fever,khansi aur bukhar 4 din se,viral fever fatigue,0.1443,0.1443,4.9796,False
+fever,khansi aur bukhar 4 din se,cough fever 5 days,0.795,0.795,1.871,True
+fever,khansi aur bukhar 4 din se,fever typhoid suspect,0.2375,0.2375,4.1949,False
+fever,khansi aur bukhar 4 din se,fever rash dengue,0.3535,0.3536,4.7096,False
+fever,sore throat aur mild fever,viral fever fatigue,0.2727,0.2728,5.2228,False
+fever,sore throat aur mild fever,cough fever 5 days,0.3312,0.3312,4.1303,False
+fever,sore throat aur mild fever,fever typhoid suspect,0.3304,0.3304,4.5951,False
+fever,sore throat aur mild fever,fever rash dengue,0.4068,0.4068,4.928,False
+fever,viral fever fatigue,cough fever 5 days,0.2089,0.2089,5.0166,False
+fever,viral fever fatigue,fever typhoid suspect,0.1572,0.1572,5.6326,False
+fever,viral fever fatigue,fever rash dengue,0.3469,0.3469,5.5009,False
+fever,cough fever 5 days,fever typhoid suspect,0.2492,0.2492,4.3872,False
+fever,cough fever 5 days,fever rash dengue,0.3755,0.3755,4.7553,False
+fever,fever typhoid suspect,fever rash dengue,0.3341,0.3342,5.2229,False
+abdominal_pain,pregnancy ke douran lower abdomen pain,lower abdomen pain aur nausea,0.8899,0.89,2.008,True
+abdominal_pain,pregnancy ke douran lower abdomen pain,pregnancy 7 months abdominal pain,0.6137,0.6137,4.2589,True
+abdominal_pain,pregnancy ke douran lower abdomen pain,abdominal cramps severe,0.2978,0.2978,5.4043,False
+abdominal_pain,pregnancy ke douran lower abdomen pain,abdominal pain nausea,0.4823,0.4823,4.5701,False
+abdominal_pain,pregnancy ke douran lower abdomen pain,abdominal cramps,0.3706,0.3706,5.2801,False
+abdominal_pain,pregnancy ke douran lower abdomen pain,abdominal pain,0.5641,0.5641,5.3162,True
+abdominal_pain,pregnancy ke douran lower abdomen pain,abdominal cramps nausea,0.3881,0.3881,4.5501,False
+abdominal_pain,pregnancy ke douran lower abdomen pain,pet mein jalan aur dard,0.4633,0.4633,3.5199,False
+abdominal_pain,pregnancy ke douran lower abdomen pain,hamal ke douran pait dard,0.5412,0.5412,3.1152,True
+abdominal_pain,lower abdomen pain aur nausea,pregnancy 7 months abdominal pain,0.6361,0.6361,4.2566,True
+abdominal_pain,lower abdomen pain aur nausea,abdominal cramps severe,0.3513,0.3513,5.5178,False
+abdominal_pain,lower abdomen pain aur nausea,abdominal pain nausea,0.648,0.648,3.994,True
+abdominal_pain,lower abdomen pain aur nausea,abdominal cramps,0.4047,0.4047,5.41,False
+abdominal_pain,lower abdomen pain aur nausea,abdominal pain,0.61,0.61,5.12,True
+abdominal_pain,lower abdomen pain aur nausea,abdominal cramps nausea,0.5435,0.5435,4.2409,True
+abdominal_pain,lower abdomen pain aur nausea,pet mein jalan aur dard,0.5014,0.5014,3.8954,True
+abdominal_pain,lower abdomen pain aur nausea,hamal ke douran pait dard,0.4877,0.4877,3.8474,False
+abdominal_pain,pregnancy 7 months abdominal pain,abdominal cramps severe,0.66,0.66,4.3828,True
+abdominal_pain,pregnancy 7 months abdominal pain,abdominal pain nausea,0.7799,0.7799,3.4734,True
+abdominal_pain,pregnancy 7 months abdominal pain,abdominal cramps,0.7036,0.7036,4.1591,True
+abdominal_pain,pregnancy 7 months abdominal pain,abdominal pain,0.8336,0.8336,3.5565,True
+abdominal_pain,pregnancy 7 months abdominal pain,abdominal cramps nausea,0.7261,0.7261,3.7493,True
+abdominal_pain,pregnancy 7 months abdominal pain,pet mein jalan aur dard,0.1612,0.1612,5.7848,False
+abdominal_pain,pregnancy 7 months abdominal pain,hamal ke douran pait dard,0.1917,0.1917,5.5366,False
+abdominal_pain,abdominal cramps severe,abdominal pain nausea,0.6806,0.6806,4.1163,True
+abdominal_pain,abdominal cramps severe,abdominal cramps,0.9721,0.9721,1.272,True
+abdominal_pain,abdominal cramps severe,abdominal pain,0.7435,0.7435,4.3297,True
+abdominal_pain,abdominal cramps severe,abdominal cramps nausea,0.8695,0.8695,2.5913,True
+abdominal_pain,abdominal cramps severe,pet mein jalan aur dard,0.0128,0.0128,6.0885,False
+abdominal_pain,abdominal cramps severe,hamal ke douran pait dard,0.0,-0.0331,5.9743,False
+abdominal_pain,abdominal pain nausea,abdominal cramps,0.7103,0.7103,3.9985,True
+abdominal_pain,abdominal pain nausea,abdominal pain,0.9068,0.9068,2.8278,True
+abdominal_pain,abdominal pain nausea,abdominal cramps nausea,0.8978,0.8978,2.2216,True
+abdominal_pain,abdominal pain nausea,pet mein jalan aur dard,0.0865,0.0865,5.7163,False
+abdominal_pain,abdominal pain nausea,hamal ke douran pait dard,0.0545,0.0545,5.5874,False
+abdominal_pain,abdominal cramps,abdominal pain,0.798,0.798,3.8901,True
+abdominal_pain,abdominal cramps,abdominal cramps nausea,0.8881,0.8882,2.51,True
+abdominal_pain,abdominal cramps,pet mein jalan aur dard,0.0689,0.0689,6.0845,False
+abdominal_pain,abdominal cramps,hamal ke douran pait dard,0.0302,0.0302,5.9803,False
+abdominal_pain,abdominal pain,abdominal cramps nausea,0.8196,0.8196,3.7666,True
+abdominal_pain,abdominal pain,pet mein jalan aur dard,0.1275,0.1275,6.8004,False
+abdominal_pain,abdominal pain,hamal ke douran pait dard,0.0983,0.0983,6.7298,False
+abdominal_pain,abdominal cramps nausea,pet mein jalan aur dard,0.0672,0.0672,5.3324,False
+abdominal_pain,abdominal cramps nausea,hamal ke douran pait dard,0.0193,0.0193,5.2101,False
+abdominal_pain,pet mein jalan aur dard,hamal ke douran pait dard,0.8751,0.8751,1.5308,True
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,roadside khana khaya tha ab ulti aur dast lag gaye,0.5863,0.5863,3.3427,True
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,food poisoning vomiting aur dehydration,0.2947,0.2947,4.6228,False
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,vomiting aur dehydration,0.5235,0.5236,3.2904,True
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,food poisoning loose motions,0.1455,0.1456,5.6942,False
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,vomiting pregnancy early,0.4659,0.4659,3.7517,False
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,vomiting dehydration,0.4996,0.4997,3.4316,False
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,vomiting pregnancy,0.6043,0.6043,3.0203,True
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,vomiting,0.4959,0.4959,3.6163,False
+vomiting_diarrhea,ulta raha hai subah se pait kharab hai,hamal ke douran ulti,0.6511,0.6511,2.8051,True
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,food poisoning vomiting aur dehydration,0.3379,0.3379,4.4587,False
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,vomiting aur dehydration,0.5205,0.5206,3.2728,True
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,food poisoning loose motions,0.1116,0.1117,5.7787,False
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,vomiting pregnancy early,0.4876,0.4876,3.653,False
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,vomiting dehydration,0.5123,0.5123,3.3637,True
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,vomiting pregnancy,0.5963,0.5963,3.0221,True
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,vomiting,0.5343,0.5343,3.455,True
+vomiting_diarrhea,roadside khana khaya tha ab ulti aur dast lag gaye,hamal ke douran ulti,0.6232,0.6232,2.859,True
+vomiting_diarrhea,food poisoning vomiting aur dehydration,vomiting aur dehydration,0.4267,0.4267,3.8594,False
+vomiting_diarrhea,food poisoning vomiting aur dehydration,food poisoning loose motions,0.7734,0.7734,3.1205,True
+vomiting_diarrhea,food poisoning vomiting aur dehydration,vomiting pregnancy early,0.3092,0.3092,4.5054,False
+vomiting_diarrhea,food poisoning vomiting aur dehydration,vomiting dehydration,0.4384,0.4384,3.8835,False
+vomiting_diarrhea,food poisoning vomiting aur dehydration,vomiting pregnancy,0.4684,0.4684,3.7341,False
+vomiting_diarrhea,food poisoning vomiting aur dehydration,vomiting,0.4278,0.4278,4.0791,False
+vomiting_diarrhea,food poisoning vomiting aur dehydration,hamal ke douran ulti,0.4599,0.4599,3.6497,False
+vomiting_diarrhea,vomiting aur dehydration,food poisoning loose motions,0.1363,0.1363,5.3416,False
+vomiting_diarrhea,vomiting aur dehydration,vomiting pregnancy early,0.5854,0.5854,2.9975,True
+vomiting_diarrhea,vomiting aur dehydration,vomiting dehydration,0.986,0.986,0.536,True
+vomiting_diarrhea,vomiting aur dehydration,vomiting pregnancy,0.8249,0.8249,1.715,True
+vomiting_diarrhea,vomiting aur dehydration,vomiting,0.8292,0.8292,1.9564,True
+vomiting_diarrhea,vomiting aur dehydration,hamal ke douran ulti,0.86,0.86,1.4796,True
+vomiting_diarrhea,food poisoning loose motions,vomiting pregnancy early,0.0331,0.0331,5.9636,False
+vomiting_diarrhea,food poisoning loose motions,vomiting dehydration,0.1378,0.1378,5.4203,False
+vomiting_diarrhea,food poisoning loose motions,vomiting pregnancy,0.1987,0.1987,5.1792,False
+vomiting_diarrhea,food poisoning loose motions,vomiting,0.1268,0.1268,5.6515,False
+vomiting_diarrhea,food poisoning loose motions,hamal ke douran ulti,0.1914,0.1913,5.02,False
+vomiting_diarrhea,vomiting pregnancy early,vomiting dehydration,0.5999,0.5999,3.0023,True
+vomiting_diarrhea,vomiting pregnancy early,vomiting pregnancy,0.7599,0.7599,2.3235,True
+vomiting_diarrhea,vomiting pregnancy early,vomiting,0.7117,0.7117,2.6814,True
+vomiting_diarrhea,vomiting pregnancy early,hamal ke douran ulti,0.7446,0.7446,2.394,True
+vomiting_diarrhea,vomiting dehydration,vomiting pregnancy,0.83,0.8301,1.754,True
+vomiting_diarrhea,vomiting dehydration,vomiting,0.8713,0.8713,1.7179,True
+vomiting_diarrhea,vomiting dehydration,hamal ke douran ulti,0.8495,0.8495,1.6459,True
+vomiting_diarrhea,vomiting pregnancy,vomiting,0.9107,0.9107,1.4728,True
+vomiting_diarrhea,vomiting pregnancy,hamal ke douran ulti,0.9574,0.9574,0.9367,True
+vomiting_diarrhea,vomiting,hamal ke douran ulti,0.8659,0.8659,1.8728,True
+bleeding_wound,bike accident ke baad pair mein bleeding,pregnancy mein bleeding ho rahi hai 8 months ki hain,0.4397,0.4396,4.354,False
+bleeding_wound,bike accident ke baad pair mein bleeding,hand injury cut bleeding,0.3292,0.3292,4.7244,False
+bleeding_wound,bike accident ke baad pair mein bleeding,cut injury bleeding,0.4251,0.4251,4.2496,False
+bleeding_wound,bike accident ke baad pair mein bleeding,hand injury bleeding,0.3363,0.3363,4.6038,False
+bleeding_wound,bike accident ke baad pair mein bleeding,haath mein gehri chot aur khoon,0.4445,0.4444,4.1524,False
+bleeding_wound,bike accident ke baad pair mein bleeding,chot lag kar khoon,0.2715,0.2715,4.315,False
+bleeding_wound,bike accident ke baad pair mein bleeding,cut injury,0.2666,0.2667,4.9421,False
+bleeding_wound,bike accident ke baad pair mein bleeding,gir gaya seedhiyon se sar phut gaya,0.2382,0.2382,4.0371,False
+bleeding_wound,bike accident ke baad pair mein bleeding,khoon ki ulti hui aur seenay mein tees,0.4366,0.4365,4.1932,False
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,hand injury cut bleeding,0.4009,0.401,4.6288,False
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,cut injury bleeding,0.5635,0.5635,3.8546,True
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,hand injury bleeding,0.6214,0.6214,3.616,True
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,haath mein gehri chot aur khoon,0.9245,0.9245,1.6239,True
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,chot lag kar khoon,0.4647,0.4647,3.9375,False
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,cut injury,0.3438,0.3439,4.8469,False
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,gir gaya seedhiyon se sar phut gaya,0.453,0.4531,3.8059,False
+bleeding_wound,pregnancy mein bleeding ho rahi hai 8 months ki hain,khoon ki ulti hui aur seenay mein tees,0.878,0.878,2.0493,True
+bleeding_wound,hand injury cut bleeding,cut injury bleeding,0.8547,0.8547,2.2135,True
+bleeding_wound,hand injury cut bleeding,hand injury bleeding,0.8057,0.8057,2.5719,True
+bleeding_wound,hand injury cut bleeding,haath mein gehri chot aur khoon,0.4185,0.4186,4.3867,False
+bleeding_wound,hand injury cut bleeding,chot lag kar khoon,0.4137,0.4136,4.0616,False
+bleeding_wound,hand injury cut bleeding,cut injury,0.6963,0.6963,3.2738,True
+bleeding_wound,hand injury cut bleeding,gir gaya seedhiyon se sar phut gaya,0.4202,0.4202,3.8333,False
+bleeding_wound,hand injury cut bleeding,khoon ki ulti hui aur seenay mein tees,0.3971,0.3971,4.4776,False
+bleeding_wound,cut injury bleeding,hand injury bleeding,0.7086,0.7086,3.0591,True
+bleeding_wound,cut injury bleeding,haath mein gehri chot aur khoon,0.623,0.623,3.4305,True
+bleeding_wound,cut injury bleeding,chot lag kar khoon,0.5904,0.5904,3.2975,True
+bleeding_wound,cut injury bleeding,cut injury,0.8147,0.8148,2.4981,True
+bleeding_wound,cut injury bleeding,gir gaya seedhiyon se sar phut gaya,0.4779,0.4779,3.5033,False
+bleeding_wound,cut injury bleeding,khoon ki ulti hui aur seenay mein tees,0.5711,0.5711,3.6688,True
+bleeding_wound,hand injury bleeding,haath mein gehri chot aur khoon,0.6476,0.6477,3.3449,True
+bleeding_wound,hand injury bleeding,chot lag kar khoon,0.4695,0.4695,3.7671,False
+bleeding_wound,hand injury bleeding,cut injury,0.4385,0.4385,4.3692,False
+bleeding_wound,hand injury bleeding,gir gaya seedhiyon se sar phut gaya,0.5542,0.5542,3.3624,True
+bleeding_wound,hand injury bleeding,khoon ki ulti hui aur seenay mein tees,0.6075,0.6075,3.5394,True
+bleeding_wound,haath mein gehri chot aur khoon,chot lag kar khoon,0.4884,0.4884,3.6281,False
+bleeding_wound,haath mein gehri chot aur khoon,cut injury,0.3749,0.375,4.5505,False
+bleeding_wound,haath mein gehri chot aur khoon,gir gaya seedhiyon se sar phut gaya,0.4804,0.4805,3.4571,False
+bleeding_wound,haath mein gehri chot aur khoon,khoon ki ulti hui aur seenay mein tees,0.9329,0.9329,1.4426,True
+bleeding_wound,chot lag kar khoon,cut injury,0.3795,0.3795,4.1733,False
+bleeding_wound,chot lag kar khoon,gir gaya seedhiyon se sar phut gaya,0.3668,0.3668,3.0788,False
+bleeding_wound,chot lag kar khoon,khoon ki ulti hui aur seenay mein tees,0.4162,0.4163,3.8781,False
+bleeding_wound,cut injury,gir gaya seedhiyon se sar phut gaya,0.3768,0.3767,3.9402,False
+bleeding_wound,cut injury,khoon ki ulti hui aur seenay mein tees,0.3151,0.3152,4.7741,False
+bleeding_wound,gir gaya seedhiyon se sar phut gaya,khoon ki ulti hui aur seenay mein tees,0.4691,0.4692,3.5032,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,khelte hue gir gaya ankle mein swelling,0.0653,0.0654,5.2331,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,right arm fracture fall ke baad,0.4706,0.4706,4.2841,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,leg injury sports mein,0.3997,0.3997,4.8673,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,bike slip knee injury,0.1486,0.1486,6.0333,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,ankle sprain sports,0.0675,0.0675,6.5183,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,leg fracture fall,0.5324,0.5324,3.9491,True
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,fracture wrist,0.2264,0.2264,5.7369,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,pair toot gaya girnay se,0.3484,0.3485,4.4048,False
+fracture_sprain,construction site par chot lagi haath mein fracture shak hai,kalai toot gayi,0.0383,0.0383,5.6439,False
+fracture_sprain,khelte hue gir gaya ankle mein swelling,right arm fracture fall ke baad,0.3557,0.3557,3.5623,False
+fracture_sprain,khelte hue gir gaya ankle mein swelling,leg injury sports mein,0.2979,0.2979,4.2959,False
+fracture_sprain,khelte hue gir gaya ankle mein swelling,bike slip knee injury,0.326,0.326,4.5299,False
+fracture_sprain,khelte hue gir gaya ankle mein swelling,ankle sprain sports,0.5594,0.5594,4.0642,True
+fracture_sprain,khelte hue gir gaya ankle mein swelling,leg fracture fall,0.3881,0.3882,3.1186,False
+fracture_sprain,khelte hue gir gaya ankle mein swelling,fracture wrist,0.4383,0.4383,4.1863,False
+fracture_sprain,khelte hue gir gaya ankle mein swelling,pair toot gaya girnay se,0.6308,0.6308,2.2093,True
+fracture_sprain,khelte hue gir gaya ankle mein swelling,kalai toot gayi,0.3886,0.3885,3.4389,False
+fracture_sprain,right arm fracture fall ke baad,leg injury sports mein,0.5732,0.5731,3.6096,True
+fracture_sprain,right arm fracture fall ke baad,bike slip knee injury,0.2419,0.2419,5.0438,False
+fracture_sprain,right arm fracture fall ke baad,ankle sprain sports,0.292,0.292,5.1046,False
+fracture_sprain,right arm fracture fall ke baad,leg fracture fall,0.8014,0.8014,2.0664,True
+fracture_sprain,right arm fracture fall ke baad,fracture wrist,0.5343,0.5343,4.0024,True
+fracture_sprain,right arm fracture fall ke baad,pair toot gaya girnay se,0.5801,0.5802,2.827,True
+fracture_sprain,right arm fracture fall ke baad,kalai toot gayi,0.3052,0.3052,4.035,False
+fracture_sprain,leg injury sports mein,bike slip knee injury,0.2343,0.2343,5.4723,False
+fracture_sprain,leg injury sports mein,ankle sprain sports,0.5317,0.5318,4.4557,True
+fracture_sprain,leg injury sports mein,leg fracture fall,0.6177,0.6177,3.3326,True
+fracture_sprain,leg injury sports mein,fracture wrist,0.3142,0.3142,5.166,False
+fracture_sprain,leg injury sports mein,pair toot gaya girnay se,0.4919,0.492,3.6842,False
+fracture_sprain,leg injury sports mein,kalai toot gayi,0.2135,0.2135,4.8213,False
+fracture_sprain,bike slip knee injury,ankle sprain sports,0.4773,0.4773,4.8691,False
+fracture_sprain,bike slip knee injury,leg fracture fall,0.1628,0.1628,5.0251,False
+fracture_sprain,bike slip knee injury,fracture wrist,0.3327,0.3327,5.3103,False
+fracture_sprain,bike slip knee injury,pair toot gaya girnay se,0.2465,0.2465,4.6205,False
+fracture_sprain,bike slip knee injury,kalai toot gayi,0.0807,0.0807,5.4999,False
+fracture_sprain,ankle sprain sports,leg fracture fall,0.2512,0.2512,5.0274,False
+fracture_sprain,ankle sprain sports,fracture wrist,0.4386,0.4386,5.0344,False
+fracture_sprain,ankle sprain sports,pair toot gaya girnay se,0.341,0.341,4.6548,False
+fracture_sprain,ankle sprain sports,kalai toot gayi,0.2223,0.2223,5.3082,False
+fracture_sprain,leg fracture fall,fracture wrist,0.544,0.544,3.8676,True
+fracture_sprain,leg fracture fall,pair toot gaya girnay se,0.7487,0.7487,1.9223,True
+fracture_sprain,leg fracture fall,kalai toot gayi,0.4256,0.4256,3.3965,False
+fracture_sprain,fracture wrist,pair toot gaya girnay se,0.4294,0.4294,4.1558,False
+fracture_sprain,fracture wrist,kalai toot gayi,0.2303,0.2303,5.0389,False
+fracture_sprain,pair toot gaya girnay se,kalai toot gayi,0.5325,0.5325,2.9206,True
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,garmi mein kaam karte hue chakkar aa gaye,0.5364,0.5363,2.8799,True
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,heat exhaustion chakkar aur weakness,0.2362,0.2362,4.3133,False
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,dizziness aur blurred vision,0.0167,0.0167,5.6882,False
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,heat stroke dizziness,0.1764,0.1765,4.9706,False
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,dizziness blurred vision,0.0,-0.0039,6.2615,False
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,vertigo dizziness,0.0146,0.0147,7.1041,False
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,garmi se chakkar aur kamzori,0.5468,0.5468,2.4651,True
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,garmi se kamzori,0.5732,0.5732,2.6887,True
+dizziness_weakness,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,vertigo,0.1272,0.1272,5.3976,False
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,heat exhaustion chakkar aur weakness,0.2803,0.2802,4.4856,False
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,dizziness aur blurred vision,0.1243,0.1243,5.7175,False
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,heat stroke dizziness,0.1278,0.1279,5.3949,False
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,dizziness blurred vision,0.0763,0.0763,6.3482,False
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,vertigo dizziness,0.0054,0.0054,7.402,False
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,garmi se chakkar aur kamzori,0.5898,0.5898,2.7248,True
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,garmi se kamzori,0.6602,0.6602,2.6452,True
+dizziness_weakness,garmi mein kaam karte hue chakkar aa gaye,vertigo,0.1201,0.1201,5.7032,False
+dizziness_weakness,heat exhaustion chakkar aur weakness,dizziness aur blurred vision,0.321,0.321,5.4411,False
+dizziness_weakness,heat exhaustion chakkar aur weakness,heat stroke dizziness,0.4609,0.4609,4.6244,False
+dizziness_weakness,heat exhaustion chakkar aur weakness,dizziness blurred vision,0.2847,0.2847,6.0055,False
+dizziness_weakness,heat exhaustion chakkar aur weakness,vertigo dizziness,0.3527,0.3527,6.4774,False
+dizziness_weakness,heat exhaustion chakkar aur weakness,garmi se chakkar aur kamzori,0.4055,0.4055,3.8799,False
+dizziness_weakness,heat exhaustion chakkar aur weakness,garmi se kamzori,0.4218,0.4218,3.9912,False
+dizziness_weakness,heat exhaustion chakkar aur weakness,vertigo,0.4038,0.4038,5.0886,False
+dizziness_weakness,dizziness aur blurred vision,heat stroke dizziness,0.7346,0.7346,3.6038,True
+dizziness_weakness,dizziness aur blurred vision,dizziness blurred vision,0.9783,0.9783,1.2658,True
+dizziness_weakness,dizziness aur blurred vision,vertigo dizziness,0.7556,0.7556,4.3622,True
+dizziness_weakness,dizziness aur blurred vision,garmi se chakkar aur kamzori,0.1267,0.1267,5.4359,False
+dizziness_weakness,dizziness aur blurred vision,garmi se kamzori,0.1425,0.1425,5.6075,False
+dizziness_weakness,dizziness aur blurred vision,vertigo,0.6722,0.6722,4.1279,True
+dizziness_weakness,heat stroke dizziness,dizziness blurred vision,0.7509,0.7509,3.789,True
+dizziness_weakness,heat stroke dizziness,vertigo dizziness,0.8772,0.8772,3.3846,True
+dizziness_weakness,heat stroke dizziness,garmi se chakkar aur kamzori,0.0998,0.0999,5.1649,False
+dizziness_weakness,heat stroke dizziness,garmi se kamzori,0.1905,0.1905,5.1551,False
+dizziness_weakness,heat stroke dizziness,vertigo,0.7871,0.7871,3.2187,True
+dizziness_weakness,dizziness blurred vision,vertigo dizziness,0.7718,0.7718,4.2701,True
+dizziness_weakness,dizziness blurred vision,garmi se chakkar aur kamzori,0.0832,0.0832,6.0623,False
+dizziness_weakness,dizziness blurred vision,garmi se kamzori,0.1186,0.1186,6.1705,False
+dizziness_weakness,dizziness blurred vision,vertigo,0.6812,0.6812,4.3401,True
+dizziness_weakness,vertigo dizziness,garmi se chakkar aur kamzori,0.0,-0.0019,7.1527,False
+dizziness_weakness,vertigo dizziness,garmi se kamzori,0.063,0.063,7.1807,False
+dizziness_weakness,vertigo dizziness,vertigo,0.8723,0.8723,3.3351,True
+dizziness_weakness,garmi se chakkar aur kamzori,garmi se kamzori,0.9103,0.9103,1.3258,True
+dizziness_weakness,garmi se chakkar aur kamzori,vertigo,0.1073,0.1074,5.4547,False
+dizziness_weakness,garmi se kamzori,vertigo,0.225,0.2251,5.3393,False
+burn,aag se burn ho gaya kitchen mein,burn injury haath aur chest par,0.6357,0.6357,3.2142,True
+burn,aag se burn ho gaya kitchen mein,burn injury hand aur face,0.4399,0.4399,4.1324,False
+burn,aag se burn ho gaya kitchen mein,burns kitchen accident,0.2451,0.2451,6.0162,False
+burn,aag se burn ho gaya kitchen mein,burn injury arm,0.627,0.627,3.256,True
+burn,aag se burn ho gaya kitchen mein,burn injury,0.6064,0.6064,3.218,True
+burn,aag se burn ho gaya kitchen mein,burn,0.5097,0.5097,3.5649,True
+burn,aag se burn ho gaya kitchen mein,jalne ki chot haath par,0.6438,0.6438,3.1541,True
+burn,aag se burn ho gaya kitchen mein,jalne ki chot,0.6064,0.6064,3.218,True
+burn,burn injury haath aur chest par,burn injury hand aur face,0.6789,0.6789,2.9391,True
+burn,burn injury haath aur chest par,burns kitchen accident,0.0,-0.0414,6.6993,False
+burn,burn injury haath aur chest par,burn injury arm,0.7673,0.7673,2.3722,True
+burn,burn injury haath aur chest par,burn injury,0.8143,0.8144,2.0198,True
+burn,burn injury haath aur chest par,burn,0.6282,0.6283,2.8247,True
+burn,burn injury haath aur chest par,jalne ki chot haath par,0.9138,0.9138,1.4243,True
+burn,burn injury haath aur chest par,jalne ki chot,0.8143,0.8144,2.0198,True
+burn,burn injury hand aur face,burns kitchen accident,0.006,0.006,6.7523,False
+burn,burn injury hand aur face,burn injury arm,0.634,0.634,3.1403,True
+burn,burn injury hand aur face,burn injury,0.6566,0.6566,2.9213,True
+burn,burn injury hand aur face,burn,0.5477,0.5477,3.327,True
+burn,burn injury hand aur face,jalne ki chot haath par,0.5997,0.5997,3.2449,True
+burn,burn injury hand aur face,jalne ki chot,0.6566,0.6566,2.9213,True
+burn,burns kitchen accident,burn injury arm,0.0104,0.0104,6.556,False
+burn,burns kitchen accident,burn injury,0.0,-0.0084,6.3587,False
+burn,burns kitchen accident,burn,0.0164,0.0164,6.306,False
+burn,burns kitchen accident,jalne ki chot haath par,0.0,-0.0299,6.616,False
+burn,burns kitchen accident,jalne ki chot,0.0,-0.0084,6.3587,False
+burn,burn injury arm,burn injury,0.8592,0.8592,1.7833,True
+burn,burn injury arm,burn,0.7263,0.7263,2.4435,True
+burn,burn injury arm,jalne ki chot haath par,0.7937,0.7937,2.2062,True
+burn,burn injury arm,jalne ki chot,0.8592,0.8592,1.7833,True
+burn,burn injury,burn,0.8631,0.8631,1.5693,True
+burn,burn injury,jalne ki chot haath par,0.8763,0.8763,1.627,True
+burn,burn injury,jalne ki chot,1.0,1.0,0.0,True
+burn,burn,jalne ki chot haath par,0.677,0.6771,2.589,True
+burn,burn,jalne ki chot,0.8631,0.8631,1.5693,True
+burn,jalne ki chot haath par,jalne ki chot,0.8763,0.8763,1.627,True
