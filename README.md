@@ -1,4 +1,5 @@
 # Domain-Guided Lightweight Feature Attention
+
 ## Hybrid Text Representation for Roman Urdu Emergency Triage Classification
 
 > A fully offline, computationally lightweight AI triage system for emergency
@@ -42,7 +43,7 @@ Implemented from [`ARCHITECTURE.md`](ARCHITECTURE.md). See that document for
 the full design; this is the short version.
 
 **Contribution 1 — automatic stop-word learner** ([`stopwords.py`](stopwords.py)).
-Instead of a hand-written Roman Urdu stop-word list, the list is *learned* from
+Instead of a hand-written Roman Urdu stop-word list, the list is _learned_ from
 the labelled complaints: a token is a stop word when it is common (high document
 frequency) **and** uninformative (near-zero mutual information with the triage
 label **and** a non-significant chi-square test). Every threshold and per-token
@@ -66,12 +67,12 @@ pip install -r requirements-embedding.txt   # once, needs internet
 python train_embedding_pipeline.py
 ```
 
-| Method | Accuracy | Under-triage | Over-triage |
-|---|---|---|---|
-| A) Dictionary + BoW (previous system) | 90.87% | 3.32% | 5.81% |
-| B) Embeddings, raw text | 91.29% | 4.56% | 4.15% |
-| C) Embeddings + preprocessing | **92.12%** | 4.56% | 3.32% |
-| D) Hybrid: dictionary + embeddings | 91.70% | **3.32%** | 4.98% |
+| Method                                | Accuracy   | Under-triage | Over-triage |
+| ------------------------------------- | ---------- | ------------ | ----------- |
+| A) Dictionary + BoW (previous system) | 90.87%     | 3.32%        | 5.81%       |
+| B) Embeddings, raw text               | 91.29%     | 4.56%        | 4.15%       |
+| C) Embeddings + preprocessing         | **92.12%** | 4.56%        | 3.32%       |
+| D) Hybrid: dictionary + embeddings    | 91.70%     | **3.32%**    | 4.98%       |
 
 Adding automatic stop-word removal lifted the embeddings from 91.29% → 92.12%
 (**+0.83 points**) — the measured effect of Contribution 1.
@@ -94,14 +95,14 @@ python embedding_evaluation.py
 editable), 441 pairwise comparisons (45 per 10-complaint cluster), each with
 cosine similarity, Pearson correlation and Euclidean distance.
 
-| Measure | Value |
-|---|---|
-| Mean within-cluster similarity | 0.477 |
-| Mean across-cluster similarity | 0.317 |
-| Separation gap | +0.159 |
-| Pairs above the 0.5 threshold | 209/441 (47.4%) |
-| **Embedding generator efficiency** (closed pool) | **71.7%** |
-| Embedding generator efficiency (open pool) | 39.4% |
+| Measure                                          | Value           |
+| ------------------------------------------------ | --------------- |
+| Mean within-cluster similarity                   | 0.477           |
+| Mean across-cluster similarity                   | 0.317           |
+| Separation gap                                   | +0.159          |
+| Pairs above the 0.5 threshold                    | 209/441 (47.4%) |
+| **Embedding generator efficiency** (closed pool) | **71.7%**       |
+| Embedding generator efficiency (open pool)       | 39.4%           |
 
 The "regenerate the text from the embedding" test is implemented as
 **nearest-neighbour fidelity**: sentence embeddings are lossy and one-way, so
@@ -142,7 +143,7 @@ files that had already started to disagree. It now lives in one shared module,
 [`triage_pipeline.py`](triage_pipeline.py), which training and every predictor
 import. Training and inference can no longer drift apart.
 
-> Note: "widening the vocabulary" improves how many complaint *types* the model
+> Note: "widening the vocabulary" improves how many complaint _types_ the model
 > can read from the existing dataset. The single biggest further improvement
 > would be adding more **real labelled patient records** for the non-cardiac
 > categories, which are still under-represented in the dataset.
@@ -152,7 +153,7 @@ import. Training and inference can no longer drift apart.
 ## Overview
 
 Patients in Pakistani EDs describe symptoms in **Roman Urdu** (Urdu written in
-the English alphabet) with no standard spelling. *Fever* alone can appear as
+the English alphabet) with no standard spelling. _Fever_ alone can appear as
 `bukhar`, `bukhaar`, `bukhr`, `bkhar`, or `garmi`. This system normalizes that
 variation with a three-stage text pipeline, then classifies with a small
 logistic-regression model that uses under ~3,000 parameters and 5-10 MB on disk.
@@ -228,6 +229,21 @@ python -m venv venv
 
 # 3. Install dependencies
 pip install -r requirements.txt
+```
+
+Windows users: two helper PowerShell scripts are included to simplify setup and running:
+
+- `setup_env.ps1` — creates a `.venv` virtual environment and installs `requirements.txt`.
+- `run_predict.ps1` — activates the `.venv` (if present) and runs `predict_batch.py` (accepts input/output args).
+
+Run them from PowerShell inside the project folder:
+
+```powershell
+# create venv and install deps
+.\setup_env.ps1
+
+# run the example batch prediction
+.\run_predict.ps1
 ```
 
 `requirements.txt`:
@@ -404,19 +420,19 @@ result with a probability bar chart. Enter `n` (or press `Ctrl+C`) to exit.
 Your Excel/CSV file needs a **header row** with these columns (order does not
 matter). Open `batch_input_template.xlsx` to see a filled-in example.
 
-| Column            | Example value                       | Notes |
-|-------------------|-------------------------------------|-------|
-| `Complaint_Text`  | `seena mein dard aur pasina`        | Roman Urdu / English free text |
-| `Age`             | `62`                                | years |
-| `Gender`          | `Male` / `Female`                   | |
-| `Mode_of_Arrival` | `Ambulance` / `Walk-in` / `Wheelchair` | |
-| `Heart_Rate`      | `120`                               | bpm |
-| `Systolic_BP`     | `158`                               | mmHg |
-| `Diastolic_BP`    | `96`                                | mmHg |
-| `Temperature`     | `37.1`                              | Celsius |
-| `SpO2`            | `93`                                | % |
-| `AVPU`            | `A` / `V` / `P`                     | consciousness |
-| `ECG_Status`      | `ST elevation`, `Normal`, ...       | see dataset for full list |
+| Column            | Example value                          | Notes                          |
+| ----------------- | -------------------------------------- | ------------------------------ |
+| `Complaint_Text`  | `seena mein dard aur pasina`           | Roman Urdu / English free text |
+| `Age`             | `62`                                   | years                          |
+| `Gender`          | `Male` / `Female`                      |                                |
+| `Mode_of_Arrival` | `Ambulance` / `Walk-in` / `Wheelchair` |                                |
+| `Heart_Rate`      | `120`                                  | bpm                            |
+| `Systolic_BP`     | `158`                                  | mmHg                           |
+| `Diastolic_BP`    | `96`                                   | mmHg                           |
+| `Temperature`     | `37.1`                                 | Celsius                        |
+| `SpO2`            | `93`                                   | %                              |
+| `AVPU`            | `A` / `V` / `P`                        | consciousness                  |
+| `ECG_Status`      | `ST elevation`, `Normal`, ...          | see dataset for full list      |
 
 **Robustness.** If a number is missing it is filled with the training average,
 and if a category value was never seen during training it falls back to a known
@@ -430,31 +446,36 @@ recorded in that row's `Notes` column so you can review it.
 The pipeline has five stages (all defined once in `triage_pipeline.py`).
 
 ### 1. Text normalization
+
 Lowercases, removes punctuation, and applies fast high-confidence rule-based
 replacements (e.g. `seenay` -> `seena`).
 
 ### 2. Fuzzy matching
+
 [RapidFuzz](https://github.com/rapidfuzz/RapidFuzz) `token_sort_ratio` catches
 spelling variants not covered by rules. Any word scoring >= 80% against the
 canonical medical vocabulary is replaced with the canonical form
 (`bukhr` -> `bukhar`, `chakar` -> `chakkar`).
 
 ### 3. Diacritization
+
 A dictionary maps every known spelling variant to a single diacritized
 canonical form, so all variants collapse to one token
 (`dard, dardh, durd, drd` -> `dárd`).
 
 ### 4. Hybrid Bag of Words
+
 Two `CountVectorizer`s run together:
 
-| Vectorizer | Analyzer | n-gram | Features | Purpose |
-|---|---|---|---|---|
-| Word BoW | word | (1, 2) | 350 | medical terms + bigrams |
-| Char BoW | char_wb | (2, 4) | 350 | sub-word patterns, typo tolerance |
+| Vectorizer | Analyzer | n-gram | Features | Purpose                           |
+| ---------- | -------- | ------ | -------- | --------------------------------- |
+| Word BoW   | word     | (1, 2) | 350      | medical terms + bigrams           |
+| Char BoW   | char_wb  | (2, 4) | 350      | sub-word patterns, typo tolerance |
 
 Concatenated into one 700-feature text matrix.
 
 ### 5. Domain-guided lightweight feature attention
+
 Each text feature is multiplied by a clinically motivated weight. Critical terms
 are boosted (`arrest` 3.2, `behosh` 3.0, `stroke` 3.0, `seena` 2.8); filler
 words are suppressed (`hai` 0.6). The weighted text features are concatenated
@@ -465,22 +486,22 @@ fed into a Logistic Regression classifier.
 
 ## Optional Experiment: Offline AI Embeddings vs the Dictionary
 
-A hand-built dictionary (fuzzy match + diacritization) can never catch *every*
+A hand-built dictionary (fuzzy match + diacritization) can never catch _every_
 spelling of every symptom. A common alternative is to let an **offline AI
 embedding model** turn each complaint into a "meaning vector," so that
 `dard`, `drd`, and `pain` land close together automatically — no dictionary
 entry needed.
 
 `embedding_experiment.py` tests whether that actually helps **on our own data**,
-instead of assuming it does. It trains the *same* Logistic Regression on the
-*same* train/test split with the *same* vital-sign features, and changes only
+instead of assuming it does. It trains the _same_ Logistic Regression on the
+_same_ train/test split with the _same_ vital-sign features, and changes only
 how the complaint text becomes numbers, comparing three options:
 
-| Method | Text representation |
-|---|---|
+| Method                  | Text representation                                                 |
+| ----------------------- | ------------------------------------------------------------------- |
 | **A. Dictionary + BoW** | what we use now (fuzzy + diacritization + Bag-of-Words + attention) |
-| **B. Embeddings only** | an offline `sentence-transformers` model encodes each complaint |
-| **C. Both combined** | dictionary features **and** embeddings together |
+| **B. Embeddings only**  | an offline `sentence-transformers` model encodes each complaint     |
+| **C. Both combined**    | dictionary features **and** embeddings together                     |
 
 It prints accuracy + under/over-triage for each, names the winner, and runs a
 short **synonym test** showing whether Roman Urdu words like `dard / drd / pain`
@@ -498,7 +519,7 @@ local cache; afterwards it runs fully offline. Results are also written to
 `embedding_experiment_results.csv`.
 
 > **Honest expectation.** These embedding models are trained mostly on
-> *native-script* Urdu (اردو) and English, so *Roman* (Latin-script) Urdu is
+> _native-script_ Urdu (اردو) and English, so _Roman_ (Latin-script) Urdu is
 > under-represented. The synonym test may show weak clustering. That's exactly
 > why this is an experiment: if embeddings (B or C) beat the dictionary (A) on
 > our data, adopt them; if not, we keep the dictionary and have real numbers to
@@ -508,7 +529,7 @@ local cache; afterwards it runs fully offline. Results are also written to
 > **Note on tooling.** This uses `sentence-transformers`, which runs offline in
 > Python and plugs straight into our classifier. A phone chat app like PocketPal
 > proves offline AI is practical, but it is a chat UI with no code interface, so
-> it cannot be wired into this pipeline. For a *programmable* offline LLM (e.g.
+> it cannot be wired into this pipeline. For a _programmable_ offline LLM (e.g.
 > to translate complaints first), Ollama or llama-cpp-python on a laptop are the
 > integrable options — heavier, and worth weighing against the project's
 > lightweight, CPU-only goal.
@@ -519,19 +540,19 @@ local cache; afterwards it runs fully offline. Results are also written to
 
 The expanded vocabulary now recognizes terms across these complaint families:
 
-| Category | Example recognized terms (Roman Urdu / English) |
-|---|---|
-| Cardiac | seena, dard, dhadkan, palpitation, pasina |
-| Respiratory | saans, phoolna, breath, dyspnea, wheezing |
-| Neurological | behosh, chakkar, **daura / mirgi / seizure**, **falij / stroke / lakwa** |
-| Trauma | **chot / zakhm / injury**, **haddi / fracture**, **accident**, moch / sprain |
-| Burns | **jalna, jhulas, scald, burn** |
-| Infectious / GI | bukhar, ulti, **dast / diarrhea**, **infection / sepsis** |
-| Metabolic | **sugar / diabetes / hypoglycemia** |
-| Heat-related | **heatstroke, dehydration** |
-| Gyne / Obstetric | **haml / pregnancy, delivery, labour, miscarriage** |
-| Allergy / Skin | **kharish / itching, rash, allergy, reaction** |
-| Psychiatric | **ghabrahat / anxiety, panic, bechaini** |
+| Category         | Example recognized terms (Roman Urdu / English)                              |
+| ---------------- | ---------------------------------------------------------------------------- |
+| Cardiac          | seena, dard, dhadkan, palpitation, pasina                                    |
+| Respiratory      | saans, phoolna, breath, dyspnea, wheezing                                    |
+| Neurological     | behosh, chakkar, **daura / mirgi / seizure**, **falij / stroke / lakwa**     |
+| Trauma           | **chot / zakhm / injury**, **haddi / fracture**, **accident**, moch / sprain |
+| Burns            | **jalna, jhulas, scald, burn**                                               |
+| Infectious / GI  | bukhar, ulti, **dast / diarrhea**, **infection / sepsis**                    |
+| Metabolic        | **sugar / diabetes / hypoglycemia**                                          |
+| Heat-related     | **heatstroke, dehydration**                                                  |
+| Gyne / Obstetric | **haml / pregnancy, delivery, labour, miscarriage**                          |
+| Allergy / Skin   | **kharish / itching, rash, allergy, reaction**                               |
+| Psychiatric      | **ghabrahat / anxiety, panic, bechaini**                                     |
 
 (Bold = added in this version.)
 
@@ -542,12 +563,12 @@ The expanded vocabulary now recognizes terms across these complaint families:
 The dataset labels patients `1-4`; the model works internally with classes
 `0-3`. The mapping is:
 
-| Dataset level | Model class | Label | Meaning |
-|---|---|---|---|
-| 1 | 0 | EMERGENCY | Immediate attention - life-threatening |
-| 2 | 1 | URGENT | Seen within 15 minutes |
-| 3 | 2 | STANDARD | Seen within 60 minutes |
-| 4 | 3 | NON-URGENT | Can wait or be redirected |
+| Dataset level | Model class | Label      | Meaning                                |
+| ------------- | ----------- | ---------- | -------------------------------------- |
+| 1             | 0           | EMERGENCY  | Immediate attention - life-threatening |
+| 2             | 1           | URGENT     | Seen within 15 minutes                 |
+| 3             | 2           | STANDARD   | Seen within 60 minutes                 |
+| 4             | 3           | NON-URGENT | Can wait or be redirected              |
 
 In the batch output, `Predicted_Triage_Level` is reported on the 1-4 scale to
 match the dataset.
@@ -594,19 +615,19 @@ Raw Roman Urdu Complaint
 
 Current retrained model (20% held-out test set, 241 patients):
 
-| Metric | Value |
-|---|---|
-| Overall accuracy | ~88.8% |
-| Correctly triaged | ~88.8% |
-| Over-triage rate | ~6.2% |
-| Under-triage rate (safety) | ~5.0% |
-| Safety grade | A+ (under-triage < 5%) |
-| Resource efficiency grade | A (over-triage < 15%) |
+| Metric                     | Value                  |
+| -------------------------- | ---------------------- |
+| Overall accuracy           | ~88.8%                 |
+| Correctly triaged          | ~88.8%                 |
+| Over-triage rate           | ~6.2%                  |
+| Under-triage rate (safety) | ~5.0%                  |
+| Safety grade               | A+ (under-triage < 5%) |
+| Resource efficiency grade  | A (over-triage < 15%)  |
 
 Beyond accuracy, two clinical safety metrics matter most:
 
-- **Under-triage** - patient rated *less* urgent than they should be. Dangerous.
-- **Over-triage** - patient rated *more* urgent than needed. Wastes resources.
+- **Under-triage** - patient rated _less_ urgent than they should be. Dangerous.
+- **Over-triage** - patient rated _more_ urgent than needed. Wastes resources.
 
 **Safety grading (under-triage):** A+ <5%, A <10%, B <15%, C <20%, F >=20% (do not deploy).
 **Efficiency grading (over-triage):** A <15%, B <25%, C <35%, D >=35%.
@@ -618,21 +639,21 @@ train.
 
 ## Dataset Columns
 
-| Column | Type | Description |
-|---|---|---|
-| `Complaint_Text` | Text | Free-text complaint in Roman Urdu / English |
-| `Age` | Numeric | Patient age (years) |
-| `Gender` | Categorical | Male / Female |
-| `Mode_of_Arrival` | Categorical | Ambulance / Walk-in / Wheelchair |
-| `Heart_Rate` | Numeric | bpm |
-| `Systolic_BP` | Numeric | mmHg |
-| `Diastolic_BP` | Numeric | mmHg |
-| `Temperature` | Numeric | Celsius |
-| `SpO2` | Numeric | Oxygen saturation % |
-| `AVPU` | Categorical | Alert / Voice / Pain / Unresponsive |
-| `ECG_Status` | Categorical | Normal / ST elevation / Arrhythmia / etc. |
-| `Triage_Level` | Target (1-4) | Ground-truth triage level |
-| `Category` | Label | Cardiac / Respiratory / Trauma / etc. |
+| Column            | Type         | Description                                 |
+| ----------------- | ------------ | ------------------------------------------- |
+| `Complaint_Text`  | Text         | Free-text complaint in Roman Urdu / English |
+| `Age`             | Numeric      | Patient age (years)                         |
+| `Gender`          | Categorical  | Male / Female                               |
+| `Mode_of_Arrival` | Categorical  | Ambulance / Walk-in / Wheelchair            |
+| `Heart_Rate`      | Numeric      | bpm                                         |
+| `Systolic_BP`     | Numeric      | mmHg                                        |
+| `Diastolic_BP`    | Numeric      | mmHg                                        |
+| `Temperature`     | Numeric      | Celsius                                     |
+| `SpO2`            | Numeric      | Oxygen saturation %                         |
+| `AVPU`            | Categorical  | Alert / Voice / Pain / Unresponsive         |
+| `ECG_Status`      | Categorical  | Normal / ST elevation / Arrhythmia / etc.   |
+| `Triage_Level`    | Target (1-4) | Ground-truth triage level                   |
+| `Category`        | Label        | Cardiac / Respiratory / Trauma / etc.       |
 
 ---
 
@@ -674,7 +695,7 @@ which regenerates the model files against your installed version.
 - Sana Shaukat Siddiqui
 - Junaid Abdullah
 
-*Department of Biomedical Engineering - May 2026*
+_Department of Biomedical Engineering - May 2026_
 
 ---
 

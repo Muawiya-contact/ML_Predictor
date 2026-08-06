@@ -1,3 +1,34 @@
+# Python virtual env
+.venv/
+venv/
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor temp
+*.swp
+*.swo
+
+# Data / models (large or generated)
+triage_model_embedding/
+triage_model/
+*.pkl
+*.h5
+*.joblib
+
+# Output / results
+*_predictions.*
+embedding_*.csv
+embedding_pipeline_results.csv
+embedding_evaluation_*.csv
 # Python
 __pycache__/
 *.pyc
