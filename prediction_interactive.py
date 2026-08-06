@@ -133,7 +133,13 @@ def main():
             print("\n\nExiting. Goodbye!")
             break
 
-        again = input("Predict another patient? (y/n): ").strip().lower()
+        # Ctrl-C at this prompt is outside the try above, so it used to escape
+        # as an uncaught KeyboardInterrupt traceback instead of exiting cleanly.
+        try:
+            again = input("Predict another patient? (y/n): ").strip().lower()
+        except (KeyboardInterrupt, EOFError):
+            print("\n\nExiting. Goodbye!")
+            break
         if again != 'y':
             print("\nExiting. Goodbye!")
             break

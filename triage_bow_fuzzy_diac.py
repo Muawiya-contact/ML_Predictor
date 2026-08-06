@@ -123,8 +123,13 @@ df['ECG_enc']    = le_ecg.fit_transform(df['ECG_Status'])
 # NUMERICAL FEATURES
 # ============================================================
 
+# Assign the filled column back explicitly. `df[col].fillna(..., inplace=True)`
+# is chained assignment on a temporary Series: pandas 2.x only warns (and that
+# warning is swallowed by filterwarnings('ignore') above), but in pandas 3.0 it
+# is a silent no-op, so any NaN vital sign would survive into StandardScaler and
+# poison every feature row with NaN.
 for col in NUMERICAL_FEATURES:
-    df[col].fillna(df[col].median(), inplace=True)
+    df[col] = df[col].fillna(df[col].median())
 
 scaler = StandardScaler()
 df[NUMERICAL_FEATURES] = scaler.fit_transform(df[NUMERICAL_FEATURES])

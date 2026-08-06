@@ -1,6 +1,7 @@
 pandas>=1.5.0
 numpy>=1.23.0
 scikit-learn==1.6.1   # pinned: model.pkl was built with this version; other versions may fail to load it
+scipy>=1.9.0          # stopwords.py imports scipy.stats directly; do not rely on it arriving via scikit-learn
 rapidfuzz>=3.0.0
 joblib>=1.2.0
 matplotlib>=3.6.0
