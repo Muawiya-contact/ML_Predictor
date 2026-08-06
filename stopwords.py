@@ -421,6 +421,10 @@ def _main():
     path = save_stopwords(report, args.out)
     print(f"\n[ok] Full report ({len(report['token_statistics'])} tokens with "
           f"per-token statistics) saved to '{path}'")
+    if args.out == STOPWORDS_FILE:
+        print("     NOTE: train_embedding_pipeline.py is the canonical producer of")
+        print("     this file - it also records the leak-free training-split list.")
+        print("     Re-run it after this if you want that detail back.")
 
     examples = [
         "seena mein shadeed dard aur pasina aa raha hai",

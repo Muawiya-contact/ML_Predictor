@@ -36,6 +36,89 @@
 
 ## What's New in This Version
 
+### Embedding pipeline + two new research contributions
+
+Implemented from [`ARCHITECTURE.md`](ARCHITECTURE.md). See that document for
+the full design; this is the short version.
+
+**Contribution 1 — automatic stop-word learner** ([`stopwords.py`](stopwords.py)).
+Instead of a hand-written Roman Urdu stop-word list, the list is *learned* from
+the labelled complaints: a token is a stop word when it is common (high document
+frequency) **and** uninformative (near-zero mutual information with the triage
+label **and** a non-significant chi-square test). Every threshold and per-token
+statistic is written to `learned_stopwords.json` so a reviewer can re-derive it.
+
+```bash
+python stopwords.py
+```
+
+Two findings worth reporting: classic filler (`hai`, `mein`, `aur`) is **not**
+removed because it is statistically significant on this data; and the statistics
+alone would have deleted real symptom words (`pain`, `jalan`, `khoon`), so a
+clinical safety guard exempts the medical vocabulary and reports every rescue.
+
+**Embedding pipeline** ([`train_embedding_pipeline.py`](train_embedding_pipeline.py)).
+Complaint text now goes `clean → fuzzy normalize → remove learned stop words →
+sentence embedding → fuse with vitals → Logistic Regression`.
+
+```bash
+pip install -r requirements-embedding.txt   # once, needs internet
+python train_embedding_pipeline.py
+```
+
+| Method | Accuracy | Under-triage | Over-triage |
+|---|---|---|---|
+| A) Dictionary + BoW (previous system) | 90.87% | 3.32% | 5.81% |
+| B) Embeddings, raw text | 91.29% | 4.56% | 4.15% |
+| C) Embeddings + preprocessing | **92.12%** | 4.56% | 3.32% |
+| D) Hybrid: dictionary + embeddings | 91.70% | **3.32%** | 4.98% |
+
+Adding automatic stop-word removal lifted the embeddings from 91.29% → 92.12%
+(**+0.83 points**) — the measured effect of Contribution 1.
+
+**D is selected, not the most accurate C.** Under-triage (a critically ill
+patient sent to the back of the queue) outranks raw accuracy, so the selection
+rule minimises it first and uses accuracy as the tie-breaker. Artifacts go to
+`triage_model_embedding/`; the published `triage_model/` is left untouched so
+the existing predictors keep working.
+
+**Contribution 2 — embedding-effectiveness study**
+([`embedding_evaluation.py`](embedding_evaluation.py)). Measures how faithfully
+the embedding generator represents complaints. Does not touch the classifier.
+
+```bash
+python embedding_evaluation.py
+```
+
+10 manual meaning-clusters ([`evaluation_clusters.json`](evaluation_clusters.json),
+editable), 441 pairwise comparisons (45 per 10-complaint cluster), each with
+cosine similarity, Pearson correlation and Euclidean distance.
+
+| Measure | Value |
+|---|---|
+| Mean within-cluster similarity | 0.477 |
+| Mean across-cluster similarity | 0.317 |
+| Separation gap | +0.159 |
+| Pairs above the 0.5 threshold | 209/441 (47.4%) |
+| **Embedding generator efficiency** (closed pool) | **71.7%** |
+| Embedding generator efficiency (open pool) | 39.4% |
+
+The "regenerate the text from the embedding" test is implemented as
+**nearest-neighbour fidelity**: sentence embeddings are lossy and one-way, so
+literal inversion is not possible (see `ARCHITECTURE.md` Task 4c). Instead each
+complaint's closest neighbour is checked for same-meaning membership.
+
+> **Honest finding.** Roman Urdu clusters only weakly, exactly as
+> `ARCHITECTURE.md` §4.1 predicted. Per-cluster results range from
+> unconsciousness (82% of pairs above threshold) down to breathing difficulty
+> (24%). `seena mein shadeed dard aur pasina aa raha hai` (chest pain) scores
+> 0.94 against `saans lene mein takleef wheezing ho rahi hai` (breathing) — the
+> model is partly encoding "Roman Urdu sentence-ness" rather than meaning. This
+> is evidence for transliterating to native script or fine-tuning, and is
+> reported rather than tuned away.
+
+---
+
 Two features were added on top of the original system.
 
 **1. Batch prediction from an uploaded file (`predict_batch.py`).**
@@ -83,6 +166,15 @@ ED/
 |
 |-- triage_pipeline.py              # SHARED pipeline: dictionaries, normalize, predict (single source of truth)
 |-- triage_bow_fuzzy_diac.py        # Training script (imports triage_pipeline)
+|-- stopwords.py                    # NEW: automatic stop-word learner (Contribution 1)
+|-- learned_stopwords.json          # NEW: learned list + per-token statistics
+|-- train_embedding_pipeline.py     # NEW: embedding -> fuse -> classify training flow
+|-- embedding_evaluation.py         # NEW: embedding-effectiveness study (Contribution 2)
+|-- evaluation_clusters.json        # NEW: 10 manual meaning-clusters (editable)
+|-- embedding_evaluation_results.csv    # NEW: per-cluster summary
+|-- embedding_evaluation_pairs.csv      # NEW: all 441 pairwise comparisons
+|-- embedding_evaluation_neighbours.csv # NEW: nearest neighbour of each complaint
+|-- embedding_pipeline_results.csv      # NEW: 4-way method comparison
 |-- predict_batch.py                # NEW: batch prediction from an Excel/CSV file
 |-- embedding_experiment.py         # OPTIONAL: test offline AI embeddings vs the dictionary
 |-- EXPERIMENT_GUIDE.md             # OPTIONAL: simple friend-facing guide for the experiment
@@ -103,6 +195,7 @@ ED/
 |-- sample_100_patients.csv         # NEW: same 100 patients as CSV
 |-- sample_100_patients_predictions.xlsx/.csv   # NEW: example output produced by predict_batch.py
 |
+|-- triage_model_embedding/         # NEW: saved embedding-pipeline model (separate on purpose)
 |-- triage_model/                   # Saved model (regenerated by training)
 |   |-- model.pkl
 |   |-- word_bow.pkl
