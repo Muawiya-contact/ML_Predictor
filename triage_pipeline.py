@@ -248,6 +248,14 @@ CANONICAL_VOCAB = [
 # Each BoW feature whose name CONTAINS one of these keys is
 # multiplied by the given clinical weight (critical terms are
 # boosted; grammatical filler is suppressed).
+#
+# MATCHING RULES (see build_attention_weights): the longest key
+# that matches a feature wins, and keys of 3 characters or fewer
+# ("g", "mi", "tha", "pet") only match a WHOLE token. Without
+# those two rules the short filler keys at the bottom of this
+# dict silently captured most of the vocabulary - "g" alone
+# suppressed every feature containing the letter g, including
+# "sugar", "girna" and "ghabrahat".
 # ============================================================
 
 MEDICAL_WEIGHTS = {
@@ -429,13 +437,42 @@ def preprocess_corpus_for_embedding(texts, stopword_set=None):
 # ATTENTION
 # ============================================================
 
+#: Minimum key length for substring matching. Anything shorter is a
+#: filler word and must match a whole token instead.
+_MIN_SUBSTRING_KEY_LEN = 4
+
+#: Longest key first, so the most specific medical term wins over a short
+#: filler key that happens to be a substring of it.
+_ORDERED_WEIGHTS = sorted(MEDICAL_WEIGHTS.items(), key=lambda kv: -len(kv[0]))
+
+
 def build_attention_weights(feature_names):
-    """Return the per-feature weight vector for a list of BoW feature names."""
+    """Return the per-feature weight vector for a list of BoW feature names.
+
+    A feature takes the weight of the LONGEST matching key, and the search
+    stops there. Short keys (< 4 characters) are the grammatical filler at
+    the bottom of MEDICAL_WEIGHTS, so they only match a whole token.
+
+    The previous version scanned MEDICAL_WEIGHTS in insertion order with no
+    break, so the LAST matching key won - and the last key in the dict is
+    "g": 0.7. Every feature containing the letter g was therefore suppressed
+    to 0.7 regardless of its clinical weight ("sugar" 2.0 -> 0.7,
+    "garmīlagna" 2.2 -> 0.7, "girna" 1.8 -> 0.7), and unlisted features such
+    as "bleeding" or "emergency" were suppressed too instead of staying at
+    the neutral 1.0. "tha": 0.7 and "mi": 3.0 did the same to "thanda" and
+    "vomit".
+    """
     weights = np.ones(len(feature_names))
     for i, feat in enumerate(feature_names):
-        for k, w in MEDICAL_WEIGHTS.items():
-            if k in feat:
+        tokens = feat.split()
+        for k, w in _ORDERED_WEIGHTS:
+            if len(k) >= _MIN_SUBSTRING_KEY_LEN:
+                matched = k in feat
+            else:
+                matched = k in tokens
+            if matched:
                 weights[i] = w
+                break
     return weights
 
 
