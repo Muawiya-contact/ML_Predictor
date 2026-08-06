@@ -539,13 +539,14 @@ def safe_encode(encoder, value, warnings_list=None, field=''):
 
 
 def _safe_float(value, default):
+    """Coerce a value to float. Returns (value, was_substituted)."""
     try:
         f = float(value)
         if np.isnan(f):
-            return default
-        return f
+            return default, True
+        return f, False
     except (TypeError, ValueError):
-        return default
+        return default, True
 
 
 # ============================================================
@@ -600,12 +601,19 @@ def predict_dataframe(art, df):
     means = {f: m for f, m in zip(NUMERICAL_FEATURES, art['scaler'].mean_)}
     row_notes = ['' for _ in range(len(df))]
 
+    # Note EVERY substituted vital sign, not just blank/NaN ones. A typo such
+    # as Heart_Rate="l10" also falls back to the training mean, and previously
+    # that row came out with an empty Notes column - an operator would see a
+    # triage level computed from a vital sign the patient never had, with no
+    # indication anything was replaced.
     num_matrix = np.zeros((len(df), len(NUMERICAL_FEATURES)))
     for j, f in enumerate(NUMERICAL_FEATURES):
         for i, raw in enumerate(df[f].tolist()):
-            val = _safe_float(raw, means[f])
-            if val != raw and (raw is None or (isinstance(raw, float) and np.isnan(raw))):
-                row_notes[i] += f"{f} missing->mean; "
+            val, substituted = _safe_float(raw, means[f])
+            if substituted:
+                blank = raw is None or (isinstance(raw, float) and np.isnan(raw))
+                reason = "missing" if blank else f"unreadable ('{raw}')"
+                row_notes[i] += f"{f} {reason}->mean; "
             num_matrix[i, j] = val
     num_matrix = art['scaler'].transform(
         pd.DataFrame(num_matrix, columns=NUMERICAL_FEATURES))
