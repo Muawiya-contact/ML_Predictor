@@ -1,6 +1,15 @@
+# NOTE: this file previously held two different .gitignore versions
+# concatenated together, with contradictory rules. The old top half ignored
+# `triage_model/`, `*.pkl` and `embedding_*.csv` - which are exactly the
+# artifacts this repo SHIPS. The effect was that anyone who retrained saw a
+# clean `git status` and their updated model was silently never committed,
+# while the bottom half's own comment said those CSVs "ARE tracked".
+# Deduplicated, and the rules that shadowed tracked deliverables removed.
+
 # Python virtual env
 .venv/
 venv/
+env/
 
 # Byte-compiled / cache
 __pycache__/
@@ -8,34 +17,6 @@ __pycache__/
 
 # Jupyter
 .ipynb_checkpoints
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Editor temp
-*.swp
-*.swo
-
-# Data / models (large or generated)
-triage_model_embedding/
-triage_model/
-*.pkl
-*.h5
-*.joblib
-
-# Output / results
-*_predictions.*
-embedding_*.csv
-embedding_pipeline_results.csv
-embedding_evaluation_*.csv
-# Python
-__pycache__/
-*.pyc
-*.pyo
-venv/
-.venv/
-env/
 
 # Hugging Face / sentence-transformers model cache (if downloaded into the project)
 .cache/
@@ -47,11 +28,16 @@ models--*/
 *_predictions.csv
 *_predictions.xlsx
 
-# Captured console logs from local runs (the CSV results files are the
-# real deliverables and ARE tracked)
+# Captured console logs from local runs. The model artifacts in
+# triage_model/ and the *_results.csv tables ARE tracked deliverables and
+# must stay visible to git.
 eval_out.txt
 eval_raw.txt
 
+# Editor temp
+*.swp
+*.swo
+
 # OS noise
-Thumbs.db
 .DS_Store
+Thumbs.db
