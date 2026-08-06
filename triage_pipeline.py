@@ -23,9 +23,30 @@
 
 import os
 import re
+import sys
 import numpy as np
 import joblib
 from rapidfuzz import process, fuzz
+
+
+# ------------------------------------------------------------
+# Console safety (Windows)
+# ------------------------------------------------------------
+
+def make_console_safe():
+    """Stop Windows' cp1252 console from crashing on diacritized output.
+
+    Canonical forms produced by the diacritization step ("dárd",
+    "bukhār", "sēna") cannot be encoded by the default Windows console
+    codepage, and printing one raises UnicodeEncodeError. Degrade those
+    characters to '?' on screen instead of killing the run - files
+    written to disk keep the exact spelling.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(errors="replace")
+        except (AttributeError, ValueError):
+            pass
 
 # ------------------------------------------------------------
 # Triage level labels  (model classes are 0..3; dataset is 1..4)
@@ -345,6 +366,63 @@ def normalize_roman_urdu(text):
 
 # Backwards-compatible alias used by the interactive script
 normalize = normalize_roman_urdu
+
+
+# ============================================================
+# PREPROCESSING FOR THE EMBEDDING PATH  (ARCHITECTURE.md, Tasks 1-2)
+#
+#   raw text -> lowercase/clean -> fuzzy normalize -> remove
+#   learned stop words -> embed
+#
+# The fuzzy spelling step is deliberately KEPT (Task 2): it is what
+# collapses bukhar / bukhaar / bukharr into one form, which a sentence
+# embedding model trained mostly on English and native-script Urdu will
+# not do on its own for Roman Urdu.
+#
+# WHY THIS IS A SEPARATE FUNCTION, not a flag flipped on
+# normalize_roman_urdu():
+#   The saved Bag-of-Words model in triage_model/ was fitted on text
+#   WITHOUT stop-word removal. Changing normalize_roman_urdu() would
+#   feed the existing vectorizers text they were never fitted on and
+#   silently degrade predict_batch.py / prediction.py /
+#   prediction_interactive.py. The dictionary+BoW path therefore keeps
+#   its exact current behaviour, and the new embedding path gets its
+#   own preprocessing entry point.
+# ============================================================
+
+def preprocess_for_embedding(text, stopword_set=None):
+    """Full preprocessing for the embedding path.
+
+    Args:
+        text: raw complaint string.
+        stopword_set: learned stop words. Pass None to load the saved
+            learned_stopwords.json; pass an explicit set (including an
+            empty one) to control it directly.
+
+    Returns:
+        Normalized, fuzzy-corrected, stop-word-stripped text.
+    """
+    # Imported lazily: stopwords.py imports this module for its clinical
+    # safety guard, so a module-level import here would be circular.
+    from stopwords import load_stopwords, remove_stopwords
+
+    if stopword_set is None:
+        stopword_set = load_stopwords()
+
+    return remove_stopwords(normalize_roman_urdu(text), stopword_set)
+
+
+def preprocess_corpus_for_embedding(texts, stopword_set=None):
+    """Vectorized preprocess_for_embedding over an iterable of complaints.
+
+    Loads the stop-word list once instead of per row.
+    """
+    from stopwords import load_stopwords
+
+    if stopword_set is None:
+        stopword_set = load_stopwords()
+
+    return [preprocess_for_embedding(t, stopword_set) for t in texts]
 
 
 # ============================================================

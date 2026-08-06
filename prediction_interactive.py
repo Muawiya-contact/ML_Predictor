@@ -4,7 +4,18 @@
 # Run: python prediction_interactive.py
 
 import numpy as np
-from triage_pipeline import load_artifacts, predict_one, normalize_roman_urdu, TRIAGE_LABELS_SHORT
+from triage_pipeline import (
+    load_artifacts,
+    predict_one,
+    normalize_roman_urdu,
+    make_console_safe,
+    TRIAGE_LABELS_SHORT,
+)
+
+# This screen prints the diacritized complaint ("dárd", "sēna"), which the
+# default Windows console codepage cannot encode. Without this the script
+# crashes with UnicodeEncodeError right before showing the triage result.
+make_console_safe()
 
 # ============================================================
 # LOAD MODEL

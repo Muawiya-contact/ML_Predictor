@@ -70,6 +70,7 @@ from triage_pipeline import (
     CANONICAL_VOCAB,
     DIACRITIZATION_MAP,
     MEDICAL_WEIGHTS,
+    make_console_safe,   # re-exported so scripts can import it from here too
 )
 
 STOPWORDS_FILE = "learned_stopwords.json"
@@ -340,23 +341,6 @@ def load_stopwords(path=STOPWORDS_FILE):
     with open(path, "r", encoding="utf-8") as f:
         report = json.load(f)
     return set(report.get("stopwords", []))
-
-
-def make_console_safe():
-    """Stop Windows' cp1252 console from crashing on diacritized tokens.
-
-    Canonical forms like "dárd" and "bukhār" cannot be encoded by the
-    default Windows console codepage, and printing one raises
-    UnicodeEncodeError. Degrade those characters to '?' instead of
-    killing the run; the JSON report keeps the exact spelling.
-    """
-    import sys
-
-    for stream in (sys.stdout, sys.stderr):
-        try:
-            stream.reconfigure(errors="replace")
-        except (AttributeError, ValueError):
-            pass
 
 
 def summarize(report, top_n=15):
