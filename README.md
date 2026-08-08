@@ -279,12 +279,23 @@ Run them from PowerShell inside the project folder:
 ```
 pandas>=1.5.0
 numpy>=1.23.0
-scikit-learn>=1.2.0
+scikit-learn==1.6.1  # pinned: the saved model was built with this version
+scipy>=1.9.0         # stopwords.py imports scipy.stats directly
 rapidfuzz>=3.0.0
 joblib>=1.2.0
 matplotlib>=3.6.0
 openpyxl>=3.1.0      # needed for reading/writing Excel (.xlsx) files
 ```
+
+`requirements-embedding.txt` (needed for the embedding pipeline, the embedding
+evaluation, and the app's **Embedding Demo**):
+
+```
+sentence-transformers>=3.0.0
+```
+
+The GUI itself needs no extra install — it uses `tkinter`, which ships with
+Python.
 
 ---
 
@@ -320,62 +331,165 @@ python triage_bow_fuzzy_diac.py
 
 ## How To Run (Detailed, Beginner-Friendly)
 
-Follow these steps in order. **Steps 1–3 are done once per computer.** After that,
-you only repeat Step 4.
+**Never used Python before? Start here.** Follow the steps in order.
+**Steps 1 to 4 are done once per computer.** After that you only repeat Step 5.
+
+Every command below has been run and checked on this project. You can copy and
+paste each one exactly as it is written.
+
+---
 
 ### Step 1 — Install Python (one time)
 
-1. Go to **https://www.python.org/downloads/** and click **Download Python**.
-2. Open the downloaded installer.
-3. **Tick the box "Add Python to PATH"** on the first screen (very important —
-   the commands won't work without it), then click **Install Now**.
-4. To confirm: open **PowerShell** (Start menu → type `powershell`) and run
-   `python --version`. You should see something like `Python 3.12.0`.
+1. Go to **https://www.python.org/downloads/**
+2. Click the big **Download Python** button.
+3. Open the file you just downloaded.
+4. **Tick the box that says "Add Python to PATH".** This is on the first screen
+   of the installer. It is very important — the commands will not work without it.
+5. Click **Install Now** and wait for it to finish.
+6. To check it worked, open **PowerShell** (click Start, type `powershell`,
+   press Enter) and type:
 
-### Step 2 — Unzip the project
-
-1. Right-click `ED_updated.zip` → **Extract All** → **Extract**.
-2. Open the inner `ED_updated` folder — the one that contains `predict_batch.py`,
-   `README.md`, etc. **This is the folder you work in.**
-
-### Step 3 — Open a terminal inside the folder and install dependencies (one time)
-
-1. Open the folder that has `predict_batch.py`.
-2. Click the **address bar** at the top of the window, type `powershell`, press
-   **Enter**. A terminal opens already pointing at this folder.
-3. Install what the program needs (downloads once):
    ```bash
-   pip install -r requirements.txt
+   python --version
    ```
 
-### Step 4 — Run the triage (repeat this any time)
+   You should see something like `Python 3.12.0`. If you see an error, install
+   Python again and make sure you tick **Add Python to PATH**.
 
-In that same PowerShell window:
+---
+
+### Step 2 — Get the project folder onto your computer
+
+1. If you have a `.zip` file, right-click it → **Extract All** → **Extract**.
+2. Open the folder until you can see the file `triage_gui.py` inside it.
+   **That folder is the one you work in.**
+
+---
+
+### Step 3 — Open a terminal inside the project folder
+
+1. Open the folder that has `triage_gui.py` in it.
+2. Click the **address bar** at the top of the window (where the folder path is
+   shown).
+3. Type `powershell` and press **Enter**.
+
+A black or blue window opens. It is already pointing at your project folder.
+**Use this window for every command below.**
+
+---
+
+### Step 4 — Install what the program needs (one time)
+
+Type this and press Enter. It downloads the basic parts:
 
 ```bash
-python predict_batch.py sample_100_patients.xlsx
+pip install -r requirements.txt
 ```
 
-It prints a summary and saves two results files into the folder:
-`sample_100_patients_predictions.xlsx` and `.csv`. Open the `.xlsx` in Excel —
-each patient now has `Predicted_Triage_Level`, `Predicted_Label`, `Confidence`,
-the probability columns, and `Notes`.
+Then type this and press Enter. It downloads the AI embedding part:
 
-### Step 5 — Use your own patients
+```bash
+pip install -r requirements-embedding.txt
+```
 
-1. Open `batch_input_template.xlsx`, then **File → Save As** → `my_patients.xlsx`
-   (save it in the **same folder**).
-2. Keep the header row. Replace the example rows with your own patients, one per
-   row. Only `Complaint_Text` is required; other columns are optional.
-3. Run:
-   ```bash
-   python predict_batch.py my_patients.xlsx
-   ```
-   This creates `my_patients_predictions.xlsx`.
+Both are one-time downloads and need internet. **After this the program works
+offline** — you do not need internet again.
 
-> The filename in the command must match your file **exactly**, and the file must
-> be in the same folder you opened PowerShell in. Type `dir` to list the files in
-> that folder if you're unsure.
+> The very first time you run an embedding command, it also downloads the AI
+> model (a few hundred MB). That is also one time only. Everything after that
+> runs with no internet.
+
+---
+
+### Step 5 — Open the app (this is the part you repeat)
+
+```bash
+python triage_gui.py
+```
+
+A window opens. This is the easiest way to use the whole project — you can
+triage a patient, run a whole file of patients, and look at the results and
+scores, all with buttons instead of commands.
+
+---
+
+### Step 6 — Use your own patients
+
+1. Open `batch_input_template.xlsx`, then **File → Save As** →
+   `my_patients.xlsx`. Save it in the **same folder**.
+2. Keep the top row (the headings). Replace the example rows with your own
+   patients, one patient per row. Only `Complaint_Text` is required; the other
+   columns are optional.
+3. In the app, go to the **Batch File** tab, click **Browse...**, choose your
+   file, and click **Run batch triage**.
+
+Prefer the command line? This does the same thing:
+
+```bash
+python predict_batch.py my_patients.xlsx
+```
+
+It creates `my_patients_predictions.xlsx` and `my_patients_predictions.csv`.
+
+> The file name in the command must match your file **exactly**, and the file
+> must be in the same folder. Type `dir` and press Enter to list the files in
+> the folder if you are not sure.
+
+---
+
+## All Commands (copy and paste)
+
+Run every command from inside the project folder — the one containing
+`triage_gui.py`. Each command below has been tested and works.
+
+### Everyday use
+
+| What you want to do | Command |
+|---|---|
+| **Open the app (easiest)** | `python triage_gui.py` |
+| Triage a file of patients | `python predict_batch.py sample_100_patients.xlsx` |
+| Triage your own file | `python predict_batch.py my_patients.xlsx` |
+| Choose where to save results | `python predict_batch.py my_patients.xlsx my_results.xlsx` |
+| See five built-in example patients | `python prediction.py` |
+| Type in one patient, step by step | `python prediction_interactive.py` |
+
+### Training and research
+
+These take longer to run. You only need them if you change the data or the
+dictionaries, or if you are writing up the results.
+
+| What you want to do | Command |
+|---|---|
+| Train the dictionary model | `python triage_bow_fuzzy_diac.py` |
+| Learn the stop-word list on its own | `python stopwords.py` |
+| Train the embedding model + compare all four methods | `python train_embedding_pipeline.py` |
+| Measure how good the embeddings are | `python embedding_evaluation.py` |
+| Compare dictionary vs embeddings (older experiment) | `python embedding_experiment.py` |
+
+**What each one writes:**
+
+- `triage_bow_fuzzy_diac.py` → updates `triage_model/` and `visualizations/`
+- `stopwords.py` → updates `learned_stopwords.json`
+- `train_embedding_pipeline.py` → updates `triage_model_embedding/`,
+  `embedding_pipeline_results.csv` and `learned_stopwords.json`
+- `embedding_evaluation.py` → updates `embedding_evaluation_results.csv`,
+  `embedding_evaluation_pairs.csv` and `embedding_evaluation_neighbours.csv`
+
+> **Order matters for the app's Results tab.** Run
+> `python train_embedding_pipeline.py` and then `python embedding_evaluation.py`
+> at least once. Until you do, the **Results** and **Model Score** tabs will tell
+> you which command to run instead of showing a number. They never show a made-up
+> value.
+
+### Windows helper scripts (optional)
+
+Two PowerShell helpers are included if you prefer them:
+
+```powershell
+.\setup_env.ps1     # creates a .venv folder and installs requirements.txt
+.\run_predict.ps1   # runs predict_batch.py using that .venv
+```
 
 ---
 
