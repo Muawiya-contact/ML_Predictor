@@ -1,22 +1,22 @@
 {
-  "winning_method": "D) Hybrid: dictionary + embeddings",
+  "winning_method": "A) Dictionary + BoW (current)",
   "selection_rule": "Lowest under-triage first (within 0.5 points), accuracy as tie-breaker. Under-triage outranks accuracy because it is the error that harms patients.",
   "most_accurate_method": "C) Embeddings + preprocessing",
   "most_accurate_not_selected": true,
-  "text_representation": "hybrid",
-  "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "text_representation": "dictionary_bow",
+  "embedding_model": null,
   "embedding_dim": 384,
-  "accuracy": 91.7,
-  "under_triage_pct": 3.32,
-  "over_triage_pct": 4.98,
+  "accuracy": 90.04,
+  "under_triage_pct": 3.73,
+  "over_triage_pct": 6.22,
   "safety_grade": "A+",
   "efficiency_grade": "A",
-  "n_features": 1094,
+  "n_features": 710,
   "confusion_matrix": [
     [
-      89,
+      88,
       5,
-      0,
+      1,
       0
     ],
     [
@@ -27,8 +27,8 @@
     ],
     [
       0,
-      1,
-      58,
+      4,
+      55,
       1
     ],
     [
@@ -46,9 +46,9 @@
   "all_methods": [
     {
       "method": "A) Dictionary + BoW (current)",
-      "accuracy": 90.87,
-      "under_triage_pct": 3.32,
-      "over_triage_pct": 5.81,
+      "accuracy": 90.04,
+      "under_triage_pct": 3.73,
+      "over_triage_pct": 6.22,
       "safety_grade": "A+",
       "efficiency_grade": "A",
       "n_features": 710,
@@ -76,9 +76,9 @@
     },
     {
       "method": "D) Hybrid: dictionary + embeddings",
-      "accuracy": 91.7,
-      "under_triage_pct": 3.32,
-      "over_triage_pct": 4.98,
+      "accuracy": 90.04,
+      "under_triage_pct": 3.73,
+      "over_triage_pct": 6.22,
       "safety_grade": "A+",
       "efficiency_grade": "A",
       "n_features": 1094,

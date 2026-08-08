@@ -70,9 +70,24 @@ LEVEL_BLURB = [
 ]
 
 MODEL_DIR = "triage_model"
+EMBED_MODEL_DIR = "triage_model_embedding"
 STOPWORDS_FILE = "learned_stopwords.json"
 PIPELINE_RESULTS = "embedding_pipeline_results.csv"
 EVAL_RESULTS = "embedding_evaluation_results.csv"
+EVAL_NEIGHBOURS = "embedding_evaluation_neighbours.csv"
+CLUSTERS_FILE = "evaluation_clusters.json"
+DATASET_FILE = "triage_mixed_language_dataset.csv"
+
+# Every figure the app shows is read from one of the files above. When a file
+# is missing the app prints the command that produces it rather than inventing
+# a plausible-looking number.
+MISSING_HINT = {
+    PIPELINE_RESULTS: "python train_embedding_pipeline.py",
+    EVAL_RESULTS: "python embedding_evaluation.py",
+    EVAL_NEIGHBOURS: "python embedding_evaluation.py",
+    os.path.join(MODEL_DIR, "triage_metrics.json"): "python triage_bow_fuzzy_diac.py",
+    os.path.join(EMBED_MODEL_DIR, "triage_metrics.json"): "python train_embedding_pipeline.py",
+}
 
 
 # ---------------------------------------------------------------------
@@ -111,6 +126,30 @@ def heading(parent, text, size=13):
 def body(parent, text="", size=10, fg=INK, bg=CARD, **kw):
     return tk.Label(parent, text=text, bg=bg, fg=fg,
                     font=("Segoe UI", size), anchor="w", justify="left", **kw)
+
+
+def missing_notice(parent, path, extra=""):
+    """Say which command produces a missing results file.
+
+    Used everywhere a number would otherwise be shown. The app never
+    substitutes a placeholder or example value for a real measurement.
+    """
+    cmd = MISSING_HINT.get(path, "see README.md")
+    holder = tk.Frame(parent, bg="#fdf3f2", highlightbackground="#f0c8c3",
+                      highlightthickness=1)
+    inner = tk.Frame(holder, bg="#fdf3f2")
+    inner.pack(fill="x", padx=12, pady=9)
+    tk.Label(inner, text=f"'{path}' has not been generated yet.",
+             bg="#fdf3f2", fg="#8c2f22", font=("Segoe UI Semibold", 9),
+             anchor="w").pack(fill="x")
+    tk.Label(inner, text=f"Run this first:    {cmd}",
+             bg="#fdf3f2", fg="#8c2f22", font=("Consolas", 9),
+             anchor="w").pack(fill="x", pady=(2, 0))
+    if extra:
+        tk.Label(inner, text=extra, bg="#fdf3f2", fg=MUTED,
+                 font=("Segoe UI", 8), anchor="w", justify="left",
+                 wraplength=900).pack(fill="x", pady=(4, 0))
+    return holder
 
 
 def read_csv_rows(path):
@@ -210,12 +249,14 @@ class TriageGUI(tk.Tk):
         self.tab_stops = tk.Frame(self.nb, bg=BG)
         self.tab_batch = tk.Frame(self.nb, bg=BG)
         self.tab_results = tk.Frame(self.nb, bg=BG)
+        self.tab_score = tk.Frame(self.nb, bg=BG)
         for frame, label in [
             (self.tab_predict, "  Triage a Patient  "),
             (self.tab_pipeline, "  Pipeline Explorer  "),
             (self.tab_stops, "  Stop Words  "),
             (self.tab_batch, "  Batch File  "),
             (self.tab_results, "  Results  "),
+            (self.tab_score, "  Model Score & Embedding Analysis  "),
         ]:
             self.nb.add(frame, text=label)
 
@@ -224,6 +265,7 @@ class TriageGUI(tk.Tk):
         self._build_stopwords_tab()
         self._build_batch_tab()
         self._build_results_tab()
+        self._build_score_tab()
         self.nb.select(0)
 
     # ------------------------------------------------ background worker
@@ -245,6 +287,10 @@ class TriageGUI(tk.Tk):
                 kind, name, payload = self._work_queue.get_nowait()
                 if kind == "err":
                     self.status.set(f"Error in {name}")
+                    # Re-enable any button the failed job had disabled, so a
+                    # single failure does not leave the tab permanently dead.
+                    if hasattr(self, "demo_btn"):
+                        self.demo_btn.config(state="normal")
                     messagebox.showerror("Error", payload)
                 else:
                     handler = getattr(self, f"_done{name}", None)
@@ -1003,6 +1049,455 @@ class TriageGUI(tk.Tk):
                            "closest neighbour is checked for the same meaning."),
                      bg="#f7f9fb", fg=MUTED, font=("Segoe UI", 8), anchor="w",
                      justify="left", wraplength=960).pack(fill="x", pady=(6, 0))
+
+
+    # =================================================================
+    # TAB 6 - Model Score & Embedding Analysis
+    # =================================================================
+    def _build_score_tab(self):
+        root = self.tab_score
+        canvas = tk.Canvas(root, bg=BG, highlightthickness=0)
+        sb = ttk.Scrollbar(root, orient="vertical", command=canvas.yview)
+        holder = tk.Frame(canvas, bg=BG)
+        holder.bind("<Configure>",
+                    lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        window_id = canvas.create_window((0, 0), window=holder, anchor="nw")
+        canvas.bind("<Configure>",
+                    lambda e: canvas.itemconfigure(window_id, width=e.width))
+        canvas.configure(yscrollcommand=sb.set)
+        canvas.pack(side="left", fill="both", expand=True, padx=4, pady=6)
+        sb.pack(side="right", fill="y", pady=6)
+
+        def on_wheel(event):
+            canvas.yview_scroll(-1 if event.delta > 0 else 1, "units")
+
+        canvas.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", on_wheel))
+        canvas.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
+
+        self._score_section_model(holder)
+        self._score_section_pairs(holder)
+        self._score_section_demo(holder)
+
+    # ----------------------------------------------------- (a) score
+    def _score_section_model(self, parent):
+        box = card(parent)
+        box.pack(fill="x", padx=4, pady=(0, 10))
+        pad = tk.Frame(box, bg=CARD)
+        pad.pack(fill="both", expand=True, padx=18, pady=16)
+
+        heading(pad, "Model score").pack(fill="x")
+        body(pad,
+             "Measured on the held-out test patients the model never saw during "
+             "training. Every figure below is read from the saved result files - "
+             "nothing here is typed in by hand.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 12))
+
+        shown = 0
+        for path, title, note in [
+            (os.path.join(EMBED_MODEL_DIR, "triage_metrics.json"),
+             "Selected pipeline", "chosen by the safety-first rule"),
+            (os.path.join(MODEL_DIR, "triage_metrics.json"),
+             "Dictionary model (shipped in triage_model/)",
+             "the model the prediction tabs actually use"),
+        ]:
+            if not os.path.exists(path):
+                missing_notice(pad, path).pack(fill="x", pady=(0, 8))
+                continue
+            try:
+                with open(path, "r", encoding="utf-8") as f:
+                    m = json.load(f)
+            except (OSError, ValueError):
+                missing_notice(pad, path,
+                               "The file exists but could not be read.").pack(
+                    fill="x", pady=(0, 8))
+                continue
+
+            # The two files use different key names and different scales
+            # (0-1 vs 0-100), so normalise before displaying.
+            if "overall_under_triage_rate" in m:
+                acc = fnum(m.get("accuracy"), 0.0) * 100
+                under = fnum(m.get("overall_under_triage_rate"), 0.0)
+                over = fnum(m.get("overall_over_triage_rate"), 0.0)
+                subtitle = m.get("winning_method", "")
+                n_test = m.get("total_patients")
+            else:
+                acc = fnum(m.get("accuracy"), 0.0)
+                under = fnum(m.get("under_triage_pct"), 0.0)
+                over = fnum(m.get("over_triage_pct"), 0.0)
+                subtitle = m.get("winning_method", "")
+                n_test = m.get("n_test")
+
+            self._score_card(pad, title, note, subtitle, acc, under, over,
+                             n_test, m, path)
+            shown += 1
+
+        if shown:
+            body(pad,
+                 "Under-triage is the dangerous error: the patient is rated LESS "
+                 "urgent than they really are, so a critically ill person waits. "
+                 "Over-triage only wastes staff time. That is why the selection "
+                 "rule minimises under-triage first and treats accuracy as the "
+                 "tie-breaker.",
+                 fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(10, 0))
+
+    def _score_card(self, parent, title, note, subtitle, acc, under, over,
+                    n_test, raw, path):
+        wrap = tk.Frame(parent, bg="#f7f9fb", highlightbackground=LINE,
+                        highlightthickness=1)
+        wrap.pack(fill="x", pady=(0, 10))
+        inner = tk.Frame(wrap, bg="#f7f9fb")
+        inner.pack(fill="x", padx=14, pady=12)
+
+        tk.Label(inner, text=title, bg="#f7f9fb", fg=ACCENT,
+                 font=("Segoe UI Semibold", 11), anchor="w").pack(fill="x")
+        line = note if not subtitle else f"{note}  ·  {subtitle}"
+        tk.Label(inner, text=line, bg="#f7f9fb", fg=MUTED,
+                 font=("Segoe UI", 8), anchor="w",
+                 wraplength=960, justify="left").pack(fill="x", pady=(0, 8))
+
+        stats = tk.Frame(inner, bg="#f7f9fb")
+        stats.pack(fill="x")
+        cells = [
+            ("Accuracy", f"{acc:.2f}%", ACCENT, "correct triage decisions"),
+            ("Under-triage", f"{under:.2f}%", "#c0392b", "rated too LOW - dangerous"),
+            ("Over-triage", f"{over:.2f}%", "#e08e0b", "rated too HIGH - wasteful"),
+        ]
+        grade = raw.get("safety_grade")
+        if grade:
+            cells.append(("Safety grade", str(grade), "#2e9e5b", "under-triage band"))
+        for i, (label, value, colour, hint) in enumerate(cells):
+            stats.columnconfigure(i, weight=1, uniform="stat")
+            cell = tk.Frame(stats, bg="#f7f9fb")
+            cell.grid(row=0, column=i, sticky="ew", padx=(0, 10))
+            tk.Label(cell, text=label, bg="#f7f9fb", fg=MUTED,
+                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
+            tk.Label(cell, text=value, bg="#f7f9fb", fg=colour,
+                     font=("Segoe UI Semibold", 17), anchor="w").pack(fill="x")
+            tk.Label(cell, text=hint, bg="#f7f9fb", fg=MUTED,
+                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
+
+        bits = [f"source: {path}"]
+        if n_test:
+            bits.append(f"{n_test} held-out test patients")
+        if raw.get("embedding_model"):
+            bits.append(f"{raw['embedding_model']} ({raw.get('embedding_dim', '?')} dims)")
+        tk.Label(inner, text="   |   ".join(bits), bg="#f7f9fb", fg=MUTED,
+                 font=("Segoe UI", 8), anchor="w", wraplength=960,
+                 justify="left").pack(fill="x", pady=(8, 0))
+
+        cm = raw.get("confusion_matrix")
+        if cm:
+            tk.Label(inner, text="Confusion matrix  (rows = true level, "
+                                 "columns = predicted level)",
+                     bg="#f7f9fb", fg=MUTED, font=("Segoe UI", 8),
+                     anchor="w").pack(fill="x", pady=(8, 2))
+            grid = tk.Frame(inner, bg="#f7f9fb")
+            grid.pack(fill="x")
+            for j in range(4):
+                tk.Label(grid, text=f"pred L{j + 1}", bg="#f7f9fb", fg=MUTED,
+                         font=("Segoe UI", 8), width=9).grid(row=0, column=j + 1)
+            for i, row in enumerate(cm):
+                tk.Label(grid, text=f"true L{i + 1}", bg="#f7f9fb", fg=MUTED,
+                         font=("Segoe UI", 8), width=9,
+                         anchor="e").grid(row=i + 1, column=0, sticky="e")
+                for j, v in enumerate(row):
+                    on_diag = i == j
+                    tk.Label(grid, text=str(v), bg="#f7f9fb",
+                             fg=INK if on_diag else MUTED, width=9,
+                             font=("Consolas", 9, "bold") if on_diag
+                             else ("Consolas", 9)).grid(row=i + 1, column=j + 1)
+
+    # ------------------------------------------------ (b) the 45 maths
+    def _score_section_pairs(self, parent):
+        box = card(parent)
+        box.pack(fill="x", padx=4, pady=(0, 10))
+        pad = tk.Frame(box, bg=CARD)
+        pad.pack(fill="both", expand=True, padx=18, pady=16)
+
+        heading(pad, "Where the number 45 comes from").pack(fill="x")
+        body(pad,
+             "To check whether the AI groups similar complaints together, every "
+             "complaint in a group is compared against every other complaint in "
+             "that group. Comparing 10 sentences does not give 10 comparisons - "
+             "it gives 45.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 12))
+
+        maths = tk.Frame(pad, bg="#f7f9fb", highlightbackground=LINE,
+                         highlightthickness=1)
+        maths.pack(fill="x")
+        mi = tk.Frame(maths, bg="#f7f9fb")
+        mi.pack(fill="x", padx=14, pady=12)
+
+        for text, note in [
+            ("Each of the 10 sentences is compared with the other 9",
+             "10  x  9  =  90"),
+            ("But A-vs-B is the same comparison as B-vs-A, so halve it",
+             "90  /  2  =  45"),
+        ]:
+            r = tk.Frame(mi, bg="#f7f9fb")
+            r.pack(fill="x", pady=2)
+            tk.Label(r, text=text, bg="#f7f9fb", fg=INK, font=("Segoe UI", 9),
+                     anchor="w").pack(side="left")
+            tk.Label(r, text=note, bg="#f7f9fb", fg=ACCENT,
+                     font=("Consolas", 11, "bold"), anchor="e").pack(side="right")
+
+        tk.Frame(mi, bg=LINE, height=1).pack(fill="x", pady=8)
+        tk.Label(mi, text="The same thing written the formal way "
+                          "(the 'n choose 2' formula):",
+                 bg="#f7f9fb", fg=MUTED, font=("Segoe UI", 8),
+                 anchor="w").pack(fill="x")
+        tk.Label(mi,
+                 text="C(10,2)  =  10!  /  ( 2!  x  8! )  =  "
+                      "3628800 / (2 x 40320)  =  45",
+                 bg="#f7f9fb", fg=INK, font=("Consolas", 11),
+                 anchor="w").pack(fill="x", pady=(2, 0))
+        tk.Label(mi,
+                 text="A group of 9 sentences gives C(9,2) = 9 x 8 / 2 = 36 pairs, "
+                      "not 45. The table below shows the real count for each group.",
+                 bg="#f7f9fb", fg=MUTED, font=("Segoe UI", 8), anchor="w",
+                 wraplength=960, justify="left").pack(fill="x", pady=(6, 0))
+
+        # ---- real per-cluster numbers ----
+        body(pad, "Real results, per meaning-group", size=10).pack(
+            fill="x", pady=(14, 2))
+
+        if not os.path.exists(EVAL_RESULTS):
+            missing_notice(pad, EVAL_RESULTS,
+                           "This table shows the measured pair counts and pass "
+                           "rates, so it stays empty until the study has been "
+                           "run.").pack(fill="x")
+            return
+
+        rows = read_csv_rows(EVAL_RESULTS)
+        clusters = [r for r in rows if r["cluster"] != "OVERALL"]
+        overall = next((r for r in rows if r["cluster"] == "OVERALL"), None)
+        pct_key = next((k for k in rows[0] if k.startswith("pct_above_")), None)
+        above_key = next((k for k in rows[0] if k.startswith("pairs_above_")), None)
+        threshold = (pct_key or "pct_above_0.5").rsplit("_", 1)[-1]
+
+        cols = ("n", "calc", "pairs", "above", "pct")
+        tree = ttk.Treeview(pad, columns=cols, show="tree headings",
+                            height=len(clusters) + 1)
+        tree.heading("#0", text="meaning group")
+        tree.column("#0", width=210)
+        for col, label, w in [("n", "sentences", 90),
+                              ("calc", "calculation", 150),
+                              ("pairs", "pairs", 80),
+                              ("above", f"above {threshold}", 110),
+                              ("pct", "pass rate", 100)]:
+            tree.heading(col, text=label)
+            tree.column(col, width=w, anchor="center")
+
+        for r in clusters:
+            n = int(fnum(r["n_complaints"], 0))
+            pairs = int(fnum(r["n_pairs"], 0))
+            pct = fnum(r.get(pct_key), 0.0)
+            tag = ("good" if pct >= 80 else "mid" if pct >= 50 else "low")
+            tree.insert("", "end", text=r["cluster"], tags=(tag,), values=(
+                n, f"{n} x {n - 1} / 2", pairs,
+                r.get(above_key, "-"), f"{pct:.1f}%"))
+        if overall:
+            tree.insert("", "end", text="ALL GROUPS", tags=("total",), values=(
+                int(fnum(overall["n_complaints"], 0)), "sum of the above",
+                int(fnum(overall["n_pairs"], 0)),
+                overall.get(above_key, "-"),
+                f"{fnum(overall.get(pct_key), 0.0):.1f}%"))
+        tree.tag_configure("good", foreground="#2e9e5b")
+        tree.tag_configure("mid", foreground="#e08e0b")
+        tree.tag_configure("low", foreground="#c0392b")
+        tree.tag_configure("total", font=("Segoe UI Semibold", 9))
+        tree.pack(fill="x", pady=(2, 0))
+
+        body(pad,
+             f"'Pass rate' is the share of pairs scoring above {threshold} "
+             "similarity - the cut-off for treating two complaints as meaning "
+             "the same thing. Green is 80% or better, amber 50-79%, red below "
+             "50%.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(8, 0))
+
+    # --------------------------------------------- (c) embedding demo
+    def _score_section_demo(self, parent):
+        box = card(parent)
+        box.pack(fill="x", padx=4, pady=(0, 10))
+        pad = tk.Frame(box, bg=CARD)
+        pad.pack(fill="both", expand=True, padx=18, pady=16)
+
+        heading(pad, "Embedding demo  -  see a sentence become numbers").pack(fill="x")
+        body(pad,
+             "Type any complaint. The AI model turns it into a list of numbers, "
+             "then the closest matching complaint from the evaluation set is "
+             "found by comparing those numbers. This is exactly how the model "
+             "decides two complaints mean the same thing. Runs offline.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 10))
+
+        row = tk.Frame(pad, bg=CARD)
+        row.pack(fill="x")
+        self.demo_var = tk.StringVar(value="seena mein dard aur pasina")
+        entry = tk.Entry(row, textvariable=self.demo_var, font=("Segoe UI", 12),
+                         relief="solid", bd=1)
+        entry.pack(side="left", fill="x", expand=True, ipady=4)
+        entry.bind("<Return>", lambda e: self._run_demo())
+        self.demo_btn = ttk.Button(row, text="Embed and match",
+                                   style="Accent.TButton", command=self._run_demo)
+        self.demo_btn.pack(side="left", padx=(8, 0))
+
+        self.demo_out = tk.Frame(pad, bg=CARD)
+        self.demo_out.pack(fill="both", expand=True, pady=(12, 0))
+        body(self.demo_out,
+             "The embedding model loads the first time you press the button "
+             "(a few seconds).",
+             fg=MUTED, size=9).pack(fill="x")
+
+        self._demo_model = None
+        self._demo_model_name = ""
+        self._demo_corpus = None
+        self._demo_text = self.demo_var.get()
+
+    def _demo_reference_corpus(self):
+        """Complaints to match against, with their meaning group if known.
+
+        Prefers the hand-labelled evaluation clusters, because then the match
+        can be shown with the meaning it belongs to. Falls back to the raw
+        dataset when that file is absent.
+        """
+        if os.path.exists(CLUSTERS_FILE):
+            try:
+                with open(CLUSTERS_FILE, "r", encoding="utf-8") as f:
+                    clusters = json.load(f)["clusters"]
+                pairs = [(t, name) for name, items in clusters.items()
+                         for t in items]
+                if pairs:
+                    return pairs, CLUSTERS_FILE
+            except (OSError, ValueError, KeyError):
+                pass
+        if os.path.exists(DATASET_FILE):
+            import pandas as pd
+            texts = (pd.read_csv(DATASET_FILE)["Complaint_Text"]
+                     .dropna().astype(str).drop_duplicates().tolist())
+            return [(t, "") for t in texts], DATASET_FILE
+        return [], ""
+
+    def _run_demo(self):
+        text = self.demo_var.get().strip()
+        if not text:
+            return
+        self.demo_btn.config(state="disabled")
+        self._demo_text = text
+        self._run_async(self._demo_worker, "Embedding the complaint...")
+
+    def _demo_worker(self):
+        import numpy as np
+        from triage_pipeline import preprocess_for_embedding
+
+        if self._demo_model is None:
+            try:
+                from sentence_transformers import SentenceTransformer
+            except ImportError:
+                return {"error":
+                        "The 'sentence-transformers' library is not installed, so "
+                        "the embedding demo cannot run.\n\n"
+                        "Install it once (needs internet), then try again:\n"
+                        "    pip install -r requirements-embedding.txt\n\n"
+                        "Everything else in this app works without it."}
+            name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+            # Read the model actually used by the study, so the demo matches
+            # the reported numbers instead of quietly using a different model.
+            if os.path.exists(EVAL_RESULTS):
+                for r in read_csv_rows(EVAL_RESULTS):
+                    if r.get("embedding_model"):
+                        name = r["embedding_model"]
+                        break
+            self._demo_model = SentenceTransformer(name, device="cpu")
+            self._demo_model_name = name
+
+        if self._demo_corpus is None:
+            pairs, source = self._demo_reference_corpus()
+            if not pairs:
+                return {"error": "No reference complaints found. Expected "
+                                 f"{CLUSTERS_FILE} or {DATASET_FILE}."}
+            texts = [preprocess_for_embedding(t) for t, _ in pairs]
+            vecs = self._demo_model.encode(texts, batch_size=32,
+                                           convert_to_numpy=True,
+                                           show_progress_bar=False,
+                                           normalize_embeddings=True)
+            self._demo_corpus = (pairs, vecs, source)
+
+        pairs, vecs, source = self._demo_corpus
+        raw = self._demo_text
+        cleaned = preprocess_for_embedding(raw)
+        vec = self._demo_model.encode([cleaned], convert_to_numpy=True,
+                                      normalize_embeddings=True)[0]
+        sims = vecs @ vec
+        order = np.argsort(-sims)[:5]
+        return {
+            "raw": raw,
+            "cleaned": cleaned,
+            "vector": vec,
+            "model": self._demo_model_name,
+            "source": source,
+            "matches": [(pairs[i][0], pairs[i][1], float(sims[i])) for i in order],
+        }
+
+    def _done_demo_worker(self, payload):
+        self.demo_btn.config(state="normal")
+        for w in self.demo_out.winfo_children():
+            w.destroy()
+
+        if payload is None:
+            return
+        if payload.get("error"):
+            body(self.demo_out, payload["error"], fg="#c0392b", size=9).pack(fill="x")
+            self.status.set("Embedding demo could not run.")
+            return
+
+        vec = payload["vector"]
+        out = self.demo_out
+
+        body(out, f"1.  After cleaning:   {payload['cleaned']}",
+             size=9).pack(fill="x")
+        body(out, f"2.  The model turns that into {len(vec)} numbers "
+                  f"(only the first 24 are shown):",
+             size=9).pack(fill="x", pady=(8, 2))
+
+        nums = "  ".join(f"{v:+.4f}" for v in vec[:24])
+        tk.Label(out, text=nums, bg="#fbfcfd", fg=INK, font=("Consolas", 9),
+                 anchor="w", justify="left", wraplength=980, padx=10, pady=8,
+                 relief="solid", bd=1).pack(fill="x")
+        body(out,
+             f"That list of {len(vec)} numbers IS the complaint, as far as the "
+             "model is concerned. Two complaints that mean the same thing get "
+             "two similar lists.",
+             fg=MUTED, size=8).pack(fill="x", pady=(3, 0))
+
+        body(out, "3.  Closest matching complaints (1.00 = identical meaning):",
+             size=9).pack(fill="x", pady=(10, 2))
+
+        tree = ttk.Treeview(out, columns=("group", "sim"),
+                            show="tree headings", height=5)
+        tree.heading("#0", text="complaint")
+        tree.column("#0", width=520)
+        tree.heading("group", text="meaning group")
+        tree.column("group", width=180, anchor="center")
+        tree.heading("sim", text="similarity")
+        tree.column("sim", width=100, anchor="center")
+        for i, (text, group, sim) in enumerate(payload["matches"]):
+            tag = "best" if i == 0 else ""
+            tree.insert("", "end", text=text, tags=(tag,),
+                        values=(group or "-", f"{sim:.3f}"))
+        tree.tag_configure("best", foreground="#2e9e5b",
+                           font=("Segoe UI Semibold", 9))
+        tree.pack(fill="x")
+
+        best_sim = payload["matches"][0][2]
+        verdict = ("a confident match" if best_sim >= 0.7 else
+                   "a usable match" if best_sim >= 0.5 else
+                   "a WEAK match - below the 0.5 cut-off")
+        body(out,
+             f"Top match scores {best_sim:.3f}, which is {verdict}.    "
+             f"model: {payload['model']}    reference set: {payload['source']}",
+             fg=MUTED, size=8, wraplength=1000).pack(fill="x", pady=(6, 0))
+        self.status.set(f"Embedded {len(vec)} dimensions; "
+                        f"best match {best_sim:.3f}.")
 
 
 def main():
