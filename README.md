@@ -16,6 +16,7 @@
 - [Overview](#overview)
 - [Project Structure](#project-structure)
 - [Installation](#installation)
+- [Desktop GUI](#desktop-gui)
 - [Quick Start](#quick-start)
 - [Usage](#usage)
   - [1. Train the model](#1-train-the-model)
@@ -36,6 +37,32 @@
 ---
 
 ## What's New in This Version
+
+### Desktop GUI
+
+[`triage_gui.py`](triage_gui.py) is a graphical interface built for
+**understanding** the system, not just running it — every screen shows the
+working, not only the answer.
+
+```bash
+python triage_gui.py
+```
+
+| Tab | What it shows |
+|---|---|
+| **Triage a Patient** | Enter one patient → triage level, confidence bars, **and** what the text pipeline did to the complaint at each stage |
+| **Pipeline Explorer** | Type any complaint and watch it move through clean → fuzzy → stop-word removal, with the statistics justifying every removed word |
+| **Stop Words** | The learned list (Contribution 1) as a filterable table: document frequency, mutual information, chi-square, and why each token was kept or dropped |
+| **Batch File** | Triage a whole Excel/CSV, see the results table and level distribution |
+| **Results** | The four-method comparison and the embedding-effectiveness study as charts |
+
+Uses only the Python standard library (`tkinter`), so it adds **no new
+dependencies** and runs fully offline — in keeping with the project's
+lightweight, CPU-only goal.
+
+> A useful side effect: tkinter renders Unicode properly, so the diacritized
+> canonical forms (`dárd`, `bukhār`, `sēna`) display correctly in the GUI even
+> though the Windows console cannot print them.
 
 ### Embedding pipeline + two new research contributions
 
@@ -165,6 +192,7 @@ logistic-regression model that uses under ~3,000 parameters and 5-10 MB on disk.
 ```
 ED/
 |
+|-- triage_gui.py                   # NEW: desktop GUI (tkinter, no extra dependencies)
 |-- triage_pipeline.py              # SHARED pipeline: dictionaries, normalize, predict (single source of truth)
 |-- triage_bow_fuzzy_diac.py        # Training script (imports triage_pipeline)
 |-- stopwords.py                    # NEW: automatic stop-word learner (Contribution 1)
@@ -262,7 +290,15 @@ openpyxl>=3.1.0      # needed for reading/writing Excel (.xlsx) files
 
 ## Quick Start
 
-A trained model is already included, so you can predict immediately:
+A trained model is already included, so you can predict immediately.
+
+**Easiest — open the desktop app:**
+
+```bash
+python triage_gui.py
+```
+
+**Or from the command line:**
 
 ```bash
 # Triage the 100 example patients and write a results file
