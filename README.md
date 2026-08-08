@@ -17,6 +17,7 @@
 - [Project Structure](#project-structure)
 - [Installation](#installation)
 - [Desktop GUI](#desktop-gui)
+- [Features Guide (FEATURES.md)](FEATURES.md)
 - [Quick Start](#quick-start)
 - [Usage](#usage)
   - [1. Train the model](#1-train-the-model)
@@ -55,6 +56,7 @@ python triage_gui.py
 | **Stop Words** | The learned list (Contribution 1) as a filterable table: document frequency, mutual information, chi-square, and why each token was kept or dropped |
 | **Batch File** | Triage a whole Excel/CSV, see the results table and level distribution |
 | **Results** | The four-method comparison and the embedding-effectiveness study as charts |
+| **Model Score & Embedding Analysis** | Real accuracy / under-triage / over-triage from the saved metrics files, a visual explanation of the "45 pairs" maths, and a live embedding demo |
 
 Uses only the Python standard library (`tkinter`), so it adds **no new
 dependencies** and runs fully offline — in keeping with the project's
@@ -63,6 +65,13 @@ lightweight, CPU-only goal.
 > A useful side effect: tkinter renders Unicode properly, so the diacritized
 > canonical forms (`dárd`, `bukhār`, `sēna`) display correctly in the GUI even
 > though the Windows console cannot print them.
+
+**Every number in the app is read from the saved result files.** If a file has
+not been generated yet, the app names the file and prints the exact command that
+produces it — it never shows an invented or placeholder value.
+
+> **New here?** [`FEATURES.md`](FEATURES.md) explains every feature in plain
+> English — what it does, how it works, and why it was added.
 
 ### Embedding pipeline + two new research contributions
 
@@ -94,21 +103,34 @@ pip install -r requirements-embedding.txt   # once, needs internet
 python train_embedding_pipeline.py
 ```
 
+Current results, copied from `embedding_pipeline_results.csv` — the app's
+**Model Score** tab reads the same file live, so that is always the
+authoritative view:
+
 | Method                                | Accuracy   | Under-triage | Over-triage |
 | ------------------------------------- | ---------- | ------------ | ----------- |
-| A) Dictionary + BoW (previous system) | 90.87%     | 3.32%        | 5.81%       |
+| A) Dictionary + BoW (previous system) | 90.04%     | **3.73%**    | 6.22%       |
 | B) Embeddings, raw text               | 91.29%     | 4.56%        | 4.15%       |
 | C) Embeddings + preprocessing         | **92.12%** | 4.56%        | 3.32%       |
-| D) Hybrid: dictionary + embeddings    | 91.70%     | **3.32%**    | 4.98%       |
+| D) Hybrid: dictionary + embeddings    | 90.04%     | **3.73%**    | 6.22%       |
 
 Adding automatic stop-word removal lifted the embeddings from 91.29% → 92.12%
 (**+0.83 points**) — the measured effect of Contribution 1.
 
-**D is selected, not the most accurate C.** Under-triage (a critically ill
-patient sent to the back of the queue) outranks raw accuracy, so the selection
-rule minimises it first and uses accuracy as the tie-breaker. Artifacts go to
-`triage_model_embedding/`; the published `triage_model/` is left untouched so
-the existing predictors keep working.
+**A is currently selected, not the most accurate C.** Under-triage (a critically
+ill patient sent to the back of the queue) outranks raw accuracy, so the
+selection rule minimises it first and uses accuracy only as the tie-breaker.
+Artifacts go to `triage_model_embedding/`; the published `triage_model/` is left
+untouched so the existing predictors keep working.
+
+> **Known issue — the hybrid is not currently contributing.** Method D reports
+> numbers identical to method A. The attention-weighted Bag-of-Words features
+> reach magnitudes around 8.0 while the L2-normalised embedding features average
+> about 0.1, so when the two blocks are concatenated the embedding columns are
+> effectively drowned out and the classifier reproduces the dictionary-only fit.
+> This surfaced after the attention-weight fix raised the BoW weights. The fix is
+> to scale the two blocks before concatenating in `train_embedding_pipeline.py`.
+> Recorded here rather than hidden, since D is meant to be the safe default.
 
 **Contribution 2 — embedding-effectiveness study**
 ([`embedding_evaluation.py`](embedding_evaluation.py)). Measures how faithfully
@@ -192,7 +214,8 @@ logistic-regression model that uses under ~3,000 parameters and 5-10 MB on disk.
 ```
 ED/
 |
-|-- triage_gui.py                   # NEW: desktop GUI (tkinter, no extra dependencies)
+|-- triage_gui.py                   # NEW: desktop GUI, 6 tabs (tkinter, no extra dependencies)
+|-- FEATURES.md                     # NEW: every feature explained (what / how / why), plain English
 |-- triage_pipeline.py              # SHARED pipeline: dictionaries, normalize, predict (single source of truth)
 |-- triage_bow_fuzzy_diac.py        # Training script (imports triage_pipeline)
 |-- stopwords.py                    # NEW: automatic stop-word learner (Contribution 1)
