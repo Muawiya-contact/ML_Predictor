@@ -1,5 +1,5 @@
 method,accuracy,under_triage_pct,over_triage_pct,safety_grade,efficiency_grade,n_features,text_representation
-A) Dictionary + BoW (current),90.87,3.32,5.81,A+,A,710,dictionary_bow
+A) Dictionary + BoW (current),90.04,3.73,6.22,A+,A,710,dictionary_bow
 "B) Embeddings, raw text",91.29,4.56,4.15,A+,A,394,embeddings_raw
 C) Embeddings + preprocessing,92.12,4.56,3.32,A+,A,394,embeddings_preprocessed
-D) Hybrid: dictionary + embeddings,91.7,3.32,4.98,A+,A,1094,hybrid
+D) Hybrid: dictionary + embeddings,90.04,3.73,6.22,A+,A,1094,hybrid
