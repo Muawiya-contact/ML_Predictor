@@ -1,41 +1,45 @@
 {
-  "winning_method": "A) Dictionary + BoW (current)",
-  "selection_rule": "Lowest under-triage first (within 0.5 points), accuracy as tie-breaker. Under-triage outranks accuracy because it is the error that harms patients.",
+  "winning_method": "C) Embeddings + preprocessing",
+  "deployed_method": "C) Embeddings + preprocessing",
+  "selection_rule": "explicit --deploy C: the offline embedding model is the method this project deploys on purpose",
+  "safety_first_pick": "A) Dictionary + BoW (current)",
+  "deploy_override_used": true,
   "most_accurate_method": "C) Embeddings + preprocessing",
-  "most_accurate_not_selected": true,
-  "text_representation": "dictionary_bow",
-  "embedding_model": null,
+  "most_accurate_not_selected": false,
+  "text_representation": "embeddings_preprocessed",
+  "uses_embeddings": true,
+  "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
   "embedding_dim": 384,
-  "accuracy": 90.04,
-  "under_triage_pct": 3.73,
-  "over_triage_pct": 6.22,
+  "accuracy": 92.12,
+  "under_triage_pct": 4.56,
+  "over_triage_pct": 3.32,
   "safety_grade": "A+",
   "efficiency_grade": "A",
-  "n_features": 710,
+  "n_features": 394,
   "confusion_matrix": [
     [
       88,
-      5,
-      1,
-      0
-    ],
-    [
-      8,
-      65,
-      2,
-      0
-    ],
-    [
+      6,
       0,
-      4,
-      55,
+      0
+    ],
+    [
+      2,
+      70,
+      2,
       1
     ],
     [
       0,
+      4,
+      54,
+      2
+    ],
+    [
+      0,
+      0,
       2,
-      1,
-      9
+      10
     ]
   ],
   "n_train": 963,
@@ -76,10 +80,10 @@
     },
     {
       "method": "D) Hybrid: dictionary + embeddings",
-      "accuracy": 90.04,
-      "under_triage_pct": 3.73,
-      "over_triage_pct": 6.22,
-      "safety_grade": "A+",
+      "accuracy": 87.14,
+      "under_triage_pct": 6.22,
+      "over_triage_pct": 6.64,
+      "safety_grade": "A",
       "efficiency_grade": "A",
       "n_features": 1094,
       "text_representation": "hybrid"

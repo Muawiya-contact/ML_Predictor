@@ -49,10 +49,10 @@
   "token_statistics": [
     {
       "token": "sēna",
-      "document_frequency": 0.4444,
-      "document_count": 535,
-      "normalized_mutual_information": 0.028186,
-      "chi_square": 82.4335,
+      "document_frequency": 0.4427,
+      "document_count": 533,
+      "normalized_mutual_information": 0.02796,
+      "chi_square": 81.8112,
       "chi_square_dof": 3,
       "chi_square_p_value": 0.0,
       "is_high_frequency": true,
@@ -243,6 +243,19 @@
       "is_stopword": false
     },
     {
+      "token": "pasīna",
+      "document_frequency": 0.0615,
+      "document_count": 74,
+      "normalized_mutual_information": 0.026048,
+      "chi_square": 68.5751,
+      "chi_square_dof": 3,
+      "chi_square_p_value": 0.0,
+      "is_high_frequency": true,
+      "is_uninformative": false,
+      "clinically_protected": true,
+      "is_stopword": false
+    },
+    {
       "token": "bēhōsh",
       "document_frequency": 0.0615,
       "document_count": 74,
@@ -358,19 +371,6 @@
       "is_uninformative": true,
       "clinically_protected": false,
       "is_stopword": true
-    },
-    {
-      "token": "pasīna",
-      "document_frequency": 0.0424,
-      "document_count": 51,
-      "normalized_mutual_information": 0.017515,
-      "chi_square": 47.0215,
-      "chi_square_dof": 3,
-      "chi_square_p_value": 0.0,
-      "is_high_frequency": true,
-      "is_uninformative": false,
-      "clinically_protected": true,
-      "is_stopword": false
     },
     {
       "token": "bukhār",
