@@ -71,22 +71,33 @@ Outputs:
 import argparse
 import itertools
 import json
+import os
 import sys
 import warnings
+
+# See prediction.py: keeps `import triage_pipeline` working regardless of
+# how this script was launched.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
 
 import numpy as np
 import pandas as pd
 
-from triage_pipeline import make_console_safe, preprocess_corpus_for_embedding
+from triage_pipeline import (make_console_safe,
+                             preprocess_corpus_for_embedding, project_path,
+                             resolve_project_file)
 
 warnings.filterwarnings("ignore")
 make_console_safe()
 
 CLUSTERS_FILE = "evaluation_clusters.json"
 DATA_FILE = "triage_mixed_language_dataset.csv"
-SUMMARY_CSV = "embedding_evaluation_results.csv"
-PAIRS_CSV = "embedding_evaluation_pairs.csv"
-NEIGHBOURS_CSV = "embedding_evaluation_neighbours.csv"
+# Outputs go beside the code, so the GUI's Results tabs find them however
+# this study was launched. Inputs are resolved the same way when read.
+SUMMARY_CSV = project_path("embedding_evaluation_results.csv")
+PAIRS_CSV = project_path("embedding_evaluation_pairs.csv")
+NEIGHBOURS_CSV = project_path("embedding_evaluation_neighbours.csv")
 
 # Same default as the training pipeline, so the study evaluates the model
 # the system actually uses. TODO(Sir): standardize (ARCHITECTURE.md s6 Q1).
@@ -161,6 +172,7 @@ def load_embedding_model(model_name):
 
 
 def load_clusters(path):
+    path = resolve_project_file(path)
     with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
     clusters = data["clusters"]
@@ -328,7 +340,7 @@ def main():
     # ---- open pool: every other dataset complaint as a distractor ----
     open_score = None
     try:
-        df = pd.read_csv(args.data)
+        df = pd.read_csv(resolve_project_file(args.data))
         pool = [t for t in df["Complaint_Text"].dropna().astype(str).unique()
                 if t not in set(texts)]
     except FileNotFoundError:

@@ -26,6 +26,19 @@ else {
 
 $predictScript = Join-Path $scriptDir "predict_batch.py"
 
+# Resolve the input the same way triage_pipeline.resolve_project_file() does:
+# honour the path the caller gave if it exists here, otherwise fall back to
+# the copy that ships beside the script. Without this, running the wrapper
+# from anywhere other than the repository folder failed with
+# "Input file not found: sample_100_patients.xlsx" even though the sample
+# sits right next to predict_batch.py.
+if (-not (Test-Path $InputPath)) {
+    $shipped = Join-Path $scriptDir $InputPath
+    if (Test-Path $shipped) {
+        $InputPath = $shipped
+    }
+}
+
 if ($OutputPath -ne "") {
     python $predictScript $InputPath $OutputPath
 }

@@ -6,6 +6,15 @@
 # normalization) now lives in triage_pipeline.py so that training and every
 # predictor share ONE identical definition and can never drift apart.
 
+import os
+import sys
+
+# See prediction.py: keeps `import triage_pipeline` working regardless of
+# how this script was launched.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -15,7 +24,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import joblib
 import json
-import os
 import warnings
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -25,6 +33,8 @@ from triage_pipeline import (
     normalize_roman_urdu,
     build_attention_weights,
     make_console_safe,
+    project_path,
+    resolve_project_file,
     NUMERICAL_FEATURES,
 )
 
@@ -36,11 +46,19 @@ warnings.filterwarnings('ignore')
 # before the model is ever saved.
 make_console_safe()
 
-os.makedirs('triage_model', exist_ok=True)
-os.makedirs('visualizations', exist_ok=True)
+# Anchored to the project folder, not the working directory, so training
+# always reads the shipped dataset and always overwrites the model bundle
+# the predictors actually load - never a stray copy in whatever directory
+# the run started from.
+MODEL_DIR = project_path('triage_model')
+VIS_DIR = project_path('visualizations')
+DATA_FILE = resolve_project_file('triage_mixed_language_dataset.csv')
+
+os.makedirs(MODEL_DIR, exist_ok=True)
+os.makedirs(VIS_DIR, exist_ok=True)
 
 print("Loading dataset...")
-df = pd.read_csv('triage_mixed_language_dataset.csv')
+df = pd.read_csv(DATA_FILE)
 print(f"  {len(df)} patient records loaded.")
 
 # ============================================================
@@ -90,7 +108,7 @@ for bar, freq in zip(bars, frequencies):
 
 plt.grid(axis='x', alpha=0.3, linestyle='--')
 plt.tight_layout()
-plt.savefig('visualizations/word_frequency_histogram.png', dpi=300, bbox_inches='tight')
+plt.savefig(os.path.join(VIS_DIR, 'word_frequency_histogram.png'), dpi=300, bbox_inches='tight')
 plt.close()
 
 print(f"\nWord Frequency Statistics:")
@@ -101,9 +119,9 @@ for i, (word, freq) in enumerate(top_words_ascending, 1):
     print(f"  {i:2d}. '{word}' - {freq} occurrences")
 
 word_freq_df = pd.DataFrame(word_freq.most_common(), columns=['Word', 'Frequency'])
-word_freq_df.to_csv('visualizations/word_frequencies.csv', index=False)
-print(f"\n[ok] Word frequency data saved to 'visualizations/word_frequencies.csv'")
-print(f"[ok] Histogram saved to 'visualizations/word_frequency_histogram.png'")
+word_freq_df.to_csv(os.path.join(VIS_DIR, 'word_frequencies.csv'), index=False)
+print(f"\n[ok] Word frequency data saved to {os.path.join(VIS_DIR, 'word_frequencies.csv')}")
+print(f"[ok] Histogram saved to {os.path.join(VIS_DIR, 'word_frequency_histogram.png')}")
 
 # ============================================================
 # CATEGORICAL ENCODING
@@ -340,14 +358,14 @@ print("\n" + "=" * 70)
 print("SAVING MODEL AND METRICS")
 print("=" * 70)
 
-joblib.dump(model,    'triage_model/model.pkl')
-joblib.dump(word_bow, 'triage_model/word_bow.pkl')
-joblib.dump(char_bow, 'triage_model/char_bow.pkl')
-joblib.dump(scaler,   'triage_model/scaler.pkl')
-joblib.dump(le_gender, 'triage_model/gender_enc.pkl')
-joblib.dump(le_mode,   'triage_model/mode_enc.pkl')
-joblib.dump(le_avpu,   'triage_model/avpu_enc.pkl')
-joblib.dump(le_ecg,    'triage_model/ecg_enc.pkl')
+joblib.dump(model,    os.path.join(MODEL_DIR, 'model.pkl'))
+joblib.dump(word_bow, os.path.join(MODEL_DIR, 'word_bow.pkl'))
+joblib.dump(char_bow, os.path.join(MODEL_DIR, 'char_bow.pkl'))
+joblib.dump(scaler,   os.path.join(MODEL_DIR, 'scaler.pkl'))
+joblib.dump(le_gender, os.path.join(MODEL_DIR, 'gender_enc.pkl'))
+joblib.dump(le_mode,   os.path.join(MODEL_DIR, 'mode_enc.pkl'))
+joblib.dump(le_avpu,   os.path.join(MODEL_DIR, 'avpu_enc.pkl'))
+joblib.dump(le_ecg,    os.path.join(MODEL_DIR, 'ecg_enc.pkl'))
 
 metrics_summary = {
     'accuracy':                    float(accuracy),
@@ -367,7 +385,7 @@ metrics_summary = {
     }
 }
 
-with open('triage_model/triage_metrics.json', 'w') as f:
+with open(os.path.join(MODEL_DIR, 'triage_metrics.json'), 'w') as f:
     json.dump(metrics_summary, f, indent=4)
 
 print("[ok] Model saved to 'triage_model/'")
@@ -379,5 +397,5 @@ print("\n" + "=" * 70)
 print("TRAINING COMPLETE")
 print("=" * 70)
 print("\nVisualization Summary:")
-print("   - Word frequency histogram -> 'visualizations/word_frequency_histogram.png'")
-print("   - Word frequency data      -> 'visualizations/word_frequencies.csv'")
+print(f"   - Word frequency histogram -> {os.path.join(VIS_DIR, 'word_frequency_histogram.png')}")
+print(f"   - Word frequency data      -> {os.path.join(VIS_DIR, 'word_frequencies.csv')}")

@@ -86,6 +86,12 @@ import os
 import sys
 import warnings
 
+# See prediction.py: keeps `import triage_pipeline` working regardless of
+# how this script was launched.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
 import joblib
 import numpy as np
 import pandas as pd
@@ -102,14 +108,20 @@ from triage_pipeline import (
     make_console_safe,
     normalize_roman_urdu,
     preprocess_corpus_for_embedding,
+    project_path,
+    resolve_project_file,
 )
 
 warnings.filterwarnings("ignore")
 make_console_safe()
 
 DATA_FILE = "triage_mixed_language_dataset.csv"
-MODEL_DIR = "triage_model_embedding"
-RESULTS_FILE = "embedding_pipeline_results.csv"
+# Anchored to the project folder: training must overwrite the bundle the
+# predictors and the GUI actually load, not create a second copy in
+# whatever directory the run was started from - two bundles that disagree
+# is precisely the drift this project's shared pipeline exists to prevent.
+MODEL_DIR = project_path("triage_model_embedding")
+RESULTS_FILE = project_path("embedding_pipeline_results.csv")
 
 # TODO(Sir - open question 1 in ARCHITECTURE.md section 6): standardize the
 # embedding model. This is the safe default already used by
@@ -255,9 +267,10 @@ def main():
     print("EMBEDDING TRIAGE PIPELINE  -  train, compare, keep the best")
     print("=" * 78)
 
-    df = pd.read_csv(args.data)
+    data_path = resolve_project_file(args.data)
+    df = pd.read_csv(data_path)
     df["Complaint_Text"] = df["Complaint_Text"].fillna("").astype(str)
-    print(f"[ok] Loaded {len(df)} patients from {args.data}")
+    print(f"[ok] Loaded {len(df)} patients from {data_path}")
 
     y = df["Triage_Level"].values - 1          # dataset 1..4 -> classes 0..3
     raw_texts = df["Complaint_Text"].tolist()

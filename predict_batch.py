@@ -40,6 +40,13 @@
 
 import os
 import sys
+
+# See prediction.py: without this, `python -m predict_batch` and IDE
+# runners fail on "No module named 'triage_pipeline'".
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
 import pandas as pd
 
 from triage_pipeline import (
@@ -48,11 +55,15 @@ from triage_pipeline import (
     predict_dataframe,
     read_table,
     resolve_model_dir,
+    resolve_project_file,
     REQUIRED_INPUT_COLUMNS,
     TRIAGE_LABELS,
 )
 
-DEFAULT_INPUT = "batch_input_template.xlsx"
+# The template ships with the project, so the no-argument run must find it
+# from any directory. A file named on the command line is left exactly as
+# the caller typed it.
+DEFAULT_INPUT = resolve_project_file("batch_input_template.xlsx")
 
 # read_table now lives in triage_pipeline.py so this script and the GUI's
 # batch tab share ONE reader. The local copy here used a bare
@@ -81,6 +92,12 @@ def main():
     model_dir = None
     if "--model-dir" in argv:
         i = argv.index("--model-dir")
+        # Say what is wrong instead of dying on an IndexError traceback when
+        # the flag is passed with nothing after it.
+        if i + 1 >= len(argv):
+            print("[error] --model-dir needs a directory, e.g. "
+                  "--model-dir triage_model")
+            sys.exit(1)
         model_dir = argv[i + 1]
         del argv[i:i + 2]
 
