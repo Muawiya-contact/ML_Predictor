@@ -220,6 +220,11 @@ VARIANT_TO_CANONICAL = {
     for variant in variants
 }
 
+#: Every spelling the diacritization stage can resolve on its own - both the
+#: canonical forms and all their listed variants. fuzzy_correct_word() leaves
+#: these alone, because an exact dictionary entry beats a fuzzy guess.
+_DIACRITIZATION_KNOWN = set(VARIANT_TO_CANONICAL) | set(DIACRITIZATION_MAP)
+
 # ============================================================
 # FUZZY MATCHING VOCABULARY
 # Canonical (plain) medical terms used to correct unseen
@@ -345,8 +350,32 @@ RULE_REPLACEMENTS = {
 # ============================================================
 
 def fuzzy_correct_word(word, threshold=80):
-    """Replace a word with the closest canonical term if score >= threshold."""
+    """Replace a word with the closest canonical term if score >= threshold.
+
+    A word the diacritization dictionary ALREADY knows exactly is returned
+    untouched. Fuzzy matching is a guess for unseen spellings; when the next
+    stage has an exact entry for the word, that entry is ground truth and the
+    guess can only make it worse.
+
+    THE BUG THIS FIXES: fuzzy matching ran on every token, including ones
+    DIACRITIZATION_MAP lists verbatim, and RapidFuzz happily rewrote them to a
+    different medical concept because the nearest CANONICAL_VOCAB string is not
+    the nearest MEANING:
+
+        sina      (chest)      -> pasina  ->  pasīna      (sweating)
+        paseena   (sweating)   -> seena   ->  sēna        (chest)
+        crash     (accident)   -> rash    ->  kharish     (itching)
+        sunstroke (heat stroke)-> stroke  ->  falij       (paralysis/CVA)
+
+    "paseena" occurs 23 times in triage_mixed_language_dataset.csv, so this
+    also mislabelled real training rows, not just live input. STAGE_NOTES
+    already documented this guard ("It only fires on spellings the dictionary
+    in the next stage does not already know") - it was described but never
+    implemented.
+    """
     if len(word) < 3:
+        return word
+    if word in _DIACRITIZATION_KNOWN:
         return word
     match, score, _ = process.extractOne(word, CANONICAL_VOCAB, scorer=fuzz.token_sort_ratio)
     return match if score >= threshold else word
