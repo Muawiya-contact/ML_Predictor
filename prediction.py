@@ -6,6 +6,18 @@
 # Run:  python prediction.py
 # (For predicting MANY patients from a file, use predict_batch.py instead.)
 
+import os
+import sys
+
+# Python only puts this file's folder on sys.path when the file is
+# launched directly. Under `python -m prediction`, an IDE run
+# configuration, or any embedded/wrapped launch it does not, and the
+# project import below then fails with
+# "ModuleNotFoundError: No module named 'triage_pipeline'".
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
 from triage_pipeline import (describe_model, load_artifacts, predict_one,
                              resolve_model_dir, TRIAGE_LABELS)
 

@@ -60,10 +60,22 @@ import csv
 import json
 import os
 import queue
+import sys
 import threading
 import tkinter as tk
 import traceback
 from tkinter import filedialog, messagebox, ttk
+
+# See prediction.py: a desktop shortcut, a launcher script or an IDE runner
+# may not put this file's folder on sys.path, and every `from
+# triage_pipeline import ...` below (they are deliberately lazy, inside the
+# methods that need them) would then fail at the moment the user clicks a
+# button rather than at startup.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
+from triage_pipeline import resolve_project_file
 
 # ---------------------------------------------------------------- theme
 BG = "#f4f6f8"
@@ -83,14 +95,20 @@ LEVEL_BLURB = [
     "Can wait or be redirected",
 ]
 
-MODEL_DIR = "triage_model"
-EMBED_MODEL_DIR = "triage_model_embedding"
-STOPWORDS_FILE = "learned_stopwords.json"
-PIPELINE_RESULTS = "embedding_pipeline_results.csv"
-EVAL_RESULTS = "embedding_evaluation_results.csv"
-EVAL_NEIGHBOURS = "embedding_evaluation_neighbours.csv"
-CLUSTERS_FILE = "evaluation_clusters.json"
-DATASET_FILE = "triage_mixed_language_dataset.csv"
+# Every one of these is a file that SHIPS WITH the project, so each is
+# resolved against the code rather than against the working directory. The
+# app is launched from a shortcut, a wrapper script or an IDE as often as
+# from a terminal sitting in the project folder; with bare relative names
+# every Results panel reported "not generated yet" and offered a command to
+# regenerate files that were already there.
+MODEL_DIR = resolve_project_file("triage_model")
+EMBED_MODEL_DIR = resolve_project_file("triage_model_embedding")
+STOPWORDS_FILE = resolve_project_file("learned_stopwords.json")
+PIPELINE_RESULTS = resolve_project_file("embedding_pipeline_results.csv")
+EVAL_RESULTS = resolve_project_file("embedding_evaluation_results.csv")
+EVAL_NEIGHBOURS = resolve_project_file("embedding_evaluation_neighbours.csv")
+CLUSTERS_FILE = resolve_project_file("evaluation_clusters.json")
+DATASET_FILE = resolve_project_file("triage_mixed_language_dataset.csv")
 
 # Every figure the app shows is read from one of the files above. When a file
 # is missing the app prints the command that produces it rather than inventing
@@ -1011,7 +1029,8 @@ class TriageGUI(tk.Tk):
 
         row = tk.Frame(pad, bg=CARD)
         row.pack(fill="x")
-        self.batch_path = tk.StringVar(value="sample_100_patients.xlsx")
+        self.batch_path = tk.StringVar(
+            value=resolve_project_file("sample_100_patients.xlsx"))
         tk.Entry(row, textvariable=self.batch_path, font=("Segoe UI", 10),
                  relief="solid", bd=1).pack(side="left", fill="x",
                                             expand=True, ipady=3)

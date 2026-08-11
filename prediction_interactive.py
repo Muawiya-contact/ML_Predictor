@@ -3,9 +3,15 @@
 # Uses the shared pipeline from triage_pipeline.py.
 # Run: python prediction_interactive.py
 
+import os
 import sys
 
-import numpy as np
+# See prediction.py: without this, `python -m prediction_interactive` and
+# IDE runners fail on "No module named 'triage_pipeline'".
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
 from triage_pipeline import (
     describe_model,
     load_artifacts,

@@ -30,6 +30,54 @@ from rapidfuzz import process, fuzz
 
 
 # ------------------------------------------------------------
+# Where the project's own files live
+#
+# Every asset this project ships - the two model bundles, the learned
+# stop-word list, the dataset, the results CSVs - used to be named by a
+# bare relative path ('triage_model', 'learned_stopwords.json', ...).
+# A bare relative path is resolved against the CURRENT WORKING
+# DIRECTORY, not against the code, so the whole project only worked
+# when it happened to be launched from its own folder. Run any script
+# from anywhere else - an IDE with a different workspace root, a
+# desktop shortcut, a scheduled job, `cd ..` - and two things happened:
+#
+#   * load_artifacts() died with
+#     FileNotFoundError: 'triage_model/model.pkl', and
+#   * load_stopwords() silently returned an EMPTY set, because it is
+#     written to degrade gracefully on a fresh clone. That one is the
+#     dangerous case: the model was TRAINED with stop-word removal, so
+#     inference then ran a different text pipeline than training, with
+#     no error anywhere - just quietly different triage levels.
+#
+# Anchoring to __file__ makes the location of the code, not the
+# location of the terminal, decide where the project's files are.
+# ------------------------------------------------------------
+
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+def project_path(*parts):
+    """Absolute path to a file that ships with this project."""
+    return os.path.join(PROJECT_ROOT, *parts)
+
+
+def resolve_project_file(path):
+    """Resolve a project asset without breaking caller-supplied paths.
+
+    A path that is absolute, or that exists relative to the current
+    directory, is honoured exactly as given - so an operator can still
+    keep a local override next to their own working files, and a file
+    picked in a file dialog is never redirected. Only when the path
+    does not resolve against the cwd do we fall back to the copy that
+    ships with the project.
+    """
+    if not path or os.path.isabs(path) or os.path.exists(path):
+        return path
+    shipped = project_path(path)
+    return shipped if os.path.exists(shipped) else path
+
+
+# ------------------------------------------------------------
 # Console safety (Windows)
 # ------------------------------------------------------------
 
@@ -656,7 +704,7 @@ REPRESENTATION_BLOCKS = {
 
 def read_manifest(model_dir):
     """Describe a saved model directory. Falls back to the legacy layout."""
-    path = os.path.join(model_dir, MANIFEST_FILE)
+    path = os.path.join(resolve_project_file(model_dir), MANIFEST_FILE)
     if not os.path.exists(path):
         return dict(LEGACY_MANIFEST)
     import json
@@ -710,12 +758,16 @@ def resolve_model_dir(model_dir=None, allow_fallback=True):
     crashing on an import deep inside a prediction.
     """
     if model_dir:
-        return model_dir, ''
+        return resolve_project_file(model_dir), ''
 
-    candidate = EMBEDDING_MODEL_DIR
+    # resolve_project_file() is what makes this work from any working
+    # directory: without it the embedding bundle "was not found" whenever
+    # the caller happened to be standing somewhere else, and every such
+    # run silently downgraded itself to the dictionary model.
+    candidate = resolve_project_file(EMBEDDING_MODEL_DIR)
     if not os.path.exists(os.path.join(candidate, 'model.pkl')):
-        return DICTIONARY_MODEL_DIR, (
-            f"'{candidate}/' not found - using the dictionary model. "
+        return resolve_project_file(DICTIONARY_MODEL_DIR), (
+            f"'{EMBEDDING_MODEL_DIR}/' not found - using the dictionary model. "
             "Run: python train_embedding_pipeline.py")
 
     info = describe_model(candidate)
@@ -723,7 +775,7 @@ def resolve_model_dir(model_dir=None, allow_fallback=True):
         try:
             import sentence_transformers          # noqa: F401
         except ImportError:
-            return DICTIONARY_MODEL_DIR, (
+            return resolve_project_file(DICTIONARY_MODEL_DIR), (
                 f"'{candidate}/' needs sentence-transformers "
                 f"({info['embedding_model']}), which is not installed - "
                 "falling back to the dictionary model in "
@@ -734,6 +786,8 @@ def resolve_model_dir(model_dir=None, allow_fallback=True):
 
 def load_artifacts(model_dir='triage_model'):
     """Load the trained model, vectorizers, scaler, encoders and manifest."""
+    model_dir = resolve_project_file(model_dir)
+
     def p(name):
         return os.path.join(model_dir, name)
 

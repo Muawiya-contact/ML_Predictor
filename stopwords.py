@@ -60,7 +60,14 @@ training and prediction always strip exactly the same tokens.
 import json
 import math
 import os
+import sys
 from collections import Counter
+
+# See prediction.py: keeps `import triage_pipeline` working regardless of
+# how this module was launched.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
 
 import numpy as np
 
@@ -71,6 +78,8 @@ from triage_pipeline import (
     DIACRITIZATION_MAP,
     MEDICAL_WEIGHTS,
     make_console_safe,   # re-exported so scripts can import it from here too
+    project_path,
+    resolve_project_file,
 )
 
 STOPWORDS_FILE = "learned_stopwords.json"
@@ -324,7 +333,14 @@ def remove_stopwords(text, stopword_set):
 
 
 def save_stopwords(report, path=STOPWORDS_FILE):
-    """Write the full learned-stop-word report (list + statistics) to JSON."""
+    """Write the full learned-stop-word report (list + statistics) to JSON.
+
+    The default lands beside the code, so the list is written where
+    load_stopwords() will look for it rather than into whichever
+    directory the training run happened to start from.
+    """
+    if path == STOPWORDS_FILE:
+        path = project_path(STOPWORDS_FILE)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(report, f, indent=2, ensure_ascii=False)
     return path
@@ -335,7 +351,16 @@ def load_stopwords(path=STOPWORDS_FILE):
 
     Returning empty (rather than raising) keeps every existing predictor
     working on a fresh clone where training has not been run.
+
+    That graceful degradation is also why this lookup must not depend on
+    the working directory. The models in this project were trained WITH
+    stop-word removal; silently returning an empty set because the
+    process started in a different folder would run inference through a
+    different text pipeline than training and quietly change predicted
+    triage levels. resolve_project_file() keeps "not learned yet" and
+    "learned, but you are standing somewhere else" from looking alike.
     """
+    path = resolve_project_file(path)
     if not os.path.exists(path):
         return set()
     with open(path, "r", encoding="utf-8") as f:
@@ -399,8 +424,9 @@ def _main():
 
     make_console_safe()
 
-    df = pd.read_csv(args.data)
-    print(f"[ok] Loaded {len(df)} complaints from {args.data}")
+    data_path = resolve_project_file(args.data)
+    df = pd.read_csv(data_path)
+    print(f"[ok] Loaded {len(df)} complaints from {data_path}")
 
     # Learn on the same representation the stop words are applied to:
     # normalized + fuzzy-corrected text (see ARCHITECTURE.md, Task 2).

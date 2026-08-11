@@ -39,9 +39,16 @@ Every run after that works with no internet.
 =======================================================================
 """
 
+import os
 import sys
 import argparse
 import warnings
+
+# See prediction.py: keeps `import triage_pipeline` working regardless of
+# how this script was launched.
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
 
 import numpy as np
 import pandas as pd
@@ -54,6 +61,8 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 from triage_pipeline import (
     normalize_roman_urdu,
     build_attention_weights,
+    project_path,
+    resolve_project_file,
     NUMERICAL_FEATURES,
 )
 
@@ -208,8 +217,9 @@ def main():
     print("EMBEDDING vs DICTIONARY  -  TRIAGE TEXT REPRESENTATION EXPERIMENT")
     print("=" * 70)
 
-    df = pd.read_csv(args.data)
-    print(f"[ok] Loaded {len(df)} patients from {args.data}")
+    data_path = resolve_project_file(args.data)
+    df = pd.read_csv(data_path)
+    print(f"[ok] Loaded {len(df)} patients from {data_path}")
 
     # Normalized text (for dictionary path) and raw text (for embeddings)
     df["Complaint_Text"] = df["Complaint_Text"].fillna("")
@@ -265,8 +275,9 @@ def main():
               f"({best['method']}).")
 
     # ---- save results + synonym check ----
-    pd.DataFrame(results).to_csv("embedding_experiment_results.csv", index=False)
-    print("\n[ok] Results saved to 'embedding_experiment_results.csv'")
+    results_path = project_path("embedding_experiment_results.csv")
+    pd.DataFrame(results).to_csv(results_path, index=False)
+    print(f"\n[ok] Results saved to '{results_path}'")
 
     synonym_check(model)
     print("\nDone.")
