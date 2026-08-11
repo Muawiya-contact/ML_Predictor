@@ -6,11 +6,17 @@
 # Run:  python prediction.py
 # (For predicting MANY patients from a file, use predict_batch.py instead.)
 
-from triage_pipeline import load_artifacts, predict_one, TRIAGE_LABELS
+from triage_pipeline import (describe_model, load_artifacts, predict_one,
+                             resolve_model_dir, TRIAGE_LABELS)
 
-print("Loading model...")
-art = load_artifacts("triage_model")
-print("[ok] Model and encoders loaded successfully.")
+MODEL_DIR, _note = resolve_model_dir()
+if _note:
+    print(f"[note] {_note}")
+print(f"Loading model from {MODEL_DIR}/ ...")
+art = load_artifacts(MODEL_DIR)
+MODEL_INFO = describe_model(MODEL_DIR)
+print(f"[ok] Model and encoders loaded successfully.")
+print(f"     Deployed method: {MODEL_INFO['method']}  ({MODEL_INFO['basis']})")
 
 
 def predict_triage(complaint, age, heart_rate, systolic_bp, diastolic_bp,

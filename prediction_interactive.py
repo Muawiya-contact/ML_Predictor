@@ -3,12 +3,16 @@
 # Uses the shared pipeline from triage_pipeline.py.
 # Run: python prediction_interactive.py
 
+import sys
+
 import numpy as np
 from triage_pipeline import (
+    describe_model,
     load_artifacts,
     predict_one,
     normalize_roman_urdu,
     make_console_safe,
+    resolve_model_dir,
     TRIAGE_LABELS_SHORT,
 )
 
@@ -24,9 +28,22 @@ make_console_safe()
 print("\n" + "=" * 60)
 print("   ROMAN URDU EMERGENCY TRIAGE SYSTEM")
 print("=" * 60)
-print("Loading model...", end=" ")
-art = load_artifacts("triage_model")
-print("[ok] Ready.\n")
+_cli_dir = None
+if "--model-dir" in sys.argv:
+    _cli_dir = sys.argv[sys.argv.index("--model-dir") + 1]
+MODEL_DIR, _note = resolve_model_dir(_cli_dir)
+if _note:
+    print(f"[note] {_note}")
+
+print(f"Loading model from {MODEL_DIR}/ ...", end=" ")
+art = load_artifacts(MODEL_DIR)
+INFO = describe_model(MODEL_DIR)
+print("[ok] Ready.")
+print(f"  Deployed method : {INFO['method']}")
+print(f"  Text features   : {INFO['basis']}"
+      + (f"  ({INFO['embedding_model']}, {INFO['embedding_dim']} dims)"
+         if INFO['uses_embeddings'] else ""))
+print()
 
 # ============================================================
 # SAFE INPUT HELPERS

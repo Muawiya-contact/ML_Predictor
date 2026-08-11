@@ -11,6 +11,16 @@
 #   python predict_batch.py my_patients.xlsx
 #   python predict_batch.py my_patients.csv
 #   python predict_batch.py my_patients.xlsx  results.xlsx
+#   python predict_batch.py my_patients.csv --model-dir triage_model
+#
+# By default this runs the DEPLOYED model in triage_model_embedding/ (the
+# offline sentence-embedding pipeline). Pass --model-dir triage_model to
+# run the older dictionary + Bag-of-Words model instead. Whichever runs is
+# printed at startup, so the method behind a result sheet is never a guess.
+#
+# CSV files are read with encoding detection (utf-8 -> utf-8-sig -> cp1252
+# -> latin-1), so a sheet exported from Excel on Windows no longer fails
+# with UnicodeDecodeError.
 #
 # INPUT FILE COLUMNS (header row required, any order):
 #   Complaint_Text, Age, Gender, Mode_of_Arrival, Heart_Rate,
@@ -33,23 +43,21 @@ import sys
 import pandas as pd
 
 from triage_pipeline import (
+    describe_model,
     load_artifacts,
     predict_dataframe,
+    read_table,
+    resolve_model_dir,
     REQUIRED_INPUT_COLUMNS,
     TRIAGE_LABELS,
 )
 
 DEFAULT_INPUT = "batch_input_template.xlsx"
 
-
-def read_table(path):
-    """Read a CSV or Excel file into a DataFrame."""
-    ext = os.path.splitext(path)[1].lower()
-    if ext in (".xlsx", ".xls"):
-        return pd.read_excel(path)
-    if ext in (".csv", ".txt"):
-        return pd.read_csv(path)
-    raise ValueError(f"Unsupported file type '{ext}'. Use .xlsx or .csv")
+# read_table now lives in triage_pipeline.py so this script and the GUI's
+# batch tab share ONE reader. The local copy here used a bare
+# pd.read_csv(path), which assumes UTF-8 and died with UnicodeDecodeError
+# on any CSV exported from Excel on a Windows machine.
 
 
 def write_table(df, base_path_no_ext):
@@ -69,22 +77,38 @@ def write_table(df, base_path_no_ext):
 
 def main():
     # ---- resolve input / output paths ----
-    in_path = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_INPUT
+    argv = [a for a in sys.argv[1:]]
+    model_dir = None
+    if "--model-dir" in argv:
+        i = argv.index("--model-dir")
+        model_dir = argv[i + 1]
+        del argv[i:i + 2]
+
+    in_path = argv[0] if argv else DEFAULT_INPUT
 
     if not os.path.exists(in_path):
         print(f"[error] Input file not found: {in_path}")
         print(f"        Provide a CSV/Excel file, e.g.:  python predict_batch.py my_patients.xlsx")
         sys.exit(1)
 
-    if len(sys.argv) > 2:
-        out_base = os.path.splitext(sys.argv[2])[0]
+    if len(argv) > 1:
+        out_base = os.path.splitext(argv[1])[0]
     else:
         out_base = os.path.splitext(in_path)[0] + "_predictions"
 
     # ---- load model ----
-    print("Loading model and encoders...")
-    art = load_artifacts("triage_model")
-    print("[ok] Model ready.\n")
+    model_dir, note = resolve_model_dir(model_dir)
+    if note:
+        print(f"[note] {note}")
+    print(f"Loading model and encoders from '{model_dir}/'...")
+    art = load_artifacts(model_dir)
+    info = describe_model(model_dir)
+    print(f"[ok] Model ready.")
+    print(f"     Deployed method : {info['method']}")
+    print(f"     Text features   : {info['basis']}"
+          + (f"  ({info['embedding_model']}, {info['embedding_dim']} dims)"
+             if info['uses_embeddings'] else ""))
+    print()
 
     # ---- read patients ----
     print(f"Reading patients from: {in_path}")

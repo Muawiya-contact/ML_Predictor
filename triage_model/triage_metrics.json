@@ -1,20 +1,20 @@
 {
-    "accuracy": 0.9045643153526971,
+    "accuracy": 0.9004149377593361,
     "overall_over_triage_rate": 5.394190871369295,
-    "overall_under_triage_rate": 4.149377593360995,
-    "correct_classification_rate": 90.45643153526972,
+    "overall_under_triage_rate": 4.564315352697095,
+    "correct_classification_rate": 90.04149377593362,
     "total_patients": 241,
     "confusion_matrix": [
         [
             89,
-            5,
-            0,
+            4,
+            1,
             0
         ],
         [
             8,
-            63,
-            4,
+            62,
+            5,
             0
         ],
         [
@@ -42,8 +42,8 @@
             "triage_level": 1,
             "total_actual": 75,
             "over_triage_rate": 10.666666666666668,
-            "under_triage_rate": 5.333333333333334,
-            "correct_rate": 84.0
+            "under_triage_rate": 6.666666666666667,
+            "correct_rate": 82.66666666666667
         },
         "class_2": {
             "triage_level": 2,

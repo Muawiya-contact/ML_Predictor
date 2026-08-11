@@ -35,8 +35,22 @@ RUN
 -----------------------------------------------------------------------
     python triage_gui.py
 
-Needs the trained model in triage_model/ (already shipped). The Results
-tab additionally reads the CSV/JSON files produced by
+-----------------------------------------------------------------------
+WHICH MODEL IS LIVE
+-----------------------------------------------------------------------
+The app predicts with triage_model_embedding/ (the offline
+sentence-embedding pipeline) when that directory exists, and falls back
+to the dictionary + Bag-of-Words model in triage_model/ when
+sentence-transformers is not installed. Whichever is live is named in
+the status bar, on the Triage a Patient tab, and on the Model Score tab
+- it is never left to be inferred from a results table.
+
+Two different systems produce numbers in this app. Every table states
+which one produced it:
+  * dictionary + Bag-of-Words counts with domain attention weights
+  * offline sentence-transformer embeddings (384 dims)
+
+The Results tab additionally reads the CSV/JSON files produced by
 train_embedding_pipeline.py and embedding_evaluation.py, and simply says
 so if they have not been generated yet.
 =======================================================================
@@ -81,6 +95,18 @@ DATASET_FILE = "triage_mixed_language_dataset.csv"
 # Every figure the app shows is read from one of the files above. When a file
 # is missing the app prints the command that produces it rather than inventing
 # a plausible-looking number.
+# Plain-English name for every text representation, so a table row always
+# states which pipeline produced its numbers. Two very different pipelines
+# are reported side by side in this app - a dictionary + Bag-of-Words count
+# model, and an offline sentence-transformer - and without this the reader
+# has no way to tell an "A" row from a "C" row apart from the letter.
+REPRESENTATION_LABEL = {
+    "dictionary_bow": "dictionary + BoW counts",
+    "embeddings_raw": "sentence-transformer (raw text)",
+    "embeddings_preprocessed": "sentence-transformer (preprocessed)",
+    "hybrid": "dictionary + BoW  AND  sentence-transformer",
+}
+
 MISSING_HINT = {
     PIPELINE_RESULTS: "python train_embedding_pipeline.py",
     EVAL_RESULTS: "python embedding_evaluation.py",
@@ -165,6 +191,45 @@ def fnum(value, default=None):
 
 
 # ---------------------------------------------------------------------
+# Why a token was kept
+#
+# The learner drops a token only when THREE things hold: it is frequent
+# enough, its normalized mutual information is at or below the threshold,
+# AND its chi-square test of independence is not significant. The tab used
+# to collapse all three into one sentence, "kept - carries triage signal",
+# shown whenever the token was not judged uninformative.
+#
+# That sentence is wrong for a token like "hai": its mutual information is
+# 0.0062, BELOW the 0.01 threshold, so the MI column on the same row says it
+# carries essentially no signal. What actually saved "hai" is the chi-square
+# test (p = 0.0007). The row therefore contradicted itself and read as a
+# miscategorisation. Name the criterion that decided it instead.
+# ---------------------------------------------------------------------
+
+def keep_reason(stat, thresholds):
+    """The specific criterion that stopped this token becoming a stop word."""
+    if stat["is_stopword"]:
+        return "STOP WORD - removed"
+    if stat["clinically_protected"] and stat["is_uninformative"]:
+        return "kept - clinical safety guard (medical vocabulary)"
+    if not stat["is_high_frequency"]:
+        return "kept - not frequent enough to be tested"
+
+    mi_ok = stat["normalized_mutual_information"] <= thresholds["mi_threshold"]
+    p_ok = stat["chi_square_p_value"] > thresholds["alpha"]
+    if not mi_ok and not p_ok:
+        return "kept - both tests say it tracks the triage level"
+    if not mi_ok:
+        return (f"kept - mutual information "
+                f"{stat['normalized_mutual_information']:.5f} is above the "
+                f"{thresholds['mi_threshold']} threshold")
+    # mi_ok and not p_ok: the interesting case ("hai", "mein", "aur").
+    return (f"kept - chi-square is significant (p={stat['chi_square_p_value']:.4f} "
+            f"<= {thresholds['alpha']}), so it is NOT independent of triage, "
+            f"even though its MI is low")
+
+
+# ---------------------------------------------------------------------
 # Main window
 # ---------------------------------------------------------------------
 
@@ -190,6 +255,8 @@ class TriageGUI(tk.Tk):
 
         self.artifacts = None
         self.stopword_report = None
+        self.model_info = None          # which method is actually deployed
+        self.model_dir = None
         self._work_queue = queue.Queue()
 
         self._build_style()
@@ -301,23 +368,100 @@ class TriageGUI(tk.Tk):
         self.after(80, self._drain_queue)
 
     def _load_model(self):
-        from triage_pipeline import load_artifacts
-        art = load_artifacts(MODEL_DIR)
+        from triage_pipeline import describe_model, load_artifacts, resolve_model_dir
+
+        # Which model this app predicts with is now resolved, reported and
+        # shown on screen. It used to be the hard-coded string "triage_model"
+        # - the dictionary + Bag-of-Words model - while the Results tabs
+        # showed embedding scores beside it with nothing saying that the
+        # live predictions came from neither of the embedding rows.
+        model_dir, note = resolve_model_dir()
+        art = load_artifacts(model_dir)
+        info = describe_model(model_dir)
+
+        # Warm the sentence-transformer here, on the background thread. It is
+        # loaded lazily on first use, and first use is inside predict_one() on
+        # the UI thread - which would freeze the window for several seconds on
+        # the first "Triage this patient" click.
+        if info["uses_embeddings"]:
+            from triage_pipeline import build_text_features
+            build_text_features(art, ["warmup"])
+
         report = None
         if os.path.exists(STOPWORDS_FILE):
             with open(STOPWORDS_FILE, "r", encoding="utf-8") as f:
                 report = json.load(f)
-        return art, report
+        return art, report, info, model_dir, note
 
     def _done_load_model(self, payload):
-        self.artifacts, self.stopword_report = payload
+        (self.artifacts, self.stopword_report,
+         self.model_info, self.model_dir, note) = payload
         n_stops = len(self.stopword_report["stopwords"]) if self.stopword_report else 0
         self.status.set(
-            f"Ready.  Model loaded from {MODEL_DIR}/  |  "
-            f"{n_stops} learned stop words  |  everything runs offline.")
+            f"Ready.  Deployed: {self.model_info['method']}  "
+            f"({self.model_info['basis']}) from {self.model_dir}/  |  "
+            f"{n_stops} learned stop words  |  everything runs offline."
+            + (f"  |  {note}" if note else ""))
         self._fill_dropdowns()
         self._populate_stopwords()
+        self._refresh_deployed_banners(note)
         self.predict_btn.config(state="normal")
+        self.batch_btn.config(state="normal")
+
+    def _deployed_line(self):
+        """One-line 'this is the model making the predictions' summary."""
+        if not self.model_info:
+            return "Currently deployed: loading..."
+        i = self.model_info
+        line = (f"Currently deployed: {i['method']}   ·   "
+                f"text features from {i['basis']}   ·   {self.model_dir}/")
+        if i["uses_embeddings"]:
+            line += f"\nembedding model: {i['embedding_model']}  ({i['embedding_dim']} dims)"
+        return line
+
+    def _refresh_deployed_banners(self, note=""):
+        """Fill in everything that depends on WHICH model finished loading."""
+        # Redraw the two tables that mark the deployed method. They are built
+        # at startup so the window paints immediately, but the model loads on
+        # a background thread, so the marker is only correct after this call.
+        for box, render in [(getattr(self, "_results_methods_box", None),
+                             self._results_section_methods),
+                            (getattr(self, "_score_model_box", None),
+                             self._score_section_model)]:
+            if box is None:
+                continue
+            for child in box.winfo_children():
+                child.destroy()
+            render(box)
+
+        live = []
+        for label in getattr(self, "_deployed_labels", []):
+            if not label.winfo_exists():
+                continue
+            text = self._deployed_line()
+            if note:
+                text += f"\n{note}"
+            label.configure(text=text)
+            live.append(label)
+        self._deployed_labels = live
+
+    def _deployed_banner(self, parent, prefix=""):
+        """A prominent, always-visible statement of what is actually running."""
+        holder = tk.Frame(parent, bg="#eaf3ea", highlightbackground="#b7d7b7",
+                          highlightthickness=1)
+        inner = tk.Frame(holder, bg="#eaf3ea")
+        inner.pack(fill="x", padx=12, pady=9)
+        if prefix:
+            tk.Label(inner, text=prefix, bg="#eaf3ea", fg=MUTED,
+                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
+        label = tk.Label(inner, text=self._deployed_line(), bg="#eaf3ea",
+                         fg="#1e5c2e", font=("Segoe UI Semibold", 9),
+                         anchor="w", justify="left", wraplength=940)
+        label.pack(fill="x")
+        if not hasattr(self, "_deployed_labels"):
+            self._deployed_labels = []
+        self._deployed_labels.append(label)
+        return holder
 
     # =================================================================
     # TAB 1 - Triage a patient
@@ -412,6 +556,8 @@ class TriageGUI(tk.Tk):
         rpad.pack(fill="both", expand=True, padx=16, pady=14)
 
         heading(rpad, "Result").pack(fill="x")
+        self._deployed_banner(
+            rpad, "This tab's predictions come from:").pack(fill="x", pady=(6, 0))
 
         # No fixed height: at high DPI the two stacked labels are taller than
         # any hard-coded value, and the subtitle gets clipped.
@@ -465,9 +611,9 @@ class TriageGUI(tk.Tk):
             self.combos[name].set(want if want in values else values[0])
 
     def _do_predict(self):
-        from triage_pipeline import (normalize_roman_urdu, predict_one,
-                                     preprocess_for_embedding)
+        from triage_pipeline import predict_one, preprocess_stages
 
+        uses_emb = bool(self.model_info and self.model_info["uses_embeddings"])
         text = self.complaint.get("1.0", "end").strip()
         if not text:
             messagebox.showwarning("No complaint", "Please enter a complaint.")
@@ -506,20 +652,35 @@ class TriageGUI(tk.Tk):
 
         self._draw_proba(proba, level)
 
-        normalized = normalize_roman_urdu(text)
-        cleaned = preprocess_for_embedding(text)
-        removed = [w for w in normalized.split() if w not in cleaned.split()]
+        stages = preprocess_stages(text)
+        removed = stages[-1].get("dropped") or []
 
         self.stages.config(state="normal")
         self.stages.delete("1.0", "end")
-        self.stages.insert("end", "1. raw input\n", "h")
-        self.stages.insert("end", f"   {text}\n\n")
-        self.stages.insert("end", "2. cleaned + fuzzy matched + diacritized\n", "h")
-        self.stages.insert("end", f"   {normalized}\n\n")
-        self.stages.insert("end", "3. learned stop words removed  (fed to the embedding model)\n", "h")
-        self.stages.insert("end", f"   {cleaned}\n")
+        for i, stage in enumerate(stages):
+            mark = "" if stage["key"] == "raw" else (
+                "" if stage["changed"] else "   (no change)")
+            self.stages.insert("end", f"{i}. {stage['title'].lower()}{mark}\n", "h")
+            self.stages.insert("end", f"   {stage['text']}\n")
         if removed:
-            self.stages.insert("end", f"\n   dropped: {', '.join(removed)}\n")
+            self.stages.insert("end",
+                               f"\n   stop words dropped: {', '.join(removed)}\n")
+        else:
+            self.stages.insert("end",
+                               "\n   no learned stop words were present\n")
+        # Which stage the live model is actually fed differs by method: the
+        # Bag-of-Words vectorizers were fitted WITHOUT stop-word removal, so
+        # they get the diacritized text; the embedding path gets the stripped
+        # text. Saying "this is what the model received" under the last panel
+        # regardless would have been wrong for one of them.
+        if uses_emb:
+            fed = f"step {len(stages) - 1} ({stages[-1]['title'].lower()})"
+            consumer = "the sentence-transformer"
+        else:
+            fed = f"step {len(stages) - 2} ({stages[-2]['title'].lower()})"
+            consumer = ("the Bag-of-Words vectorizers, which were fitted "
+                        "before stop-word removal existed")
+        self.stages.insert("end", f"\n   {consumer} received {fed}\n")
         self.stages.tag_config("h", foreground=ACCENT,
                                font=("Consolas", 9, "bold"))
         self.stages.config(state="disabled")
@@ -587,51 +748,58 @@ class TriageGUI(tk.Tk):
         self.explore_out.pack(fill="both", expand=True, pady=(16, 0))
 
     def _do_explore(self):
-        from triage_pipeline import (apply_diacritization, fuzzy_correct_text,
-                                     normalize_roman_urdu,
-                                     preprocess_for_embedding)
-        import re
+        # preprocess_stages() runs the SAME functions, in the same order, that
+        # normalize_roman_urdu() and preprocess_for_embedding() run. The tab
+        # used to re-implement the pipeline inline and skipped the rule
+        # replacement stage entirely, so "saans phulna" -> "saans phoolna" and
+        # "thanda pasina" -> "sweating" happened invisibly and words appeared
+        # to vanish between the last two panels for no stated reason.
+        from triage_pipeline import preprocess_stages
 
         for w in self.explore_out.winfo_children():
             w.destroy()
 
         raw = self.explore_var.get().strip()
         if not raw:
+            # Say so. Returning silently cleared the panel and left the tab
+            # blank, which is indistinguishable from the analysis crashing.
+            body(self.explore_out,
+                 "Type a complaint above and press Analyse. "
+                 "There is nothing to run the pipeline on yet.",
+                 fg=MUTED, size=9).pack(fill="x")
             return
 
-        lowered = re.sub(r"[^a-z\s]", " ", raw.lower())
-        fuzzed = fuzzy_correct_text(lowered)
-        diacritized = apply_diacritization(fuzzed)
-        normalized = normalize_roman_urdu(raw)
-        final = preprocess_for_embedding(raw)
+        stages = preprocess_stages(raw)
+        final = stages[-1]["text"]
 
-        stages = [
-            ("1  Raw input", raw,
-             "exactly what the triage nurse typed"),
-            ("2  Lowercase + punctuation stripped", " ".join(lowered.split()),
-             "everything except a-z becomes a space"),
-            ("3  Fuzzy spelling correction", fuzzed,
-             "RapidFuzz maps misspellings onto the canonical vocabulary at >=80% similarity"),
-            ("4  Diacritization", diacritized,
-             "every known spelling variant collapses to one canonical form"),
-            ("5  Learned stop words removed", final,
-             "Contribution 1 - the list was learned from the data, not hand-written"),
-        ]
-
-        for title, text, note in stages:
+        for i, stage in enumerate(stages):
             block = tk.Frame(self.explore_out, bg=CARD)
             block.pack(fill="x", pady=(0, 10))
-            tk.Label(block, text=title, bg=CARD, fg=ACCENT,
-                     font=("Segoe UI Semibold", 10), anchor="w").pack(fill="x")
-            tk.Label(block, text=text or "(empty)", bg="#fbfcfd", fg=INK,
+            head = tk.Frame(block, bg=CARD)
+            head.pack(fill="x")
+            tk.Label(head, text=f"{i}  {stage['title']}", bg=CARD, fg=ACCENT,
+                     font=("Segoe UI Semibold", 10), anchor="w").pack(side="left")
+            if stage["key"] != "raw":
+                # Say explicitly whether the stage did anything. Without this a
+                # stage that legitimately had nothing to correct is
+                # indistinguishable from a stage that never ran.
+                changed = stage["changed"]
+                tk.Label(head,
+                         text=("changed this text" if changed
+                               else "ran - nothing to change here"),
+                         bg="#eaf3ea" if changed else "#eef1f4",
+                         fg="#1e5c2e" if changed else MUTED,
+                         font=("Segoe UI", 8), padx=6).pack(side="right")
+            tk.Label(block, text=stage["text"] or "(empty)", bg="#fbfcfd", fg=INK,
                      font=("Consolas", 11), anchor="w", justify="left",
                      wraplength=1000, padx=10, pady=7,
                      relief="solid", bd=1).pack(fill="x", pady=(2, 1))
-            tk.Label(block, text=note, bg=CARD, fg=MUTED,
-                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
+            tk.Label(block, text=stage["note"], bg=CARD, fg=MUTED,
+                     font=("Segoe UI", 8), anchor="w", justify="left",
+                     wraplength=1000).pack(fill="x")
 
         # ---- word-by-word accounting ----
-        dropped = [w for w in normalized.split() if w not in final.split()]
+        dropped = stages[-1].get("dropped") or []
         if dropped and self.stopword_report:
             stats = {t["token"]: t for t in self.stopword_report["token_statistics"]}
             box = tk.Frame(self.explore_out, bg=CARD)
@@ -668,9 +836,57 @@ class TriageGUI(tk.Tk):
                      anchor="w", wraplength=980, justify="left").pack(fill="x")
         elif not dropped:
             tk.Label(self.explore_out,
-                     text="No stop words were present in this complaint.",
+                     text="No learned stop words were present in this complaint.",
                      bg=CARD, fg=MUTED, font=("Segoe UI", 9),
                      anchor="w").pack(fill="x")
+
+        # ---- and, just as importantly, what was KEPT ----
+        # "Stop words removed" reads as "all the filler is gone", and it is
+        # not: "hai" survives on purpose because the chi-square test says it
+        # does track the triage level on this dataset. Showing the surviving
+        # filler with its reason is the difference between a misleading label
+        # and an explained one.
+        self._explain_kept_fillers(final)
+
+    def _explain_kept_fillers(self, final_text):
+        if not self.stopword_report:
+            return
+        stats = {t["token"]: t for t in self.stopword_report["token_statistics"]}
+        kept = [stats[w] for w in dict.fromkeys(final_text.split())
+                if w in stats and not stats[w]["is_stopword"]
+                and not stats[w]["clinically_protected"]]
+        if not kept:
+            return
+
+        box = tk.Frame(self.explore_out, bg=CARD)
+        box.pack(fill="x", pady=(10, 0))
+        tk.Label(box, text="Common words that were KEPT, and why",
+                 bg=CARD, fg=ACCENT, font=("Segoe UI Semibold", 10),
+                 anchor="w").pack(fill="x")
+        tk.Label(box,
+                 text=('This step removes LEARNED stop words, not every filler '
+                       'word. A frequent word is only dropped when the data says '
+                       'it is unrelated to the triage level.'),
+                 bg=CARD, fg=MUTED, font=("Segoe UI", 8), anchor="w",
+                 wraplength=980, justify="left").pack(fill="x")
+        tree = ttk.Treeview(box, columns=("df", "mi", "p", "why"),
+                            show="tree headings", height=min(6, len(kept)))
+        tree.heading("#0", text="token")
+        tree.column("#0", width=150)
+        for col, label, w in [("df", "doc frequency", 110),
+                              ("mi", "normalized MI", 110),
+                              ("p", "p-value", 90),
+                              ("why", "why it stayed", 380)]:
+            tree.heading(col, text=label)
+            tree.column(col, width=w,
+                        anchor="w" if col == "why" else "center")
+        for s in kept:
+            tree.insert("", "end", text=s["token"], values=(
+                f"{s['document_frequency']:.3f}",
+                f"{s['normalized_mutual_information']:.5f}",
+                f"{s['chi_square_p_value']:.4f}",
+                keep_reason(s, self.stopword_report["thresholds"])))
+        tree.pack(fill="x", pady=(4, 0))
 
     # =================================================================
     # TAB 3 - Stop words
@@ -692,7 +908,8 @@ class TriageGUI(tk.Tk):
         body(filt, "Show:", fg=MUTED, size=9).pack(side="left", padx=(0, 6))
         self.stop_filter = tk.StringVar(value="all")
         for value, label in [("all", "all tested tokens"),
-                             ("stop", "learned stop words"),
+                             ("stop", "removed (learned stop words)"),
+                             ("kept", "kept (everything else)"),
                              ("protected", "rescued by the clinical guard")]:
             tk.Radiobutton(filt, text=label, value=value,
                            variable=self.stop_filter, bg=CARD, fg=INK,
@@ -704,9 +921,9 @@ class TriageGUI(tk.Tk):
         self.stop_tree = ttk.Treeview(pad, columns=cols, show="tree headings")
         self.stop_tree.heading("#0", text="token")
         self.stop_tree.column("#0", width=160)
-        for col, label, w in [("df", "doc frequency", 110), ("count", "documents", 90),
-                              ("mi", "normalized MI", 115), ("chi", "chi-square", 100),
-                              ("p", "p-value", 95), ("verdict", "decision", 230)]:
+        for col, label, w in [("df", "doc frequency", 105), ("count", "documents", 80),
+                              ("mi", "normalized MI", 150), ("chi", "chi-square", 90),
+                              ("p", "p-value", 130), ("verdict", "decision", 380)]:
             self.stop_tree.heading(col, text=label)
             self.stop_tree.column(col, width=w, anchor="center")
         self.stop_tree.column("verdict", anchor="w")
@@ -727,12 +944,19 @@ class TriageGUI(tk.Tk):
         c = r["corpus"]
         review = r.get("review_recommended") or []
         self.stop_summary.configure(text=(
-            f"Rule:  document frequency >= {t['effective_df_cutoff']:.4f}"
+            f"A token is removed only when ALL THREE hold:  document frequency "
+            f">= {t['effective_df_cutoff']:.4f}"
             f"   AND   normalized mutual information <= {t['mi_threshold']}"
             f"   AND   chi-square p > {t['alpha']}\n"
             f"{c['n_documents']} complaints, {c['n_unique_tokens']} unique tokens, "
             f"{c['n_tokens_tested']} high-frequency tokens tested, "
-            f"{r['n_stopwords']} learned as stop words."
+            f"{r['n_stopwords']} learned as stop words: "
+            f"{', '.join(r['stopwords'])}.\n"
+            "Most rows in this table are tokens that were TESTED and KEPT - the "
+            "'decision' column names the criterion that saved each one. Frequent "
+            "filler such as \"hai\", \"mein\" and \"aur\" is kept on purpose: the "
+            "chi-square test finds it is not independent of the triage level on "
+            "this dataset."
             + (f"\nNeeds clinician sign-off (negation / intensity): "
                f"{', '.join(review)}" if review else "")))
 
@@ -743,21 +967,27 @@ class TriageGUI(tk.Tk):
         for s in r["token_statistics"]:
             if mode == "stop" and not s["is_stopword"]:
                 continue
+            if mode == "kept" and s["is_stopword"]:
+                continue
             if mode == "protected" and not (s["clinically_protected"]
                                             and s["is_uninformative"]):
                 continue
+            verdict = keep_reason(s, t)
             if s["is_stopword"]:
-                verdict, tag = "STOP WORD - removed", "stop"
+                tag = "stop"
             elif s["clinically_protected"] and s["is_uninformative"]:
-                verdict, tag = "kept - clinical safety guard", "prot"
-            elif not s["is_uninformative"]:
-                verdict, tag = "kept - carries triage signal", ""
+                tag = "prot"
             else:
-                verdict, tag = "kept", ""
+                tag = ""
+            # Per-criterion PASS/FAIL, so a row explains itself without the
+            # reader having to hold three thresholds in their head.
+            mi_flag = "pass" if s["normalized_mutual_information"] <= t["mi_threshold"] else "FAIL"
+            p_flag = "pass" if s["chi_square_p_value"] > t["alpha"] else "FAIL"
             self.stop_tree.insert("", "end", text=s["token"], tags=(tag,), values=(
                 f"{s['document_frequency']:.4f}", s["document_count"],
-                f"{s['normalized_mutual_information']:.5f}",
-                f"{s['chi_square']:.2f}", f"{s['chi_square_p_value']:.4f}",
+                f"{s['normalized_mutual_information']:.5f}  ({mi_flag})",
+                f"{s['chi_square']:.2f}",
+                f"{s['chi_square_p_value']:.4f}  ({p_flag})",
                 verdict))
 
     # =================================================================
@@ -774,7 +1004,9 @@ class TriageGUI(tk.Tk):
         body(pad,
              "Pick an Excel (.xlsx) or CSV file of patients. Only Complaint_Text is "
              "required; missing numbers fall back to the training average and unknown "
-             "categories fall back safely, with a note recorded per row.",
+             "categories fall back safely, with a note recorded per row. CSV files are "
+             "read with encoding detection (utf-8, utf-8-sig, cp1252, latin-1), so a "
+             "sheet exported from Excel on Windows loads instead of failing.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 10))
 
         row = tk.Frame(pad, bg=CARD)
@@ -785,8 +1017,18 @@ class TriageGUI(tk.Tk):
                                             expand=True, ipady=3)
         ttk.Button(row, text="Browse...",
                    command=self._browse_batch).pack(side="left", padx=6)
-        ttk.Button(row, text="Run batch triage", style="Accent.TButton",
-                   command=self._do_batch).pack(side="left")
+        # Disabled until the model is loaded, like the Triage tab's button.
+        # It used to be live from the moment the window painted, so clicking it
+        # during the few seconds the sentence-transformer takes to load called
+        # predict_dataframe(None, df) and threw a raw TypeError traceback in a
+        # dialog box.
+        self.batch_btn = ttk.Button(row, text="Run batch triage",
+                                    style="Accent.TButton", state="disabled",
+                                    command=self._do_batch)
+        self.batch_btn.pack(side="left")
+
+        self._deployed_banner(
+            pad, "Every row is triaged by:").pack(fill="x", pady=(10, 0))
 
         self.batch_summary = body(pad, "", fg=INK, size=9)
         self.batch_summary.pack(fill="x", pady=(10, 0))
@@ -829,12 +1071,15 @@ class TriageGUI(tk.Tk):
         self._run_async(self._batch_worker, f"Triaging {os.path.basename(path)}...")
 
     def _batch_worker(self):
-        import pandas as pd
-        from triage_pipeline import predict_dataframe
+        # read_table() is shared with predict_batch.py and tries a chain of
+        # encodings. The old inline pd.read_csv(path) assumed UTF-8 and threw
+        # UnicodeDecodeError ("can't decode byte 0xfb") on any CSV saved by
+        # Excel on a Windows machine, which is the normal way these files
+        # arrive.
+        from triage_pipeline import predict_dataframe, read_table
 
         path = self._batch_target
-        ext = os.path.splitext(path)[1].lower()
-        df = pd.read_excel(path) if ext in (".xlsx", ".xls") else pd.read_csv(path)
+        df = read_table(path)
         results, _ = predict_dataframe(self.artifacts, df)
 
         out_base = os.path.splitext(path)[0] + "_predictions"
@@ -895,7 +1140,13 @@ class TriageGUI(tk.Tk):
         canvas.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", on_wheel))
         canvas.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
 
-        self._results_section_methods(holder)
+        # The method-comparison table has to say WHICH row is deployed, and
+        # that is only known once the model has finished loading on the
+        # background thread. Build it into a container that gets re-rendered
+        # then, rather than drawing a table that is stale from birth.
+        self._results_methods_box = tk.Frame(holder, bg=BG)
+        self._results_methods_box.pack(fill="x")
+        self._results_section_methods(self._results_methods_box)
         self._results_section_embedding(holder)
 
     def _results_section_methods(self, parent):
@@ -907,8 +1158,13 @@ class TriageGUI(tk.Tk):
         heading(pad, "Which text representation wins?").pack(fill="x")
         body(pad,
              "Same train/test split, same vital signs, same Logistic Regression - only "
-             "the text representation changes. Produced by train_embedding_pipeline.py.",
+             "the text representation changes. Produced by train_embedding_pipeline.py. "
+             "The 'text features' column says which pipeline produced each row's numbers, "
+             "so a dictionary result is never mistaken for an embedding result.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 10))
+        self._deployed_banner(
+            pad, "Of the rows below, this is the one actually serving predictions:"
+            ).pack(fill="x", pady=(0, 10))
 
         if not os.path.exists(PIPELINE_RESULTS):
             body(pad, f"Not generated yet. Run:  python train_embedding_pipeline.py",
@@ -916,43 +1172,54 @@ class TriageGUI(tk.Tk):
             return
 
         rows = read_csv_rows(PIPELINE_RESULTS)
-        cols = ("acc", "under", "over", "grade", "feat")
+        cols = ("basis", "acc", "under", "over", "grade", "feat")
         tree = ttk.Treeview(pad, columns=cols, show="tree headings",
                             height=len(rows) + 1)
         tree.heading("#0", text="method")
-        tree.column("#0", width=330)
-        for col, label, w in [("acc", "accuracy %", 100),
-                              ("under", "under-triage %", 120),
-                              ("over", "over-triage %", 115),
-                              ("grade", "safety", 80), ("feat", "features", 90)]:
+        tree.column("#0", width=280)
+        for col, label, w in [("basis", "text features", 230),
+                              ("acc", "accuracy %", 95),
+                              ("under", "under-triage %", 115),
+                              ("over", "over-triage %", 110),
+                              ("grade", "safety", 70), ("feat", "features", 80)]:
             tree.heading(col, text=label)
-            tree.column(col, width=w, anchor="center")
+            tree.column(col, width=w,
+                        anchor="w" if col == "basis" else "center")
+
+        # The deployed row is read from the saved model's own metrics, NOT
+        # re-derived here. This panel used to re-implement the safety rule to
+        # guess which row shipped, which is exactly how a stale/incorrect
+        # "selected" marker gets shown next to a model that was chosen some
+        # other way.
+        deployed = ""
+        if self.model_info:
+            deployed = self.model_info["method"]
 
         best_acc = max(fnum(r["accuracy"], 0) for r in rows)
-        min_under = min(fnum(r["under_triage_pct"], 99) for r in rows)
         for r in rows:
-            acc, under = fnum(r["accuracy"], 0), fnum(r["under_triage_pct"], 0)
-            tags = []
-            if under <= min_under + 0.5 and acc == max(
-                    fnum(x["accuracy"], 0) for x in rows
-                    if fnum(x["under_triage_pct"], 99) <= min_under + 0.5):
-                tags = ["sel"]
-            elif acc == best_acc:
-                tags = ["acc"]
-            tree.insert("", "end", text=r["method"], tags=tags, values=(
-                f"{acc:.2f}", f"{under:.2f}",
-                f"{fnum(r['over_triage_pct'], 0):.2f}",
-                r.get("safety_grade", ""), r.get("n_features", "")))
+            acc = fnum(r["accuracy"], 0)
+            rep = r.get("text_representation", "")
+            tags = ["sel"] if r["method"] == deployed else (
+                ["acc"] if acc == best_acc else [])
+            tree.insert("", "end",
+                        text=("> " if r["method"] == deployed else "   ") + r["method"],
+                        tags=tags, values=(
+                            REPRESENTATION_LABEL.get(rep, rep or "?"),
+                            f"{acc:.2f}", f"{fnum(r['under_triage_pct'], 0):.2f}",
+                            f"{fnum(r['over_triage_pct'], 0):.2f}",
+                            r.get("safety_grade", ""), r.get("n_features", "")))
         tree.tag_configure("sel", foreground="#2e9e5b",
                            font=("Segoe UI Semibold", 9))
         tree.tag_configure("acc", foreground=ACCENT)
         tree.pack(fill="x")
 
         body(pad,
-             "Green = selected for deployment.  Blue = most accurate.\n"
-             "They differ on purpose: under-triage means a critically ill patient is sent "
-             "to the back of the queue, so the selection rule minimises it first and uses "
-             "accuracy only as the tie-breaker.",
+             "Green '>' = the method actually deployed and serving the Triage a Patient "
+             "tab.  Blue = most accurate on the test set.\n"
+             "Only rows whose text features mention embeddings come from the "
+             "sentence-transformer. Rows A and D include dictionary + Bag-of-Words "
+             "counts, which is a completely different representation - their numbers "
+             "are NOT embedding numbers.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(8, 0))
 
     def _results_section_embedding(self, parent):
@@ -962,10 +1229,17 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Contribution 2  -  how good is the embedding generator?").pack(fill="x")
+        tk.Label(pad, text="● Numbers produced by: sentence-transformer embeddings "
+                           "only - no dictionary or Bag-of-Words is involved in this "
+                           "section",
+                 bg=CARD, fg=ACCENT, font=("Segoe UI Semibold", 9), anchor="w",
+                 wraplength=1000, justify="left").pack(fill="x", pady=(4, 0))
         body(pad,
              "Within-cluster similarity per manual meaning-cluster. A good embedding "
              "generator puts same-meaning complaints close together (most pairs above "
-             "0.5). Produced by embedding_evaluation.py.",
+             "0.5). Produced by embedding_evaluation.py. These are similarity scores "
+             "between complaints, NOT triage accuracy - they do not belong on the same "
+             "axis as the table above.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 10))
 
         if not os.path.exists(EVAL_RESULTS):
@@ -1074,7 +1348,9 @@ class TriageGUI(tk.Tk):
         canvas.bind("<Enter>", lambda e: canvas.bind_all("<MouseWheel>", on_wheel))
         canvas.bind("<Leave>", lambda e: canvas.unbind_all("<MouseWheel>"))
 
-        self._score_section_model(holder)
+        self._score_model_box = tk.Frame(holder, bg=BG)
+        self._score_model_box.pack(fill="x")
+        self._score_section_model(self._score_model_box)
         self._score_section_pairs(holder)
         self._score_section_demo(holder)
 
@@ -1089,16 +1365,43 @@ class TriageGUI(tk.Tk):
         body(pad,
              "Measured on the held-out test patients the model never saw during "
              "training. Every figure below is read from the saved result files - "
-             "nothing here is typed in by hand.",
-             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 12))
+             "nothing here is typed in by hand.\n"
+             "TWO DIFFERENT SYSTEMS are scored on this page. They are separate "
+             "pipelines, not two views of one model, so their numbers are not "
+             "interchangeable and are never combined:",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 6))
+        legend = tk.Frame(pad, bg=CARD)
+        legend.pack(fill="x", pady=(0, 10))
+        for colour, name, what in [
+            (ACCENT, "Sentence-transformer embeddings",
+             "complaint text -> clean -> fuzzy -> learned stop-word removal -> "
+             "384-dim vector -> Logistic Regression"),
+            ("#8a6d3b", "Dictionary + Bag-of-Words",
+             "complaint text -> clean -> fuzzy -> diacritize -> word/char n-gram "
+             "COUNTS -> domain attention weights -> Logistic Regression"),
+        ]:
+            row = tk.Frame(legend, bg=CARD)
+            row.pack(fill="x", pady=1)
+            tk.Label(row, text="●", bg=CARD, fg=colour,
+                     font=("Segoe UI", 10)).pack(side="left", padx=(0, 6))
+            tk.Label(row, text=name, bg=CARD, fg=colour,
+                     font=("Segoe UI Semibold", 9)).pack(side="left")
+            tk.Label(row, text="   " + what, bg=CARD, fg=MUTED,
+                     font=("Segoe UI", 8), anchor="w", justify="left",
+                     wraplength=760).pack(side="left")
+
+        self._deployed_banner(pad).pack(fill="x", pady=(0, 12))
 
         shown = 0
         for path, title, note in [
             (os.path.join(EMBED_MODEL_DIR, "triage_metrics.json"),
-             "Selected pipeline", "chosen by the safety-first rule"),
+             "Embedding pipeline  (triage_model_embedding/)",
+             "numbers below come from the sentence-transformer pipeline"),
             (os.path.join(MODEL_DIR, "triage_metrics.json"),
-             "Dictionary model (shipped in triage_model/)",
-             "the model the prediction tabs actually use"),
+             "Dictionary + Bag-of-Words model  (triage_model/)",
+             "numbers below come from the dictionary/BoW pipeline - NOT from any "
+             "embedding. Kept as the offline fallback when sentence-transformers "
+             "is not installed."),
         ]:
             if not os.path.exists(path):
                 missing_notice(pad, path).pack(fill="x", pady=(0, 8))
@@ -1148,8 +1451,29 @@ class TriageGUI(tk.Tk):
         inner = tk.Frame(wrap, bg="#f7f9fb")
         inner.pack(fill="x", padx=14, pady=12)
 
-        tk.Label(inner, text=title, bg="#f7f9fb", fg=ACCENT,
-                 font=("Segoe UI Semibold", 11), anchor="w").pack(fill="x")
+        # Which pipeline produced these numbers, stated on the card itself.
+        rep = raw.get("text_representation", "dictionary_bow")
+        basis = REPRESENTATION_LABEL.get(rep, rep)
+        is_embed = "sentence-transformer" in basis
+        accent = ACCENT if is_embed else "#8a6d3b"
+        is_live = bool(self.model_info
+                       and os.path.normpath(self.model_dir or "")
+                       == os.path.normpath(os.path.dirname(path)))
+
+        head = tk.Frame(inner, bg="#f7f9fb")
+        head.pack(fill="x")
+        tk.Label(head, text=title, bg="#f7f9fb", fg=accent,
+                 font=("Segoe UI Semibold", 11), anchor="w").pack(side="left")
+        tk.Label(head,
+                 text=("  LIVE - this is what the Triage a Patient tab uses  "
+                       if is_live else "  not deployed  "),
+                 bg="#2e9e5b" if is_live else "#e9edf1",
+                 fg="white" if is_live else MUTED,
+                 font=("Segoe UI Semibold", 8)).pack(side="left", padx=(10, 0))
+
+        tk.Label(inner, text=f"● Numbers produced by: {basis}", bg="#f7f9fb",
+                 fg=accent, font=("Segoe UI Semibold", 9), anchor="w",
+                 wraplength=960, justify="left").pack(fill="x", pady=(4, 0))
         line = note if not subtitle else f"{note}  ·  {subtitle}"
         tk.Label(inner, text=line, bg="#f7f9fb", fg=MUTED,
                  font=("Segoe UI", 8), anchor="w",
@@ -1185,6 +1509,17 @@ class TriageGUI(tk.Tk):
                  font=("Segoe UI", 8), anchor="w", wraplength=960,
                  justify="left").pack(fill="x", pady=(8, 0))
 
+        if raw.get("selection_rule"):
+            rule = f"how this method was chosen: {raw['selection_rule']}"
+            if raw.get("deploy_override_used") and raw.get("safety_first_pick"):
+                rule += (f"\nthe safety-first rule would have picked "
+                         f"{raw['safety_first_pick']}; the override is deliberate "
+                         "and its cost in under-triage is printed by "
+                         "train_embedding_pipeline.py")
+            tk.Label(inner, text=rule, bg="#f7f9fb", fg=MUTED,
+                     font=("Segoe UI", 8), anchor="w", wraplength=960,
+                     justify="left").pack(fill="x", pady=(2, 0))
+
         cm = raw.get("confusion_matrix")
         if cm:
             tk.Label(inner, text="Confusion matrix  (rows = true level, "
@@ -1215,6 +1550,10 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Where the number 45 comes from").pack(fill="x")
+        tk.Label(pad, text="● Numbers produced by: sentence-transformer embeddings "
+                           "(pairwise cosine similarity between complaints)",
+                 bg=CARD, fg=ACCENT, font=("Segoe UI Semibold", 9), anchor="w",
+                 wraplength=1000, justify="left").pack(fill="x", pady=(4, 0))
         body(pad,
              "To check whether the AI groups similar complaints together, every "
              "complaint in a group is compared against every other complaint in "
@@ -1324,10 +1663,13 @@ class TriageGUI(tk.Tk):
 
         heading(pad, "Embedding demo  -  see a sentence become numbers").pack(fill="x")
         body(pad,
-             "Type any complaint. The AI model turns it into a list of numbers, "
-             "then the closest matching complaint from the evaluation set is "
-             "found by comparing those numbers. This is exactly how the model "
-             "decides two complaints mean the same thing. Runs offline.",
+             "Type any complaint. The sentence-transformer turns it into a list of "
+             "numbers here and now, then those numbers are cosine-compared against "
+             "every complaint in evaluation_clusters.json - which is loaded from "
+             "that file, preprocessed with the same clean -> fuzzy -> learned "
+             "stop-word removal used in training, and encoded by the same model. "
+             "Nothing on this panel is read from a saved results file. Runs offline "
+             "after the model has been downloaded once.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 10))
 
         row = tk.Frame(pad, bg=CARD)
@@ -1386,12 +1728,16 @@ class TriageGUI(tk.Tk):
         self._run_async(self._demo_worker, "Embedding the complaint...")
 
     def _demo_worker(self):
+        import time
+
         import numpy as np
-        from triage_pipeline import preprocess_for_embedding
+        from triage_pipeline import (load_sentence_transformer,
+                                     preprocess_corpus_for_embedding,
+                                     preprocess_for_embedding, read_manifest)
 
         if self._demo_model is None:
             try:
-                from sentence_transformers import SentenceTransformer
+                import sentence_transformers          # noqa: F401
             except ImportError:
                 return {"error":
                         "The 'sentence-transformers' library is not installed, so "
@@ -1399,15 +1745,23 @@ class TriageGUI(tk.Tk):
                         "Install it once (needs internet), then try again:\n"
                         "    pip install -r requirements-embedding.txt\n\n"
                         "Everything else in this app works without it."}
-            name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-            # Read the model actually used by the study, so the demo matches
-            # the reported numbers instead of quietly using a different model.
-            if os.path.exists(EVAL_RESULTS):
+            # Prefer the model the DEPLOYED bundle actually uses, so the demo
+            # shows the same encoder that produced the live prediction. Fall
+            # back to the one the evaluation study used.
+            name = None
+            if self.model_info and self.model_info.get("embedding_model"):
+                name = self.model_info["embedding_model"]
+            if not name:
+                name = read_manifest(EMBED_MODEL_DIR).get("embedding_model")
+            if not name and os.path.exists(EVAL_RESULTS):
                 for r in read_csv_rows(EVAL_RESULTS):
                     if r.get("embedding_model"):
                         name = r["embedding_model"]
                         break
-            self._demo_model = SentenceTransformer(name, device="cpu")
+            name = name or "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+            # Cache-first, same as the deployed predictor - see
+            # triage_pipeline.load_sentence_transformer for why.
+            self._demo_model = load_sentence_transformer(name)
             self._demo_model_name = name
 
         if self._demo_corpus is None:
@@ -1415,27 +1769,48 @@ class TriageGUI(tk.Tk):
             if not pairs:
                 return {"error": "No reference complaints found. Expected "
                                  f"{CLUSTERS_FILE} or {DATASET_FILE}."}
-            texts = [preprocess_for_embedding(t) for t, _ in pairs]
+            # preprocess_corpus_for_embedding loads learned_stopwords.json ONCE.
+            # The per-item preprocess_for_embedding() used before re-read and
+            # re-parsed that JSON for every complaint in the pool.
+            texts = preprocess_corpus_for_embedding([t for t, _ in pairs])
             vecs = self._demo_model.encode(texts, batch_size=32,
                                            convert_to_numpy=True,
                                            show_progress_bar=False,
                                            normalize_embeddings=True)
-            self._demo_corpus = (pairs, vecs, source)
+            self._demo_corpus = (pairs, texts, vecs, source)
 
-        pairs, vecs, source = self._demo_corpus
+        pairs, pool_texts, vecs, source = self._demo_corpus
         raw = self._demo_text
         cleaned = preprocess_for_embedding(raw)
+
+        # Timed so the panel can show the encode really happened on this
+        # click. Nothing here is cached per input text.
+        t0 = time.perf_counter()
         vec = self._demo_model.encode([cleaned], convert_to_numpy=True,
                                       normalize_embeddings=True)[0]
+        encode_ms = (time.perf_counter() - t0) * 1000
+
+        # vecs is L2-normalized and so is vec, so the dot product IS the
+        # cosine similarity. Computed here, now, against the live pool.
         sims = vecs @ vec
         order = np.argsort(-sims)[:5]
         return {
             "raw": raw,
             "cleaned": cleaned,
             "vector": vec,
+            "vector_norm": float(np.linalg.norm(vec)),
+            "vector_sum": float(vec.sum()),
+            "vector_min": float(vec.min()),
+            "vector_max": float(vec.max()),
+            "encode_ms": encode_ms,
             "model": self._demo_model_name,
             "source": source,
-            "matches": [(pairs[i][0], pairs[i][1], float(sims[i])) for i in order],
+            "pool_size": len(pairs),
+            "pool_groups": len({g for _, g in pairs if g}),
+            "sim_mean": float(sims.mean()),
+            "sim_min": float(sims.min()),
+            "matches": [(pairs[i][0], pool_texts[i], pairs[i][1], float(sims[i]))
+                        for i in order],
         }
 
     def _done_demo_worker(self, payload):
@@ -1453,8 +1828,14 @@ class TriageGUI(tk.Tk):
         vec = payload["vector"]
         out = self.demo_out
 
-        body(out, f"1.  After cleaning:   {payload['cleaned']}",
+        body(out, f"1.  Preprocessed exactly like training "
+                  f"(clean -> fuzzy -> learned stop-word removal):",
              size=9).pack(fill="x")
+        tk.Label(out, text=payload["cleaned"] or "(empty)", bg="#fbfcfd", fg=INK,
+                 font=("Consolas", 10), anchor="w", justify="left",
+                 wraplength=980, padx=10, pady=6, relief="solid",
+                 bd=1).pack(fill="x", pady=(2, 0))
+
         body(out, f"2.  The model turns that into {len(vec)} numbers "
                   f"(only the first 24 are shown):",
              size=9).pack(fill="x", pady=(8, 2))
@@ -1463,52 +1844,85 @@ class TriageGUI(tk.Tk):
         tk.Label(out, text=nums, bg="#fbfcfd", fg=INK, font=("Consolas", 9),
                  anchor="w", justify="left", wraplength=980, padx=10, pady=8,
                  relief="solid", bd=1).pack(fill="x")
+        # Fingerprints of the WHOLE vector, not just the 24 shown. These move
+        # whenever the text changes, which is how you can tell at a glance
+        # that the numbers were computed and not fetched from a file.
+        body(out,
+             f"whole-vector fingerprint:   sum {payload['vector_sum']:+.6f}"
+             f"    min {payload['vector_min']:+.4f}"
+             f"    max {payload['vector_max']:+.4f}"
+             f"    L2 norm {payload['vector_norm']:.6f}"
+             f"    computed in {payload['encode_ms']:.0f} ms on this click",
+             fg=MUTED, size=8).pack(fill="x", pady=(3, 0))
         body(out,
              f"That list of {len(vec)} numbers IS the complaint, as far as the "
              "model is concerned. Two complaints that mean the same thing get "
-             "two similar lists.",
-             fg=MUTED, size=8).pack(fill="x", pady=(3, 0))
+             "two similar lists. Change a word above and every one of these "
+             "figures changes.",
+             fg=MUTED, size=8, wraplength=1000).pack(fill="x", pady=(1, 0))
 
-        body(out, "3.  Closest matching complaints (1.00 = identical meaning):",
+        body(out, f"3.  Compared live against all {payload['pool_size']} "
+                  f"complaints in {payload['source']}"
+                  + (f" ({payload['pool_groups']} meaning groups)"
+                     if payload["pool_groups"] else "")
+                  + ".  Closest matches (1.00 = identical meaning):",
              size=9).pack(fill="x", pady=(10, 2))
 
-        tree = ttk.Treeview(out, columns=("group", "sim"),
+        tree = ttk.Treeview(out, columns=("prep", "group", "sim"),
                             show="tree headings", height=5)
-        tree.heading("#0", text="complaint")
-        tree.column("#0", width=520)
+        tree.heading("#0", text="complaint (as written in the reference file)")
+        tree.column("#0", width=360)
+        tree.heading("prep", text="what was actually compared (preprocessed)")
+        tree.column("prep", width=330, anchor="w")
         tree.heading("group", text="meaning group")
-        tree.column("group", width=180, anchor="center")
-        tree.heading("sim", text="similarity")
-        tree.column("sim", width=100, anchor="center")
-        for i, (text, group, sim) in enumerate(payload["matches"]):
+        tree.column("group", width=150, anchor="center")
+        tree.heading("sim", text="cosine similarity")
+        tree.column("sim", width=110, anchor="center")
+        for i, (text, prepped, group, sim) in enumerate(payload["matches"]):
             tag = "best" if i == 0 else ""
             tree.insert("", "end", text=text, tags=(tag,),
-                        values=(group or "-", f"{sim:.3f}"))
+                        values=(prepped, group or "-", f"{sim:.3f}"))
         tree.tag_configure("best", foreground="#2e9e5b",
                            font=("Segoe UI Semibold", 9))
         tree.pack(fill="x")
 
-        best_sim = payload["matches"][0][2]
+        best_sim = payload["matches"][0][3]
         verdict = ("a confident match" if best_sim >= 0.7 else
                    "a usable match" if best_sim >= 0.5 else
                    "a WEAK match - below the 0.5 cut-off")
         body(out,
-             f"Top match scores {best_sim:.3f}, which is {verdict}.    "
-             f"model: {payload['model']}    reference set: {payload['source']}",
+             f"Top match scores {best_sim:.3f}, which is {verdict}. "
+             f"For contrast, the mean similarity across the whole pool is "
+             f"{payload['sim_mean']:.3f} and the worst is {payload['sim_min']:.3f} - "
+             "if the top match were not grounded in the pool these three numbers "
+             "would not spread apart.",
              fg=MUTED, size=8, wraplength=1000).pack(fill="x", pady=(6, 0))
-        self.status.set(f"Embedded {len(vec)} dimensions; "
-                        f"best match {best_sim:.3f}.")
+        body(out,
+             f"model: {payload['model']}    reference set: {payload['source']} "
+             f"({payload['pool_size']} complaints, encoded once per session, then "
+             "cosine-compared on every click)",
+             fg=MUTED, size=8, wraplength=1000).pack(fill="x")
+        self.status.set(f"Embedded {len(vec)} dimensions in "
+                        f"{payload['encode_ms']:.0f} ms; "
+                        f"best match {best_sim:.3f} of {payload['pool_size']}.")
 
 
 def main():
     enable_dpi_awareness()
-    if not os.path.exists(os.path.join(MODEL_DIR, "model.pkl")):
+    # Either bundle is enough to start: the embedding pipeline is preferred,
+    # the dictionary model is the fallback. Requiring triage_model/ here would
+    # refuse to launch on a clone that only has the deployed embedding model.
+    if not any(os.path.exists(os.path.join(d, "model.pkl"))
+               for d in (EMBED_MODEL_DIR, MODEL_DIR)):
         root = tk.Tk()
         root.withdraw()
         messagebox.showerror(
             "Model not found",
-            f"Could not find {MODEL_DIR}/model.pkl.\n\n"
-            "Train the model first:\n    python triage_bow_fuzzy_diac.py")
+            f"Found neither {EMBED_MODEL_DIR}/model.pkl nor "
+            f"{MODEL_DIR}/model.pkl.\n\n"
+            "Train a model first:\n"
+            "    python train_embedding_pipeline.py     (deployed pipeline)\n"
+            "    python triage_bow_fuzzy_diac.py        (dictionary fallback)")
         return
     TriageGUI().mainloop()
 

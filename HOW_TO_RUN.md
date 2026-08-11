@@ -75,6 +75,21 @@ pip install -r requirements.txt
 Wait for it to finish. You'll see some text scroll by — that's normal. You only
 need to do this once per computer.
 
+Then install the AI part as well:
+
+```
+pip install -r requirements-embedding.txt
+```
+
+This one is a bigger download (a few hundred megabytes) and needs internet. It
+is what the program uses to understand the complaint text. **The program still
+works without it** — it quietly falls back to the older dictionary method and
+tells you so on screen — but the results will not match the ones in the paper.
+
+The very first time you run the program after this, it downloads the language
+model (a few hundred megabytes more, once). Every run after that is fully
+offline.
+
 ---
 
 ## Step 4 — Run the triage (this is the part you repeat)
@@ -85,7 +100,20 @@ Still in that same PowerShell window, type:
 python predict_batch.py sample_100_patients.xlsx
 ```
 
-Press Enter. In a couple of seconds you will see a summary like this:
+Press Enter. First it tells you **which method it is using**, so you always know
+what produced your numbers:
+
+```
+Loading model and encoders from 'triage_model_embedding/'...
+[ok] Model ready.
+     Deployed method : C) Embeddings + preprocessing
+     Text features   : sentence-transformer embeddings  (384 dims)
+```
+
+If instead it says `triage_model/` and *dictionary + Bag-of-Words*, the AI part
+did not install — go back and run `pip install -r requirements-embedding.txt`.
+
+Then you will see a summary like this:
 
 ```
 [ok] 100 patient rows found.
@@ -170,6 +198,21 @@ The program can't find your file. Two usual reasons:
 **`ModuleNotFoundError: No module named 'openpyxl'` (or pandas, sklearn, etc.)**
 You skipped the install step. Run `pip install -r requirements.txt` (Step 3).
 
+**It says it is using `triage_model/` and "dictionary + Bag-of-Words"**
+That is the fallback. The AI part is not installed — run
+`pip install -r requirements-embedding.txt` (Step 3) and try again. Nothing is
+broken; the program is telling you which method it used rather than pretending.
+
+**`UnicodeDecodeError: 'utf-8' codec can't decode byte ...` when opening a CSV**
+This used to happen with CSV files saved out of Excel. It is fixed — the program
+now works out the file's encoding by itself. If you still see it, you are running
+an older copy of the program.
+
+**`ModuleNotFoundError: No module named 'tkinter'` when opening the app**
+Only happens on Linux. Windows and macOS include it. On Fedora run
+`sudo dnf install python3-tkinter`; on Ubuntu run `sudo apt install python3-tk`.
+There is no `pip install` for it — it comes with Python itself.
+
 **`InconsistentVersionWarning` or
 `AttributeError: 'LogisticRegression' object has no attribute 'multi_class'`**
 Your computer has a different version of scikit-learn than the saved model.
@@ -192,11 +235,17 @@ address bar).
 | I want to...                              | Type this                                          |
 |-------------------------------------------|----------------------------------------------------|
 | Install everything (once)                 | `pip install -r requirements.txt`                  |
+| Install the AI part (once)                | `pip install -r requirements-embedding.txt`        |
+| **Open the app with buttons and tabs**    | `python triage_gui.py`                             |
 | Triage the 100 example patients           | `python predict_batch.py sample_100_patients.xlsx` |
 | Triage my own file                        | `python predict_batch.py my_patients.xlsx`         |
 | Triage one patient by hand (Q&A style)    | `python prediction_interactive.py`                 |
 | See files in the current folder           | `dir`                                              |
 | Check Python is installed                 | `python --version`                                 |
+
+If you would rather click than type, `python triage_gui.py` opens a window with
+six tabs — enter a patient, upload a spreadsheet, or look at the results and
+charts. A green bar at the top of each tab names the method doing the work.
 
 ---
 

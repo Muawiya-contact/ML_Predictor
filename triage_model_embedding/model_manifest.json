@@ -1,0 +1,20 @@
+{
+  "method": "C) Embeddings + preprocessing",
+  "text_representation": "embeddings_preprocessed",
+  "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "embedding_dim": 384,
+  "text_pipeline": "clean -> rule replace -> fuzzy -> diacritize -> learned stop-word removal -> sentence-transformer",
+  "feature_blocks": [
+    {
+      "name": "structured",
+      "dim": 10
+    },
+    {
+      "name": "embedding",
+      "dim": 384,
+      "rescaled": false
+    }
+  ],
+  "trained_by": "train_embedding_pipeline.py",
+  "deploy_mode": "C"
+}

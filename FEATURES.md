@@ -112,12 +112,20 @@ every one of these stages.
 **What it does.** Finds and removes the filler words that carry no medical
 meaning — and works out *which* words those are by itself, from the data.
 
-**How it works.** A word is removed only if **both** of these are true:
+**How it works.** A word is removed only if **all three** of these are true:
 
 1. **It is common** — it turns up in a lot of complaints.
-2. **It tells you nothing about urgency** — knowing whether the word is present
-   does not help predict the triage level. This is measured two ways (mutual
-   information and a chi-square test), and both must agree.
+2. **Its mutual information with the triage level is near zero** — knowing the
+   word is present barely narrows down how urgent the patient is.
+3. **A chi-square test cannot tell it apart from independent** — there is no
+   statistical evidence the word relates to the triage level at all.
+
+Points 2 and 3 measure similar things but do not always agree, and **both must
+pass**. That is not a formality: it is exactly what saves `hai` (see below).
+
+This means **"stop words removed" does not mean "all filler removed"**. On this
+dataset the learned list is ten words — `baad, bhi, jaisa, ki, lekin, nahi,
+saath, se, tak, tez` — and plenty of ordinary filler survives, on purpose.
 
 Every threshold and every number behind every decision is saved in
 `learned_stopwords.json`, so anyone can check the working by hand.
@@ -132,6 +140,15 @@ from the data makes it reproducible and defensible in a research paper.
   dataset they genuinely do carry a signal, because how people phrase things
   turns out to relate to how sick they are. An honest method keeps them. A
   hand-written list would have thrown them away.
+
+  Worth knowing *which* test saved them, because it differs. `aur` fails both
+  tests — it plainly tracks urgency. `hai` is subtler: its mutual information
+  is 0.0062, *below* the 0.01 cut-off, so by that measure it looks like filler.
+  What keeps it is the chi-square test, p = 0.0007 — far too small to call it
+  independent of the triage level. The **Stop Words** tab names the deciding
+  test on every row rather than lumping all of them together as "carries
+  signal", which would contradict the mutual-information column sitting right
+  next to it.
 - The maths on its own wanted to delete real symptom words like `pain`,
   `jalan` (burning) and `khoon` (blood), because they appear at every triage
   level and so look "uninformative". Deleting a symptom from a triage system is
@@ -185,14 +202,38 @@ the classifier, which outputs the triage level.
 **Why we added it.** The two methods fail in different ways. The dictionary is
 reliable on the spellings it knows and useless on the ones it does not.
 Embeddings are the opposite — broad, but vaguer on Roman Urdu. Keeping both
-means the dictionary still anchors the words the AI model misses.
+was meant to let the dictionary anchor the words the AI model misses.
 
-**Which one is actually used?** The program trains all four options on the same
-patients and the same split, then picks a winner using a safety-first rule:
-**lowest under-triage first, accuracy only as the tie-breaker.** The live
-numbers are in `embedding_pipeline_results.csv` and are shown on the
-**Model Score** tab — this document deliberately does not repeat them, so it
-can never go stale or disagree with the real files.
+**Does it work?** Not on this dataset. Once the two feature blocks were
+rescaled so the classifier could actually see both (they were not, for a while —
+see below), the hybrid scored *worse* than either method on its own. It is kept
+because measuring it is the point, not because it won.
+
+**Which one is actually used?** **Method C, embeddings + preprocessing.** The
+program trains all four options on the same patients and the same split and
+reports a safety-first recommendation, but what ships is an explicit choice:
+the `--deploy` flag, default `C`. The app names the deployed method on the
+Triage, Batch, Results and Model Score tabs, and every command-line predictor
+prints it at startup. The live numbers are in `embedding_pipeline_results.csv`
+and on the **Model Score** tab — this document deliberately does not repeat
+them, so it can never go stale or disagree with the real files.
+
+**Why deployment is a separate decision.** The safety rule alone used to decide
+this, and it could not: when two methods tie it silently keeps the first, which
+is the dictionary baseline. Combined with the scaling fault below, that made the
+"embedding pipeline" ship a dictionary-only model — reporting itself as the
+embedding pipeline while recording `embedding_model: null` in its own metrics.
+Separating "what scores best" from "what ships" is what makes that failure
+impossible to repeat quietly.
+
+> **The scaling fault, recorded rather than hidden.** The dictionary features
+> are multiplied by domain attention weights; the embedding features are
+> L2-normalised across 384 dimensions. Joined into one list without rescaling,
+> the two blocks sit on very different scales, and a single penalised classifier
+> responds by ignoring the smaller one entirely — the hybrid reproduced the
+> dictionary-only result to the last decimal. Each block is now standardised
+> separately before being joined, and the training script prints both blocks'
+> scales on every run so the fault cannot creep back unnoticed.
 
 ---
 
@@ -245,15 +286,23 @@ numbers from `embedding_evaluation_results.csv`.
 
 | Tab | What it gives you |
 |---|---|
-| **Triage a Patient** | Type one patient, get the level and confidence, plus what the text pipeline did to their complaint |
-| **Pipeline Explorer** | Type any sentence and watch every cleaning stage happen, with the statistics behind each removed word |
-| **Stop Words** | The learned list as a table — removed, kept for signal, or rescued by the safety guard |
+| **Triage a Patient** | Type one patient, get the level and confidence, plus what the text pipeline did to their complaint and which stage the live model was fed |
+| **Pipeline Explorer** | Type any sentence and watch every cleaning stage happen. Each stage is tagged *changed this text* or *ran — nothing to change here*, so a stage that had nothing to correct is never mistaken for a stage that did not run |
+| **Stop Words** | Every tested token as a table, with the specific criterion that decided it — removed, kept because chi-square says it tracks triage, kept because its mutual information is too high, or rescued by the clinical safety guard |
 | **Batch File** | Triage a whole spreadsheet, with a results table and level counts |
-| **Results** | The four-method comparison and the per-cluster embedding scores as charts |
-| **Model Score & Embedding Analysis** | The real accuracy figures, a visual explanation of the "45 pairs" maths, and a live embedding demo |
+| **Results** | The four-method comparison and the per-cluster embedding scores as charts, each row labelled with the pipeline that produced it |
+| **Model Score & Embedding Analysis** | The real accuracy figures for both pipelines side by side, a visual explanation of the "45 pairs" maths, and a live embedding demo |
 
-It is built with `tkinter`, which comes free with Python, so it needs **no extra
-installation** and stays fully offline.
+**Which model is live is stated, never implied.** A green banner on the Triage,
+Batch, Results and Model Score tabs names the deployed method, the text features
+it uses and the directory it came from. Score cards are marked **LIVE** or
+**not deployed**, and each carries a coloured "Numbers produced by:" line, so a
+dictionary figure can never be read as an embedding figure.
+
+It is built with `tkinter`, which ships with Python on Windows and macOS, so it
+needs **no extra installation** and stays fully offline. Some Linux
+distributions package it separately — `sudo dnf install python3-tkinter` on
+Fedora, `sudo apt install python3-tk` on Debian/Ubuntu.
 
 **Why we added it.** Two reasons. First, a doctor or a teammate should not need
 to use a terminal. Second, and more useful for the research: the tabs make the
