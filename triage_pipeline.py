@@ -780,6 +780,29 @@ def load_artifacts(model_dir='triage_model'):
     return artifacts
 
 
+def load_sentence_transformer(name):
+    """Load a sentence-transformer, preferring the local cache.
+
+    THE PROBLEM THIS SOLVES: SentenceTransformer(name) contacts huggingface.co
+    on EVERY load to revalidate the snapshot, even when the model is fully
+    cached. This project's whole claim is that it runs offline on a hospital
+    machine, and on a slow, captive-portal or firewalled network that call does
+    not fail fast - it hangs. Measured on this machine: 8 seconds with the hub
+    disabled versus over 5 minutes with it reachable-but-slow, during which the
+    GUI sits on "Loading model and encoders..." with no way to tell whether it
+    is working.
+
+    So: try the cache first and only reach for the network when the model is
+    genuinely not present yet (the documented one-time download).
+    """
+    from sentence_transformers import SentenceTransformer
+    try:
+        return SentenceTransformer(name, device='cpu', local_files_only=True)
+    except Exception:
+        # Not cached yet - this is the first run, which is allowed to download.
+        return SentenceTransformer(name, device='cpu')
+
+
 def get_text_encoder(art):
     """Return the sentence-transformer for this bundle, loading it once."""
     if art.get('encoder') is not None:
@@ -790,7 +813,7 @@ def get_text_encoder(art):
             f"{art['model_dir']} is an embedding model but its manifest does "
             "not name an embedding_model. Re-run train_embedding_pipeline.py.")
     try:
-        from sentence_transformers import SentenceTransformer
+        import sentence_transformers          # noqa: F401
     except ImportError as e:
         raise RuntimeError(
             f"The deployed model in '{art['model_dir']}' uses sentence "
@@ -798,7 +821,7 @@ def get_text_encoder(art):
             "Install it once (needs internet), then re-run:\n"
             "    pip install -r requirements-embedding.txt"
         ) from e
-    art['encoder'] = SentenceTransformer(name, device='cpu')
+    art['encoder'] = load_sentence_transformer(name)
     return art['encoder']
 
 
