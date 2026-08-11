@@ -964,6 +964,21 @@ def predict_dataframe(art, df):
         if col not in df.columns:
             df[col] = np.nan
 
+    # A header-only sheet is a real thing an operator uploads (they exported
+    # the template and saved it before typing anyone in). StandardScaler
+    # rejects a 0-row array with "Found array with 0 sample(s)", which surfaced
+    # as a raw sklearn traceback in the GUI's error dialog. Return the empty
+    # result frame with the full output schema instead, so the caller's
+    # "0 patients triaged" path works and the columns are still there.
+    if len(df) == 0:
+        out = df.copy()
+        out['Predicted_Level_0to3'] = pd.Series(dtype=int)
+        out['Predicted_Triage_Level'] = pd.Series(dtype=int)
+        for col in ['Predicted_Label', 'Confidence', 'P_L0', 'P_L1',
+                    'P_L2', 'P_L3', 'Notes']:
+            out[col] = pd.Series(dtype=object)
+        return out, []
+
     # --- numeric fill (use training means from the scaler) ---
     means = {f: m for f, m in zip(NUMERICAL_FEATURES, art['scaler'].mean_)}
     row_notes = ['' for _ in range(len(df))]
