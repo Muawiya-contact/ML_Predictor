@@ -20,8 +20,16 @@ Implements the target architecture from ARCHITECTURE.md section 1:
 
 It also re-runs the three-way comparison (dictionary / embeddings /
 both) that ARCHITECTURE.md Task 3 asks for, now that automatic
-stop-word removal sits in front of the embedding step, and keeps
-whichever representation scores best on accuracy and under-triage.
+stop-word removal sits in front of the embedding step, and reports
+which representation scores best on accuracy and under-triage.
+
+WHAT SHIPS is an explicit choice: --deploy, default C (offline
+embeddings + preprocessing). It used to be decided by the safety rule
+alone, which tied between A and D and kept the first - so this script
+shipped a dictionary-only model into triage_model_embedding/ while
+reporting itself as the embedding pipeline. Two things caused that and
+both are fixed here: the tie (see --deploy) and the reason for the tie
+(the hybrid's unscaled block concatenation, see STEP 3).
 
 -----------------------------------------------------------------------
 ABLATION - does Contribution 1 actually help the embeddings?
@@ -235,6 +243,12 @@ def main():
     parser.add_argument("--out-dir", default=MODEL_DIR)
     parser.add_argument("--skip-embeddings", action="store_true",
                         help="dictionary path only (no model download needed)")
+    parser.add_argument("--deploy", default="C", choices=["auto", "A", "B", "C", "D"],
+                        help="which method to ship to --out-dir. Default C "
+                             "(offline embeddings + preprocessing), the method "
+                             "this project deploys. 'auto' uses the safety-first "
+                             "rule, which can tie on A and silently ship a "
+                             "dictionary-only model.")
     args = parser.parse_args()
 
     print("=" * 78)
@@ -326,6 +340,7 @@ def main():
     )]
 
     emb_model = None
+    block_scalers = {}
     if not args.skip_embeddings:
         emb_model = load_embedding_model(args.model)
         emb_raw = encode(emb_model, raw_texts, "Embeddings (raw text)")
@@ -333,6 +348,56 @@ def main():
 
         er_train, er_test = emb_raw[idx_train], emb_raw[idx_test]
         ep_train, ep_test = emb_prep[idx_train], emb_prep[idx_test]
+
+        # ==============================================================
+        # HYBRID FUSION - rescale each block before concatenating.
+        #
+        # THE BUG THIS FIXES: the BoW block is multiplied by the domain
+        # attention weights, so its non-zero entries sit around 1-8, while
+        # the embedding block is L2-normalized across 384 dims, so its
+        # entries sit around 0.05. Concatenating them raw and fitting one
+        # L2-penalised Logistic Regression means a unit of "signal" costs
+        # ~100x more coefficient magnitude on the embedding columns than on
+        # the BoW columns. The optimiser therefore ignores the embeddings
+        # entirely and the hybrid reproduced method A's accuracy,
+        # under-triage AND over-triage to the last decimal (90.04 / 3.73 /
+        # 6.22), which is what made the "embedding pipeline" ship a
+        # dictionary-only model.
+        #
+        # Standardising each block separately (fit on TRAIN only) puts both
+        # on unit variance per column, so the penalty is comparable and the
+        # classifier can actually choose between them.
+        # ==============================================================
+        bow_scaler = StandardScaler().fit(bow_train)
+        emb_scaler = StandardScaler().fit(ep_train)
+        block_scalers = {"bow": bow_scaler, "embedding": emb_scaler}
+
+        bow_train_s, bow_test_s = (bow_scaler.transform(bow_train),
+                                   bow_scaler.transform(bow_test))
+        ep_train_s, ep_test_s = (emb_scaler.transform(ep_train),
+                                 emb_scaler.transform(ep_test))
+
+        # Report the quantity the L2 penalty actually responds to: the typical
+        # spread of a single column. A column with a large spread needs a small
+        # coefficient to move the decision, so it is cheap under the penalty; a
+        # column with a tiny spread needs a large one and gets shrunk to zero.
+        def block_scale(mat):
+            nz = np.abs(mat[mat != 0])
+            return mat.std(axis=0).mean(), (nz.mean() if nz.size else 0.0)
+
+        (bow_sd, bow_nz), (emb_sd, emb_nz) = block_scale(bow_train), block_scale(ep_train)
+        print("\n  block scales before fusion  (why the old hybrid was broken):")
+        print(f"    {'':<26}{'mean column sd':>16}{'mean |non-zero|':>18}")
+        print(f"    dictionary + BoW block    {bow_sd:>16.4f}{bow_nz:>18.4f}")
+        print(f"    embedding block           {emb_sd:>16.4f}{emb_nz:>18.4f}")
+        print(f"    ratio                     {bow_sd / max(emb_sd, 1e-12):>15.1f}x"
+              f"{bow_nz / max(emb_nz, 1e-12):>17.1f}x")
+        print("    A shared L2 penalty across blocks on that ratio means the "
+              "embedding\n    columns cost far more coefficient per unit of signal, so the "
+              "optimiser\n    dropped them and the hybrid reproduced method A exactly.")
+        print(f"    after StandardScaler per block: "
+              f"BoW {bow_train_s.std(axis=0).mean():.4f}   "
+              f"embedding {ep_train_s.std(axis=0).mean():.4f}")
 
         candidates += [
             ("B) Embeddings, raw text",
@@ -344,8 +409,8 @@ def main():
              np.hstack([struct_test, ep_test]),
              {"text_representation": "embeddings_preprocessed"}),
             ("D) Hybrid: dictionary + embeddings",
-             np.hstack([struct_train, bow_train, ep_train]),
-             np.hstack([struct_test, bow_test, ep_test]),
+             np.hstack([struct_train, bow_train_s, ep_train_s]),
+             np.hstack([struct_test, bow_test_s, ep_test_s]),
              {"text_representation": "hybrid"}),
         ]
     else:
@@ -393,10 +458,12 @@ def main():
     #
     # Rule: treat every representation whose under-triage is within
     # SAFETY_TOLERANCE points of the lowest under-triage as
-    # safety-equivalent, then take the most accurate of those. This also
-    # lands on the hybrid option that ARCHITECTURE.md section 4.3 names
-    # as the safe default (the dictionary keeps anchoring the Roman Urdu
-    # the embedding model misses).
+    # safety-equivalent, then take the most accurate of those.
+    #
+    # This rule REPORTS a recommendation; it no longer decides what ships.
+    # It cannot: when two methods score identically it silently keeps the
+    # first, and "first" is the dictionary baseline. See the deploy block
+    # below.
     # ==================================================================
     SAFETY_TOLERANCE = 0.5   # percentage points of under-triage
 
@@ -405,7 +472,8 @@ def main():
     min_under = min(r["under_triage_pct"] for r in results)
     safety_equivalent = [r for r in results
                          if r["under_triage_pct"] <= min_under + SAFETY_TOLERANCE]
-    best = max(safety_equivalent, key=lambda r: (r["accuracy"], -r["under_triage_pct"]))
+    auto_best = max(safety_equivalent,
+                    key=lambda r: (r["accuracy"], -r["under_triage_pct"]))
 
     print("\n" + "=" * 78)
     print("VERDICT")
@@ -413,12 +481,57 @@ def main():
     print(f"  Most accurate overall : {most_accurate['method']}  "
           f"({most_accurate['accuracy']:.2f}%, "
           f"under-triage {most_accurate['under_triage_pct']:.2f}%)")
+    print(f"  Safety-first pick     : {auto_best['method']}  "
+          f"({auto_best['accuracy']:.2f}%, "
+          f"under-triage {auto_best['under_triage_pct']:.2f}%)")
 
-    if most_accurate is not best:
-        print(f"  NOT selected: its under-triage ({most_accurate['under_triage_pct']:.2f}%) "
-              f"is worse than the safest option ({min_under:.2f}%).")
-        print("  Under-triage sends a critically ill patient to the back of the")
-        print("  queue, so it outranks raw accuracy in the selection rule.")
+    if most_accurate is not auto_best:
+        print(f"  The safety rule rejects the most accurate method because its "
+              f"under-triage ({most_accurate['under_triage_pct']:.2f}%)")
+        print(f"  is more than {SAFETY_TOLERANCE} points worse than the safest "
+              f"option ({min_under:.2f}%).")
+
+    # ==================================================================
+    # WHICH METHOD ACTUALLY SHIPS
+    #
+    # The safety rule alone is not enough to decide this. On this dataset
+    # methods A and D can tie exactly, and `max` keeps the FIRST of a tie -
+    # which is A - so an "embedding pipeline" silently deployed a
+    # dictionary-only model with embedding_model=null in its metrics.
+    # Deployment is therefore an explicit choice, defaulting to the method
+    # this project is built to use (C, offline sentence embeddings), with
+    # --deploy auto still available to reproduce the old behaviour.
+    # ==================================================================
+    by_letter = {r["method"][0]: r for r in results}
+    if args.deploy == "auto":
+        best = auto_best
+        selection_mode = (
+            f"auto: lowest under-triage first (within {SAFETY_TOLERANCE} points), "
+            "accuracy as tie-breaker")
+    else:
+        if args.deploy not in by_letter:
+            print(f"\n[x] --deploy {args.deploy} is not available in this run "
+                  f"(have: {', '.join(sorted(by_letter))}).")
+            if args.skip_embeddings:
+                print("    --skip-embeddings only trains method A.")
+            sys.exit(1)
+        best = by_letter[args.deploy]
+        selection_mode = (f"explicit --deploy {args.deploy}: the offline embedding "
+                          "model is the method this project deploys on purpose")
+        if best is not auto_best:
+            print(f"\n  OVERRIDE: --deploy {args.deploy} ships "
+                  f"{best['method']} instead of the safety-first pick.")
+            d = best["under_triage_pct"] - auto_best["under_triage_pct"]
+            if d > 0:
+                print(f"  Cost of that choice: {d:+.2f} points of under-triage "
+                      f"({auto_best['under_triage_pct']:.2f}% -> "
+                      f"{best['under_triage_pct']:.2f}%). Stated, not hidden.")
+
+    if not best["text_representation"].startswith("embeddings") \
+            and best["text_representation"] != "hybrid":
+        print("\n  [!] WARNING: the method being deployed to "
+              f"'{args.out_dir}' does NOT use embeddings.")
+        print("      Pass --deploy C to ship the offline embedding model.")
 
     print(f"\n  SELECTED : {best['method']}")
     print(f"  accuracy {best['accuracy']:.2f}%   "
@@ -476,28 +589,80 @@ def main():
         print(f"       full-data only : {only_full or '-'}")
         print(f"       train-only     : {only_train or '-'}")
 
+    rep = best["text_representation"]
+    uses_bow = rep in ("dictionary_bow", "hybrid")
+    uses_emb = rep in ("embeddings_raw", "embeddings_preprocessed", "hybrid")
+
     joblib.dump(best["_model"], os.path.join(args.out_dir, "model.pkl"))
     joblib.dump(scaler, os.path.join(args.out_dir, "scaler.pkl"))
     for name, enc in encoders.items():
         joblib.dump(enc, os.path.join(args.out_dir, f"{name}.pkl"))
-    if best["text_representation"] in ("dictionary_bow", "hybrid"):
+    if uses_bow:
         joblib.dump(word_bow, os.path.join(args.out_dir, "word_bow.pkl"))
         joblib.dump(char_bow, os.path.join(args.out_dir, "char_bow.pkl"))
 
+    # Per-block scalers are part of the model: without them at inference time
+    # the hybrid would see features on a different scale than it was fitted
+    # on. Only the hybrid rescales, so only the hybrid saves them.
+    for block, block_scaler in (block_scalers if rep == "hybrid" else {}).items():
+        joblib.dump(block_scaler,
+                    os.path.join(args.out_dir, f"{block}_block_scaler.pkl"))
+
+    # Stale artifacts from a previous run with a DIFFERENT representation
+    # would otherwise be picked up and silently mixed into the feature
+    # matrix (e.g. leftover word_bow.pkl from a dictionary run).
+    stale = []
+    if not uses_bow:
+        stale += ["word_bow.pkl", "char_bow.pkl"]
+    if rep != "hybrid":
+        stale += ["bow_block_scaler.pkl", "embedding_block_scaler.pkl"]
+    for name in stale:
+        path = os.path.join(args.out_dir, name)
+        if os.path.exists(path):
+            os.remove(path)
+            print(f"  [ok] removed stale artifact from a previous run: {name}")
+
+    embedding_model_name = args.model if uses_emb else None
+    embedding_dim = (int(emb_model.get_sentence_embedding_dimension())
+                     if (uses_emb and emb_model is not None) else None)
+
+    # The manifest is how every predictor knows what this directory holds.
+    # See triage_pipeline.read_manifest / build_text_features.
+    manifest = {
+        "method": best["method"],
+        "text_representation": rep,
+        "embedding_model": embedding_model_name,
+        "embedding_dim": embedding_dim,
+        "text_pipeline": (
+            "clean -> rule replace -> fuzzy -> diacritize"
+            + (" -> learned stop-word removal" if rep != "embeddings_raw" else "")
+            + (" -> BoW + attention" if uses_bow else "")
+            + (" -> sentence-transformer" if uses_emb else "")),
+        "feature_blocks": (
+            [{"name": "structured", "dim": int(structured.shape[1])}]
+            + ([{"name": "bow", "dim": int(bow_train.shape[1]),
+                 "rescaled": rep == "hybrid"}] if uses_bow else [])
+            + ([{"name": "embedding", "dim": embedding_dim,
+                 "rescaled": rep == "hybrid"}] if uses_emb else [])),
+        "trained_by": "train_embedding_pipeline.py",
+        "deploy_mode": args.deploy,
+    }
+    with open(os.path.join(args.out_dir, "model_manifest.json"), "w",
+              encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+
     metrics = {
         "winning_method": best["method"],
-        "selection_rule": (
-            f"Lowest under-triage first (within {SAFETY_TOLERANCE} points), "
-            "accuracy as tie-breaker. Under-triage outranks accuracy because "
-            "it is the error that harms patients."
-        ),
+        "deployed_method": best["method"],
+        "selection_rule": selection_mode,
+        "safety_first_pick": auto_best["method"],
+        "deploy_override_used": args.deploy != "auto" and best is not auto_best,
         "most_accurate_method": most_accurate["method"],
         "most_accurate_not_selected": most_accurate["method"] != best["method"],
-        "text_representation": best["text_representation"],
-        "embedding_model": (None if best["text_representation"] == "dictionary_bow"
-                            else args.model),
-        "embedding_dim": (None if emb_model is None
-                          else int(emb_model.get_sentence_embedding_dimension())),
+        "text_representation": rep,
+        "uses_embeddings": uses_emb,
+        "embedding_model": embedding_model_name,
+        "embedding_dim": embedding_dim,
         "accuracy": best["accuracy"],
         "under_triage_pct": best["under_triage_pct"],
         "over_triage_pct": best["over_triage_pct"],
@@ -521,11 +686,15 @@ def main():
                   for r in results]).to_csv(RESULTS_FILE, index=False)
 
     print(f"  [ok] Model + encoders saved to '{args.out_dir}/'")
+    print(f"  [ok] Manifest saved to '{args.out_dir}/model_manifest.json'")
     print(f"  [ok] Metrics saved to '{args.out_dir}/triage_metrics.json'")
     print(f"  [ok] Comparison table saved to '{RESULTS_FILE}'")
+    print(f"\n  DEPLOYED: {best['method']}")
+    print(f"            text representation : {rep}")
+    print(f"            uses embeddings     : {'YES - ' + str(embedding_model_name) if uses_emb else 'NO'}")
     print("\n  NOTE: the published dictionary model in 'triage_model/' is left")
-    print("        untouched, so predict_batch.py / prediction.py /")
-    print("        prediction_interactive.py keep working exactly as before.")
+    print("        untouched and still loads exactly as before; it is the")
+    print("        fallback when sentence-transformers is not installed.")
     print("\nDone.")
 
 
