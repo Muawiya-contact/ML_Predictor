@@ -361,15 +361,111 @@ def apply_diacritization(text):
     return ' '.join(VARIANT_TO_CANONICAL.get(w, w) for w in text.split())
 
 
-def normalize_roman_urdu(text):
-    """Full text pipeline: clean -> rule replace -> fuzzy -> diacritize."""
-    text = str(text).lower()
-    text = re.sub(r"[^a-z\s]", " ", text)
+def clean_text(text):
+    """Lowercase and replace everything outside a-z / whitespace with a space.
+
+    Runs of spaces are deliberately NOT collapsed here: the rule
+    replacements below match on literal single-spaced phrases, and
+    collapsing first would make "loose  motion" (two spaces, produced by a
+    stripped comma) start matching a rule it does not match today. The
+    saved Bag-of-Words vectorizers in triage_model/ were fitted under the
+    current behaviour, so it is preserved exactly.
+    """
+    return re.sub(r"[^a-z\s]", " ", str(text).lower())
+
+
+def apply_rule_replacements(text):
+    """High-confidence multi-word fixes applied before fuzzy matching.
+
+    This is a REAL pipeline stage - it is what turns "saans phulna" into
+    "saans phoolna", "thanda pasina" into "sweating" and "sugar level"
+    into "sugar". Anything that shows the pipeline to a human must show
+    this stage too, or words appear to vanish later for no visible reason.
+    """
     for k, v in RULE_REPLACEMENTS.items():
         text = text.replace(k, v)
-    text = fuzzy_correct_text(text)
-    text = apply_diacritization(text)
     return text
+
+
+#: The normalization pipeline as an ordered list of (key, title, function).
+#: normalize_roman_urdu() and every explain-the-pipeline view are both built
+#: from this list, so a stage can never be shown that is not actually run,
+#: and a stage can never be run that is not shown.
+NORMALIZATION_STAGES = [
+    ("clean", "Lowercase + punctuation stripped", clean_text),
+    ("rules", "Rule-based phrase replacements", apply_rule_replacements),
+    ("fuzzy", "Fuzzy spelling correction", fuzzy_correct_text),
+    ("diacritize", "Diacritization", apply_diacritization),
+]
+
+STAGE_NOTES = {
+    "clean": "everything except a-z becomes a space",
+    "rules": ("fixed multi-word phrases from RULE_REPLACEMENTS "
+              "(saans phulna -> saans phoolna, sugar level -> sugar)"),
+    "fuzzy": ("RapidFuzz maps an unknown spelling onto the closest word in "
+              "CANONICAL_VOCAB at >=80% similarity. It only fires on spellings "
+              "the dictionary in the next stage does not already know, so on "
+              "many complaints it correctly changes nothing."),
+    "diacritize": ("every spelling variant listed in DIACRITIZATION_MAP "
+                   "collapses to one canonical form"),
+    "stopwords": ("Contribution 1 - the list was learned from the data. Only "
+                  "tokens that are BOTH common AND statistically unrelated to "
+                  "the triage level are dropped; common words that do track "
+                  "triage (\"hai\", \"aur\", \"mein\") are kept on purpose."),
+}
+
+
+def normalize_roman_urdu(text):
+    """Full text pipeline: clean -> rule replace -> fuzzy -> diacritize."""
+    for _, _, fn in NORMALIZATION_STAGES:
+        text = fn(text)
+    return text
+
+
+def normalize_stages(text):
+    """Run the pipeline and return what every stage produced.
+
+    Returns a list of dicts: key, title, text, note, changed. The last
+    entry's "text" is exactly normalize_roman_urdu(text) - the same code
+    runs both, so an explainer built on this cannot drift from the model.
+    """
+    stages = [{"key": "raw", "title": "Raw input", "text": str(text),
+               "note": "exactly what the triage nurse typed", "changed": False}]
+    current = text
+    previous = " ".join(str(text).split())
+    for key, title, fn in NORMALIZATION_STAGES:
+        current = fn(current)
+        shown = " ".join(current.split())
+        stages.append({"key": key, "title": title, "text": shown,
+                       "note": STAGE_NOTES.get(key, ""),
+                       "changed": shown != previous})
+        previous = shown
+    return stages
+
+
+def preprocess_stages(text, stopword_set=None):
+    """normalize_stages() plus the learned stop-word removal stage.
+
+    The final entry's "text" is exactly preprocess_for_embedding(text).
+    """
+    from stopwords import load_stopwords, remove_stopwords
+
+    if stopword_set is None:
+        stopword_set = load_stopwords()
+
+    stages = normalize_stages(text)
+    normalized = stages[-1]["text"]
+    final = remove_stopwords(normalize_roman_urdu(text), stopword_set)
+    shown = " ".join(final.split())
+    stages.append({"key": "stopwords", "title": "Learned stop words removed",
+                   "text": shown, "note": STAGE_NOTES["stopwords"],
+                   "changed": shown != normalized,
+                   # dict.fromkeys de-duplicates while keeping the order they
+                   # appeared in, so a complaint saying "se ... se" lists the
+                   # token once rather than twice in the explanation table.
+                   "dropped": list(dict.fromkeys(
+                       w for w in normalized.split() if w in stopword_set))})
+    return stages
 
 
 # Backwards-compatible alias used by the interactive script
@@ -495,27 +591,272 @@ REQUIRED_INPUT_COLUMNS = [
 ]
 
 
+# ============================================================
+# MODEL BUNDLE MANIFEST
+#
+# A saved model directory describes ITSELF. Before this existed, every
+# predictor assumed "model.pkl was trained on structured + attention-weighted
+# Bag-of-Words", which is why an embedding-based model could not be deployed
+# at all: nothing downstream could build the features it expects. The
+# manifest names the text representation, so load_artifacts() can assemble
+# the right feature blocks in the right order.
+#
+# A directory with NO manifest is the historical dictionary+BoW bundle
+# (triage_model/), and is loaded exactly as before.
+# ============================================================
+
+MANIFEST_FILE = 'model_manifest.json'
+
+LEGACY_MANIFEST = {
+    'text_representation': 'dictionary_bow',
+    'method': 'A) Dictionary + BoW',
+    'embedding_model': None,
+    'embedding_dim': None,
+    'text_pipeline': 'clean -> rule replace -> fuzzy -> diacritize -> BoW + attention',
+}
+
+#: Which feature blocks each representation stacks, in training order.
+#: MUST match the np.hstack order in train_embedding_pipeline.py.
+REPRESENTATION_BLOCKS = {
+    'dictionary_bow':          ('bow',),
+    'embeddings_raw':          ('embedding',),
+    'embeddings_preprocessed': ('embedding',),
+    'hybrid':                  ('bow', 'embedding'),
+}
+
+
+def read_manifest(model_dir):
+    """Describe a saved model directory. Falls back to the legacy layout."""
+    path = os.path.join(model_dir, MANIFEST_FILE)
+    if not os.path.exists(path):
+        return dict(LEGACY_MANIFEST)
+    import json
+    with open(path, 'r', encoding='utf-8') as f:
+        manifest = json.load(f)
+    for k, v in LEGACY_MANIFEST.items():
+        manifest.setdefault(k, v)
+    return manifest
+
+
+def describe_model(model_dir='triage_model'):
+    """Short human-readable description of what a model directory contains.
+
+    Used by the GUI and the CLI predictors so the operator can always see
+    WHICH method is actually making the prediction in front of them.
+    """
+    manifest = read_manifest(model_dir)
+    rep = manifest['text_representation']
+    blocks = REPRESENTATION_BLOCKS.get(rep, ())
+    if 'embedding' in blocks and 'bow' in blocks:
+        basis = 'dictionary BoW + sentence-transformer embeddings'
+    elif 'embedding' in blocks:
+        basis = 'sentence-transformer embeddings'
+    else:
+        basis = 'dictionary + Bag-of-Words'
+    return {
+        'model_dir': model_dir,
+        'method': manifest.get('method') or rep,
+        'text_representation': rep,
+        'basis': basis,
+        'uses_embeddings': 'embedding' in blocks,
+        'embedding_model': manifest.get('embedding_model'),
+        'embedding_dim': manifest.get('embedding_dim'),
+    }
+
+
+#: The two model bundles this project ships. The embedding bundle is the
+#: deployed one; the dictionary bundle is the offline-safe fallback for a
+#: machine without sentence-transformers installed.
+EMBEDDING_MODEL_DIR = 'triage_model_embedding'
+DICTIONARY_MODEL_DIR = 'triage_model'
+
+
+def resolve_model_dir(model_dir=None, allow_fallback=True):
+    """Decide which saved model actually runs, and say why.
+
+    Returns (model_dir, note). An explicit model_dir is always honoured.
+    Otherwise the embedding bundle wins, unless it needs
+    sentence-transformers and that is not installed - in which case the
+    dictionary bundle is used and the note says so, rather than the caller
+    crashing on an import deep inside a prediction.
+    """
+    if model_dir:
+        return model_dir, ''
+
+    candidate = EMBEDDING_MODEL_DIR
+    if not os.path.exists(os.path.join(candidate, 'model.pkl')):
+        return DICTIONARY_MODEL_DIR, (
+            f"'{candidate}/' not found - using the dictionary model. "
+            "Run: python train_embedding_pipeline.py")
+
+    info = describe_model(candidate)
+    if info['uses_embeddings'] and allow_fallback:
+        try:
+            import sentence_transformers          # noqa: F401
+        except ImportError:
+            return DICTIONARY_MODEL_DIR, (
+                f"'{candidate}/' needs sentence-transformers "
+                f"({info['embedding_model']}), which is not installed - "
+                "falling back to the dictionary model in "
+                f"'{DICTIONARY_MODEL_DIR}/'. Install it with: "
+                "pip install -r requirements-embedding.txt")
+    return candidate, ''
+
+
 def load_artifacts(model_dir='triage_model'):
-    """Load the trained model, vectorizers, scaler and encoders."""
+    """Load the trained model, vectorizers, scaler, encoders and manifest."""
     def p(name):
         return os.path.join(model_dir, name)
 
+    manifest = read_manifest(model_dir)
+    rep = manifest['text_representation']
+    if rep not in REPRESENTATION_BLOCKS:
+        raise ValueError(
+            f"{model_dir}/{MANIFEST_FILE} declares unknown text_representation "
+            f"'{rep}'. Known: {sorted(REPRESENTATION_BLOCKS)}")
+    blocks = REPRESENTATION_BLOCKS[rep]
+
     artifacts = {
         'model':     joblib.load(p('model.pkl')),
-        'word_bow':  joblib.load(p('word_bow.pkl')),
-        'char_bow':  joblib.load(p('char_bow.pkl')),
         'scaler':    joblib.load(p('scaler.pkl')),
         'le_gender': joblib.load(p('gender_enc.pkl')),
         'le_mode':   joblib.load(p('mode_enc.pkl')),
         'le_avpu':   joblib.load(p('avpu_enc.pkl')),
         'le_ecg':    joblib.load(p('ecg_enc.pkl')),
+        'manifest':  manifest,
+        'model_dir': model_dir,
+        'text_representation': rep,
+        'blocks': blocks,
     }
-    artifacts['feature_names'] = (
-        list(artifacts['word_bow'].get_feature_names_out()) +
-        list(artifacts['char_bow'].get_feature_names_out())
-    )
-    artifacts['attention'] = build_attention_weights(artifacts['feature_names'])
+
+    if 'bow' in blocks:
+        artifacts['word_bow'] = joblib.load(p('word_bow.pkl'))
+        artifacts['char_bow'] = joblib.load(p('char_bow.pkl'))
+        artifacts['feature_names'] = (
+            list(artifacts['word_bow'].get_feature_names_out()) +
+            list(artifacts['char_bow'].get_feature_names_out())
+        )
+        artifacts['attention'] = build_attention_weights(artifacts['feature_names'])
+
+    # Per-block rescaling, saved only by the hybrid path (see
+    # train_embedding_pipeline.py). Without it the attention-weighted BoW
+    # block (values around 8) drowns out the L2-normalized embedding block
+    # (values around 0.05) and the classifier ignores the embeddings.
+    for block in blocks:
+        scaler_path = p(f'{block}_block_scaler.pkl')
+        if os.path.exists(scaler_path):
+            artifacts[f'{block}_block_scaler'] = joblib.load(scaler_path)
+
+    artifacts['encoder'] = None          # loaded lazily on first use
     return artifacts
+
+
+def get_text_encoder(art):
+    """Return the sentence-transformer for this bundle, loading it once."""
+    if art.get('encoder') is not None:
+        return art['encoder']
+    name = art['manifest'].get('embedding_model')
+    if not name:
+        raise RuntimeError(
+            f"{art['model_dir']} is an embedding model but its manifest does "
+            "not name an embedding_model. Re-run train_embedding_pipeline.py.")
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError as e:
+        raise RuntimeError(
+            f"The deployed model in '{art['model_dir']}' uses sentence "
+            f"embeddings ({name}), so 'sentence-transformers' is required.\n"
+            "Install it once (needs internet), then re-run:\n"
+            "    pip install -r requirements-embedding.txt"
+        ) from e
+    art['encoder'] = SentenceTransformer(name, device='cpu')
+    return art['encoder']
+
+
+def build_text_features(art, raw_texts, batch_size=32):
+    """Turn raw complaint strings into the text feature block this model wants.
+
+    The block order here MUST match the np.hstack order used at training
+    time (bow first, then embeddings) - see REPRESENTATION_BLOCKS.
+    """
+    raw_texts = ['unknown' if t is None else str(t) for t in raw_texts]
+    rep = art['text_representation']
+    parts = []
+
+    for block in art['blocks']:
+        if block == 'bow':
+            cleaned = [normalize_roman_urdu(t) for t in raw_texts]
+            mat = np.hstack([
+                art['word_bow'].transform(cleaned).toarray(),
+                art['char_bow'].transform(cleaned).toarray(),
+            ]) * art['attention']
+        else:
+            # 'embeddings_raw' deliberately skips preprocessing; every other
+            # embedding representation gets clean -> fuzzy -> stop-word removal,
+            # exactly as train_embedding_pipeline.py did.
+            texts = (list(raw_texts) if rep == 'embeddings_raw'
+                     else preprocess_corpus_for_embedding(raw_texts))
+            mat = get_text_encoder(art).encode(
+                texts, batch_size=batch_size, show_progress_bar=False,
+                convert_to_numpy=True, normalize_embeddings=True)
+        block_scaler = art.get(f'{block}_block_scaler')
+        if block_scaler is not None:
+            mat = block_scaler.transform(mat)
+        parts.append(mat)
+
+    return np.hstack(parts)
+
+
+# ============================================================
+# READING PATIENT FILES
+# ============================================================
+
+#: Tried in order when a CSV does not decode as UTF-8. cp1252 comes before
+#: latin-1 because latin-1 decodes ANY byte sequence without error, so
+#: putting it earlier would silently turn Windows curly quotes and other
+#: cp1252 bytes into mojibake instead of letting cp1252 read them properly.
+CSV_ENCODINGS = ('utf-8', 'utf-8-sig', 'cp1252', 'latin-1')
+
+
+def read_table(path):
+    """Read a CSV or Excel file of patients into a DataFrame.
+
+    Excel files carry their own encoding, but a CSV exported from Excel on a
+    Windows machine is usually cp1252/latin-1, not UTF-8, and pandas raised
+    UnicodeDecodeError on the first non-ASCII byte. A triage file must not be
+    rejected because someone typed a degree sign, so the encoding is detected
+    (chardet when available) and then a fallback chain is tried.
+    """
+    import pandas as pd
+
+    ext = os.path.splitext(path)[1].lower()
+    if ext in ('.xlsx', '.xls'):
+        return pd.read_excel(path)
+    if ext not in ('.csv', '.txt'):
+        raise ValueError(f"Unsupported file type '{ext}'. Use .xlsx or .csv")
+
+    candidates = []
+    try:                                    # optional; never required
+        import chardet
+        with open(path, 'rb') as f:
+            guess = chardet.detect(f.read(200_000))
+        if guess.get('encoding') and guess.get('confidence', 0) >= 0.6:
+            candidates.append(guess['encoding'])
+    except Exception:
+        pass
+    candidates += [e for e in CSV_ENCODINGS if e not in candidates]
+
+    last_error = None
+    for encoding in candidates:
+        try:
+            return pd.read_csv(path, encoding=encoding)
+        except (UnicodeDecodeError, LookupError) as e:
+            last_error = e
+    # latin-1 decodes any byte, so reaching here means the file is not the
+    # text file it claims to be. Say that instead of re-raising a decode error.
+    raise ValueError(
+        f"Could not read '{path}' as text with any of {candidates}. "
+        f"Is it really a CSV? Underlying error: {last_error}")
 
 
 def safe_encode(encoder, value, warnings_list=None, field=''):
@@ -556,10 +897,7 @@ def _safe_float(value, default):
 def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
                 temperature, spo2, gender, mode_of_arrival, avpu, ecg_status):
     """Predict triage for a single patient. Returns (level, confidence, proba)."""
-    cleaned = normalize_roman_urdu(complaint)
-    word_feat = art['word_bow'].transform([cleaned]).toarray()
-    char_feat = art['char_bow'].transform([cleaned]).toarray()
-    text_feat = np.hstack([word_feat, char_feat]) * art['attention']
+    text_feat = build_text_features(art, [complaint])
 
     import pandas as pd
     numerical = art['scaler'].transform(pd.DataFrame(
@@ -618,11 +956,9 @@ def predict_dataframe(art, df):
     num_matrix = art['scaler'].transform(
         pd.DataFrame(num_matrix, columns=NUMERICAL_FEATURES))
 
-    # --- text features (vectorize the whole column at once) ---
-    cleaned = df['Complaint_Text'].fillna('unknown').astype(str).apply(normalize_roman_urdu)
-    word_feat = art['word_bow'].transform(cleaned).toarray()
-    char_feat = art['char_bow'].transform(cleaned).toarray()
-    text_feat = np.hstack([word_feat, char_feat]) * art['attention']
+    # --- text features (vectorize / embed the whole column at once) ---
+    text_feat = build_text_features(
+        art, df['Complaint_Text'].fillna('unknown').astype(str).tolist())
 
     # --- categorical encoding (safe) ---
     cat_matrix = np.zeros((len(df), 4))
