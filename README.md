@@ -107,30 +107,56 @@ Current results, copied from `embedding_pipeline_results.csv` — the app's
 **Model Score** tab reads the same file live, so that is always the
 authoritative view:
 
-| Method                                | Accuracy   | Under-triage | Over-triage |
-| ------------------------------------- | ---------- | ------------ | ----------- |
-| A) Dictionary + BoW (previous system) | 90.04%     | **3.73%**    | 6.22%       |
-| B) Embeddings, raw text               | 91.29%     | 4.56%        | 4.15%       |
-| C) Embeddings + preprocessing         | **92.12%** | 4.56%        | 3.32%       |
-| D) Hybrid: dictionary + embeddings    | 90.04%     | **3.73%**    | 6.22%       |
+| Method                                | Accuracy   | Under-triage | Over-triage |                |
+| ------------------------------------- | ---------- | ------------ | ----------- | -------------- |
+| A) Dictionary + BoW (previous system) | 90.04%     | **3.73%**    | 6.22%       |                |
+| B) Embeddings, raw text               | 91.29%     | 4.56%        | 4.15%       |                |
+| C) Embeddings + preprocessing         | **92.12%** | 4.56%        | **3.32%**   | ← **deployed** |
+| D) Hybrid: dictionary + embeddings    | 86.72%     | 7.05%        | 6.22%       |                |
 
 Adding automatic stop-word removal lifted the embeddings from 91.29% → 92.12%
 (**+0.83 points**) — the measured effect of Contribution 1.
 
-**A is currently selected, not the most accurate C.** Under-triage (a critically
-ill patient sent to the back of the queue) outranks raw accuracy, so the
-selection rule minimises it first and uses accuracy only as the tie-breaker.
-Artifacts go to `triage_model_embedding/`; the published `triage_model/` is left
-untouched so the existing predictors keep working.
+**C is deployed.** Deployment is an explicit choice (`--deploy`, default `C`),
+not a by-product of the scoring rule — see *How the deployed method is chosen*
+below. Artifacts go to `triage_model_embedding/`, which is what
+`triage_gui.py`, `predict_batch.py`, `prediction.py` and
+`prediction_interactive.py` all load by default. `triage_model/` is left
+untouched and is the fallback for machines without `sentence-transformers`.
 
-> **Known issue — the hybrid is not currently contributing.** Method D reports
-> numbers identical to method A. The attention-weighted Bag-of-Words features
-> reach magnitudes around 8.0 while the L2-normalised embedding features average
-> about 0.1, so when the two blocks are concatenated the embedding columns are
-> effectively drowned out and the classifier reproduces the dictionary-only fit.
-> This surfaced after the attention-weight fix raised the BoW weights. The fix is
-> to scale the two blocks before concatenating in `train_embedding_pipeline.py`.
-> Recorded here rather than hidden, since D is meant to be the safe default.
+**The cost of that choice, stated plainly:** C carries **+0.83 points more
+under-triage** than A (4.56% vs 3.73%). Under-triage is the error that harms
+patients, so this is a real trade against a 2.08-point accuracy gain and a
+2.90-point over-triage improvement. `train_embedding_pipeline.py` prints this
+line on every run.
+
+### How the deployed method is chosen
+
+Two separate things, deliberately kept apart:
+
+1. **The safety-first rule** — treat every method whose under-triage is within
+   0.5 points of the lowest as safety-equivalent, then take the most accurate.
+   This is still computed and reported on every run.
+2. **What actually ships** — the `--deploy` flag, default `C`.
+
+They were the same thing until it emerged that the rule alone could not decide
+this: when two methods tie, `max()` keeps the first, and the first is the
+dictionary baseline. So the "embedding pipeline" shipped a dictionary-only
+model with `embedding_model: null` in its own metrics. Use `--deploy auto` to
+fall back to the old rule-decides-everything behaviour.
+
+> **Fixed — the hybrid was not contributing.** Method D used to report numbers
+> identical to method A on all three metrics (90.04 / 3.73 / 6.22). The
+> attention-weighted Bag-of-Words block and the L2-normalised embedding block
+> were concatenated without rescaling, so under a shared L2 penalty the
+> embedding columns cost far more coefficient per unit of signal and the
+> optimiser dropped all 384 of them. Each block is now standardised separately
+> (fit on the training split only) before concatenation, and
+> `train_embedding_pipeline.py` prints both blocks' scales so the fault cannot
+> return silently. **Note the honest outcome:** properly fused, D is *worse*
+> than either input alone (86.72%, 7.05% under-triage) — 1,094 features on 963
+> training rows. Fixing the fusion was necessary to know that; it did not
+> produce a better model, which is why C is deployed.
 
 **Contribution 2 — embedding-effectiveness study**
 ([`embedding_evaluation.py`](embedding_evaluation.py)). Measures how faithfully
@@ -476,6 +502,17 @@ Run every command from inside the project folder — the one containing
 | Choose where to save results | `python predict_batch.py my_patients.xlsx my_results.xlsx` |
 | See five built-in example patients | `python prediction.py` |
 | Type in one patient, step by step | `python prediction_interactive.py` |
+| Force the dictionary model instead of the deployed one | `python predict_batch.py my_patients.xlsx --model-dir triage_model` |
+
+**Which model do these use?** All of them load `triage_model_embedding/` — the
+deployed sentence-embedding pipeline — and fall back to `triage_model/` if
+`sentence-transformers` is not installed. Each one prints the method it is
+using at startup, and the app shows it on the Triage, Batch, Results and
+Model Score tabs. You never have to guess which method produced a result.
+
+CSV files are read with encoding detection (`utf-8` → `utf-8-sig` → `cp1252` →
+`latin-1`), so a sheet exported from Excel on Windows loads instead of failing
+with `UnicodeDecodeError`.
 
 ### Training and research
 
@@ -484,9 +521,11 @@ dictionaries, or if you are writing up the results.
 
 | What you want to do | Command |
 |---|---|
-| Train the dictionary model | `python triage_bow_fuzzy_diac.py` |
+| Train the dictionary model (the fallback) | `python triage_bow_fuzzy_diac.py` |
 | Learn the stop-word list on its own | `python stopwords.py` |
-| Train the embedding model + compare all four methods | `python train_embedding_pipeline.py` |
+| **Train + deploy the embedding model** | `python train_embedding_pipeline.py` |
+| Deploy a different method instead | `python train_embedding_pipeline.py --deploy D` |
+| Let the safety rule decide (old behaviour) | `python train_embedding_pipeline.py --deploy auto` |
 | Measure how good the embeddings are | `python embedding_evaluation.py` |
 | Compare dictionary vs embeddings (older experiment) | `python embedding_experiment.py` |
 
@@ -494,8 +533,9 @@ dictionaries, or if you are writing up the results.
 
 - `triage_bow_fuzzy_diac.py` → updates `triage_model/` and `visualizations/`
 - `stopwords.py` → updates `learned_stopwords.json`
-- `train_embedding_pipeline.py` → updates `triage_model_embedding/`,
-  `embedding_pipeline_results.csv` and `learned_stopwords.json`
+- `train_embedding_pipeline.py` → updates `triage_model_embedding/` (including
+  `model_manifest.json`, which is how every predictor knows what that directory
+  holds), `embedding_pipeline_results.csv` and `learned_stopwords.json`
 - `embedding_evaluation.py` → updates `embedding_evaluation_results.csv`,
   `embedding_evaluation_pairs.csv` and `embedding_evaluation_neighbours.csv`
 
@@ -786,16 +826,22 @@ Raw Roman Urdu Complaint
 
 ## Evaluation Metrics
 
-Current retrained model (20% held-out test set, 241 patients):
+Two models are scored in this project. They are **separate pipelines, not two
+views of one model**, so their numbers are never combined:
 
-| Metric                     | Value                  |
-| -------------------------- | ---------------------- |
-| Overall accuracy           | ~88.8%                 |
-| Correctly triaged          | ~88.8%                 |
-| Over-triage rate           | ~6.2%                  |
-| Under-triage rate (safety) | ~5.0%                  |
-| Safety grade               | A+ (under-triage < 5%) |
-| Resource efficiency grade  | A (over-triage < 15%)  |
+| | Deployed — `triage_model_embedding/` | Fallback — `triage_model/` |
+| --- | --- | --- |
+| Method | C) Embeddings + preprocessing | Dictionary + Bag-of-Words |
+| Text features | sentence-transformer, 384 dims | word/char n-gram counts × attention |
+| Accuracy | **92.12%** | ~90.5% |
+| Under-triage | 4.56% | ~4.1% |
+| Over-triage | 3.32% | ~5.4% |
+| Safety grade | A+ | A+ |
+| Metrics file | `triage_model_embedding/triage_metrics.json` | `triage_model/triage_metrics.json` |
+
+Both measured on the same 20% held-out test set (241 patients). The **Model
+Score** tab reads both files live and labels each card with the pipeline that
+produced it.
 
 Beyond accuracy, two clinical safety metrics matter most:
 
@@ -805,8 +851,9 @@ Beyond accuracy, two clinical safety metrics matter most:
 **Safety grading (under-triage):** A+ <5%, A <10%, B <15%, C <20%, F >=20% (do not deploy).
 **Efficiency grading (over-triage):** A <15%, B <25%, C <35%, D >=35%.
 
-Exact numbers are written to `triage_model/triage_metrics.json` each time you
-train.
+Exact numbers are written to the relevant `triage_metrics.json` each time you
+train — `triage_model/` by `triage_bow_fuzzy_diac.py`, and
+`triage_model_embedding/` by `train_embedding_pipeline.py`.
 
 ---
 
@@ -840,7 +887,23 @@ Pass the correct path, e.g. `python predict_batch.py sample_100_patients.xlsx`,
 and run the command from inside the `ED/` folder.
 
 **`FileNotFoundError: triage_model/model.pkl`**
-Train first: `python triage_bow_fuzzy_diac.py`.
+Train first: `python triage_bow_fuzzy_diac.py`. The app needs only *one* of the
+two bundles to start, so `python train_embedding_pipeline.py` also works.
+
+**`UnicodeDecodeError: 'utf-8' codec can't decode byte 0xfb...` on a CSV**
+Fixed — CSV reading now detects the encoding. If you still see this, you are on
+an old copy: the shared reader is `read_table()` in `triage_pipeline.py`, used by
+both `predict_batch.py` and the app's Batch File tab.
+
+**The app says it is using the dictionary model, not embeddings**
+`sentence-transformers` is missing, so it fell back on purpose. The status bar
+says so. Install it with `pip install -r requirements-embedding.txt`, or run
+`python train_embedding_pipeline.py` if `triage_model_embedding/` is absent.
+
+**`ModuleNotFoundError: No module named 'tkinter'` (Linux)**
+Some distributions ship tkinter separately from Python. On Fedora/RHEL:
+`sudo dnf install python3-tkinter`; on Debian/Ubuntu: `sudo apt install python3-tk`.
+It is part of the standard library, so there is no `pip` package for it.
 
 **Predictions look off after editing a dictionary in `triage_pipeline.py`**
 You must retrain (`python triage_bow_fuzzy_diac.py`) so the saved model and the
@@ -856,6 +919,20 @@ The saved model in `triage_model/` was built with **scikit-learn 1.6.1** (pinned
 Fix by matching the version: `pip install scikit-learn==1.6.1`. If you prefer a
 newer scikit-learn, just retrain once with it (`python triage_bow_fuzzy_diac.py`),
 which regenerates the model files against your installed version.
+
+Note that **1.6.1 has no wheel for Python 3.14** and needs a C compiler to build
+from source. On Python 3.13 or newer, install the current scikit-learn and
+retrain both bundles rather than fighting the pin:
+
+```bash
+pip install scikit-learn
+python triage_bow_fuzzy_diac.py        # regenerates triage_model/
+python train_embedding_pipeline.py     # regenerates triage_model_embedding/
+```
+
+A pickle written by a newer scikit-learn generally will **not** load on an older
+one, so if you hand this project to someone else, either ship the version you
+trained with or tell them to retrain.
 
 ---
 
