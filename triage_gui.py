@@ -213,15 +213,16 @@ def fnum(value, default=None):
 #
 # The learner drops a token only when THREE things hold: it is frequent
 # enough, its normalized mutual information is at or below the threshold,
-# AND its chi-square test of independence is not significant. The tab used
+# AND its Cramer's V effect size is at or below the threshold. The tab used
 # to collapse all three into one sentence, "kept - carries triage signal",
 # shown whenever the token was not judged uninformative.
 #
-# That sentence is wrong for a token like "hai": its mutual information is
-# 0.0062, BELOW the 0.01 threshold, so the MI column on the same row says it
-# carries essentially no signal. What actually saved "hai" is the chi-square
-# test (p = 0.0007). The row therefore contradicted itself and read as a
-# miscategorisation. Name the criterion that decided it instead.
+# (Historical note: the decision used to hinge on the chi-square p-value
+# instead of Cramer's V. P-values shrink as the corpus grows, so filler
+# like "hai" and "mein" - genuinely uninformative by MI - kept being
+# vetoed on larger datasets. Effect size does not scale with n, which is
+# why the criterion was changed.) Name the criterion that decided each
+# row instead of a vague catch-all.
 # ---------------------------------------------------------------------
 
 def keep_reason(stat, thresholds):
@@ -234,17 +235,17 @@ def keep_reason(stat, thresholds):
         return "kept - not frequent enough to be tested"
 
     mi_ok = stat["normalized_mutual_information"] <= thresholds["mi_threshold"]
-    p_ok = stat["chi_square_p_value"] > thresholds["alpha"]
-    if not mi_ok and not p_ok:
+    v_ok = stat["cramers_v"] <= thresholds["cramers_v_threshold"]
+    if not mi_ok and not v_ok:
         return "kept - both tests say it tracks the triage level"
     if not mi_ok:
         return (f"kept - mutual information "
                 f"{stat['normalized_mutual_information']:.5f} is above the "
                 f"{thresholds['mi_threshold']} threshold")
-    # mi_ok and not p_ok: the interesting case ("hai", "mein", "aur").
-    return (f"kept - chi-square is significant (p={stat['chi_square_p_value']:.4f} "
-            f"<= {thresholds['alpha']}), so it is NOT independent of triage, "
-            f"even though its MI is low")
+    # mi_ok and not v_ok: low MI but a real association by effect size.
+    return (f"kept - Cramer's V {stat['cramers_v']:.3f} is above the "
+            f"{thresholds['cramers_v_threshold']} cutoff, so its association "
+            f"with triage is too strong to drop, even though its MI is low")
 
 
 # ---------------------------------------------------------------------
@@ -860,10 +861,10 @@ class TriageGUI(tk.Tk):
 
         # ---- and, just as importantly, what was KEPT ----
         # "Stop words removed" reads as "all the filler is gone", and it is
-        # not: "hai" survives on purpose because the chi-square test says it
-        # does track the triage level on this dataset. Showing the surviving
-        # filler with its reason is the difference between a misleading label
-        # and an explained one.
+        # not: a frequent word survives when either its mutual information or
+        # its Cramer's V effect size says it genuinely tracks the triage level
+        # on this dataset. Showing the surviving filler with its reason is the
+        # difference between a misleading label and an explained one.
         self._explain_kept_fillers(final)
 
     def _explain_kept_fillers(self, final_text):
@@ -887,13 +888,13 @@ class TriageGUI(tk.Tk):
                        'it is unrelated to the triage level.'),
                  bg=CARD, fg=MUTED, font=("Segoe UI", 8), anchor="w",
                  wraplength=980, justify="left").pack(fill="x")
-        tree = ttk.Treeview(box, columns=("df", "mi", "p", "why"),
+        tree = ttk.Treeview(box, columns=("df", "mi", "v", "why"),
                             show="tree headings", height=min(6, len(kept)))
         tree.heading("#0", text="token")
         tree.column("#0", width=150)
         for col, label, w in [("df", "doc frequency", 110),
                               ("mi", "normalized MI", 110),
-                              ("p", "p-value", 90),
+                              ("v", "Cramer's V", 90),
                               ("why", "why it stayed", 380)]:
             tree.heading(col, text=label)
             tree.column(col, width=w,
@@ -902,7 +903,7 @@ class TriageGUI(tk.Tk):
             tree.insert("", "end", text=s["token"], values=(
                 f"{s['document_frequency']:.3f}",
                 f"{s['normalized_mutual_information']:.5f}",
-                f"{s['chi_square_p_value']:.4f}",
+                f"{s['cramers_v']:.3f}",
                 keep_reason(s, self.stopword_report["thresholds"])))
         tree.pack(fill="x", pady=(4, 0))
 
@@ -935,13 +936,15 @@ class TriageGUI(tk.Tk):
                            selectcolor=CARD,
                            command=self._populate_stopwords).pack(side="left", padx=6)
 
-        cols = ("df", "count", "mi", "chi", "p", "verdict")
+        cols = ("df", "count", "mi", "v", "chi", "p", "verdict")
         self.stop_tree = ttk.Treeview(pad, columns=cols, show="tree headings")
         self.stop_tree.heading("#0", text="token")
         self.stop_tree.column("#0", width=160)
         for col, label, w in [("df", "doc frequency", 105), ("count", "documents", 80),
-                              ("mi", "normalized MI", 150), ("chi", "chi-square", 90),
-                              ("p", "p-value", 130), ("verdict", "decision", 380)]:
+                              ("mi", "normalized MI", 150),
+                              ("v", "Cramer's V", 130), ("chi", "chi-square", 90),
+                              ("p", "p-value (info only)", 110),
+                              ("verdict", "decision", 380)]:
             self.stop_tree.heading(col, text=label)
             self.stop_tree.column(col, width=w, anchor="center")
         self.stop_tree.column("verdict", anchor="w")
@@ -965,16 +968,16 @@ class TriageGUI(tk.Tk):
             f"A token is removed only when ALL THREE hold:  document frequency "
             f">= {t['effective_df_cutoff']:.4f}"
             f"   AND   normalized mutual information <= {t['mi_threshold']}"
-            f"   AND   chi-square p > {t['alpha']}\n"
+            f"   AND   Cramer's V <= {t['cramers_v_threshold']}\n"
             f"{c['n_documents']} complaints, {c['n_unique_tokens']} unique tokens, "
             f"{c['n_tokens_tested']} high-frequency tokens tested, "
             f"{r['n_stopwords']} learned as stop words: "
             f"{', '.join(r['stopwords'])}.\n"
             "Most rows in this table are tokens that were TESTED and KEPT - the "
-            "'decision' column names the criterion that saved each one. Frequent "
-            "filler such as \"hai\", \"mein\" and \"aur\" is kept on purpose: the "
-            "chi-square test finds it is not independent of the triage level on "
-            "this dataset."
+            "'decision' column names the criterion that saved each one. The "
+            "chi-square statistic and p-value are shown for transparency only: "
+            "the decision uses Cramer's V (effect size), which does not shrink "
+            "as the dataset grows the way p-values do."
             + (f"\nNeeds clinician sign-off (negation / intensity): "
                f"{', '.join(review)}" if review else "")))
 
@@ -998,14 +1001,16 @@ class TriageGUI(tk.Tk):
             else:
                 tag = ""
             # Per-criterion PASS/FAIL, so a row explains itself without the
-            # reader having to hold three thresholds in their head.
+            # reader having to hold three thresholds in their head. Chi-square
+            # and its p-value carry no flag: they are context, not criteria.
             mi_flag = "pass" if s["normalized_mutual_information"] <= t["mi_threshold"] else "FAIL"
-            p_flag = "pass" if s["chi_square_p_value"] > t["alpha"] else "FAIL"
+            v_flag = "pass" if s["cramers_v"] <= t["cramers_v_threshold"] else "FAIL"
             self.stop_tree.insert("", "end", text=s["token"], tags=(tag,), values=(
                 f"{s['document_frequency']:.4f}", s["document_count"],
                 f"{s['normalized_mutual_information']:.5f}  ({mi_flag})",
+                f"{s['cramers_v']:.4f}  ({v_flag})",
                 f"{s['chi_square']:.2f}",
-                f"{s['chi_square_p_value']:.4f}  ({p_flag})",
+                f"{s['chi_square_p_value']:.4f}",
                 verdict))
 
     # =================================================================

@@ -19,9 +19,16 @@ A token is a stop word here when BOTH are true:
      you almost nothing about the triage level. Measured two ways:
        * normalized mutual information  I(present ; triage) / H(triage),
          which is 0 for a token that is spread evenly over all levels;
-       * a chi-square test of independence on the 2 x K contingency
-         table, whose p-value must be above `alpha` (i.e. we FAIL to
-         reject independence -> no evidence the token carries signal).
+       * Cramer's V, the chi-square-based EFFECT SIZE of the 2 x K
+         contingency table, which must be at or below
+         `cramers_v_threshold`. Unlike a p-value, V measures the
+         STRENGTH of the association and does not shrink as the corpus
+         grows, so the learned list stays stable across dataset sizes.
+         (The raw chi-square statistic and its p-value are still
+         recorded per token for transparency, but they no longer take
+         part in the decision: on a large corpus the p-value flags even
+         negligible associations as "significant" and vetoed genuine
+         filler like "hai" and "mein".)
 
 Every number behind every decision is written to `learned_stopwords.json`
 so the methods section of the paper can quote it and a reviewer can
@@ -103,7 +110,8 @@ REVIEW_WATCHLIST = {
 DEFAULT_MIN_DF = 0.02          # must appear in >= 2% of complaints
 DEFAULT_DF_PERCENTILE = 75.0   # "high frequency" = top 25% of tokens by df
 DEFAULT_MI_THRESHOLD = 0.01    # normalized mutual information "near zero"
-DEFAULT_ALPHA = 0.05           # chi-square p-value above this = independent
+DEFAULT_ALPHA = 0.05           # report-only: p-value context in the JSON
+DEFAULT_CRAMERS_V_THRESHOLD = 0.12   # "small" effect size; V above this = signal
 
 
 def _protected_terms():
@@ -154,6 +162,23 @@ def _chi_square(table):
     return stat, dof, p_value
 
 
+def _cramers_v(table, chi2_stat):
+    """Cramer's V effect size for a contingency table, in [0, 1].
+
+    V = sqrt(chi2 / (n * (min(rows, cols) - 1))). For our 2 x K tables
+    this is sqrt(chi2 / n). It expresses how STRONGLY token presence is
+    associated with the triage level, on a scale that does not depend on
+    the number of complaints - the property the p-value lacks.
+    """
+    n = table.sum()
+    if n <= 0:
+        return 0.0
+    k = min(table.shape) - 1
+    if k <= 0:
+        return 0.0
+    return float(math.sqrt(chi2_stat / (n * k)))
+
+
 def _normalized_mutual_information(table):
     """I(present ; label) / H(label), in [0, 1]. 0 = token carries no signal."""
     total = table.sum()
@@ -183,6 +208,7 @@ def learn_stopwords(corpus,
                     df_percentile=DEFAULT_DF_PERCENTILE,
                     mi_threshold=DEFAULT_MI_THRESHOLD,
                     alpha=DEFAULT_ALPHA,
+                    cramers_v_threshold=DEFAULT_CRAMERS_V_THRESHOLD,
                     protect_clinical_terms=True):
     """Learn Roman Urdu stop words from labelled complaints.
 
@@ -199,8 +225,10 @@ def learn_stopwords(corpus,
             document frequencies.
         mi_threshold: normalized mutual information at or below this
             counts as "carries no signal about the triage level".
-        alpha: chi-square p-value above this means we cannot reject
-            independence between the token and the triage level.
+        alpha: recorded in the report for context only - the chi-square
+            p-value no longer takes part in the stop-word decision.
+        cramers_v_threshold: Cramer's V effect size at or below this
+            counts as "no meaningful association with the triage level".
         protect_clinical_terms: keep clinical vocabulary out of the
             stop-word list regardless of the statistics (see module
             docstring).
@@ -251,9 +279,10 @@ def learn_stopwords(corpus,
         present_flags = [token in tokens for tokens in doc_tokens]
         table = _contingency(present_flags, labels, classes)
         chi2_stat, dof, p_value = _chi_square(table)
+        cramers_v = _cramers_v(table, chi2_stat)
         nmi = _normalized_mutual_information(table)
 
-        is_uninformative = (nmi <= mi_threshold) and (p_value > alpha)
+        is_uninformative = (nmi <= mi_threshold) and (cramers_v <= cramers_v_threshold)
         is_protected = token in protected
         is_stopword = is_common and is_uninformative and not is_protected
 
@@ -267,6 +296,7 @@ def learn_stopwords(corpus,
             "document_frequency": round(df, 4),
             "document_count": int(doc_counts[token]),
             "normalized_mutual_information": round(nmi, 6),
+            "cramers_v": round(cramers_v, 6),
             "chi_square": round(chi2_stat, 4),
             "chi_square_dof": dof,
             "chi_square_p_value": round(p_value, 6),
@@ -280,9 +310,13 @@ def learn_stopwords(corpus,
         "method": (
             "A token is a stop word when its document frequency is at or above "
             "the df cut-off AND its normalized mutual information with the "
-            "triage label is at or below mi_threshold AND its chi-square test "
-            "of independence is not significant (p > alpha). Clinical "
-            "vocabulary is exempt when protect_clinical_terms is true."
+            "triage label is at or below mi_threshold AND its Cramer's V "
+            "effect size is at or below cramers_v_threshold. The chi-square "
+            "statistic and p-value are reported per token for transparency "
+            "but are not part of the decision: p-values shrink with corpus "
+            "size, so on a large dataset they veto genuinely uninformative "
+            "filler. Clinical vocabulary is exempt when "
+            "protect_clinical_terms is true."
         ),
         "thresholds": {
             "min_df": min_df,
@@ -290,7 +324,9 @@ def learn_stopwords(corpus,
             "df_cutoff_from_percentile": round(df_cutoff, 6),
             "effective_df_cutoff": round(high_df_cutoff, 6),
             "mi_threshold": mi_threshold,
+            "cramers_v_threshold": cramers_v_threshold,
             "alpha": alpha,
+            "alpha_note": "report-only context; not used in the decision",
             "protect_clinical_terms": bool(protect_clinical_terms),
         },
         "corpus": {
@@ -379,7 +415,8 @@ def summarize(report, top_n=15):
         f"  high-frequency tokens sifted: {c['n_tokens_tested']} "
         f"(document frequency >= {t['effective_df_cutoff']:.4f})",
         f"  rule: df >= {t['effective_df_cutoff']:.4f}  AND  "
-        f"normalized MI <= {t['mi_threshold']}  AND  chi-square p > {t['alpha']}",
+        f"normalized MI <= {t['mi_threshold']}  AND  "
+        f"Cramer's V <= {t['cramers_v_threshold']}",
         f"  stop words learned         : {report['n_stopwords']}",
     ]
     stops = report["stopwords"]
@@ -412,12 +449,15 @@ def _main():
 
     parser = argparse.ArgumentParser(
         description="Learn Roman Urdu stop words from the triage dataset.")
-    parser.add_argument("--data", default="triage_mixed_language_dataset.csv")
+    parser.add_argument("--data", default="triage_mixed_language_dataset_10000.csv")
     parser.add_argument("--out", default=STOPWORDS_FILE)
     parser.add_argument("--min-df", type=float, default=DEFAULT_MIN_DF)
     parser.add_argument("--df-percentile", type=float, default=DEFAULT_DF_PERCENTILE)
     parser.add_argument("--mi-threshold", type=float, default=DEFAULT_MI_THRESHOLD)
-    parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA)
+    parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA,
+                        help="report-only p-value context; not part of the decision")
+    parser.add_argument("--cramers-v-threshold", type=float,
+                        default=DEFAULT_CRAMERS_V_THRESHOLD)
     parser.add_argument("--no-clinical-guard", action="store_true",
                         help="allow clinical vocabulary to be removed too")
     args = parser.parse_args()
@@ -439,6 +479,7 @@ def _main():
         df_percentile=args.df_percentile,
         mi_threshold=args.mi_threshold,
         alpha=args.alpha,
+        cramers_v_threshold=args.cramers_v_threshold,
         protect_clinical_terms=not args.no_clinical_guard,
     )
 

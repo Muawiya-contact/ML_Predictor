@@ -16,5 +16,13 @@
     }
   ],
   "trained_by": "train_embedding_pipeline.py",
-  "deploy_mode": "C"
+  "deploy_mode": "C",
+  "dataset": {
+    "file": "triage_mixed_language_dataset_10000.csv",
+    "rows": 10000,
+    "sha256": "8f4526539576941000d28293a869a18a8aed0462f903916e8a2245ee2f57f5bb",
+    "trained_at": "2026-08-13T10:57+05:00",
+    "stamped_by": "post-training stamp (train script does not write this yet)"
+  },
+  "vocab_revision": "v3: English synonyms mapped to canonical tokens at the diacritization stage"
 }

@@ -132,7 +132,14 @@ DIACRITIZATION_MAP = {
 
     # ---------------- PAIN ----------------
     "dárd":     ["dard", "dardh", "durd", "drd", "darad", "darrd",
-                 "daard", "daro", "drt"],
+                 "daard", "daro", "drt",
+                 # English synonyms: a nurse typing "pain" must land on the
+                 # same canonical token as one typing "drd" - the embedding
+                 # only weakly clusters cross-language synonyms (55.6% pass
+                 # rate for chest_pain in embedding_evaluation_results.csv),
+                 # so the collapse happens here, not at the embedding stage.
+                 "pain", "pains", "ache", "aches", "aching",
+                 "hurt", "hurts", "hurting", "painful"],
 
     # ---------------- CHEST ----------------
     "sēna":     ["seena", "seenay", "sina", "sena", "seenaa", "sinaa",
@@ -141,15 +148,22 @@ DIACRITIZATION_MAP = {
 
     # ---------------- BREATHING ----------------
     "sāns":     ["saans", "sans", "saaans", "saan", "sanse", "sanss",
-                 "breath", "breth", "breeth"],
+                 "breath", "breth", "breeth",
+                 "breathing", "breathless", "breathlessness",
+                 "dyspnea", "dyspnoea", "sob"],
     "phūlna":   ["phoolna", "phulna", "phulana", "phoolana", "phulraha",
                  "phoolraha", "phulrahi", "phoolrahi", "tangi", "dam", "damghutti"],
 
     # ---------------- NEURO ----------------
     "bēhōsh":   ["behosh", "behoshy", "behushi", "gash", "gasha",
-                 "girpara", "girpari", "unconscious", "unconcious", "unconsius"],
+                 "girpara", "girpari", "unconscious", "unconcious", "unconsius",
+                 # "collapse"/"blackout" deliberately NOT here: they can
+                 # describe a mechanical fall rather than true loss of
+                 # consciousness, and this token feeds a 3.0 attention weight.
+                 "faint", "fainted", "fainting", "syncope"],
     "chákkar":  ["chakkar", "chakar", "chakr", "chaker", "chakkr",
-                 "chakkkar", "dizzy", "gardish"],
+                 "chakkkar", "dizzy", "gardish",
+                 "dizziness", "vertigo", "lightheaded", "giddy", "giddiness"],
 
     # ---------------- CARDIAC ----------------
     "dháḍkan":  ["dhadkan", "dhadkaan", "dhadkna", "dhadhkan", "dhadkann",
@@ -158,28 +172,38 @@ DIACRITIZATION_MAP = {
 
     # ---------------- GI ----------------
     "úlṭī":     ["ulti", "ultee", "ulltee", "ultti", "ulte", "qai", "qay",
-                 "qaai", "kaai", "vomit", "vomiting", "vomiit", "nausea", "nausiated"],
+                 "qaai", "kaai", "vomit", "vomiting", "vomiit", "nausea", "nausiated",
+                 "vomited", "vomits", "puke", "puking",
+                 "nauseous", "nauseated", "retching"],
 
     # ---------------- FEVER ----------------
     "bukhār":   ["bukhar", "bukhaar", "bukhr", "bukhur", "buxar", "bkhar",
-                 "bkhr", "bukar", "fever", "fevar", "faver", "tap", "garmi"],
+                 "bkhr", "bukar", "fever", "fevar", "faver", "tap", "garmi",
+                 "feverish", "febrile", "pyrexia", "temperature"],
 
     # ---------------- SWEATING ----------------
     "pasīna":   ["pasina", "paseena", "pasiina", "paseenaa", "pasena",
-                 "pasnaa", "pasna", "sweat", "sweating", "thandapasina", "coldsweat"],
+                 "pasnaa", "pasna", "sweat", "sweating", "thandapasina", "coldsweat",
+                 "sweats", "sweaty", "perspiration", "diaphoresis"],
 
     # ---------------- WEAKNESS ----------------
     "kamzōrī":  ["kamzori", "kamzoori", "kamzorri", "kamzory", "kamzr",
                  "kmzori", "kmzri", "weak", "weakness", "thakan", "thakaan",
-                 "thakawat", "thakaawat", "tired", "tiredness"],
+                 "thakawat", "thakaawat", "tired", "tiredness",
+                 "fatigue", "fatigued", "lethargy", "lethargic",
+                 "exhausted", "exhaustion"],
 
     # ---------------- BODY PARTS ----------------
     "bāzū":     ["bazo", "bazoo", "bazou", "bazu", "bazuu", "baazo", "arm", "arms"],
     "kāndha":   ["kandha", "kanda", "kandaa", "kandhaa", "kndha",
                  "shoulder", "shulder", "shouldr"],
-    "gardan":   ["gardann", "gardn", "garrdan", "neck", "nck", "gala", "halaq"],
+    "gardan":   ["gardann", "gardn", "garrdan", "neck", "nck", "gala", "halaq",
+                 "throat"],
     "peṭ":      ["pet", "pett", "pait", "paet", "payt", "paait",
-                 "stomach", "stomac", "stomak", "abdomen", "belly", "tummy"],
+                 "stomach", "stomac", "stomak", "abdomen", "belly", "tummy",
+                 "abdominal"],
+    # "migraine" is a diagnosis, not a synonym for "head"; collapsing it here
+    # would throw away the signal that distinguishes it from generic headache.
     "sár":      ["sar", "sir", "sarr", "saar", "head", "headache", "sirdard", "sirdrd"],
     "kamár":    ["kamar", "kmar", "kammar", "kamarr"],
     "pīṭh":     ["peeth", "pith", "back", "backpain"],
@@ -188,20 +212,23 @@ DIACRITIZATION_MAP = {
 
     # ---------------- GENERAL SYMPTOMS ----------------
     "sōnn":     ["sonn", "sun", "sunna", "sunnapan", "numbness", "numb", "sunn"],
-    "jálan":    ["jalan", "jalann", "jlan", "jaalan", "burning", "burn", "jalana"],
+    "jálan":    ["jalan", "jalann", "jlan", "jaalan", "burning", "burn", "jalana",
+                 "heartburn"],
     "sūjan":    ["sujan", "sujaan", "sujn", "sojan", "swelling", "swell",
-                 "swolen", "swollen"],
+                 "swolen", "swollen", "edema", "oedema"],
     "khānsī":   ["khansi", "khaansi", "khansy", "khasi", "khaasi",
                  "cough", "coughing", "cofing", "cofgh"],
     "khūn":     ["khoon", "khun", "khonn", "khoonn", "blood", "blod",
-                 "bleed", "bleeding"],
-    "pēshāb":   ["peshab", "peshaab", "peshabb", "pshab", "urine", "urination", "pee"],
+                 "bleed", "bleeding", "hemorrhage", "haemorrhage"],
+    "pēshāb":   ["peshab", "peshaab", "peshabb", "pshab", "urine", "urination", "pee",
+                 "urinary"],
 
     # ======================================================
     # ============== ADDED: TRAUMA / INJURY ================
     # ======================================================
     "chōṭ":     ["chot", "chott", "injury", "injured", "zakham", "zakhm",
-                 "zakhmi", "wound", "wounded", "ghao", "ghaao"],
+                 "zakhmi", "wound", "wounded", "ghao", "ghaao",
+                 "trauma", "bruise", "bruised"],
     "haḍḍī":    ["haddi", "haddii", "hadi", "bone", "fracture", "fractured",
                  "toota", "tuta", "tootgayi", "broken"],
     "girna":    ["girgaya", "girgayi", "fall", "fell", "fallen",
@@ -226,9 +253,10 @@ DIACRITIZATION_MAP = {
     # ============ ADDED: NEURO EMERGENCIES ================
     # ======================================================
     "daura":    ["dora", "doura", "daure", "fit", "fits", "seizure", "siezure",
-                 "convulsion", "convulsions", "jhatka", "jhatke", "mirgi", "mirgii"],
+                 "convulsion", "convulsions", "jhatka", "jhatke", "mirgi", "mirgii",
+                 "epilepsy", "epileptic"],
     "falij":    ["faalij", "falaj", "paralysis", "paralyzed", "stroke",
-                 "strok", "lakwa", "laqwa"],
+                 "strok", "lakwa", "laqwa", "paralysed", "hemiplegia"],
 
     # ======================================================
     # ============ ADDED: METABOLIC / ENDOCRINE ============
@@ -246,7 +274,8 @@ DIACRITIZATION_MAP = {
     # ============ ADDED: ALLERGY / SKIN ===================
     # ======================================================
     "kharish":  ["khaarish", "kharsh", "itch", "itching", "rash", "daane",
-                 "dane", "allergy", "alergy", "reaction", "chubhan"],
+                 "dane", "allergy", "alergy", "reaction", "chubhan",
+                 "hives", "urticaria"],
 
     # ======================================================
     # ============ ADDED: GYNE / OBSTETRIC =================
@@ -258,7 +287,8 @@ DIACRITIZATION_MAP = {
     # ================== ADDED: PSYCH ======================
     # ======================================================
     "ghabrahat":["ghabrahit", "ghabrana", "anxiety", "anxious", "panic",
-                 "ghabra", "bechaini", "bechainii"],
+                 "ghabra", "bechaini", "bechainii",
+                 "nervous", "restless", "restlessness"],
 }
 
 # Invert at runtime: variant -> canonical  (O(1) lookup)
@@ -378,6 +408,46 @@ MEDICAL_WEIGHTS = {
     "hai": 0.6, "hain": 0.5, "tha": 0.7, "hey": 0.5, "g": 0.7,
 }
 
+# ============================================================
+# FUNCTION-WORD SPELLING VARIANTS
+#
+# Pure spelling variants of words the stop-word learner ALREADY
+# selected. These are grammatical filler, not medical vocabulary,
+# so they belong here rather than in DIACRITIZATION_MAP.
+#
+# THE BUG THIS FIXES: "hai" is a learned stop word and is stripped
+# correctly, but the equally common spelling "hay" was never mapped
+# back to it, so it survived every stage and reached the encoder.
+#
+# WHY THIS IS A SEPARATE DICT FROM RULE_REPLACEMENTS: that one is
+# applied with a naked str.replace(), i.e. substring matching, which
+# is safe for the multi-word phrases it holds but destroys short
+# function words. In the 10k corpus "hay" occurs as a substring of
+# "kandhay" (shoulders - a body part that must reach DIACRITIZATION_MAP
+# intact), "khaya" and "baithay"; a substring rule would silently
+# rewrite those to "kandhai"/"khaia"/"baithai". Entries here are
+# therefore matched as WHOLE TOKENS only.
+# ============================================================
+
+FUNCTION_WORD_VARIANTS = {
+    # -> "hai" (learned stop word, 2755 occurrences in the corpus)
+    "hay": "hai",
+    "hae": "hai",
+    # -> "mein" (learned stop word, 4262 occurrences)
+    "may": "mein",
+    "mai": "mein",
+}
+
+
+def apply_function_word_variants(text):
+    """Map function-word spelling variants onto the learned spelling.
+
+    Whole-token replacement only - see FUNCTION_WORD_VARIANTS for why
+    substring matching is unsafe here.
+    """
+    return ' '.join(FUNCTION_WORD_VARIANTS.get(w, w) for w in text.split())
+
+
 # Rule-based replacements applied first (fast, high-confidence)
 RULE_REPLACEMENTS = {
     "dardh":             "dard",
@@ -452,16 +522,23 @@ def clean_text(text):
 
 
 def apply_rule_replacements(text):
-    """High-confidence multi-word fixes applied before fuzzy matching.
+    """High-confidence fixes applied before fuzzy matching.
 
     This is a REAL pipeline stage - it is what turns "saans phulna" into
     "saans phoolna", "thanda pasina" into "sweating" and "sugar level"
     into "sugar". Anything that shows the pipeline to a human must show
     this stage too, or words appear to vanish later for no visible reason.
+
+    Two passes, deliberately different in kind:
+      1. RULE_REPLACEMENTS      - substring, for multi-word phrases.
+      2. FUNCTION_WORD_VARIANTS - whole token, for filler spellings
+         ("hay" -> "hai"). Runs second so the phrase rules still see the
+         text exactly as they always have, and whole-token only so it
+         cannot chew through words like "kandhay" on the way past.
     """
     for k, v in RULE_REPLACEMENTS.items():
         text = text.replace(k, v)
-    return text
+    return apply_function_word_variants(text)
 
 
 #: The normalization pipeline as an ordered list of (key, title, function).
@@ -470,7 +547,8 @@ def apply_rule_replacements(text):
 #: and a stage can never be run that is not shown.
 NORMALIZATION_STAGES = [
     ("clean", "Lowercase + punctuation stripped", clean_text),
-    ("rules", "Rule-based phrase replacements", apply_rule_replacements),
+    ("rules", "Rule-based phrase + function-word replacements",
+     apply_rule_replacements),
     ("fuzzy", "Fuzzy spelling correction", fuzzy_correct_text),
     ("diacritize", "Diacritization", apply_diacritization),
 ]
@@ -478,17 +556,22 @@ NORMALIZATION_STAGES = [
 STAGE_NOTES = {
     "clean": "everything except a-z becomes a space",
     "rules": ("fixed multi-word phrases from RULE_REPLACEMENTS "
-              "(saans phulna -> saans phoolna, sugar level -> sugar)"),
+              "(saans phulna -> saans phoolna, sugar level -> sugar), then "
+              "whole-token filler spellings from FUNCTION_WORD_VARIANTS "
+              "(hay -> hai, may -> mein) so the stop-word stage can match them"),
     "fuzzy": ("RapidFuzz maps an unknown spelling onto the closest word in "
               "CANONICAL_VOCAB at >=80% similarity. It only fires on spellings "
               "the dictionary in the next stage does not already know, so on "
               "many complaints it correctly changes nothing."),
     "diacritize": ("every spelling variant listed in DIACRITIZATION_MAP "
                    "collapses to one canonical form"),
-    "stopwords": ("Contribution 1 - the list was learned from the data. Only "
-                  "tokens that are BOTH common AND statistically unrelated to "
-                  "the triage level are dropped; common words that do track "
-                  "triage (\"hai\", \"aur\", \"mein\") are kept on purpose."),
+    "stopwords": ("Contribution 1 - the list was learned from the data. A "
+                  "token is dropped when it is common AND shows no meaningful "
+                  "association with the triage level: near-zero mutual "
+                  "information AND a Cramer's V effect size at or below the "
+                  "threshold. Effect size, not the chi-square p-value, makes "
+                  "the call - p-values shrink as the corpus grows and were "
+                  "keeping filler like \"hai\" and \"mein\" in."),
 }
 
 
