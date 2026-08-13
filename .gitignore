@@ -41,3 +41,9 @@ eval_raw.txt
 # OS noise
 .DS_Store
 Thumbs.db
+
+# Local version snapshots of the model bundle, kept for rollback while
+# iterating. The LIVE bundle in triage_model_embedding/ is the tracked
+# deliverable; these dated copies are local-only and would bloat the repo.
+triage_model_embedding_v*/
+learned_stopwords_v*.json

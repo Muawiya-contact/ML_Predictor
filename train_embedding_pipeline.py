@@ -115,7 +115,7 @@ from triage_pipeline import (
 warnings.filterwarnings("ignore")
 make_console_safe()
 
-DATA_FILE = "triage_mixed_language_dataset.csv"
+DATA_FILE = "triage_mixed_language_dataset_10000.csv"
 # Anchored to the project folder: training must overwrite the bundle the
 # predictors and the GUI actually load, not create a second copy in
 # whatever directory the run was started from - two bundles that disagree

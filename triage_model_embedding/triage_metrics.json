@@ -2,89 +2,89 @@
   "winning_method": "C) Embeddings + preprocessing",
   "deployed_method": "C) Embeddings + preprocessing",
   "selection_rule": "explicit --deploy C: the offline embedding model is the method this project deploys on purpose",
-  "safety_first_pick": "A) Dictionary + BoW (current)",
+  "safety_first_pick": "B) Embeddings, raw text",
   "deploy_override_used": true,
-  "most_accurate_method": "C) Embeddings + preprocessing",
-  "most_accurate_not_selected": false,
+  "most_accurate_method": "A) Dictionary + BoW (current)",
+  "most_accurate_not_selected": true,
   "text_representation": "embeddings_preprocessed",
   "uses_embeddings": true,
   "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
   "embedding_dim": 384,
-  "accuracy": 92.12,
-  "under_triage_pct": 4.56,
-  "over_triage_pct": 3.32,
-  "safety_grade": "A+",
-  "efficiency_grade": "A",
+  "accuracy": 52.15,
+  "under_triage_pct": 31.3,
+  "over_triage_pct": 16.55,
+  "safety_grade": "F",
+  "efficiency_grade": "B",
   "n_features": 394,
   "confusion_matrix": [
     [
-      88,
+      345,
+      190,
+      166,
+      11
+    ],
+    [
+      179,
+      373,
+      129,
+      45
+    ],
+    [
+      107,
+      36,
+      253,
+      85
+    ],
+    [
+      1,
+      2,
       6,
-      0,
-      0
-    ],
-    [
-      2,
-      70,
-      2,
-      1
-    ],
-    [
-      0,
-      4,
-      54,
-      2
-    ],
-    [
-      0,
-      0,
-      2,
-      10
+      72
     ]
   ],
-  "n_train": 963,
-  "n_test": 241,
+  "n_train": 8000,
+  "n_test": 2000,
   "random_state": 42,
   "preprocessing": "clean -> fuzzy normalize -> learned stop-word removal",
-  "n_stopwords_deployed": 10,
+  "n_stopwords_deployed": 67,
   "all_methods": [
     {
       "method": "A) Dictionary + BoW (current)",
-      "accuracy": 90.04,
-      "under_triage_pct": 3.73,
-      "over_triage_pct": 6.22,
-      "safety_grade": "A+",
-      "efficiency_grade": "A",
+      "accuracy": 53.15,
+      "under_triage_pct": 31.25,
+      "over_triage_pct": 15.6,
+      "safety_grade": "F",
+      "efficiency_grade": "B",
       "n_features": 710,
       "text_representation": "dictionary_bow"
     },
     {
       "method": "B) Embeddings, raw text",
-      "accuracy": 91.29,
-      "under_triage_pct": 4.56,
-      "over_triage_pct": 4.15,
-      "safety_grade": "A+",
-      "efficiency_grade": "A",
+      "accuracy": 52.95,
+      "under_triage_pct": 30.35,
+      "over_triage_pct": 16.7,
+      "safety_grade": "F",
+      "efficiency_grade": "B",
       "n_features": 394,
       "text_representation": "embeddings_raw"
     },
     {
       "method": "C) Embeddings + preprocessing",
-      "accuracy": 92.12,
-      "under_triage_pct": 4.56,
-      "over_triage_pct": 3.32,
-      "safety_grade": "A+",
-      "efficiency_grade": "A",
+      "accuracy": 52.15,
+      "under_triage_pct": 31.3,
+      "over_triage_pct": 16.55,
+      "safety_grade": "F",
+      "efficiency_grade": "B",
       "n_features": 394,
       "text_representation": "embeddings_preprocessed"
     },
     {
       "method": "D) Hybrid: dictionary + embeddings",
-      "accuracy": 87.14,
-      "under_triage_pct": 6.22,
-      "over_triage_pct": 6.64,
-      "safety_grade": "A",
-      "efficiency_grade": "A",
+      "accuracy": 52.45,
+      "under_triage_pct": 32.05,
+      "over_triage_pct": 15.5,
+      "safety_grade": "F",
+      "efficiency_grade": "B",
       "n_features": 1094,
       "text_representation": "hybrid"
     }
