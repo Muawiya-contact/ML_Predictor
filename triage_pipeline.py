@@ -142,9 +142,13 @@ DIACRITIZATION_MAP = {
                  "hurt", "hurts", "hurting", "painful"],
 
     # ---------------- CHEST ----------------
+    # "chest" used to be its own canonical, so English "chest pain" and Roman
+    # Urdu "seena mein dard" never met - 3279 and 4215 rows of the same
+    # complaint sitting in two different tokens. Merged here rather than at
+    # inference time, because both spellings are frequent in training.
     "sēna":     ["seena", "seenay", "sina", "sena", "seenaa", "sinaa",
-                 "syna", "seyna", "chati", "chaati", "chatti"],
-    "chest":    ["chst", "chets", "cheast"],
+                 "syna", "seyna", "chati", "chaati", "chatti",
+                 "chest", "chst", "chets", "cheast", "thorax", "thoracic"],
 
     # ---------------- BREATHING ----------------
     "sāns":     ["saans", "sans", "saaans", "saan", "sanse", "sanss",
@@ -152,7 +156,8 @@ DIACRITIZATION_MAP = {
                  "breathing", "breathless", "breathlessness",
                  "dyspnea", "dyspnoea", "sob"],
     "phūlna":   ["phoolna", "phulna", "phulana", "phoolana", "phulraha",
-                 "phoolraha", "phulrahi", "phoolrahi", "tangi", "dam", "damghutti"],
+                 "phoolraha", "phulrahi", "phoolrahi", "tangi", "dam", "damghutti",
+                 "phool", "phoolta", "phulta", "phoolti", "phulti"],
 
     # ---------------- NEURO ----------------
     "bēhōsh":   ["behosh", "behoshy", "behushi", "gash", "gasha",
@@ -160,15 +165,36 @@ DIACRITIZATION_MAP = {
                  # "collapse"/"blackout" deliberately NOT here: they can
                  # describe a mechanical fall rather than true loss of
                  # consciousness, and this token feeds a 3.0 attention weight.
-                 "faint", "fainted", "fainting", "syncope"],
+                 "faint", "fainted", "fainting", "syncope",
+                 # "behoshi" is 506 rows of cardiac_multilingual_10000.csv and
+                 # was the single largest normalization hole in the pipeline:
+                 # the map knew behosh/behoshy/behushi but not this spelling.
+                 "behoshi", "behoshee", "unresponsive", "obtunded"],
     "chákkar":  ["chakkar", "chakar", "chakr", "chaker", "chakkr",
                  "chakkkar", "dizzy", "gardish",
                  "dizziness", "vertigo", "lightheaded", "giddy", "giddiness"],
 
     # ---------------- CARDIAC ----------------
+    # "dil" is the canonical for the organ. English "heart" was never mapped
+    # onto it, so "heart may pain hay" and "dil mein dard hai" reached the
+    # encoder as different tokens. Both spellings are frequent in
+    # cardiac_multilingual_10000.csv (heart 812 rows, dil 1005), which is why
+    # this mapping ships WITH a retrain - applying it at inference only would
+    # have moved live input away from what the model was fitted on.
+    "dil":      ["heart", "hart", "herat", "dill", "dl", "cardiac", "cardio"],
     "dháḍkan":  ["dhadkan", "dhadkaan", "dhadkna", "dhadhkan", "dhadkann",
                  "dhakdan", "dhakdhan", "dhak", "dhakdhak",
-                 "palpitation", "palpitations", "palpi", "heartbeat", "hrtbt"],
+                 "palpitation", "palpitations", "palpi", "heartbeat", "hrtbt",
+                 "tachycardia", "bradycardia", "fluttering", "flutter",
+                 "pounding", "thumping",
+                 "dhadak", "dhadakna", "dhadakta", "dhadakti",
+                 "dharakna", "dharakta", "dharakti", "dhadkanein",
+                 # "racing" occurs 0 times in cardiac_multilingual_10000_v3.csv,
+                 # so mapping it cannot desync inference from training - the
+                 # same safety argument as the "hay" -> "hai" fix. It closes
+                 # the one same-meaning pair that failed the 0.5 threshold
+                 # ("dil ki dhadkan tez" vs "heart racing fast").
+                 "racing"],
 
     # ---------------- GI ----------------
     "úlṭī":     ["ulti", "ultee", "ulltee", "ultti", "ulte", "qai", "qay",
@@ -196,7 +222,10 @@ DIACRITIZATION_MAP = {
     # ---------------- BODY PARTS ----------------
     "bāzū":     ["bazo", "bazoo", "bazou", "bazu", "bazuu", "baazo", "arm", "arms"],
     "kāndha":   ["kandha", "kanda", "kandaa", "kandhaa", "kndha",
-                 "shoulder", "shulder", "shouldr"],
+                 "shoulder", "shulder", "shouldr",
+                 "kandhay", "kandhe", "kandhon", "shoulders"],
+    "hāth":     ["haath", "hath", "haathon", "hathon",
+                 "hand", "hands", "wrist", "forearm"],
     "gardan":   ["gardann", "gardn", "garrdan", "neck", "nck", "gala", "halaq",
                  "throat"],
     "peṭ":      ["pet", "pett", "pait", "paet", "payt", "paait",
@@ -289,6 +318,94 @@ DIACRITIZATION_MAP = {
     "ghabrahat":["ghabrahit", "ghabrana", "anxiety", "anxious", "panic",
                  "ghabra", "bechaini", "bechainii",
                  "nervous", "restless", "restlessness"],
+
+    # ======================================================
+    # ADDED: CARDIAC QUALITY DESCRIPTORS
+    #
+    # How the chest feels is the classic discriminator between cardiac and
+    # non-cardiac chest pain, and every one of these was reaching the encoder
+    # unmapped - "tightness" (384 rows) and "jakar" (350) are the same
+    # complaint in two languages, and "bhaari"/"bhari" are the same WORD in
+    # two spellings. Kept as three separate concepts rather than one, because
+    # tightness, pressure and heaviness are clinically distinct sensations.
+    # ======================================================
+    "jákṛan":   ["tightness", "tight", "tightening", "jakar", "jakran",
+                 "jakarna", "jakdan", "kasav", "kasao", "squeezing",
+                 "constriction", "constricting"],
+    "dabāo":    ["pressure", "dabao", "dabav", "dabaw", "dabaav", "dabaao",
+                 "compression", "compressing"],
+    "bhārī":    ["bhaari", "bhari", "bhaaree", "bojh", "boojh",
+                 "bojhal", "heaviness", "weight"],
+    "tēkha":    ["teekhi", "teekha", "tikhi", "sharp", "stabbing", "shooting",
+                 "piercing", "knifelike"],
+    "phailna":  ["radiating", "radiate", "radiates", "radiation", "phail",
+                 "phailta", "phailti", "spreading", "spreads"],
+
+    # ======================================================
+    # ADDED: EXERTION vs REST CONTEXT
+    #
+    # Exertional versus rest onset is one of the strongest cardiac triage
+    # signals there is (rest angina outranks exertional angina). The dataset
+    # says it in both languages - "seedhiyan chadhte" (climbing stairs, 746
+    # rows) and "exercise" (693) mean the same thing here, as do "aram
+    # karte hue" (888) and "sotay" (714) for the rest side.
+    # ======================================================
+    "mehnat":   ["exercise", "exertion", "exert", "exertional", "seedhiyan",
+                 "seerhiyan", "seerhian", "chadhte", "chadhna", "chadhtay",
+                 "kaam", "workout", "jogging", "chalte", "chalna", "walking"],
+    "ārām":     ["aram", "araam", "resting", "sotay", "sote", "sona", "soté",
+                 "letay", "letnay", "lying", "baithe", "baithay", "sitting"],
+
+    # ======================================================
+    # ADDED: SEVERITY / ONSET / HISTORY
+    # ======================================================
+    "shadīd":   ["shadeed", "shadid", "severe", "intense", "unbearable",
+                 "extreme", "excruciating"],
+    "halkā":    ["halka", "halki", "halke", "mamuli", "mamooli", "maamuli",
+                 "mild", "minor", "slight"],
+    "achānak":  ["achanak", "acchaanak", "achaanak", "sudden", "suddenly",
+                 "abrupt", "abruptly"],
+    "purānā":   ["purani", "purana", "puranay", "chronic", "longstanding",
+                 "recurring", "recurrent"],
+    "mareez":   ["patient", "patients", "mareezh", "mariz", "marizh", "mareeza"],
+    "ehsās":    ["ehsaas", "ehsas", "sensation", "feeling", "ajeeb", "strange",
+                 "odd", "weird"],
+    "thanḍa":   ["thanday", "thande", "thandi", "thandee"],
+
+    # ======================================================
+    # ADDED: CARDIAC HISTORY / PROCEDURES
+    #
+    # Kept as distinct tokens: a prior bypass, a stent and a diagnosis of
+    # hypertension are different pieces of history and collapsing them into
+    # one "cardiac history" token would throw away the distinction.
+    # ======================================================
+    "hypertension": ["bloodpressure", "highbp", "hypertensive", "htn"],
+    "bypass":   ["bypaas", "cabg", "graft"],
+    "stent":    ["stunt", "stents", "angioplasty", "stenting"],
+    "surgery":  ["operation", "sarjari", "opration", "surgeries", "procedure"],
+    "attack":   ["heartattack", "infarction", "myocardial", "infarct"],
+    "irregular":["betarteeb", "beqaida", "arrhythmic", "erratic", "uneven"],
+
+    # ======================================================
+    # ADDED: TRIGGER / TIMING / LATERALITY CONTEXT
+    #
+    # Cardiac triage reads heavily off WHEN a complaint started, WHAT set it
+    # off and WHICH side it sits on - "left arm" is not the same complaint as
+    # "right arm". All of it was arriving at the encoder in whichever language
+    # the nurse happened to type.
+    # ======================================================
+    "khānā":    ["khana", "khane", "khanay", "khaya", "food", "eating",
+                 "meal", "meals", "eaten", "khaana"],
+    "subah":    ["morning", "sub", "subha", "savera"],
+    "rāat":     ["raat", "night", "nights", "raatko", "raaton"],
+    "din":      ["day", "days", "roz", "dino", "dinon", "dn"],
+    "bāyāñ":    ["left", "baayan", "bayen", "baen", "baaen", "baaein"],
+    "dāyāñ":    ["right", "daayan", "dayen", "daen", "daaen"],
+    "taraf":    ["side", "sides", "janib", "taraff"],
+    "takleef":  ["taklif", "takliif", "discomfort", "distress", "trouble",
+                 "uneasiness", "uneasy"],
+    "khāndān":  ["family", "khandani", "khandan", "familial", "hereditary"],
+    "tāreekh":  ["history", "maazi", "previous", "prior", "past"],
 }
 
 # Invert at runtime: variant -> canonical  (O(1) lookup)
@@ -1083,6 +1200,42 @@ def _safe_float(value, default):
 # PREDICTION  (single + vectorized batch)
 # ============================================================
 
+#: Encoder keys for the four categorical inputs, in the column order the
+#: structured block is built in. Training and inference both read this.
+CATEGORICAL_ENCODER_KEYS = ['le_gender', 'le_mode', 'le_avpu', 'le_ecg']
+
+
+def encode_categoricals(art, codes):
+    """Turn integer category codes into the layout the model was trained on.
+
+    THE BUG THIS FIXES: the categoricals were fed to the model as the raw
+    LabelEncoder integers, i.e. ECG_Status became 0..N in ALPHABETICAL order.
+    A linear model reads those codes as magnitudes, so "ST elevation" (10)
+    was treated as ten times "Abnormal" (0) - meaningless, and ECG_Status is
+    the single most informative feature in the dataset (51.7% of RandomForest
+    importance). Measured on cardiac_multilingual_10000.csv, structured
+    features alone: 94.5% accuracy / 2.2% under-triage with the ordinal
+    codes versus 98.3% / 0.5% one-hot. Under-triage is the number that
+    matters clinically, and it drops four-fold.
+
+    Bundles record their choice in the manifest, so the model bundles saved
+    before this change (triage_model_embedding_v1_1204rows/ and friends)
+    keep loading and predicting exactly as they always did.
+    """
+    codes = np.asarray(codes, dtype=int)
+    if art['manifest'].get('categorical_encoding') != 'onehot':
+        return codes.astype(float)          # legacy bundles: ordinal codes
+    blocks = []
+    for j, key in enumerate(CATEGORICAL_ENCODER_KEYS):
+        width = len(art[key].classes_)
+        block = np.zeros((codes.shape[0], width))
+        # safe_encode already maps unknown categories onto a valid code;
+        # clip guards against a bundle whose encoder was replaced by hand.
+        block[np.arange(codes.shape[0]), np.clip(codes[:, j], 0, width - 1)] = 1.0
+        blocks.append(block)
+    return np.hstack(blocks)
+
+
 def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
                 temperature, spo2, gender, mode_of_arrival, avpu, ecg_status):
     """Predict triage for a single patient. Returns (level, confidence, proba)."""
@@ -1092,7 +1245,7 @@ def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
     numerical = art['scaler'].transform(pd.DataFrame(
         [[age, heart_rate, systolic_bp, diastolic_bp, temperature, spo2]],
         columns=NUMERICAL_FEATURES))
-    categorical = np.array([[
+    categorical = encode_categoricals(art, [[
         safe_encode(art['le_gender'], gender),
         safe_encode(art['le_mode'],   mode_of_arrival),
         safe_encode(art['le_avpu'],   avpu),
@@ -1180,7 +1333,7 @@ def predict_dataframe(art, df):
                 row_notes[i] += warns[0] + "; "
 
     # --- combine + predict ---
-    X = np.hstack([num_matrix, cat_matrix, text_feat])
+    X = np.hstack([num_matrix, encode_categoricals(art, cat_matrix), text_feat])
     proba = art['model'].predict_proba(X)
     levels = np.argmax(proba, axis=1)
 
@@ -1191,7 +1344,10 @@ def predict_dataframe(art, df):
                                      for l in levels]
     out['Confidence']             = [f"{proba[i, levels[i]]*100:.1f}%"
                                      for i in range(len(df))]
-    for k in range(4):
+    # One column per class the MODEL actually has. Hardcoding 4 raised
+    # IndexError the moment a dataset carried only 3 triage levels
+    # (cardiac_multilingual_10000.csv has no Level 4 at all).
+    for k in range(proba.shape[1]):
         out[f'P_L{k}'] = [f"{proba[i, k]*100:.1f}%" for i in range(len(df))]
     out['Notes'] = [n.strip().rstrip(';') for n in row_notes]
 
