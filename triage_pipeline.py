@@ -1204,6 +1204,57 @@ def _safe_float(value, default):
 #: structured block is built in. Training and inference both read this.
 CATEGORICAL_ENCODER_KEYS = ['le_gender', 'le_mode', 'le_avpu', 'le_ecg']
 
+# ======================================================================
+# NO-TEXT GUARD
+#
+# THE BUG THIS FIXES: an empty complaint - or one that is only digits or
+# only punctuation, both of which clean to the empty string - was
+# returning "Level 4, NON-URGENT, 91.2% confidence". That is the single
+# worst direction this system can fail in: a nurse who tabs past the
+# complaint box, or a CSV whose text column did not survive an export,
+# gets a confident DISCHARGE-tier answer. The GUI asked for a complaint
+# before predicting, but predict_one() and the whole batch path did not,
+# so any file with a blank complaint column went straight through.
+#
+# WHY FLAG-AND-CAP RATHER THAN A VITALS-ONLY FALLBACK: there is no
+# vitals-only model in the bundle, and building one today would mean
+# either training a second classifier or feeding the deployed one a
+# zeroed text block. A zeroed block is not something the model ever saw
+# in training, so it would answer just as confidently from an input it
+# has no basis for - trading a visible failure for an invisible one. The
+# honest option is to return what the model actually said, refuse to
+# dress it up as confident, and make the reason impossible to miss in
+# BOTH the single and batch paths.
+#
+# Note this guard deliberately does NOT catch gibberish ("asdkfj
+# qwoeiru"), which survives cleaning as real tokens and still yields a
+# confident answer. That is a separate, documented limitation - see
+# SUBMISSION_SUMMARY.md - not something a token count can detect.
+# ======================================================================
+
+#: Ceiling on reported confidence when the complaint carried no tokens.
+MAX_CONFIDENCE_WITHOUT_TEXT = 0.50
+
+NO_TEXT_SIGNAL_WARNING = (
+    "NO COMPLAINT TEXT: nothing usable survived cleaning, so this level "
+    "comes from the vitals alone and the text features are meaningless. "
+    "Confidence capped. Do NOT act on this triage level - re-enter the "
+    "complaint."
+)
+
+
+def has_text_signal(text):
+    """True when any token survives the normalization pipeline.
+
+    Empty strings, whitespace, digit-only and punctuation-only inputs all
+    clean to nothing (clean_text keeps only a-z and whitespace) and
+    therefore return False.
+    """
+    try:
+        return bool(normalize_roman_urdu(text).split())
+    except Exception:
+        return False
+
 
 def encode_categoricals(art, codes):
     """Turn integer category codes into the layout the model was trained on.
@@ -1237,25 +1288,45 @@ def encode_categoricals(art, codes):
 
 
 def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
-                temperature, spo2, gender, mode_of_arrival, avpu, ecg_status):
-    """Predict triage for a single patient. Returns (level, confidence, proba)."""
+                temperature, spo2, gender, mode_of_arrival, avpu, ecg_status,
+                warnings=None):
+    """Predict triage for a single patient. Returns (level, confidence, proba).
+
+    Pass a list as `warnings` to receive input-quality notes (unknown
+    category fallbacks, missing complaint text). The parameter is optional
+    so existing three-value callers keep working unchanged, but anything
+    user-facing should pass one - the confidence cap alone does not
+    explain WHY a number is low.
+    """
     text_feat = build_text_features(art, [complaint])
 
     import pandas as pd
     numerical = art['scaler'].transform(pd.DataFrame(
         [[age, heart_rate, systolic_bp, diastolic_bp, temperature, spo2]],
         columns=NUMERICAL_FEATURES))
+    # Unknown-category fallbacks were previously computed and thrown away
+    # here; only the batch path ever surfaced them. Collect them so a
+    # single prediction can say "ECG_Status was not recognised" too.
+    cat_warns = []
     categorical = encode_categoricals(art, [[
-        safe_encode(art['le_gender'], gender),
-        safe_encode(art['le_mode'],   mode_of_arrival),
-        safe_encode(art['le_avpu'],   avpu),
-        safe_encode(art['le_ecg'],    ecg_status),
+        safe_encode(art['le_gender'], gender,         cat_warns, 'Gender'),
+        safe_encode(art['le_mode'],   mode_of_arrival, cat_warns, 'Mode_of_Arrival'),
+        safe_encode(art['le_avpu'],   avpu,            cat_warns, 'AVPU'),
+        safe_encode(art['le_ecg'],    ecg_status,      cat_warns, 'ECG_Status'),
     ]])
 
     X = np.hstack([numerical, categorical, text_feat])
     proba = art['model'].predict_proba(X)[0]
     level = int(np.argmax(proba))
-    return level, float(proba[level]), proba
+    confidence = float(proba[level])
+
+    if not has_text_signal(complaint):
+        cat_warns.insert(0, NO_TEXT_SIGNAL_WARNING)
+        confidence = min(confidence, MAX_CONFIDENCE_WITHOUT_TEXT)
+
+    if warnings is not None:
+        warnings.extend(cat_warns)
+    return level, confidence, proba
 
 
 def predict_dataframe(art, df):
@@ -1337,13 +1408,24 @@ def predict_dataframe(art, df):
     proba = art['model'].predict_proba(X)
     levels = np.argmax(proba, axis=1)
 
+    # Same no-text guard as predict_one, applied per row: a blank complaint
+    # column in a spreadsheet was the likeliest way to hit this, and it
+    # produced a confident NON-URGENT for every such row.
+    no_text = [not has_text_signal(t)
+               for t in df['Complaint_Text'].fillna('').astype(str)]
+    for i, blank in enumerate(no_text):
+        if blank:
+            row_notes[i] = NO_TEXT_SIGNAL_WARNING + "; " + row_notes[i]
+
     out = df.copy()
     out['Predicted_Level_0to3']   = levels.astype(int)
     out['Predicted_Triage_Level'] = (levels + 1).astype(int)
     out['Predicted_Label']        = [TRIAGE_LABELS[int(l)].split('(')[0].strip()
                                      for l in levels]
-    out['Confidence']             = [f"{proba[i, levels[i]]*100:.1f}%"
-                                     for i in range(len(df))]
+    out['Confidence']             = [
+        f"{min(proba[i, levels[i]], MAX_CONFIDENCE_WITHOUT_TEXT if no_text[i] else 1.0)*100:.1f}%"
+        + ("  (capped - no complaint text)" if no_text[i] else "")
+        for i in range(len(df))]
     # One column per class the MODEL actually has. Hardcoding 4 raised
     # IndexError the moment a dataset carried only 3 triage levels
     # (cardiac_multilingual_10000.csv has no Level 4 at all).

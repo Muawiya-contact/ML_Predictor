@@ -677,13 +677,15 @@ class TriageGUI(tk.Tk):
                 return
             numbers[name] = value
 
+        input_warnings = []
         try:
             level, confidence, proba = predict_one(
                 self.artifacts, text,
                 numbers["Age"], numbers["Heart_Rate"], numbers["Systolic_BP"],
                 numbers["Diastolic_BP"], numbers["Temperature"], numbers["SpO2"],
                 self.combos["Gender"].get(), self.combos["Mode_of_Arrival"].get(),
-                self.combos["AVPU"].get(), self.combos["ECG_Status"].get())
+                self.combos["AVPU"].get(), self.combos["ECG_Status"].get(),
+                warnings=input_warnings)
         except Exception:
             messagebox.showerror("Prediction failed", traceback.format_exc())
             return
@@ -732,9 +734,18 @@ class TriageGUI(tk.Tk):
                                font=("Consolas", 9, "bold"))
         self.stages.config(state="disabled")
 
+        # Input-quality warnings used to be computed and dropped on this
+        # path - only the batch tab ever showed them. A capped confidence
+        # with no stated reason reads as a weak case, not a bad input.
+        if input_warnings:
+            self.stages.config(state="normal")
+            self.stages.insert("1.0", "!! " + "\n!! ".join(input_warnings) + "\n\n")
+            self.stages.config(state="disabled")
+
         self.status.set(
             f"Predicted Level {level + 1} ({LEVEL_NAMES[level]}) "
-            f"at {confidence * 100:.1f}% confidence.")
+            f"at {confidence * 100:.1f}% confidence."
+            + ("   |  ⚠ " + input_warnings[0].split(':')[0] if input_warnings else ""))
 
     def _draw_proba(self, proba, chosen):
         self._last_proba = (proba, chosen)

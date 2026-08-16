@@ -97,7 +97,24 @@ majority-class baseline, confirming the text carries real but partial signal.
    trustworthy estimate.
 6. **Cardiac scope only.** Non-cardiac complaints are out of scope; the model
    will still emit a confident level for them. An out-of-scope warning layer
-   is designed but not implemented.
+   is designed but not implemented. Measured: "toota hua pair, chalne mein
+   dard" (a broken leg) returns **Level 3 at 96.4% confidence** with no
+   indication the complaint is outside the validated domain.
+7. **Nonsense input is not detected.** Text that survives cleaning as tokens
+   but carries no clinical meaning is scored as though it were a real
+   complaint. Measured: "asdkfj qwoeiru zxcvbnm" returns **Level 3 at 97.7%
+   confidence**. The system guards the case where *nothing* survives cleaning
+   (empty, digits-only, punctuation-only inputs are flagged and their
+   confidence capped at 50%), but it has no language or plausibility model
+   and cannot tell an unfamiliar Roman Urdu spelling from keyboard mash.
+   Users must not read high confidence as evidence the input was understood.
+8. **Vitals are not range-checked.** No physiological validation is performed
+   anywhere in the pipeline. Measured: age −5, heart rate 300, blood pressure
+   900/−40, temperature 99 °C and SpO2 150 together return **Level 3 at 99.9%
+   confidence**, with no error and no warning. Out-of-range values are scaled
+   and fed to the model like any other number, so a data-entry slip or a unit
+   mismatch (Fahrenheit for Celsius, say) produces a confident answer built on
+   an impossible patient. Any deployment must validate vitals upstream.
 
 ## Reproducibility
 
