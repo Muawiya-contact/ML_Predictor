@@ -105,6 +105,7 @@ from stopwords import learn_stopwords, save_stopwords, summarize
 from triage_pipeline import (
     NUMERICAL_FEATURES,
     build_attention_weights,
+    encode_categoricals,
     make_console_safe,
     normalize_roman_urdu,
     preprocess_corpus_for_embedding,
@@ -115,7 +116,52 @@ from triage_pipeline import (
 warnings.filterwarnings("ignore")
 make_console_safe()
 
-DATA_FILE = "triage_mixed_language_dataset_10000.csv"
+DATA_FILE = "cardiac_multilingual_10000.csv"
+
+
+def _today():
+    import datetime
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+
+
+def _dataset_stamp(path, df, y):
+    """Describe the training data in the bundle, provenance included.
+
+    If the dataset ships a <name>.provenance.json (written by
+    generate_cardiac_dataset.py) it is copied in verbatim, so a bundle
+    trained on synthetic data carries that disclosure with it and nobody
+    downstream has to go looking for it. A dataset with no provenance file
+    is stamped "unknown" rather than silently left blank - see
+    DATASET_PROVENANCE.md for why that distinction matters here.
+    """
+    stamp = {
+        "file": os.path.basename(path),
+        "rows": int(len(df)),
+        "sha256": _dataset_sha256(path),
+        "n_classes": int(len(np.unique(y))),
+    }
+    prov_path = path + ".provenance.json"
+    if os.path.exists(prov_path):
+        with open(prov_path, "r", encoding="utf-8") as f:
+            stamp["provenance"] = json.load(f)
+    else:
+        stamp["provenance"] = {
+            "synthetic": "unknown",
+            "disclosure": ("No provenance file accompanies this dataset; how it "
+                           "was produced is not recorded. Do not cite it as data "
+                           "of known origin."),
+        }
+    return stamp
+
+
+def _dataset_sha256(path):
+    """Hash the training CSV so a bundle can prove which data produced it."""
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
 # Anchored to the project folder: training must overwrite the bundle the
 # predictors and the GUI actually load, not create a second copy in
 # whatever directory the run was started from - two bundles that disagree
@@ -145,10 +191,14 @@ def evaluate(y_true, pred):
     Predicting HIGHER than truth = less urgent = under-triage (dangerous).
     """
     acc = accuracy_score(y_true, pred)
-    cm = confusion_matrix(y_true, pred, labels=[0, 1, 2, 3])
+    # Class count comes from the data, not a constant: a cardiac-only dataset
+    # can legitimately carry 3 levels, and forcing labels=[0,1,2,3] then
+    # reported a phantom empty Level 4 row in every confusion matrix.
+    n_classes = int(max(np.max(y_true), np.max(pred))) + 1
+    cm = confusion_matrix(y_true, pred, labels=list(range(n_classes)))
     total = cm.sum()
-    over = sum(cm[t, p] for t in range(4) for p in range(t))
-    under = sum(cm[t, p] for t in range(4) for p in range(t + 1, 4))
+    over = sum(cm[t, p] for t in range(n_classes) for p in range(t))
+    under = sum(cm[t, p] for t in range(n_classes) for p in range(t + 1, n_classes))
     return acc, 100 * over / total, 100 * under / total, cm
 
 
@@ -289,8 +339,27 @@ def main():
         df[col] = df[col].fillna(df[col].median())
     scaler = StandardScaler().fit(df[NUMERICAL_FEATURES])
     df[NUMERICAL_FEATURES] = scaler.transform(df[NUMERICAL_FEATURES])
-    structured = df[NUMERICAL_FEATURES +
-                    ["Gender_enc", "Mode_enc", "AVPU_enc", "ECG_enc"]].values
+
+    # Categoricals are ONE-HOT, not the raw LabelEncoder integers. Those
+    # integers are alphabetical codes with no ordering, and feeding them to a
+    # linear model made it read "ST elevation" as ten times "Abnormal". See
+    # encode_categoricals() in triage_pipeline.py for the measured cost.
+    # The codes are built through the SAME saved encoders inference uses, so
+    # the two paths cannot drift apart.
+    cat_codes = np.column_stack([
+        encoders["gender_enc"].transform(df["Gender"].astype(str)),
+        encoders["mode_enc"].transform(df["Mode_of_Arrival"].astype(str)),
+        encoders["avpu_enc"].transform(df["AVPU"].astype(str)),
+        encoders["ecg_enc"].transform(df["ECG_Status"].astype(str)),
+    ])
+    cat_onehot = encode_categoricals(
+        {"manifest": {"categorical_encoding": "onehot"},
+         "le_gender": encoders["gender_enc"], "le_mode": encoders["mode_enc"],
+         "le_avpu": encoders["avpu_enc"], "le_ecg": encoders["ecg_enc"]},
+        cat_codes)
+    structured = np.hstack([df[NUMERICAL_FEATURES].values, cat_onehot])
+    print(f"[ok] Structured block: {len(NUMERICAL_FEATURES)} numeric + "
+          f"{cat_onehot.shape[1]} one-hot categorical = {structured.shape[1]} dims")
 
     # ---- one split, reused by every representation ----
     idx_train, idx_test = train_test_split(
@@ -570,9 +639,14 @@ def main():
     for i, row in enumerate(best["_cm"]):
         print(f"    True L{i}  " + "".join(f"{v:>7}" for v in row))
     print()
+    # Only the classes this dataset actually contains. Forcing all four
+    # printed a phantom "L3 Non-Urgent" row with zero support on a
+    # cardiac-only dataset, and dragged the macro average down with it.
+    _all_names = ["L0 Emergency", "L1 Urgent", "L2 Standard", "L3 Non-Urgent"]
+    _labels = sorted(set(np.unique(y_test)) | set(np.unique(best["_pred"])))
     print(classification_report(
-        y_test, best["_pred"], labels=[0, 1, 2, 3],
-        target_names=["L0 Emergency", "L1 Urgent", "L2 Standard", "L3 Non-Urgent"]))
+        y_test, best["_pred"], labels=_labels,
+        target_names=[_all_names[i] for i in _labels]))
 
     # ==================================================================
     # STEP 5 - ship the winner
@@ -659,6 +733,21 @@ def main():
                  "rescaled": rep == "hybrid"}] if uses_emb else [])),
         "trained_by": "train_embedding_pipeline.py",
         "deploy_mode": args.deploy,
+        # Read by encode_categoricals() at inference. Bundles saved before
+        # this key existed are treated as "ordinal" and keep working.
+        "categorical_encoding": "onehot",
+        "dataset": _dataset_stamp(resolve_project_file(args.data), df, y),
+        "scope": {
+            "clinical_scope": "CARDIAC COMPLAINTS ONLY",
+            "note": ("Trained exclusively on cardiac presentations. Predictions "
+                     "for non-cardiac complaints (trauma, burns, neurological, "
+                     "obstetric, etc.) are OUT OF SCOPE and must not be relied "
+                     "on."),
+            "categories_in_training_data": sorted(
+                df["Category"].astype(str).unique().tolist())
+            if "Category" in df else [],
+        },
+        "trained_on_date": _today(),
     }
     with open(os.path.join(args.out_dir, "model_manifest.json"), "w",
               encoding="utf-8") as f:
