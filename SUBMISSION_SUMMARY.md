@@ -121,8 +121,17 @@ majority-class baseline, confirming the text carries real but partial signal.
 ```bash
 python generate_cardiac_dataset.py --out cardiac_multilingual_10000_v3.csv
 python train_embedding_pipeline.py --data cardiac_multilingual_10000_v3.csv --deploy D
+python check_embedding_pairs.py      # verifies the 0.159 -> 0.721 figures above
 ./run_gui.sh
 ```
+
+`check_embedding_pairs.py` holds the five documented similarities as
+assertions rather than printing them: it re-encodes both phrasings of each
+pair, compares against the figures quoted in this document, and exits
+non-zero if any has drifted by more than 0.02. A reviewer can therefore
+confirm the headline embedding claim without taking it on trust, and a later
+change to the dictionary or stop-word list cannot leave this write-up
+silently stale.
 
 Deployed bundle: `triage_model_embedding/` (snapshot
 `triage_model_embedding_v8_v3_deployD/`). The manifest records dataset
