@@ -97,15 +97,59 @@ majority-class baseline, confirming the text carries real but partial signal.
    trustworthy estimate.
 6. **Cardiac scope only.** Non-cardiac complaints are out of scope; the model
    will still emit a confident level for them. An out-of-scope warning layer
-   is designed but not implemented.
+   is designed but not implemented. Measured: "toota hua pair, chalne mein
+   dard" (a broken leg) returns **Level 3 at 96.4% confidence** with no
+   indication the complaint is outside the validated domain.
+7. **Nonsense input is not detected.** Text that survives cleaning as tokens
+   but carries no clinical meaning is scored as though it were a real
+   complaint. Measured: "asdkfj qwoeiru zxcvbnm" returns **Level 3 at 97.7%
+   confidence**. The system guards the case where *nothing* survives cleaning
+   (empty, digits-only, punctuation-only inputs are flagged and their
+   confidence capped at 50%), but it has no language or plausibility model
+   and cannot tell an unfamiliar Roman Urdu spelling from keyboard mash.
+   Users must not read high confidence as evidence the input was understood.
+8. **No runtime red-flag / reassurance guardrail.** The rule that keeps
+   red-flag phrasing out of low-acuity rows and explicit reassurance out of
+   high-acuity rows lives only in the synthetic data generator. Nothing
+   enforces it at inference, and the structured features outweigh the text
+   whenever the two disagree. Live-tested: *"halka sa seena mein dabao hai,
+   rest se theek ho jata hai"* ("mild chest pressure, resolves with rest")
+   returns **Level 1 EMERGENCY at 63.7%** under the interface's default
+   vitals. The cause is those defaults — `ECG_Status` defaults to *ST
+   elevation* — rather than the wording: the identical complaint with a
+   Normal ECG and benign vitals returns **Level 4 at 81.0%**, so the
+   self-resolving clause is not being ignored. Two practical consequences.
+   Reassuring language cannot pull a prediction down once the structured
+   inputs indicate an infarct, which is clinically defensible for a genuine
+   STEMI but means the text is not a safety net. And because the interface
+   ships with an emergency ECG preselected, an operator who types a complaint
+   and predicts without touching the dropdowns gets EMERGENCY regardless of
+   what they wrote — the default should be changed to *Normal* before any
+   use beyond demonstration.
+9. **Vitals are not range-checked.** No physiological validation is performed
+   anywhere in the pipeline. Measured: age −5, heart rate 300, blood pressure
+   900/−40, temperature 99 °C and SpO2 150 together return **Level 3 at 99.9%
+   confidence**, with no error and no warning. Out-of-range values are scaled
+   and fed to the model like any other number, so a data-entry slip or a unit
+   mismatch (Fahrenheit for Celsius, say) produces a confident answer built on
+   an impossible patient. Any deployment must validate vitals upstream.
 
 ## Reproducibility
 
 ```bash
 python generate_cardiac_dataset.py --out cardiac_multilingual_10000_v3.csv
 python train_embedding_pipeline.py --data cardiac_multilingual_10000_v3.csv --deploy D
+python check_embedding_pairs.py      # verifies the 0.159 -> 0.721 figures above
 ./run_gui.sh
 ```
+
+`check_embedding_pairs.py` holds the five documented similarities as
+assertions rather than printing them: it re-encodes both phrasings of each
+pair, compares against the figures quoted in this document, and exits
+non-zero if any has drifted by more than 0.02. A reviewer can therefore
+confirm the headline embedding claim without taking it on trust, and a later
+change to the dictionary or stop-word list cannot leave this write-up
+silently stale.
 
 Deployed bundle: `triage_model_embedding/` (snapshot
 `triage_model_embedding_v8_v3_deployD/`). The manifest records dataset
