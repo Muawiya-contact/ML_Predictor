@@ -108,7 +108,25 @@ majority-class baseline, confirming the text carries real but partial signal.
    confidence capped at 50%), but it has no language or plausibility model
    and cannot tell an unfamiliar Roman Urdu spelling from keyboard mash.
    Users must not read high confidence as evidence the input was understood.
-8. **Vitals are not range-checked.** No physiological validation is performed
+8. **No runtime red-flag / reassurance guardrail.** The rule that keeps
+   red-flag phrasing out of low-acuity rows and explicit reassurance out of
+   high-acuity rows lives only in the synthetic data generator. Nothing
+   enforces it at inference, and the structured features outweigh the text
+   whenever the two disagree. Live-tested: *"halka sa seena mein dabao hai,
+   rest se theek ho jata hai"* ("mild chest pressure, resolves with rest")
+   returns **Level 1 EMERGENCY at 63.7%** under the interface's default
+   vitals. The cause is those defaults — `ECG_Status` defaults to *ST
+   elevation* — rather than the wording: the identical complaint with a
+   Normal ECG and benign vitals returns **Level 4 at 81.0%**, so the
+   self-resolving clause is not being ignored. Two practical consequences.
+   Reassuring language cannot pull a prediction down once the structured
+   inputs indicate an infarct, which is clinically defensible for a genuine
+   STEMI but means the text is not a safety net. And because the interface
+   ships with an emergency ECG preselected, an operator who types a complaint
+   and predicts without touching the dropdowns gets EMERGENCY regardless of
+   what they wrote — the default should be changed to *Normal* before any
+   use beyond demonstration.
+9. **Vitals are not range-checked.** No physiological validation is performed
    anywhere in the pipeline. Measured: age −5, heart rate 300, blood pressure
    900/−40, temperature 99 °C and SpO2 150 together return **Level 3 at 99.9%
    confidence**, with no error and no warning. Out-of-range values are scaled
