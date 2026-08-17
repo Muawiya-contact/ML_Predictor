@@ -649,8 +649,22 @@ class TriageGUI(tk.Tk):
             "AVPU": self.artifacts["le_avpu"],
             "ECG_Status": self.artifacts["le_ecg"],
         }
+        # ECG_Status defaults to "Normal", NOT to an infarct pattern.
+        #
+        # THE BUG THIS FIXES: the form opened with "ST elevation" preselected,
+        # so anyone who typed a complaint and pressed Predict without opening
+        # the dropdown got EMERGENCY whatever they had written. Measured:
+        # "halka sa seena mein dabao hai, rest se theek ho jata hai" (mild
+        # pressure, resolves with rest) returned Level 1 at 63.7% on the old
+        # defaults and Level 4 at 81.0% once the ECG was set to Normal. The
+        # model was reading the complaint correctly the whole time; the form
+        # was answering for it.
+        #
+        # A pre-filled emergency ECG is the wrong direction to be wrong in on
+        # a screen whose output is a triage level, so the safe reading is the
+        # default and any abnormality is a deliberate act by the operator.
         defaults = {"Gender": "Male", "Mode_of_Arrival": "Ambulance",
-                    "AVPU": "A", "ECG_Status": "ST elevation"}
+                    "AVPU": "A", "ECG_Status": "Normal"}
         for name, enc in mapping.items():
             values = list(enc.classes_)
             self.combos[name]["values"] = values
