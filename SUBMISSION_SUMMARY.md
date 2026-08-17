@@ -1,6 +1,6 @@
 # Submission summary — Roman Urdu cardiac triage decision support
 
-**Generated 2026-08-16. Paste-ready; every number below is measured, not estimated.**
+**Generated 2026-08-17. Paste-ready; every number below is measured, not estimated.**
 
 ---
 
@@ -19,8 +19,8 @@
 > similarity rises from **0.159 on raw text to 0.721 after normalization**
 > (+0.563), with all five pairs clearing a 0.5 threshold. The deployed hybrid
 > model (attention-weighted bag-of-words + multilingual sentence embeddings +
-> structured vitals) reaches **85.15% accuracy with 9.00% under-triage and
-> 5.85% over-triage** on a held-out 20% split. **The evaluation dataset is
+> structured vitals) reaches **84.80% accuracy with 9.25% under-triage and
+> 5.95% over-triage** on a held-out 20% split. **The evaluation dataset is
 > synthetic**: complaints were produced by a documented phrase-bank and
 > sentence-skeleton generator whose vocabulary derives from an organic corpus
 > of 887 distinct cardiac complaints, and triage labels were assigned by
@@ -35,9 +35,9 @@
 | metric | value |
 |---|---|
 | deployed method | D) Hybrid — dictionary BoW + sentence embeddings + vitals |
-| accuracy (held-out 20%, n=2000) | **85.15%** |
-| under-triage (missed severity) | **9.00%** — safety grade A |
-| over-triage | 5.85% |
+| accuracy (held-out 20%, n=2000) | **84.80%** |
+| under-triage (missed severity) | **9.25%** — safety grade A |
+| over-triage | 5.95% |
 | classes | 4 (Emergency / Urgent / Standard / Non-Urgent) |
 | dataset | `cardiac_multilingual_10000_v3.csv`, 10,000 rows, 10,000 distinct texts |
 | operation | fully offline, verified with outbound sockets disabled |
@@ -46,9 +46,9 @@ Method comparison on the same split (all four trained identically):
 
 | method | accuracy | under-triage |
 |---|---|---|
-| A) Dictionary + BoW | 86.35% | 8.45% |
-| **D) Hybrid (deployed)** | **85.15%** | **9.00%** |
-| C) Embeddings + preprocessing | 82.40% | 11.80% |
+| A) Dictionary + BoW | 86.50% | 8.30% |
+| **D) Hybrid (deployed)** | **84.80%** | **9.25%** |
+| C) Embeddings + preprocessing | 82.40% | 12.00% |
 | B) Embeddings, raw text | 82.05% | 11.90% |
 
 D was deployed over the marginally more accurate A because it retains the
@@ -64,7 +64,7 @@ This matters: an earlier version of this dataset had `ECG_Status` determine
 the level almost perfectly (ST elevation → Level 1 in 1,930 of 1,932 rows).
 A model on that data scored 98.45%, but structured features alone scored
 99.1% — the text pipeline contributed nothing and the headline was an ECG
-lookup. The 85.15% reported here is lower and more honest: a bag-of-words
+lookup. The 84.80% reported here is lower and more honest: a bag-of-words
 model given only the complaint text scores 69.0% against a 40%
 majority-class baseline, confirming the text carries real but partial signal.
 
@@ -98,11 +98,11 @@ majority-class baseline, confirming the text carries real but partial signal.
 6. **Cardiac scope only.** Non-cardiac complaints are out of scope; the model
    will still emit a confident level for them. An out-of-scope warning layer
    is designed but not implemented. Measured: "toota hua pair, chalne mein
-   dard" (a broken leg) returns **Level 3 at 96.4% confidence** with no
+   dard" (a broken leg) returns **Level 3 at 99.1% confidence** with no
    indication the complaint is outside the validated domain.
 7. **Nonsense input is not detected.** Text that survives cleaning as tokens
    but carries no clinical meaning is scored as though it were a real
-   complaint. Measured: "asdkfj qwoeiru zxcvbnm" returns **Level 3 at 97.7%
+   complaint. Measured: "asdkfj qwoeiru zxcvbnm" returns **Level 3 at 77.7%
    confidence**. The system guards the case where *nothing* survives cleaning
    (empty, digits-only, punctuation-only inputs are flagged and their
    confidence capped at 50%), but it has no language or plausibility model
@@ -112,26 +112,25 @@ majority-class baseline, confirming the text carries real but partial signal.
    red-flag phrasing out of low-acuity rows and explicit reassurance out of
    high-acuity rows lives only in the synthetic data generator. Nothing
    enforces it at inference, and the structured features outweigh the text
-   whenever the two disagree. Live-tested: *"halka sa seena mein dabao hai,
-   rest se theek ho jata hai"* ("mild chest pressure, resolves with rest")
-   returns **Level 1 EMERGENCY at 63.7%** under the interface's default
-   vitals. The cause is those defaults — `ECG_Status` defaults to *ST
-   elevation* — rather than the wording: the identical complaint with a
-   Normal ECG and benign vitals returns **Level 4 at 81.0%**, so the
-   self-resolving clause is not being ignored. The practical consequence that
-   remains is that reassuring language cannot pull a prediction down once the
-   structured inputs indicate an infarct — clinically defensible for a genuine
-   STEMI, but it means the complaint text is not a safety net.
+   whenever the two disagree. Live-tested with *"halka sa seena mein dabao
+   hai, rest se theek ho jata hai"* ("mild chest pressure, resolves with
+   rest"): with `ECG_Status` set to ST elevation it returns **Level 1
+   EMERGENCY at 67.4%**; with a Normal ECG the same sentence returns **Level 3
+   at 99.9%**. So the self-resolving clause is not being ignored — the
+   structured inputs simply dominate it. The consequence to state plainly is
+   that reassuring language cannot pull a prediction down once the ECG
+   indicates an infarct. That is clinically defensible for a genuine STEMI,
+   but it means the complaint text is not a safety net.
    *(The interface previously shipped with ST elevation preselected, so an
    operator who predicted without opening the dropdown got EMERGENCY whatever
-   they had typed. That default is now `Normal`; the same complaint returns
-   Level 3, while a severe complaint still returns Level 1 at 99.8% even on a
-   Normal ECG. Note the numeric fields still default to abnormal values —
+   they had typed. The default is now `Normal`. A severe complaint still
+   returns Level 1 at 99.8% on a Normal ECG, so the change does not blunt
+   genuine emergencies. The numeric fields still default to abnormal values —
    HR 118, SpO2 94 — so the form remains biased upward and should be filled
    in rather than trusted.)*
 9. **Vitals are not range-checked.** No physiological validation is performed
    anywhere in the pipeline. Measured: age −5, heart rate 300, blood pressure
-   900/−40, temperature 99 °C and SpO2 150 together return **Level 3 at 99.9%
+   900/−40, temperature 99 °C and SpO2 150 together return **Level 4 at 100.0%
    confidence**, with no error and no warning. Out-of-range values are scaled
    and fed to the model like any other number, so a data-entry slip or a unit
    mismatch (Fahrenheit for Celsius, say) produces a confident answer built on
@@ -155,7 +154,7 @@ change to the dictionary or stop-word list cannot leave this write-up
 silently stale.
 
 Deployed bundle: `triage_model_embedding/` (snapshot
-`triage_model_embedding_v8_v3_deployD/`). The manifest records dataset
+`triage_model_embedding_v9_fuzzyfix/`). The manifest records dataset
 filename, row count, sha256, class count, synthetic-data provenance, cardiac
 scope and training date; the GUI banner surfaces the synthetic-data warning
 on every screen.
