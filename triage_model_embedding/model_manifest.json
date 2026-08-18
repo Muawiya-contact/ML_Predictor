@@ -49,5 +49,7 @@
       "Cardiac"
     ]
   },
-  "trained_on_date": "2026-08-17"
+  "trained_on_date": "2026-08-17",
+  "skip_normalization": false,
+  "text_column": "Complaint_Text"
 }
