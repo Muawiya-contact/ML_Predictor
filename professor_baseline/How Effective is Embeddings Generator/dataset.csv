@@ -1,0 +1,186 @@
+Age,Gender,Mode_of_Arrival,Roman Urdu Complaint,Heart_Rate,Systolic_BP,Diastolic_BP,ECG_Status,Temperature,SpO2,AVPU,Triage_Level,Category
+65,Male,Ambulance,seena mein shadeed dard aur pasina aa raha hai,118,160,95,ST elevation,37.2,94,A,1,Cardiac
+45,Female,Wheelchair,saans phool rahi hai lekin baat kar sakti hai,112,145,88,Abnormal,36.8,91,V,2,Respiratory
+28,Male,Walk-in,bukhar aur body pain do din se,102,128,78,Normal,38.9,97,A,3,Infectious_Disease
+72,Female,Ambulance,behosh ho gayi thi ab hosh mein hai kamzori hai,88,165,92,Arrhythmia,36.5,94,V,2,Neurological
+34,Male,Wheelchair,bike accident ke baad pair mein bleeding,124,118,72,Normal,37.1,98,P,2,Trauma
+19,Female,Walk-in,ulta raha hai subah se pait kharab hai,96,110,65,Normal,37.6,99,A,3,Gastrointestinal
+58,Male,Ambulance,left side chest pain radiation to arm,134,155,98,ST elevation,36.9,93,V,1,Cardiac
+41,Female,Wheelchair,sar ghoom raha hai aur aankhen dhundlee ho rahi hain,104,145,85,Abnormal,37.3,96,A,2,Neurological
+23,Male,Walk-in,garmi mein kaam karte hue chakkar aa gaye,88,118,70,Normal,38.2,97,P,3,Heat_Related
+67,Female,Ambulance,diabetes ka mareez hoon sugar high hai,96,155,88,Normal,36.7,98,A,2,Metabolic_Cardiovascular
+31,Male,Wheelchair,roadside khana khaya tha ab ulti aur dast lag gaye,110,122,75,Abnormal,37.9,96,A,3,Gastrointestinal
+52,Female,Walk-in,seena bhaari lag raha hai aur thakan bohat hai,86,148,85,Normal,36.6,97,V,2,Cardiac
+17,Male,Ambulance,head injury girnay ke baad unconscious tha ab alert hai,72,118,68,Abnormal,36.5,96,A,2,Trauma
+44,Female,Wheelchair,saans lene mein takleef wheezing ho rahi hai,128,135,82,Arrhythmia,37.1,89,V,2,Respiratory
+76,Male,Walk-in,patient ko pehle heart attack ho chuka hai ab chest tightness hai,102,140,85,ST elevation,36.8,94,A,1,Cardiac
+29,Female,Ambulance,pregnancy mein bleeding ho rahi hai 8 months ki hain,118,110,70,Normal,37.2,97,P,1,Gyne_Obstetric
+63,Male,Wheelchair,bohat zyada kamzori aur bhook nahi lag rahi do din se,92,125,78,Normal,36.9,95,A,4,Non_Specific
+38,Female,Walk-in,typhoid ka ilaaj chal raha hai bukhar utar nahi raha,108,130,82,Abnormal,39.1,93,A,3,Infectious_Disease
+55,Male,Ambulance,aag se burn ho gaya kitchen mein,130,125,80,Normal,36.8,96,P,1,Burn_Emergency
+22,Female,Wheelchair,gir gaya seedhiyon se sar phut gaya,98,115,72,Normal,37,97,V,2,Trauma
+61,Male,Ambulance,tez seena dard aur ulti jaisa mehsoos ho raha hai,120,150,92,ST elevation,37,93,V,1,Cardiac
+37,Female,Walk-in,gala kharab aur bukhar teen din se,98,120,76,Normal,38.5,97,A,3,Infectious_Disease
+49,Male,Wheelchair,right side body kamzor ho gayi achanak,110,160,100,Abnormal,36.7,95,V,1,Neurological
+26,Female,Walk-in,pait mein dard aur loose motions,92,112,70,Normal,37.8,98,A,3,Gastrointestinal
+70,Male,Ambulance,saans lene mein bohat mushkil aur chest tightness,132,148,90,Arrhythmia,36.9,88,V,1,Respiratory
+33,Male,Wheelchair,construction site par chot lagi haath mein fracture shak hai,105,125,80,Normal,37.2,99,P,2,Trauma
+21,Female,Walk-in,headache aur light sensitivity migraine jaisa,84,118,74,Normal,36.6,99,A,4,Neurological
+56,Male,Ambulance,high sugar levels aur confusion,102,150,88,Abnormal,37.1,96,V,2,Metabolic_Cardiovascular
+43,Female,Wheelchair,asthma ka attack aur wheezing,126,138,84,Arrhythmia,37,90,V,2,Respiratory
+18,Male,Walk-in,khelte hue gir gaya ankle mein swelling,88,116,72,Normal,36.8,99,A,4,Trauma
+64,Female,Ambulance,behoshi aur BP bohat high,90,170,100,Abnormal,36.5,94,P,1,Neurological
+39,Male,Walk-in,fever aur rash body par,104,124,78,Normal,38.7,97,A,3,Infectious_Disease
+27,Female,Wheelchair,pregnancy ke douran lower abdomen pain,100,118,75,Normal,37.1,98,V,2,Gyne_Obstetric
+74,Male,Ambulance,previous cardiac history aur ab severe chest pain,128,155,95,ST elevation,36.9,92,V,1,Cardiac
+35,Female,Walk-in,food poisoning vomiting aur dehydration,110,120,76,Normal,38.2,96,A,3,Gastrointestinal
+59,Male,Wheelchair,left leg mein swelling aur dard DVT shak,96,135,85,Abnormal,36.8,95,A,2,Cardiac
+24,Female,Walk-in,heat exhaustion chakkar aur weakness,90,110,68,Normal,38.3,97,A,3,Heat_Related
+68,Male,Ambulance,burn injury haath aur chest par,122,130,82,Normal,37,95,P,1,Burn_Emergency
+42,Female,Wheelchair,blurred vision aur BP high,108,150,90,Abnormal,36.9,96,A,2,Neurological
+30,Male,Walk-in,back pain heavy weight uthate hue,86,122,80,Normal,36.7,99,A,4,Non_Specific
+62,Male,Ambulance,severe chest pressure aur pasina,122,158,96,ST elevation,37.1,92,V,1,Cardiac
+48,Female,Walk-in,khansi aur bukhar 4 din se,96,126,80,Normal,38.4,96,A,3,Infectious_Disease
+35,Male,Wheelchair,right arm fracture fall ke baad,108,124,82,Normal,37,99,P,2,Trauma
+27,Female,Walk-in,lower abdomen pain aur nausea,94,118,72,Normal,37.5,98,A,3,Gastrointestinal
+71,Male,Ambulance,breathlessness aur wheezing severe,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+54,Female,Wheelchair,dizziness aur blurred vision,102,148,88,Abnormal,36.9,95,A,2,Neurological
+22,Male,Walk-in,sore throat aur mild fever,88,116,74,Normal,37.8,99,A,4,Infectious_Disease
+66,Female,Ambulance,unconscious episode ab confusion,92,162,94,Abnormal,36.6,93,P,1,Neurological
+31,Male,Wheelchair,leg injury sports mein,100,120,78,Normal,37.2,99,A,3,Trauma
+44,Female,Walk-in,vomiting aur dehydration,112,118,76,Normal,38.1,96,A,3,Gastrointestinal
+59,Male,Ambulance,known cardiac patient severe pain,126,152,98,ST elevation,36.9,91,V,1,Cardiac
+18,Female,Walk-in,heat exhaustion weakness,90,110,70,Normal,38.3,98,A,3,Heat_Related
+73,Male,Wheelchair,chest tightness mild,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,typhoid treatment ongoing fever,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+28,Male,Wheelchair,bike slip knee injury,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,shortness of breath severe,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,epigastric pain after food,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+33,Female,Wheelchair,pregnancy 7 months abdominal pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury hand aur face,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+24,Female,Walk-in,migraine severe headache,86,118,74,Normal,36.7,99,A,4,Neurological
+69,Male,Ambulance,confusion aur high BP,94,168,100,Abnormal,36.6,93,P,1,Neurological
+41,Female,Wheelchair,asthma exacerbation wheeze,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+29,Male,Walk-in,food poisoning loose motions,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,left chest pain radiating,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+20,Male,Walk-in,ankle sprain sports,84,116,72,Normal,36.8,99,A,4,Trauma
+74,Female,Ambulance,collapse aur unconscious,88,170,102,Abnormal,36.5,92,P,1,Neurological
+36,Male,Wheelchair,back injury lifting weight,96,126,80,Normal,37.1,99,A,3,Non_Specific
+45,Female,Walk-in,fever rash dengue suspect,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+63,Male,Ambulance,severe breathlessness COPD history,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+27,Female,Walk-in,vomiting pregnancy early,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+50,Male,Wheelchair,leg swelling pain possible clot,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+32,Female,Walk-in,gastritis burning pain,90,118,76,Normal,37,99,A,4,Gastrointestinal
+68,Male,Ambulance,previous MI chest discomfort,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+23,Female,Walk-in,heat stroke dizziness,96,112,70,Normal,38.4,97,A,3,Heat_Related
+57,Male,Wheelchair,head injury mild confusion,88,130,82,Abnormal,36.8,96,V,2,Trauma
+42,Female,Walk-in,shortness breath mild,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,cardiac arrest revived,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+34,Female,Wheelchair,abdominal cramps severe,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,burns kitchen accident,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral fever fatigue,92,118,76,Normal,38,98,A,4,Infectious_Disease
+60,Male,Ambulance,severe chest pain sweating,124,156,94,ST elevation,37,92,V,1,Cardiac
+42,Female,Walk-in,cough fever 5 days,98,128,82,Normal,38.6,96,A,3,Infectious_Disease
+29,Male,Wheelchair,leg fracture fall,110,122,78,Normal,37.1,99,P,2,Trauma
+33,Female,Walk-in,abdominal pain nausea,94,118,74,Normal,37.5,98,A,3,Gastrointestinal
+75,Male,Ambulance,severe dyspnea,132,150,90,Arrhythmia,36.8,87,V,1,Respiratory
+51,Female,Wheelchair,dizziness blurred vision,104,148,88,Abnormal,36.9,95,A,2,Neurological
+19,Male,Walk-in,sore throat mild fever,88,116,72,Normal,37.8,99,A,4,Infectious_Disease
+68,Female,Ambulance,collapse confusion,90,164,96,Abnormal,36.6,93,P,1,Neurological
+36,Male,Wheelchair,hand injury cut bleeding,108,120,78,Normal,37.2,99,P,2,Trauma
+47,Female,Walk-in,vomiting dehydration,112,120,76,Normal,38.2,96,A,3,Gastrointestinal
+58,Male,Ambulance,cardiac pain severe,126,152,96,ST elevation,36.9,91,V,1,Cardiac
+21,Female,Walk-in,heat exhaustion weakness,92,112,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,chest tightness mild,100,142,86,Abnormal,36.7,95,A,2,Cardiac
+40,Female,Walk-in,fever typhoid suspect,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+31,Male,Wheelchair,knee injury sports,104,122,80,Normal,37.1,99,P,2,Trauma
+66,Female,Ambulance,shortness severe,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+45,Male,Walk-in,gastritis burning pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+34,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+53,Male,Ambulance,burn injury arm,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine headache,86,118,74,Normal,36.7,99,A,4,Neurological
+69,Male,Ambulance,confusion high BP,94,168,100,Abnormal,36.6,93,P,1,Neurological
+43,Female,Wheelchair,asthma attack,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+30,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+57,Female,Ambulance,chest pain radiation,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+22,Male,Walk-in,ankle sprain,84,116,72,Normal,36.8,99,A,4,Trauma
+74,Female,Ambulance,unconscious collapse,88,170,102,Abnormal,36.5,92,P,1,Neurological
+37,Male,Wheelchair,back pain lifting,96,126,80,Normal,37.1,99,A,3,Non_Specific
+46,Female,Walk-in,fever rash dengue,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+62,Male,Ambulance,COPD breathlessness,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+28,Female,Walk-in,vomiting pregnancy,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+55,Male,Wheelchair,leg swelling clot,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+33,Female,Walk-in,gastritis,90,118,76,Normal,37,99,A,4,Gastrointestinal
+67,Male,Ambulance,MI history chest pain,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+24,Female,Walk-in,heat stroke,96,112,70,Normal,38.4,97,A,3,Heat_Related
+58,Male,Wheelchair,head injury confusion,88,130,82,Abnormal,36.8,96,V,2,Trauma
+41,Female,Walk-in,dyspnea mild,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,cardiac arrest revived,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+35,Female,Wheelchair,abdominal cramps,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,burn injury,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral fever,92,118,76,Normal,38,98,A,4,Infectious_Disease
+63,Male,Ambulance,chest pain severe,122,154,92,ST elevation,36.9,91,V,1,Cardiac
+44,Female,Walk-in,cold cough,96,124,80,Normal,37.9,97,A,3,Infectious_Disease
+27,Male,Wheelchair,fracture wrist,108,120,78,Normal,37,99,P,2,Trauma
+32,Female,Walk-in,abdominal pain,92,118,72,Normal,37.6,98,A,3,Gastrointestinal
+71,Male,Ambulance,dyspnea severe,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+49,Female,Wheelchair,vertigo dizziness,102,146,88,Abnormal,36.9,95,A,2,Neurological
+20,Male,Walk-in,fever mild,88,116,72,Normal,37.7,99,A,4,Infectious_Disease
+69,Female,Ambulance,collapse,90,166,98,Abnormal,36.6,93,P,1,Neurological
+34,Male,Wheelchair,cut injury bleeding,106,122,80,Normal,37.2,99,P,2,Trauma
+48,Female,Walk-in,vomiting,110,118,76,Normal,38.1,96,A,3,Gastrointestinal
+57,Male,Ambulance,cardiac pain,124,150,94,ST elevation,36.9,91,V,1,Cardiac
+23,Female,Walk-in,heat exhaustion,92,110,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,chest tightness,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,fever typhoid,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+30,Male,Wheelchair,injury knee,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,shortness severe,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,gastric pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+36,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine,86,118,74,Normal,36.7,99,A,4,Neurological
+70,Male,Ambulance,confusion BP high,94,168,100,Abnormal,36.6,93,P,1,Neurological
+42,Female,Wheelchair,asthma,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+31,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,chest pain,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+21,Male,Walk-in,sprain ankle,84,116,72,Normal,36.8,99,A,4,Trauma
+73,Female,Ambulance,collapse unconscious,88,170,102,Abnormal,36.5,92,P,1,Neurological
+38,Male,Wheelchair,back pain,96,126,80,Normal,37.1,99,A,3,Non_Specific
+45,Female,Walk-in,dengue suspect,108,128,82,Normal,39.2,95,A,3,Infectious_Disease
+62,Male,Ambulance,COPD severe,132,148,90,Arrhythmia,36.8,88,V,1,Respiratory
+28,Female,Walk-in,vomiting pregnancy,98,114,70,Normal,37.3,98,A,3,Gyne_Obstetric
+54,Male,Wheelchair,leg swelling,94,136,84,Abnormal,36.7,95,A,2,Cardiac
+33,Female,Walk-in,gastritis,90,118,76,Normal,37,99,A,4,Gastrointestinal
+67,Male,Ambulance,MI pain,110,142,88,ST elevation,36.9,93,V,1,Cardiac
+24,Female,Walk-in,heat stroke,96,112,70,Normal,38.4,97,A,3,Heat_Related
+58,Male,Wheelchair,head injury,88,130,82,Abnormal,36.8,96,V,2,Trauma
+41,Female,Walk-in,dyspnea,100,132,84,Normal,37.2,95,A,3,Respiratory
+76,Male,Ambulance,cardiac arrest,70,90,60,Arrhythmia,36.5,85,P,1,Cardiac
+35,Female,Wheelchair,abdominal pain,104,120,78,Normal,37.5,98,A,3,Gastrointestinal
+61,Male,Ambulance,burn,118,128,82,Normal,36.9,95,P,1,Burn_Emergency
+25,Female,Walk-in,viral fever,92,118,76,Normal,38,98,A,4,Infectious_Disease
+64,Male,Ambulance,severe chest pain,122,154,92,ST elevation,36.9,91,V,1,Cardiac
+43,Female,Walk-in,cough fever,96,124,80,Normal,37.9,97,A,3,Infectious_Disease
+29,Male,Wheelchair,fracture,108,120,78,Normal,37,99,P,2,Trauma
+32,Female,Walk-in,abdominal pain,92,118,72,Normal,37.6,98,A,3,Gastrointestinal
+71,Male,Ambulance,dyspnea,130,150,92,Arrhythmia,36.8,87,V,1,Respiratory
+50,Female,Wheelchair,vertigo,102,146,88,Abnormal,36.9,95,A,2,Neurological
+22,Male,Walk-in,fever,88,116,72,Normal,37.7,99,A,4,Infectious_Disease
+69,Female,Ambulance,collapse,90,166,98,Abnormal,36.6,93,P,1,Neurological
+34,Male,Wheelchair,cut injury,106,122,80,Normal,37.2,99,P,2,Trauma
+48,Female,Walk-in,vomiting,110,118,76,Normal,38.1,96,A,3,Gastrointestinal
+57,Male,Ambulance,cardiac pain,124,150,94,ST elevation,36.9,91,V,1,Cardiac
+23,Female,Walk-in,heat exhaustion,92,110,70,Normal,38.3,98,A,3,Heat_Related
+72,Male,Wheelchair,chest tightness,98,140,86,Abnormal,36.7,95,A,2,Cardiac
+39,Female,Walk-in,fever,106,130,82,Abnormal,39,94,A,3,Infectious_Disease
+30,Male,Wheelchair,knee injury,104,122,80,Normal,37.1,99,P,2,Trauma
+65,Female,Ambulance,shortness,128,146,90,Arrhythmia,36.8,89,V,1,Respiratory
+47,Male,Walk-in,gastric pain,92,124,78,Normal,37.4,98,A,3,Gastrointestinal
+36,Female,Wheelchair,pregnancy pain,102,118,76,Normal,37.2,98,V,2,Gyne_Obstetric
+52,Male,Ambulance,burn injury,120,130,84,Normal,36.9,95,P,1,Burn_Emergency
+26,Female,Walk-in,migraine,86,118,74,Normal,36.7,99,A,4,Neurological
+70,Male,Ambulance,confusion,94,168,100,Abnormal,36.6,93,P,1,Neurological
+42,Female,Wheelchair,asthma,124,138,86,Arrhythmia,37,90,V,2,Respiratory
+31,Male,Walk-in,food poisoning,110,120,76,Normal,38.2,97,A,3,Gastrointestinal
+56,Female,Ambulance,chest pain,118,150,92,ST elevation,36.9,92,V,1,Cardiac
+21,Male,Walk-in,ankle sprain,84,116,72,Normal,36.8,99,A,4,Trauma

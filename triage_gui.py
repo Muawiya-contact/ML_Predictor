@@ -242,6 +242,304 @@ def fnum(value, default=None):
 # row instead of a vague catch-all.
 # ---------------------------------------------------------------------
 
+
+
+# ======================================================================
+# GLOSSARY + HOVER TOOLTIPS
+#
+# The Results tab is dense with machine-learning vocabulary, and a triage
+# nurse reading it has no reason to know what "macro average" means. Every
+# definition below is written for that reader: what the number is, and what
+# it means HERE - on a triage screen - rather than a textbook restatement.
+#
+# Kept as data in one place so the wording cannot drift between the column
+# header, the summary line and the table that uses the same term.
+# ======================================================================
+
+GLOSSARY = {
+    "precision": (
+        "PRECISION\n\n"
+        "Of all the patients the model CALLED this level, how many really "
+        "were?\n\n"
+        "Low precision means false alarms: the model puts patients into this "
+        "level who do not belong there. 0.90 means 9 out of every 10 it "
+        "labelled this way were correct."
+    ),
+    "recall": (
+        "RECALL  (also called sensitivity)\n\n"
+        "Of all the patients who REALLY were this level, how many did the "
+        "model catch?\n\n"
+        "Low recall means missed cases. On the emergency row this is the "
+        "number that matters most - a missed emergency is the dangerous "
+        "failure, not a false alarm."
+    ),
+    "f1": (
+        "F1 SCORE\n\n"
+        "A metric used to evaluate classification models by combining "
+        "precision and recall into a single number.\n\n"
+        "It is their harmonic mean, so it only goes high when BOTH are high - "
+        "a model that catches every case by labelling everything this level "
+        "would have perfect recall but terrible precision, and F1 exposes "
+        "that. 1.0 is perfect, 0.0 is useless."
+    ),
+    "support": (
+        "SUPPORT\n\n"
+        "How many test patients truly had this level.\n\n"
+        "Read every other number on the row against this one. A class with "
+        "80 patients moves several percentage points on a handful of "
+        "predictions, so its precision and recall are far less stable than "
+        "a class with 800."
+    ),
+    "macro": (
+        "MACRO AVERAGE\n\n"
+        "The plain average across the four triage levels, counting each "
+        "level equally regardless of how many patients it has.\n\n"
+        "This is the honest summary when classes are unbalanced: the rare "
+        "NON-URGENT level counts as much as the common URGENT one, so a "
+        "model that ignores rare levels cannot hide behind them."
+    ),
+    "weighted": (
+        "WEIGHTED AVERAGE\n\n"
+        "The average across levels, weighted by how many patients each has.\n\n"
+        "It tracks overall accuracy closely, which also means it is "
+        "flattered by the common levels. If weighted is much higher than "
+        "macro, the model is doing well on the frequent levels and poorly "
+        "on the rare ones."
+    ),
+    "accuracy": (
+        "ACCURACY\n\n"
+        "The share of test patients given the correct triage level.\n\n"
+        "It treats every mistake alike, which triage does not - calling an "
+        "emergency patient non-urgent and calling a non-urgent patient an "
+        "emergency both cost one point here, but only one of them is "
+        "dangerous. Read it next to under-triage."
+    ),
+    "under_triage": (
+        "UNDER-TRIAGE\n\n"
+        "The share of patients rated LESS urgent than they really are.\n\n"
+        "This is the dangerous error: a Level 1 patient sent to the Level 3 "
+        "queue waits while their condition worsens. It is reported "
+        "separately from accuracy precisely because accuracy hides it."
+    ),
+    "over_triage": (
+        "OVER-TRIAGE\n\n"
+        "The share of patients rated MORE urgent than they really are.\n\n"
+        "Wasteful rather than dangerous - it consumes a bed, a clinician and "
+        "a slot that someone sicker needed. Preferable to under-triage, but "
+        "not free."
+    ),
+    "confusion_matrix": (
+        "CONFUSION MATRIX\n\n"
+        "A grid of true level against predicted level. The diagonal is what "
+        "the model got right; everything off the diagonal is a mistake, and "
+        "WHERE it sits tells you the kind.\n\n"
+        "Cells below the diagonal are over-triage, cells above it are "
+        "under-triage. Every precision, recall and F1 figure on this page is "
+        "derived from this grid."
+    ),
+    "safety_grade": (
+        "SAFETY GRADE\n\n"
+        "A band on the under-triage rate alone, not on accuracy:\n"
+        "  A+ under 5%   A under 10%   B under 15%   C under 20%   F above\n\n"
+        "A model can be accurate and still graded poorly if the mistakes it "
+        "does make are the dangerous kind."
+    ),
+}
+
+
+class _TooltipManager:
+    """One tooltip window for the whole app, shown near the cursor.
+
+    THE BUG THIS REPLACES: the first version created a Tooltip object per
+    hover target, and the Treeview variant created a NEW one on every
+    column the pointer crossed. Each instance re-bound <Enter>, <Leave>
+    and <ButtonPress> to the same tree with add="+", so the handlers piled
+    up - by the time you had swept the header a few times the widget was
+    firing a dozen stale callbacks, and the popup flickered or stuck.
+
+    One window, one set of bindings per widget, and a single pending timer
+    that is always cancelled before a new one starts.
+    """
+
+    DELAY_MS = 400
+    WRAP = 400
+    CURSOR_DX, CURSOR_DY = 16, 22
+
+    def __init__(self):
+        self._win = None
+        self._label = None
+        self._after = None
+        self._owner = None
+
+    def _ensure(self, widget):
+        if self._win is not None and self._win.winfo_exists():
+            return
+        self._win = tk.Toplevel(widget.winfo_toplevel())
+        self._win.wm_overrideredirect(True)
+        self._win.attributes("-topmost", True)
+        self._label = tk.Label(
+            self._win, justify="left", anchor="w", bg="#2b3a4a", fg="white",
+            font=("Segoe UI", 9), relief="solid", bd=1, padx=10, pady=8,
+            wraplength=self.WRAP)
+        self._label.pack()
+        self._win.withdraw()
+
+    def schedule(self, widget, text, x_root, y_root):
+        """Show `text` after the delay, unless cancelled first."""
+        self.cancel()
+        if not text:
+            return
+        self._owner = widget
+        self._after = widget.after(
+            self.DELAY_MS, lambda: self._show(widget, text, x_root, y_root))
+
+    def _show(self, widget, text, x_root, y_root):
+        self._after = None
+        if not widget.winfo_exists():
+            return
+        self._ensure(widget)
+        self._label.configure(text=text)
+        self._win.update_idletasks()
+        w, h = self._win.winfo_reqwidth(), self._win.winfo_reqheight()
+        sw, sh = self._win.winfo_screenwidth(), self._win.winfo_screenheight()
+        # Keep it on screen: flip to the other side of the cursor near an edge.
+        x = min(x_root + self.CURSOR_DX, sw - w - 8)
+        y = y_root + self.CURSOR_DY
+        if y + h > sh - 8:
+            y = y_root - h - 8
+        self._win.wm_geometry(f"+{max(8, x)}+{max(8, y)}")
+        self._win.deiconify()
+        self._win.lift()
+
+    def cancel(self):
+        if self._after is not None:
+            try:
+                if self._owner is not None and self._owner.winfo_exists():
+                    self._owner.after_cancel(self._after)
+            except Exception:
+                pass
+            self._after = None
+
+    def hide(self, _event=None):
+        self.cancel()
+        if self._win is not None and self._win.winfo_exists():
+            self._win.withdraw()
+
+    @property
+    def visible(self):
+        return (self._win is not None and self._win.winfo_exists()
+                and self._win.state() != "withdrawn")
+
+    @property
+    def text(self):
+        return self._label.cget("text") if self._label else ""
+
+
+TOOLTIP = _TooltipManager()
+
+
+def attach_tooltip(widget, key_or_text):
+    """Hover help on a plain widget. Binds once, never re-binds."""
+    text = GLOSSARY.get(key_or_text, key_or_text)
+    if getattr(widget, "_tooltip_bound", False):
+        widget._tooltip_text = text
+        return
+    widget._tooltip_bound = True
+    widget._tooltip_text = text
+    widget.bind(
+        "<Enter>",
+        lambda e, w=widget: TOOLTIP.schedule(w, w._tooltip_text, e.x_root, e.y_root),
+        add="+")
+    widget.bind("<Leave>", TOOLTIP.hide, add="+")
+    widget.bind("<ButtonPress>", TOOLTIP.hide, add="+")
+
+
+def attach_header_tooltips(tree, column_keys):
+    """Per-column hover help on a Treeview heading row.
+
+    A Treeview is a single widget, so <Enter> cannot say which heading the
+    pointer is over. Motion is tracked instead, and the tooltip is only
+    rescheduled when the pointer actually moves to a DIFFERENT column -
+    otherwise every pixel of movement would restart the timer and the
+    popup would never appear.
+    """
+    if getattr(tree, "_hdr_tooltip_bound", False):
+        return
+    tree._hdr_tooltip_bound = True
+    state = {"col": None}
+
+    def on_motion(event):
+        if tree.identify_region(event.x, event.y) != "heading":
+            if state["col"] is not None:
+                state["col"] = None
+                TOOLTIP.hide()
+            return
+        col = tree.identify_column(event.x)
+        if col == state["col"]:
+            return                      # same column - let the timer run
+        state["col"] = col
+        if col == "#0":
+            key = column_keys.get("#0")
+        else:
+            try:
+                key = column_keys.get(tree["columns"][int(col[1:]) - 1])
+            except (ValueError, IndexError):
+                key = None
+        if not key:
+            TOOLTIP.hide()
+            return
+        TOOLTIP.schedule(tree, GLOSSARY.get(key, key), event.x_root, event.y_root)
+
+    def on_leave(_event=None):
+        state["col"] = None
+        TOOLTIP.hide()
+
+    tree.bind("<Motion>", on_motion, add="+")
+    tree.bind("<Leave>", on_leave, add="+")
+
+
+def per_class_metrics(confusion):
+    """Precision, recall, F1 and support per class, from the confusion matrix.
+
+    Derived rather than stored. The saved metrics file records accuracy,
+    under/over-triage and the confusion matrix but no per-class table, and
+    the matrix already contains one exactly - precision is the column
+    share, recall the row share. Deriving beats re-training to add a field,
+    and beats hardcoding numbers that would silently go stale the next time
+    the model changes.
+
+    Verified against the stored accuracy: trace/total reproduces the
+    metrics file's own figure to four decimals.
+    """
+    cm = [[float(v) for v in row] for row in confusion]
+    n = len(cm)
+    total = sum(sum(r) for r in cm)
+    rows, macro_p, macro_r, macro_f = [], 0.0, 0.0, 0.0
+    weighted_p = weighted_r = weighted_f = 0.0
+    for i in range(n):
+        tp = cm[i][i]
+        col = sum(cm[r][i] for r in range(n))
+        support = sum(cm[i])
+        prec = tp / col if col else 0.0
+        rec = tp / support if support else 0.0
+        f1 = 2 * prec * rec / (prec + rec) if (prec + rec) else 0.0
+        rows.append({"index": i, "precision": prec, "recall": rec,
+                     "f1": f1, "support": int(support)})
+        macro_p += prec; macro_r += rec; macro_f += f1
+        if total:
+            weighted_p += prec * support / total
+            weighted_r += rec * support / total
+            weighted_f += f1 * support / total
+    accuracy = (sum(cm[i][i] for i in range(n)) / total) if total else 0.0
+    return {
+        "per_class": rows,
+        "macro": {"precision": macro_p / n, "recall": macro_r / n, "f1": macro_f / n},
+        "weighted": {"precision": weighted_p, "recall": weighted_r, "f1": weighted_f},
+        "accuracy": accuracy,
+        "total": int(total),
+    }
+
+
 def keep_reason(stat, thresholds):
     """The specific criterion that stopped this token becoming a stop word."""
     if stat["is_stopword"]:
@@ -325,7 +623,11 @@ class TriageGUI(tk.Tk):
                     padding=(16, 8))
 
     def _build_header(self):
-        bar = tk.Frame(self, bg=ACCENT, height=58)
+        # 58px fitted the title alone. The mode switch added a second row of
+        # controls to the same bar, and with pack_propagate(False) the frame
+        # refuses to grow - so the radio buttons and the title were clipped
+        # top and bottom instead. Sized for the tallest child now.
+        bar = tk.Frame(self, bg=ACCENT, height=76)
         bar.pack(fill="x", side="top")
         bar.pack_propagate(False)
         tk.Label(bar, text="  Roman Urdu Emergency Triage",
@@ -611,7 +913,9 @@ class TriageGUI(tk.Tk):
         for box, render in [(getattr(self, "_results_methods_box", None),
                              self._results_section_methods),
                             (getattr(self, "_score_model_box", None),
-                             self._score_section_model)]:
+                             self._score_section_model),
+                            (getattr(self, "_results_classification_box", None),
+                             self._results_section_classification)]:
             if box is None:
                 continue
             for child in box.winfo_children():
@@ -770,10 +1074,22 @@ class TriageGUI(tk.Tk):
 
         body(rpad, "What the text pipeline did", fg=MUTED,
              size=9).pack(fill="x", pady=(12, 4))
-        self.stages = tk.Text(rpad, height=7, font=("Consolas", 9),
+        # Scrollbar, because this panel outgrew its box. It now prints six
+        # pipeline stages at two lines each, the dropped stop words, which
+        # stage the model was actually fed, and any input-quality warning -
+        # comfortably past 15 lines. Without a scrollbar the tail was simply
+        # invisible, which is how "the sentence-transformer received step 5"
+        # ended up cut off at the bottom edge.
+        stages_wrap = tk.Frame(rpad, bg=CARD)
+        stages_wrap.pack(fill="both", expand=True)
+        stages_sb = ttk.Scrollbar(stages_wrap, orient="vertical")
+        self.stages = tk.Text(stages_wrap, height=7, font=("Consolas", 9),
                               wrap="word", relief="solid", bd=1,
-                              bg="#fbfcfd", state="disabled")
-        self.stages.pack(fill="both", expand=True)
+                              bg="#fbfcfd", state="disabled",
+                              yscrollcommand=stages_sb.set)
+        stages_sb.config(command=self.stages.yview)
+        stages_sb.pack(side="right", fill="y")
+        self.stages.pack(side="left", fill="both", expand=True)
 
     def _set_complaint(self, text):
         self.complaint.delete("1.0", "end")
@@ -1452,6 +1768,9 @@ class TriageGUI(tk.Tk):
         self._results_methods_box = tk.Frame(holder, bg=BG)
         self._results_methods_box.pack(fill="x")
         self._results_section_methods(self._results_methods_box)
+        self._results_classification_box = tk.Frame(holder, bg=BG)
+        self._results_classification_box.pack(fill="x")
+        self._results_section_classification(self._results_classification_box)
         self._results_section_embedding(holder)
 
     def _results_section_methods(self, parent):
@@ -1478,8 +1797,11 @@ class TriageGUI(tk.Tk):
 
         rows = read_csv_rows(PIPELINE_RESULTS)
         cols = ("basis", "acc", "under", "over", "grade", "feat")
+        # Treeview height counts DATA rows, not the header, and Tk rounds
+        # the widget down to whole rows - so len(rows)+1 rendered the last
+        # method as a half-height sliver. +2 leaves it whole.
         tree = ttk.Treeview(pad, columns=cols, show="tree headings",
-                            height=len(rows) + 1)
+                            height=len(rows) + 2)
         tree.heading("#0", text="method")
         tree.column("#0", width=280)
         for col, label, w in [("basis", "text features", 230),
@@ -1518,6 +1840,13 @@ class TriageGUI(tk.Tk):
         tree.tag_configure("acc", foreground=ACCENT)
         tree.pack(fill="x")
 
+        attach_header_tooltips(tree, {
+            "acc": "accuracy",
+            "under": "under_triage",
+            "over": "over_triage",
+            "grade": "safety_grade",
+        })
+
         body(pad,
              "Green '>' = the method actually deployed and serving the Triage a Patient "
              "tab.  Blue = most accurate on the test set.\n"
@@ -1526,6 +1855,107 @@ class TriageGUI(tk.Tk):
              "counts, which is a completely different representation - their numbers "
              "are NOT embedding numbers.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(8, 0))
+
+    def _results_section_classification(self, parent):
+        """Precision / recall / F1 / support for the DEPLOYED model.
+
+        Every number is computed from the saved confusion matrix at render
+        time, so it cannot drift from the model actually loaded - there are
+        no placeholder or example values anywhere on this page.
+        """
+        # Read the DEPLOYED bundle's own metrics file, the same way the
+        # other sections on this page do, so the table can never describe a
+        # different model than the one serving predictions.
+        # model_dir is None until the background load finishes, so a
+        # getattr default is not enough - the attribute exists, it is just
+        # empty. Fall back to the embedding bundle so the tab paints at
+        # startup, and re-render once the real model is known.
+        model_dir = getattr(self, "model_dir", None) or EMBED_MODEL_DIR
+        path = os.path.join(resolve_project_file(model_dir),
+                            "triage_metrics.json")
+        if not os.path.exists(path):
+            return
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                metrics = json.load(f)
+        except Exception:
+            return
+        cm = metrics.get("confusion_matrix")
+        if not cm:
+            return
+
+        box = card(parent)
+        box.pack(fill="x", padx=4, pady=(0, 10))
+        pad = tk.Frame(box, bg=CARD)
+        pad.pack(fill="both", expand=True, padx=18, pady=16)
+
+        heading(pad, "Classification report  -  the deployed model").pack(fill="x")
+        body(pad,
+             "Precision, recall and F1 per triage level, derived from the saved "
+             "confusion matrix of the held-out test patients. Precision = of the "
+             "cases called this level, how many really were. Recall = of the cases "
+             "that really were this level, how many were caught. F1 = their harmonic "
+             "mean. Support = how many test patients truly had this level.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 10))
+
+        m = per_class_metrics(cm)
+        cols = ("precision", "recall", "f1", "support")
+        tree = ttk.Treeview(pad, columns=cols, show="tree headings",
+                            height=len(m["per_class"]) + 3)
+        tree.heading("#0", text="triage level")
+        tree.column("#0", width=210)
+        for c, label, w in [("precision", "precision", 120),
+                            ("recall", "recall", 120),
+                            ("f1", "F1 score", 120),
+                            ("support", "support", 110)]:
+            tree.heading(c, text=label)
+            tree.column(c, width=w, anchor="center")
+
+        for row in m["per_class"]:
+            i = row["index"]
+            name = (f"L{i + 1} {LEVEL_NAMES[i]}" if i < len(LEVEL_NAMES)
+                    else f"L{i + 1}")
+            # Flag the weak class rather than leaving the reader to spot it.
+            tag = "weak" if row["f1"] < 0.70 else ""
+            tree.insert("", "end", text=name, tags=(tag,), values=(
+                f"{row['precision']:.3f}", f"{row['recall']:.3f}",
+                f"{row['f1']:.3f}", row["support"]))
+        tree.insert("", "end", text="", values=("", "", "", ""))
+        for label, key in [("macro avg", "macro"), ("weighted avg", "weighted")]:
+            tree.insert("", "end", text=label, tags=("avg",), values=(
+                f"{m[key]['precision']:.3f}", f"{m[key]['recall']:.3f}",
+                f"{m[key]['f1']:.3f}", m["total"]))
+        tree.tag_configure("weak", foreground="#c0392b")
+        tree.tag_configure("avg", font=("Segoe UI Semibold", 9))
+        tree.pack(fill="x")
+
+        # Hover help on each column heading. The terms below are the ones a
+        # reader without an ML background has no way to guess at.
+        attach_header_tooltips(tree, {
+            "#0": "confusion_matrix",
+            "precision": "precision",
+            "recall": "recall",
+            "f1": "f1",
+            "support": "support",
+        })
+        hint = body(pad, "Hover any column heading for a plain-English "
+                         "definition of the term.", fg=ACCENT, size=8)
+        hint.pack(fill="x", pady=(4, 0))
+
+        acc = m["accuracy"] * 100
+        stated = metrics.get("accuracy")
+        note = (f"Accuracy recomputed from this matrix: {acc:.2f}%"
+                + (f"  (metrics file states {stated:.2f}% - they agree)"
+                   if stated is not None and abs(stated - acc) < 0.05
+                   else f"  (metrics file states {stated}% - MISMATCH)"
+                   if stated is not None else ""))
+        weak = [r for r in m["per_class"] if r["f1"] < 0.70]
+        if weak:
+            names = ", ".join(f"L{r['index'] + 1}" for r in weak)
+            note += (f"\nRed rows ({names}) score below 0.70 F1. Read those "
+                     f"alongside their support column - a class with few test "
+                     f"patients moves several points on one prediction.")
+        body(pad, note, fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(8, 0))
 
     def _results_section_embedding(self, parent):
         box = card(parent)
@@ -1798,12 +2228,23 @@ class TriageGUI(tk.Tk):
             stats.columnconfigure(i, weight=1, uniform="stat")
             cell = tk.Frame(stats, bg="#f7f9fb")
             cell.grid(row=0, column=i, sticky="ew", padx=(0, 10))
-            tk.Label(cell, text=label, bg="#f7f9fb", fg=MUTED,
-                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
-            tk.Label(cell, text=value, bg="#f7f9fb", fg=colour,
-                     font=("Segoe UI Semibold", 17), anchor="w").pack(fill="x")
-            tk.Label(cell, text=hint, bg="#f7f9fb", fg=MUTED,
-                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
+            lbl = tk.Label(cell, text=label, bg="#f7f9fb", fg=MUTED,
+                           font=("Segoe UI", 8), anchor="w")
+            lbl.pack(fill="x")
+            val = tk.Label(cell, text=value, bg="#f7f9fb", fg=colour,
+                           font=("Segoe UI Semibold", 17), anchor="w")
+            val.pack(fill="x")
+            sub = tk.Label(cell, text=hint, bg="#f7f9fb", fg=MUTED,
+                           font=("Segoe UI", 8), anchor="w")
+            sub.pack(fill="x")
+            # The big headline tiles need the definition too - this is where
+            # a reader meets "under-triage" for the first time.
+            key = {"Accuracy": "accuracy", "Under-triage": "under_triage",
+                   "Over-triage": "over_triage",
+                   "Safety grade": "safety_grade"}.get(label)
+            if key:
+                for w in (cell, lbl, val, sub):
+                    attach_tooltip(w, key)
 
         bits = [f"source: {path}"]
         if n_test:

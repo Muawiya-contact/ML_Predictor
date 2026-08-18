@@ -1,0 +1,54 @@
+{
+  "Triage_Level": {
+    "LogisticRegression": {
+      "accuracy_mean": 0.7351351351351352,
+      "accuracy_std": 0.08614798621896878,
+      "macro_f1_mean": 0.6950739237185852,
+      "macro_f1_std": 0.1039832035059826,
+      "under_triage_mean": 11.891891891891893,
+      "under_triage_std": 3.666124315202848,
+      "over_triage_mean": 14.594594594594593,
+      "safety_grade": "B"
+    },
+    "RandomForest": {
+      "accuracy_mean": 0.8054054054054054,
+      "accuracy_std": 0.07130219436904281,
+      "macro_f1_mean": 0.7832100398118704,
+      "macro_f1_std": 0.09304803325252158,
+      "under_triage_mean": 6.486486486486487,
+      "under_triage_std": 2.756226764104208,
+      "over_triage_mean": 12.972972972972974,
+      "safety_grade": "A"
+    },
+    "HistGradientBoosting": {
+      "accuracy_mean": 0.7675675675675676,
+      "accuracy_std": 0.06531376201943011,
+      "macro_f1_mean": 0.7399777681666575,
+      "macro_f1_std": 0.07782798687624641,
+      "under_triage_mean": 9.18918918918919,
+      "under_triage_std": 4.045035012728586,
+      "over_triage_mean": 14.054054054054054,
+      "safety_grade": "A"
+    }
+  },
+  "Category": {
+    "LogisticRegression": {
+      "accuracy_mean": 0.918918918918919,
+      "accuracy_std": 0.017093392757666918,
+      "macro_f1_mean": 0.8726092089728453,
+      "macro_f1_std": 0.015766023327528182
+    },
+    "RandomForest": {
+      "accuracy_mean": 0.9459459459459459,
+      "accuracy_std": 0.017093392757666918,
+      "macro_f1_mean": 0.9091294463112645,
+      "macro_f1_std": 0.08194230863265752
+    },
+    "HistGradientBoosting": {
+      "accuracy_mean": 0.8810810810810811,
+      "accuracy_std": 0.043913721106140335,
+      "macro_f1_mean": 0.8414035055853237,
+      "macro_f1_std": 0.09201742978556866
+    }
+  }
+}
