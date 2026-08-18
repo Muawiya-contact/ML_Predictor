@@ -1,0 +1,41 @@
+{
+  "trained_on": "2026-08-18",
+  "dataset": "dataset.csv",
+  "rows": 185,
+  "estimator": "RandomForest",
+  "encoder": {
+    "model": "intfloat/multilingual-e5-small",
+    "dim": 384,
+    "prefix": "passage: ",
+    "normalize": true
+  },
+  "targets": {
+    "Triage_Level": {
+      "classes": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "file": "triage_level_model.pkl",
+      "train_accuracy": 0.9837837837837838
+    },
+    "Category": {
+      "classes": [
+        "Burn_Emergency",
+        "Cardiac",
+        "Gastrointestinal",
+        "Gyne_Obstetric",
+        "Heat_Related",
+        "Infectious_Disease",
+        "Metabolic_Cardiovascular",
+        "Neurological",
+        "Non_Specific",
+        "Respiratory",
+        "Trauma"
+      ],
+      "file": "category_model.pkl",
+      "train_accuracy": 1.0
+    }
+  }
+}

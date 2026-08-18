@@ -54,3 +54,9 @@ learned_stopwords_v*.json
 .env.*
 !.env.example
 *.key
+
+# Source archive of the supplied baseline. The extracted professor_baseline/
+# is what the code reads; keeping both would duplicate 3.2 MB.
+How Effective is Embeddings Generator-*.zip
+# Local rollback copy from the fuzzy-matching fix, superseded by the merged bundle.
+triage_model_embedding_PRE_FUZZYFIX/
