@@ -104,6 +104,23 @@ LEVEL_BLURB = [
 MODEL_DIR = resolve_project_file("triage_model")
 EMBED_MODEL_DIR = resolve_project_file("triage_model_embedding")
 STOPWORDS_FILE = resolve_project_file("learned_stopwords.json")
+
+# ======================================================================
+# MODE SWITCH  (experimental branch only)
+#
+# MODE_URDU is the submitted system, byte-for-byte: the offline Roman Urdu
+# pipeline against triage_model_embedding/. It makes zero network calls.
+#
+# MODE_ENGLISH sends the typed complaint to gpt-4o-mini, encodes the
+# English result directly, and predicts with the English-trained bundle.
+# It REQUIRES internet and OPENROUTER_API_KEY, and on any failure it
+# reports the error rather than quietly answering from the offline model -
+# a silent fallback would mean the operator could not tell which pipeline
+# produced the triage level in front of them.
+# ======================================================================
+MODE_URDU = "urdu"
+MODE_ENGLISH = "english"
+ENGLISH_MODEL_DIR = "triage_model_embedding_english"
 PIPELINE_RESULTS = resolve_project_file("embedding_pipeline_results.csv")
 EVAL_RESULTS = resolve_project_file("embedding_evaluation_results.csv")
 EVAL_NEIGHBOURS = resolve_project_file("embedding_evaluation_neighbours.csv")
@@ -314,10 +331,26 @@ class TriageGUI(tk.Tk):
         tk.Label(bar, text="  Roman Urdu Emergency Triage",
                  bg=ACCENT, fg="white",
                  font=("Segoe UI Semibold", 15)).pack(side="left", padx=(14, 0))
-        tk.Label(bar,
-                 text="offline  |  CPU only  |  research prototype, not a medical device  ",
-                 bg=ACCENT, fg="#cfe0f2",
-                 font=("Segoe UI", 9)).pack(side="right")
+        # ONE mode switch, in the header, so every tab reads the same value.
+        # Per-tab settings were the obvious alternative and the wrong one:
+        # two tabs disagreeing about which pipeline is live is exactly how a
+        # result gets attributed to the wrong model.
+        self.mode = tk.StringVar(value=MODE_URDU)
+        self.mode.trace_add("write", lambda *_: self._on_mode_change())
+        box = tk.Frame(bar, bg=ACCENT)
+        box.pack(side="right", padx=(0, 12))
+        tk.Label(box, text="Mode:", bg=ACCENT, fg="#cfe0f2",
+                 font=("Segoe UI", 9)).pack(side="left", padx=(0, 6))
+        for value, label in [(MODE_URDU, "Roman Urdu (Offline)"),
+                             (MODE_ENGLISH, "English (GPT)")]:
+            tk.Radiobutton(box, text=label, value=value, variable=self.mode,
+                           bg=ACCENT, fg="white", selectcolor=ACCENT,
+                           activebackground=ACCENT, activeforeground="white",
+                           font=("Segoe UI", 9), highlightthickness=0,
+                           bd=0).pack(side="left", padx=3)
+        self.header_note = tk.Label(bar, text="offline  |  CPU only  |  research prototype",
+                                    bg=ACCENT, fg="#cfe0f2", font=("Segoe UI", 9))
+        self.header_note.pack(side="right", padx=(0, 10))
 
     def _build_statusbar(self):
         self.status = tk.StringVar(value="Starting...")
@@ -430,6 +463,86 @@ class TriageGUI(tk.Tk):
         self.predict_btn.config(state="normal")
         self.batch_btn.config(state="normal")
 
+
+    # ---------------- mode plumbing ----------------
+
+    def in_english_mode(self):
+        return getattr(self, "mode", None) is not None and \
+            self.mode.get() == MODE_ENGLISH
+
+    def active_artifacts(self):
+        """The bundle the current mode predicts with.
+
+        The English bundle is loaded lazily and cached: Mode 1 must never
+        pay for it, and must never touch it.
+        """
+        if not self.in_english_mode():
+            return self.artifacts
+        if getattr(self, "artifacts_en", None) is None:
+            from triage_pipeline import load_artifacts, describe_model
+            d = resolve_project_file(ENGLISH_MODEL_DIR)
+            self.artifacts_en = load_artifacts(d)
+            self.model_info_en = describe_model(d)
+            self.model_dir_en = ENGLISH_MODEL_DIR
+        return self.artifacts_en
+
+    def active_manifest(self):
+        art = self.active_artifacts()
+        return (art or {}).get("manifest", {}) if art else {}
+
+    def translate_for_mode(self, text):
+        """Mode 2 only. Returns (english_text, error_message)."""
+        import os as _os
+        if not _os.environ.get("OPENROUTER_API_KEY"):
+            return None, ("OPENROUTER_API_KEY is not set. English (GPT) mode "
+                          "needs it to call the translation API.\n\n"
+                          "Set it and restart, or switch back to "
+                          "Roman Urdu (Offline).")
+        try:
+            from translate_roman_urdu import translate_roman_urdu
+        except SystemExit as e:
+            return None, f"Translation module refused to load: {e}"
+        except Exception as e:
+            return None, f"Could not import the translator: {e}"
+        try:
+            out = translate_roman_urdu(text)
+        except Exception as e:
+            return None, f"Translation request raised: {e}"
+        if not out:
+            return None, ("The translation API returned nothing. The console "
+                          "shows the status code - a 402 means the OpenRouter "
+                          "account is out of credits.\n\nNo prediction was "
+                          "made. This mode does NOT fall back to the offline "
+                          "model, so that the level you see is never from a "
+                          "pipeline you did not choose.")
+        return out, None
+
+    def _on_mode_change(self):
+        """Repaint everything that states which pipeline is live."""
+        english = self.in_english_mode()
+        if hasattr(self, "header_note"):
+            self.header_note.configure(
+                text=("LIVE API CALL REQUIRED - not offline"
+                      if english else "offline  |  CPU only  |  research prototype"),
+                fg="#ffd9d9" if english else "#cfe0f2")
+        try:
+            if english:
+                self.active_artifacts()       # surface load errors immediately
+        except Exception as e:
+            messagebox.showerror(
+                "English mode unavailable",
+                f"Could not load {ENGLISH_MODEL_DIR}/:\n\n{e}\n\n"
+                f"Staying in the offline Roman Urdu model.")
+            self.mode.set(MODE_URDU)
+            return
+        self._refresh_deployed_banners()
+        if self.stopword_report is not None:
+            self._populate_stopwords()
+        self.status.set(
+            ("English (GPT) mode - every prediction calls the translation API."
+             if english else
+             "Roman Urdu (Offline) mode - no network calls."))
+
     def _deployed_line(self):
         """One-line 'this is the model making the predictions' summary."""
         if not self.model_info:
@@ -444,7 +557,22 @@ class TriageGUI(tk.Tk):
         # This is deliberately on the banner rather than buried in a tab:
         # a triage screen that does not say "synthetic, cardiac only" invites
         # exactly the misreading this project cannot afford.
-        man = getattr(self, "manifest", None) or {}
+        english = self.in_english_mode()
+        if english:
+            i = getattr(self, "model_info_en", None) or i
+            line = (f"Currently deployed: {i['method']}   ·   "
+                    f"text features from {i['basis']}   ·   {ENGLISH_MODEL_DIR}/")
+            if i["uses_embeddings"]:
+                line += (f"\nembedding model: {i['embedding_model']}"
+                         f"  ({i['embedding_dim']} dims)")
+            line = ("*** MODE: ENGLISH (GPT) - LIVE API CALL REQUIRED, "
+                    "NOT OFFLINE IN THIS MODE ***\n"
+                    "every prediction sends the complaint to gpt-4o-mini "
+                    "before it is scored\n") + line
+        else:
+            line = "*** MODE: ROMAN URDU (OFFLINE) - no network calls ***\n" + line
+
+        man = self.active_manifest() or getattr(self, "manifest", None) or {}
         ds = man.get("dataset", {})
         prov = ds.get("provenance", {})
 
@@ -700,10 +828,22 @@ class TriageGUI(tk.Tk):
                 return
             numbers[name] = value
 
+        original_text = text
+        english_text = None
+        if self.in_english_mode():
+            self.status.set("English mode: calling the translation API...")
+            self.update_idletasks()
+            english_text, err = self.translate_for_mode(text)
+            if err:
+                messagebox.showerror("English (GPT) mode failed", err)
+                self.status.set("English mode: translation failed - no prediction made.")
+                return
+            text = english_text
+
         input_warnings = []
         try:
             level, confidence, proba = predict_one(
-                self.artifacts, text,
+                self.active_artifacts(), text,
                 numbers["Age"], numbers["Heart_Rate"], numbers["Systolic_BP"],
                 numbers["Diastolic_BP"], numbers["Temperature"], numbers["SpO2"],
                 self.combos["Gender"].get(), self.combos["Mode_of_Arrival"].get(),
@@ -723,6 +863,23 @@ class TriageGUI(tk.Tk):
             text=f"{LEVEL_BLURB[level]}    ·    confidence {confidence * 100:.1f}%")
 
         self._draw_proba(proba, level)
+
+        if self.in_english_mode():
+            self.stages.config(state="normal")
+            self.stages.delete("1.0", "end")
+            self.stages.insert("end", "0. raw input (as typed)\n", "h")
+            self.stages.insert("end", f"   {original_text}\n")
+            self.stages.insert("end", "1. gpt-4o-mini translation  (LIVE API CALL)\n", "h")
+            self.stages.insert("end", f"   {english_text}\n")
+            self.stages.insert("end", "2. sentence-transformer\n", "h")
+            self.stages.insert("end", "   English encoded directly - the Roman Urdu\n"
+                                      "   dictionary and stop-word stages do not apply\n")
+            self.stages.tag_config("h", foreground=ACCENT,
+                                   font=("Consolas", 9, "bold"))
+            self.stages.config(state="disabled")
+            self.status.set(f"English mode: Level {level + 1} "
+                            f"({LEVEL_NAMES[level]}) at {confidence * 100:.1f}%.")
+            return
 
         stages = preprocess_stages(text)
         removed = stages[-1].get("dropped") or []
@@ -848,6 +1005,37 @@ class TriageGUI(tk.Tk):
                  "Type a complaint above and press Analyse. "
                  "There is nothing to run the pipeline on yet.",
                  fg=MUTED, size=9).pack(fill="x")
+            return
+
+        if self.in_english_mode():
+            en, err = self.translate_for_mode(raw)
+            if err:
+                body(self.explore_out,
+                     "English (GPT) mode - translation failed:\n\n" + err,
+                     fg="#c0392b", size=9, wraplength=980).pack(fill="x")
+                return
+            for title, txt, note in [
+                ("0  Raw input (as typed)", raw,
+                 "exactly what the triage nurse typed"),
+                ("1  gpt-4o-mini translation  (LIVE API CALL)", en,
+                 "sent to OpenRouter; this mode is NOT offline"),
+                ("2  Sentence-transformer", en,
+                 "the English text is encoded directly. The Roman Urdu "
+                 "dictionary, fuzzy matching and learned stop-word stages "
+                 "are skipped - they exist to normalise Roman Urdu and do "
+                 "not apply to English."),
+            ]:
+                blk = tk.Frame(self.explore_out, bg=CARD)
+                blk.pack(fill="x", pady=(0, 10))
+                tk.Label(blk, text=title, bg=CARD, fg=ACCENT,
+                         font=("Segoe UI Semibold", 10), anchor="w").pack(fill="x")
+                tk.Label(blk, text=txt or "(empty)", bg="#fbfcfd", fg=INK,
+                         font=("Consolas", 11), anchor="w", justify="left",
+                         wraplength=1000, padx=10, pady=7, relief="solid",
+                         bd=1).pack(fill="x", pady=(2, 1))
+                tk.Label(blk, text=note, bg=CARD, fg=MUTED, font=("Segoe UI", 8),
+                         anchor="w", justify="left",
+                         wraplength=1000).pack(fill="x")
             return
 
         stages = preprocess_stages(raw)
@@ -1026,6 +1214,14 @@ class TriageGUI(tk.Tk):
         t = r["thresholds"]
         c = r["corpus"]
         review = r.get("review_recommended") or []
+        if self.in_english_mode():
+            self.stop_summary.configure(text=(
+                "MODE: ENGLISH (GPT). The learned Roman Urdu stop-word list "
+                "below is NOT applied in this mode - the English text goes "
+                "to the sentence-transformer directly. The table is shown for "
+                "reference; switch to Roman Urdu (Offline) to see the list "
+                "that is actually in use."))
+            return
         self.stop_summary.configure(text=(
             f"A token is removed only when ALL THREE hold:  document frequency "
             f">= {t['effective_df_cutoff']:.4f}"
@@ -1166,7 +1362,30 @@ class TriageGUI(tk.Tk):
 
         path = self._batch_target
         df = read_table(path)
-        results, _ = predict_dataframe(self.artifacts, df)
+        if self.in_english_mode():
+            # Translate the whole column first, then score the English.
+            # Done up front rather than row-by-row inside predict_dataframe
+            # so a mid-file API failure stops the run with a clear count
+            # instead of leaving half the sheet scored by a pipeline the
+            # operator did not pick.
+            texts, failures = [], 0
+            for t in df["Complaint_Text"].fillna("").astype(str):
+                en, err = self.translate_for_mode(t)
+                if err:
+                    failures += 1
+                    texts.append(t)
+                else:
+                    texts.append(en)
+            if failures:
+                raise RuntimeError(
+                    f"English (GPT) mode: {failures} of {len(df)} rows failed to "
+                    f"translate (a 402 means the OpenRouter account is out of "
+                    f"credits). No results are shown, because mixing translated "
+                    f"and untranslated rows would put two different pipelines in "
+                    f"one table.")
+            df = df.copy()
+            df["Complaint_Text"] = texts
+        results, _ = predict_dataframe(self.active_artifacts(), df)
 
         out_base = os.path.splitext(path)[0] + "_predictions"
         results.to_csv(out_base + ".csv", index=False)

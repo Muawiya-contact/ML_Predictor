@@ -767,6 +767,9 @@ def main():
         # Read by encode_categoricals() at inference. Bundles saved before
         # this key existed are treated as "ordinal" and keep working.
         "categorical_encoding": "onehot",
+        # Inference must reproduce this exactly - see build_text_features.
+        "skip_normalization": bool(args.skip_normalization),
+        "text_column": args.text_column,
         "dataset": _dataset_stamp(resolve_project_file(args.data), df, y),
         "scope": {
             "clinical_scope": "CARDIAC COMPLAINTS ONLY",
