@@ -15,17 +15,40 @@ URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
 # ============================================================
-# TRANSLATION FUNCTION
+# PROMPT
+#
+# Rules 1-6 are the original six, unchanged. Rules 7-10 were added after
+# reading all 50 translations from the first sample run, and each one
+# exists to close a defect that run actually produced - they are not
+# speculative tightening:
+#
+#   7  "Samajh nahi aa raha" is the writer hedging ("can't quite tell"),
+#      but it came back as "I am feeling confused" in 4 of 50 rows (8%).
+#      Confusion is a red-flag neurological finding. The model was
+#      inventing an acuity-relevant symptom that is not in the source,
+#      which is rule 2 being broken in the direction that matters most.
+#      Row 15 dropped the phrase correctly, so the behaviour was
+#      inconsistent rather than uniform.
+#
+#   8  "kasav" (constriction) and "khichao" (tightness) were flattened to
+#      generic "chest pain" in rows 36 and 50. Tightness versus pain is
+#      exactly the distinction the canonical dictionary keeps separate
+#      (jákṛan / dabāo / dárd), so losing it in translation would hand the
+#      English arm of this comparison a handicap the Roman Urdu arm does
+#      not have.
+#
+#   9  "aaram se kam ho jata hai" (resolves WITH REST) became "gradually
+#      improving" in row 11 - a syncope complaint, where how it resolves
+#      changes how urgent it reads.
+#
+#  10  "tez chalne par" (on walking fast) became "worsens with walking" in
+#      row 44. The source states a trigger, not a worsening.
+#
+# ORIGINAL_PROMPT_TEMPLATE is kept verbatim so the two can be compared,
+# and so the diff of this experiment is auditable.
 # ============================================================
 
-def translate_roman_urdu(text):
-
-    headers = {
-        "Authorization": "Bearer " + API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    prompt = """
+ORIGINAL_PROMPT_TEMPLATE = """
 Translate the following Roman Urdu medical chief complaint into
 natural English.
 
@@ -38,7 +61,54 @@ Rules:
 6. Do not provide explanations.
 
 Roman Urdu complaint:
-""" + text
+"""
+
+PROMPT_TEMPLATE = """
+Translate the following Roman Urdu medical chief complaint into
+natural English.
+
+Rules:
+1. Preserve the exact clinical meaning.
+2. Do not add information that is not present.
+3. Do not make a diagnosis.
+4. Preserve symptoms, duration and severity.
+5. Return ONLY the English translation.
+6. Do not provide explanations.
+7. The specific opening phrase "samajh nahi aa raha" expresses the
+   writer's uncertainty. Translate that phrase alone as "unclear" or omit
+   it, and never as patient confusion, disorientation or altered mental
+   state - that is a symptom the source does not report. This applies ONLY
+   to that phrase. Every other clause containing "nahi" is an ordinary
+   negation and must be translated literally: "neend nahi aa rahi" is
+   "unable to sleep", "bhook nahi lag rahi" is "no appetite", "bukhar
+   nahi" is "no fever". Do not carry uncertainty wording into them.
+8. Preserve the exact quality of the sensation. "kasav", "jakran" and
+   "khichao" are tightness or constriction, "dabao" is pressure, "bhaari
+   pan" is heaviness, "chubhan" is a pricking or stabbing sensation and
+   "jalan" is burning. Do not replace any of these with generic "pain".
+9. "aaram se kam ho jata hai" and "rest se theek ho jata hai" mean the
+   symptom improves WITH REST. Do not translate them as improving
+   gradually, on its own, or over time.
+10. Preserve trigger relationships exactly as stated. "X par" or "X karte
+   waqt" means the symptom occurs ON or DURING X. Do not upgrade this to
+   "worsens with X" unless the source says it worsens.
+
+Roman Urdu complaint:
+"""
+
+
+# ============================================================
+# TRANSLATION FUNCTION
+# ============================================================
+
+def translate_roman_urdu(text):
+
+    headers = {
+        "Authorization": "Bearer " + API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    prompt = PROMPT_TEMPLATE + text
 
     data = {
         "model": MODEL,
