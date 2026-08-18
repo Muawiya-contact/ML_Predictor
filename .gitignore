@@ -47,3 +47,10 @@ Thumbs.db
 # deliverable; these dated copies are local-only and would bloat the repo.
 triage_model_embedding_v*/
 learned_stopwords_v*.json
+
+# Secrets. The pre-existing "env/" rule matches a DIRECTORY only - a real
+# .env file was not covered and would have been committed.
+.env
+.env.*
+!.env.example
+*.key
