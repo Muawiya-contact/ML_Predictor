@@ -21,6 +21,7 @@
 #       vectorizers and attention weights stay consistent.
 # ============================================================
 
+import json
 import os
 import re
 import sys
@@ -1061,6 +1062,18 @@ def resolve_model_dir(model_dir=None, allow_fallback=True):
     if model_dir:
         return resolve_project_file(model_dir), ''
 
+    # TRIAGE_MODEL_DIR lets a run point at a different bundle without
+    # editing code. Added for the English-translation experiment, where the
+    # branch's GUI has to load triage_model_embedding_english/ while the
+    # Roman Urdu bundle stays exactly where every other caller expects it.
+    # An override is safer than changing the default: nothing that does not
+    # set the variable can pick up the experimental model by accident.
+    override = os.environ.get('TRIAGE_MODEL_DIR')
+    if override:
+        return resolve_project_file(override), (
+            f"TRIAGE_MODEL_DIR override in effect - loading '{override}/' "
+            f"instead of the default bundle")
+
     # resolve_project_file() is what makes this work from any working
     # directory: without it the embedding bundle "was not found" whenever
     # the caller happened to be standing somewhere else, and every such
@@ -1131,6 +1144,14 @@ def load_artifacts(model_dir='triage_model'):
         if os.path.exists(scaler_path):
             artifacts[f'{block}_block_scaler'] = joblib.load(scaler_path)
 
+    # Bundle-local stop words, when the training run saved them here.
+    # Falls back to None so older bundles keep using the shared file.
+    sw_path = p('learned_stopwords.json')
+    artifacts['stopwords'] = None
+    if os.path.exists(sw_path):
+        with open(sw_path, 'r', encoding='utf-8') as f:
+            artifacts['stopwords'] = set(json.load(f).get('stopwords', []))
+
     artifacts['encoder'] = None          # loaded lazily on first use
     return artifacts
 
@@ -1190,9 +1211,22 @@ def build_text_features(art, raw_texts, batch_size=32):
     rep = art['text_representation']
     parts = []
 
+    # A bundle trained with --skip-normalization must be SERVED the same way.
+    # Without this the English model was fed text that had been pushed back
+    # through the Roman Urdu dictionary ("chest pain" -> "sēna dárd"), which
+    # is nothing like what it was fitted on - a train/serve skew that made it
+    # look far worse than it is.
+    skip_norm = bool(art['manifest'].get('skip_normalization'))
+    # Each bundle carries its own stop-word list where one was saved beside
+    # it. The project-root learned_stopwords.json is shared, so whichever
+    # model trained last silently owned it - untenable once two bundles are
+    # switchable at runtime.
+    own_stops = art.get('stopwords')
+
     for block in art['blocks']:
         if block == 'bow':
-            cleaned = [normalize_roman_urdu(t) for t in raw_texts]
+            cleaned = (list(raw_texts) if skip_norm
+                       else [normalize_roman_urdu(t) for t in raw_texts])
             mat = np.hstack([
                 art['word_bow'].transform(cleaned).toarray(),
                 art['char_bow'].transform(cleaned).toarray(),
@@ -1201,8 +1235,13 @@ def build_text_features(art, raw_texts, batch_size=32):
             # 'embeddings_raw' deliberately skips preprocessing; every other
             # embedding representation gets clean -> fuzzy -> stop-word removal,
             # exactly as train_embedding_pipeline.py did.
-            texts = (list(raw_texts) if rep == 'embeddings_raw'
-                     else preprocess_corpus_for_embedding(raw_texts))
+            if rep == 'embeddings_raw':
+                texts = list(raw_texts)
+            elif skip_norm:
+                from stopwords import remove_stopwords
+                texts = [remove_stopwords(t, own_stops or set()) for t in raw_texts]
+            else:
+                texts = preprocess_corpus_for_embedding(raw_texts, own_stops)
             mat = get_text_encoder(art).encode(
                 texts, batch_size=batch_size, show_progress_bar=False,
                 convert_to_numpy=True, normalize_embeddings=True)

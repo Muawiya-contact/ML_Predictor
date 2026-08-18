@@ -1,0 +1,99 @@
+{
+  "threshold": 0.5,
+  "clusters": [
+    "chest_pain",
+    "breathlessness",
+    "palpitations",
+    "syncope",
+    "chest_burning",
+    "chest_tightness"
+  ],
+  "roman_urdu": {
+    "chest_pain": {
+      "within": 0.8106605132420858,
+      "across": 0.7729991362690926,
+      "gap": 0.03766137697299321,
+      "pass_rate": 100.0,
+      "n_pairs": 45
+    },
+    "breathlessness": {
+      "within": 0.7899637076589796,
+      "across": 0.7624412806630134,
+      "gap": 0.027522426995966187,
+      "pass_rate": 100.0,
+      "n_pairs": 45
+    },
+    "palpitations": {
+      "within": 0.7267400609122382,
+      "across": 0.7347269912958145,
+      "gap": -0.00798693038357634,
+      "pass_rate": 86.66666666666667,
+      "n_pairs": 45
+    },
+    "syncope": {
+      "within": 0.7894041220347087,
+      "across": 0.7232498601675034,
+      "gap": 0.0661542618672053,
+      "pass_rate": 100.0,
+      "n_pairs": 45
+    },
+    "chest_burning": {
+      "within": 0.7892737838957045,
+      "across": 0.7579365836381913,
+      "gap": 0.03133720025751319,
+      "pass_rate": 100.0,
+      "n_pairs": 45
+    },
+    "chest_tightness": {
+      "within": 0.7843328926298353,
+      "across": 0.7628188169002533,
+      "gap": 0.021514075729581972,
+      "pass_rate": 97.77777777777777,
+      "n_pairs": 45
+    }
+  },
+  "english": {
+    "chest_pain": {
+      "within": 0.6651748292975955,
+      "across": 0.4760166986882687,
+      "gap": 0.18915813060932685,
+      "pass_rate": 95.55555555555556,
+      "n_pairs": 45
+    },
+    "breathlessness": {
+      "within": 0.5725704643461439,
+      "across": 0.43334310069680215,
+      "gap": 0.13922736364934174,
+      "pass_rate": 86.66666666666667,
+      "n_pairs": 45
+    },
+    "palpitations": {
+      "within": 0.6118546406428019,
+      "across": 0.38469462421536443,
+      "gap": 0.2271600164274375,
+      "pass_rate": 93.33333333333333,
+      "n_pairs": 45
+    },
+    "syncope": {
+      "within": 0.5758530080318451,
+      "across": 0.40123017886281015,
+      "gap": 0.174622829169035,
+      "pass_rate": 60.0,
+      "n_pairs": 45
+    },
+    "chest_burning": {
+      "within": 0.6342075030008952,
+      "across": 0.4420732344686985,
+      "gap": 0.19213426853219673,
+      "pass_rate": 86.66666666666667,
+      "n_pairs": 45
+    },
+    "chest_tightness": {
+      "within": 0.6346566723452673,
+      "across": 0.4669665411412716,
+      "gap": 0.16769013120399573,
+      "pass_rate": 91.11111111111111,
+      "n_pairs": 45
+    }
+  }
+}

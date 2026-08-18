@@ -1,0 +1,51 @@
+Age,Gender,Mode_of_Arrival,Complaint_Text,Heart_Rate,Systolic_BP,Diastolic_BP,ECG_Status,Temperature,SpO2,AVPU,Triage_Level,Category,English_Translation
+57,Female,Ambulance,Chest mein pressure pandrah minute se,118,155,89,Arrhythmia,36.5,88,P,1,Cardiac,Pressure in the chest for fifteen minutes.
+41,Male,Ambulance,Seena bhaari lag raha teen din se,133,104,95,Atrial fibrillation,36.9,88,A,2,Cardiac,Chest feels heavy for three days.
+31,Female,Walk-in,Patient ko seena mein halki jalan hai chaar ghante se aur zyada takleef nahi hai.,119,129,67,Normal,36.8,89,A,3,Cardiac,The patient has mild burning in the chest for four hours and no significant discomfort.
+68,Male,Ambulance,"Samajh nahi aa raha, dil ki dhadkan zara tez hai aaram karte hue bhi aur jaw mein bhi dard hai.",139,185,78,Arrhythmia,36.3,82,A,1,Cardiac,"Unclear, heart rate is a bit fast even at rest and there is also pain in the jaw."
+62,Male,Wheelchair,"Samajh nahi aa raha, saans thori si phoolti hai hai tension lene par aur aaram se kam ho jata hai.",143,160,77,Sinus tachycardia,37.1,89,A,3,Cardiac,"Unclear, slight shortness of breath occurs with tension and improves with rest."
+52,Female,Walk-in,Seena mein khichao seedhiyan chadhne par khana hazam na hone jaisa.,106,124,96,Abnormal,37.1,97,V,3,Cardiac,"Tightness in the chest when climbing stairs, like difficulty in digesting food."
+47,Female,Walk-in,Chest mein halki tightness shaam ko muscle kheenchne jaisa lagta hai.,55,131,81,Bradycardia,36.5,95,A,3,Cardiac,There is a mild tightness in the chest in the evening that feels like muscle tightness.
+75,Male,Ambulance,"Samajh nahi aa raha, saans lena mushkil hai aaram karte hue bhi aur girne wala mehsoos hota hai.",140,147,79,Abnormal,36.8,89,A,1,Cardiac,"Unclear, it is difficult to breathe even while resting and feels like fainting."
+59,Female,Ambulance,Chest mein pressure garmi mein bahar nikalne par rest se theek ho jata hai.,75,102,74,Normal,36.5,94,A,3,Cardiac,Pressure in the chest during heat when going outside improves with rest.
+65,Female,Walk-in,Chest mein pressure lambi walk ke baad,47,136,83,Bradycardia,36.4,97,A,3,Cardiac,Pressure in the chest after a long walk.
+72,Male,Ambulance,Patient ko behoshi hai aadhay ghante se aur aaram se kam ho jata hai.,110,164,77,ST elevation,37.3,94,A,1,Cardiac,The patient has been unconscious for half an hour and improves with rest.
+73,Female,Ambulance,"Chest mein bohat zyada dabao since do ghante, kandhay tak dard ja raha hai",144,156,86,Arrhythmia,36.1,88,P,1,Cardiac,"Severe pressure in the chest for the past two hours, radiating to the shoulders."
+63,Male,Ambulance,Seena mein dabao bina kisi wajah ke pehle bhi hota raha hai aur theek ho jata hai.,118,162,86,Arrhythmia,37.1,92,A,1,Cardiac,There is pressure in the chest without any reason that has happened before and improves with rest.
+54,Male,Walk-in,Do ghante se seena mein bhaari pan aur dard hai.,149,116,62,T wave inversion,36.5,96,V,2,Cardiac,"For two hours, there is heaviness and pain in the chest."
+42,Female,Ambulance,"Samajh nahi aa raha, chest mein severe pain hai exercise ke baad aur aankhon ke aage andhera aa raha hai.",139,158,63,Arrhythmia,36.6,93,A,1,Cardiac,"Unclear, there is severe pain in the chest after exercise and there is darkness in front of the eyes."
+59,Female,Wheelchair,"Samajh nahi aa raha, seena mein beech beech mein dard hai exercise ke baad aur ghabrahat ho rahi hai.",106,131,77,Sinus tachycardia,37.3,94,A,3,Cardiac,"Unclear, there is intermittent pain in the chest after exercise and there is anxiety."
+87,Male,Walk-in,"Smoking ki purani aadat hai, ab chest mein halki tightness kal se.",112,143,73,Sinus tachycardia,36.7,97,A,3,Cardiac,"I have a long-standing habit of smoking, and now there is mild tightness in my chest since yesterday."
+55,Male,Ambulance,Heart beat irregular seedhiyan chadhte waqt lekin ECG normal hai.,129,202,91,LBBB,37.0,90,A,2,Cardiac,"Irregular heartbeat while climbing stairs, but ECG is normal."
+23,Male,Ambulance,"Seena mein beech beech mein dard since chaar ghante, aaram karne se kam ho jata hai",97,130,64,Abnormal,36.8,88,A,2,Cardiac,"Chest pain intermittently for four hours, improves with rest."
+31,Male,Wheelchair,Dil ki dhadkan bohat tez anxiety ke doran,118,153,73,T wave inversion,37.4,96,A,2,Cardiac,Heart rate very fast during anxiety.
+69,Male,Ambulance,Patient ko chest mein pressure hai abhi thori der pehle se aur kaam karne par barh jata hai.,147,167,90,ST elevation,37.4,90,A,1,Cardiac,"The patient has pressure in the chest for a little while now, and it increases during work."
+79,Female,Ambulance,Kaam karte waqt seena mein chubhan hota hai.,123,119,84,Sinus tachycardia,36.7,87,A,2,Cardiac,"During work, there is a pricking sensation in the chest."
+68,Female,Ambulance,"Chest pain aaram karte hue bhi, neend nahi aa rahi",126,115,92,ST elevation,36.8,84,P,1,Cardiac,"Chest pain even while resting, unable to sleep."
+75,Male,Wheelchair,Patient ko seena mein rukk rukk kar dard hai chaar ghante se aur kamzori mehsoos ho rahi hai.,100,155,68,Arrhythmia,36.5,90,A,2,Cardiac,"The patient has a tight, intermittent pain in the chest for four hours and is feeling weak."
+72,Male,Wheelchair,Seena mein khichao teen ghante se,121,172,80,ST elevation,37.0,90,A,1,Cardiac,Tightness in the chest for three hours.
+49,Female,Ambulance,"Chest mein halki tightness since kuch minute pehle, bhook nahi lag rahi",115,185,88,Arrhythmia,36.6,84,A,1,Cardiac,"Light tightness in the chest since a few minutes ago, no appetite."
+63,Female,Wheelchair,Chest mein halka dard anxiety ke doran,103,123,84,Normal,36.7,97,A,4,Cardiac,Mild chest pain during anxiety.
+58,Female,Ambulance,"Saans foolna aaram karte hue bhi, halka pasina bhi aa raha hai",141,182,89,ST elevation,36.9,86,V,1,Cardiac,"Breathlessness even while resting, with light sweating."
+59,Male,Ambulance,Patient ko seena mein jakran hai kal se aur chakkar bhi aa rahe hain.,139,129,95,ST depression,37.6,98,P,2,Cardiac,The patient has tightness in the chest since yesterday and is also experiencing dizziness.
+39,Male,Walk-in,Dil ghabrana stress ke waqt doctor ne kaha koi masla nahi.,91,131,69,Normal,36.7,97,A,4,Cardiac,Heart palpitations during stress; the doctor said there is no problem.
+46,Male,Wheelchair,Chest discomfort on and off zyada thak jane par pehle bhi hota raha hai aur theek ho jata hai.,127,142,77,Abnormal,36.9,90,A,3,Cardiac,Chest discomfort on and off occurs more with exertion and has happened before and improves with rest.
+53,Male,Ambulance,Kal se seena mein halka dard hai.,122,111,68,Sinus tachycardia,36.8,98,A,3,Cardiac,"Since yesterday, there is a mild pain in the chest."
+68,Female,Wheelchair,Seena bhaari lag raha thora chalne par,120,114,95,LBBB,37.1,94,V,2,Cardiac,Chest feels heavy on walking a little.
+56,Female,Ambulance,Aadhay ghante se seena mein dabao hai.,97,144,72,Inferior MI,36.9,92,A,1,Cardiac,"For the past half hour, there has been pressure in the chest."
+77,Male,Ambulance,Seena mein kabhi kabhar dard din bhar ke kaam ke baad acidity ki wajah se lagta hai.,73,131,52,Normal,37.2,91,A,3,Cardiac,"Occasionally, there is chest pain after a day's work due to acidity."
+54,Female,Walk-in,Patient ko seene mein kasav hai do ghante se aur neend nahi aa rahi.,137,179,87,ST depression,37.1,95,V,2,Cardiac,The patient has tightness in the chest for two hours and is unable to sleep.
+70,Female,Walk-in,Patient ko seene mein tez dard hai teen ghante se aur haath thanday ho rahe hain.,97,123,75,Abnormal,36.6,97,V,2,Cardiac,The patient has sharp pain in the chest for three hours and the hands are getting cold.
+64,Female,Walk-in,Halka kaam karte waqt chest mein halka dard hota hai.,98,168,99,Normal,36.7,96,A,3,Cardiac,"During light activity, there is mild pain in the chest."
+27,Female,Ambulance,Seena mein khichao aur bhook nahi lag rahi,127,167,80,LBBB,36.6,94,P,2,Cardiac,Tightness in the chest and no appetite.
+89,Female,Ambulance,Seena mein dard bardasht se bahar kal raat se,94,155,76,Inferior MI,36.3,83,A,1,Cardiac,Chest pain unbearable since last night.
+64,Male,Walk-in,"Samajh nahi aa raha, dhadkan tez hai shaam ko aur halka pasina bhi aa raha hai.",140,111,76,Sinus tachycardia,37.5,87,A,2,Cardiac,"Unclear, heart rate is fast in the evening and there is also light sweating."
+37,Male,Walk-in,Jab bhi zyada chalti hoon to seena mein chubhan hone lagta hai.,46,154,81,Bradycardia,36.5,100,A,3,Cardiac,"Whenever I walk a lot, I start to feel a pricking sensation in my chest."
+45,Female,Ambulance,Chaar ghante se seena mein maamuli dard hai.,86,161,103,Arrhythmia,36.7,92,A,2,Cardiac,"For the past four hours, there is mild pain in the chest."
+73,Female,Wheelchair,"Chest pain tez chalne par, aaram karne se kam ho jata hai",112,98,71,T wave inversion,36.6,93,A,2,Cardiac,"Chest pain on brisk walking, improves with rest."
+57,Male,Walk-in,Seena mein thora sa khichao garmi mein bahar nikalne par rest se theek ho jata hai.,136,134,82,Normal,36.7,95,A,3,Cardiac,There is a little tightness in the chest that improves with rest when going outside in the heat.
+62,Male,Wheelchair,"Cholesterol high rehta hai, ab saans lena mushkil kal raat se.",111,203,96,ST elevation,36.8,89,P,1,Cardiac,"Cholesterol is high, now it is difficult to breathe since last night."
+59,Male,Ambulance,"Blood pressure ka mareez hai, ab seena mein bhaari pan aur dard kal raat se.",107,127,87,T wave inversion,36.7,92,A,2,Cardiac,"The patient has high blood pressure, and now there is heaviness and pain in the chest since last night."
+75,Male,Walk-in,Chest mein halka sa pressure aaram karte hue bhi rest se theek ho jata hai.,132,113,86,T wave inversion,36.8,95,A,2,Cardiac,There is a slight pressure in the chest that improves with rest.
+66,Male,Walk-in,"Diabetes ka mareez hai, ab chest pain ek ghante se.",153,173,79,Atrial fibrillation,37.4,96,A,2,Cardiac,The patient has diabetes and has had chest pain for one hour.
+42,Male,Walk-in,Seene mein kasav seedhiyan chadhte waqt rest se theek ho jata hai.,103,116,76,Sinus tachycardia,36.3,89,A,2,Cardiac,Tightness in the chest while climbing stairs improves with rest.

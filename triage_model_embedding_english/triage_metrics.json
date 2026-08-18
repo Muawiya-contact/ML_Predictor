@@ -1,0 +1,92 @@
+{
+  "winning_method": "D) Hybrid: dictionary + embeddings",
+  "deployed_method": "D) Hybrid: dictionary + embeddings",
+  "selection_rule": "explicit --deploy D: the offline embedding model is the method this project deploys on purpose",
+  "safety_first_pick": "C) Embeddings + preprocessing",
+  "deploy_override_used": true,
+  "most_accurate_method": "B) Embeddings, raw text",
+  "most_accurate_not_selected": true,
+  "text_representation": "hybrid",
+  "uses_embeddings": true,
+  "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+  "embedding_dim": 384,
+  "accuracy": 76.05,
+  "under_triage_pct": 13.08,
+  "over_triage_pct": 10.86,
+  "safety_grade": "B",
+  "efficiency_grade": "A",
+  "n_features": 1110,
+  "confusion_matrix": [
+    [
+      113,
+      18,
+      3,
+      1
+    ],
+    [
+      17,
+      131,
+      25,
+      4
+    ],
+    [
+      0,
+      21,
+      90,
+      8
+    ],
+    [
+      0,
+      0,
+      11,
+      9
+    ]
+  ],
+  "n_train": 1801,
+  "n_test": 451,
+  "random_state": 42,
+  "preprocessing": "clean -> fuzzy normalize -> learned stop-word removal",
+  "n_stopwords_deployed": 68,
+  "all_methods": [
+    {
+      "method": "A) Dictionary + BoW (current)",
+      "accuracy": 79.16,
+      "under_triage_pct": 12.2,
+      "over_triage_pct": 8.65,
+      "safety_grade": "B",
+      "efficiency_grade": "A",
+      "n_features": 726,
+      "text_representation": "dictionary_bow"
+    },
+    {
+      "method": "B) Embeddings, raw text",
+      "accuracy": 80.71,
+      "under_triage_pct": 13.3,
+      "over_triage_pct": 5.99,
+      "safety_grade": "B",
+      "efficiency_grade": "A",
+      "n_features": 410,
+      "text_representation": "embeddings_raw"
+    },
+    {
+      "method": "C) Embeddings + preprocessing",
+      "accuracy": 80.49,
+      "under_triage_pct": 12.64,
+      "over_triage_pct": 6.87,
+      "safety_grade": "B",
+      "efficiency_grade": "A",
+      "n_features": 410,
+      "text_representation": "embeddings_preprocessed"
+    },
+    {
+      "method": "D) Hybrid: dictionary + embeddings",
+      "accuracy": 76.05,
+      "under_triage_pct": 13.08,
+      "over_triage_pct": 10.86,
+      "safety_grade": "B",
+      "efficiency_grade": "A",
+      "n_features": 1110,
+      "text_representation": "hybrid"
+    }
+  ]
+}
