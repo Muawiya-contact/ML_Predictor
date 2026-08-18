@@ -447,6 +447,15 @@ class TriageGUI(tk.Tk):
         man = getattr(self, "manifest", None) or {}
         ds = man.get("dataset", {})
         prov = ds.get("provenance", {})
+
+        # Experiment marker, first line and impossible to miss. This branch
+        # can load an English-translation model that is NOT the submitted
+        # one, and a triage screen that looks identical while running a
+        # different pipeline is exactly how the wrong result gets reported.
+        if man.get("experiment"):
+            line = ("*** EXPERIMENTAL: " + str(man["experiment"]) +
+                    " - NOT the submitted model ***\n") + line
+
         bits = []
         if ds.get("file"):
             bits.append(f"trained on {ds['file']} ({ds.get('rows', '?')} rows"

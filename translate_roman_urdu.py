@@ -201,7 +201,8 @@ SAVE_EVERY = 10
 
 
 def translate_dataset_column(csv_path, text_column, output_csv,
-                             sample_size=None, random_state=42):
+                             sample_size=None, random_state=42,
+                             max_workers=1):
     """Translate `text_column` of `csv_path` into `output_csv`.
 
     Args:
@@ -248,28 +249,61 @@ def translate_dataset_column(csv_path, text_column, output_csv,
     total = len(df)
     translated = failed = skipped = 0
 
+    # Rows already done are filled straight in; only the rest hit the API.
+    pending = []
     for i, row in df.iterrows():
         source = str(row[text_column])
-
         if source in done:
             df.at[i, TRANSLATION_COLUMN] = done[source]
             skipped += 1
-            continue
-
-        result = translate_roman_urdu(source)
-
-        if result is None:
-            # translate_roman_urdu has already printed the reason.
-            failed += 1
         else:
-            df.at[i, TRANSLATION_COLUMN] = result
-            translated += 1
+            pending.append((i, source))
 
-        if (i + 1) % SAVE_EVERY == 0 or (i + 1) == total:
-            df.to_csv(output_csv, index=False)
-            print(f"  {i + 1}/{total} rows  "
-                  f"(translated {translated}, resumed {skipped}, failed {failed})"
-                  f"  -> saved to {output_csv}")
+    if max_workers > 1 and pending:
+        # Concurrency exists for one reason: 10,000 rows at ~4 s each is
+        # roughly 12 hours serial, which is not a run anyone will babysit.
+        # Requests are independent and the bottleneck is round-trip latency,
+        # so threads are the right tool. Saves still happen on the main
+        # thread as results land, keeping the resume guarantee intact.
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        import threading
+        lock = threading.Lock()
+        print(f"  translating {len(pending)} rows with {max_workers} workers")
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            futures = {pool.submit(translate_roman_urdu, src): (i, src)
+                       for i, src in pending}
+            for n, fut in enumerate(as_completed(futures), 1):
+                i, _src = futures[fut]
+                try:
+                    result = fut.result()
+                except Exception as e:
+                    print(f"\nWorker error on row {i}: {e}")
+                    result = None
+                with lock:
+                    if result is None:
+                        failed += 1
+                    else:
+                        df.at[i, TRANSLATION_COLUMN] = result
+                        translated += 1
+                    if n % SAVE_EVERY == 0 or n == len(pending):
+                        df.to_csv(output_csv, index=False)
+                        print(f"  {n}/{len(pending)} translated "
+                              f"(ok {translated}, failed {failed})"
+                              f"  -> saved to {output_csv}")
+    else:
+        for n, (i, source) in enumerate(pending, 1):
+            result = translate_roman_urdu(source)
+            if result is None:
+                # translate_roman_urdu has already printed the reason.
+                failed += 1
+            else:
+                df.at[i, TRANSLATION_COLUMN] = result
+                translated += 1
+            if n % SAVE_EVERY == 0 or n == len(pending):
+                df.to_csv(output_csv, index=False)
+                print(f"  {n}/{len(pending)} rows  "
+                      f"(translated {translated}, resumed {skipped}, failed {failed})"
+                      f"  -> saved to {output_csv}")
 
     df.to_csv(output_csv, index=False)
     print(f"\n[done] {total} rows: {translated} translated, {skipped} resumed, "

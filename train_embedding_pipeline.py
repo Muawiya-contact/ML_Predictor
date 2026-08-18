@@ -300,6 +300,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="Train the embedding -> fuse -> classify triage pipeline.")
     parser.add_argument("--data", default=DATA_FILE)
+    parser.add_argument("--text-column", default="Complaint_Text",
+                        help="column holding the complaint text (the "
+                             "translation experiment points this at "
+                             "English_Translation)")
+    parser.add_argument("--skip-normalization", action="store_true",
+                        help="feed text to the model as written, skipping "
+                             "the Roman Urdu dictionary. For the English arm.")
     parser.add_argument("--model", default=DEFAULT_MODEL,
                         help="sentence-transformers model name")
     parser.add_argument("--out-dir", default=MODEL_DIR)
@@ -319,6 +326,15 @@ def main():
 
     data_path = resolve_project_file(args.data)
     df = pd.read_csv(data_path)
+    # --text-column lets the translation experiment train on the English
+    # column of the same file, so both arms share identical vitals, labels
+    # and split and differ ONLY in the text. Default is unchanged.
+    if args.text_column != "Complaint_Text":
+        if args.text_column not in df.columns:
+            raise SystemExit(f"--text-column {args.text_column!r} not in "
+                             f"{data_path}. Available: {list(df.columns)}")
+        df["Complaint_Text"] = df[args.text_column]
+        print(f"[ok] Using text column {args.text_column!r} as the complaint text")
     df["Complaint_Text"] = df["Complaint_Text"].fillna("").astype(str)
     print(f"[ok] Loaded {len(df)} patients from {data_path}")
 
@@ -376,7 +392,18 @@ def main():
     print("STEP 1  -  AUTOMATIC STOP-WORD LEARNING  (Contribution 1)")
     print("=" * 78)
 
-    normalized = [normalize_roman_urdu(t) for t in raw_texts]
+    # --skip-normalization exists for the English arm of the translation
+    # experiment. Running English through normalize_roman_urdu does not
+    # leave it alone - the dictionary is effectively bidirectional, so
+    # "chest pain" comes out as "sēna dárd". That is a perfectly reasonable
+    # thing to do, but it is not an English pipeline, and a comparison that
+    # quietly translated English back into Roman Urdu canonicals would be
+    # measuring the dictionary twice instead of comparing two languages.
+    if args.skip_normalization:
+        print("[note] --skip-normalization: text goes to the model as written")
+        normalized = list(raw_texts)
+    else:
+        normalized = [normalize_roman_urdu(t) for t in raw_texts]
     train_stops, train_report = learn_stopwords(
         [normalized[i] for i in idx_train],
         [y[i] + 1 for i in idx_train],
@@ -392,7 +419,11 @@ def main():
     print("STEP 2  -  PREPROCESSING  (clean -> fuzzy -> stop-word removal)")
     print("=" * 78)
 
-    preprocessed = preprocess_corpus_for_embedding(raw_texts, train_stops)
+    if args.skip_normalization:
+        from stopwords import remove_stopwords
+        preprocessed = [remove_stopwords(t, train_stops) for t in normalized]
+    else:
+        preprocessed = preprocess_corpus_for_embedding(raw_texts, train_stops)
     n_changed = sum(1 for a, b in zip(normalized, preprocessed) if a != b)
     print(f"  complaints affected by stop-word removal : {n_changed} / {len(df)}")
     print(f"  example raw          : {raw_texts[0]}")

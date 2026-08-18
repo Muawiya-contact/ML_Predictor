@@ -1061,6 +1061,18 @@ def resolve_model_dir(model_dir=None, allow_fallback=True):
     if model_dir:
         return resolve_project_file(model_dir), ''
 
+    # TRIAGE_MODEL_DIR lets a run point at a different bundle without
+    # editing code. Added for the English-translation experiment, where the
+    # branch's GUI has to load triage_model_embedding_english/ while the
+    # Roman Urdu bundle stays exactly where every other caller expects it.
+    # An override is safer than changing the default: nothing that does not
+    # set the variable can pick up the experimental model by accident.
+    override = os.environ.get('TRIAGE_MODEL_DIR')
+    if override:
+        return resolve_project_file(override), (
+            f"TRIAGE_MODEL_DIR override in effect - loading '{override}/' "
+            f"instead of the default bundle")
+
     # resolve_project_file() is what makes this work from any working
     # directory: without it the embedding bundle "was not found" whenever
     # the caller happened to be standing somewhere else, and every such
