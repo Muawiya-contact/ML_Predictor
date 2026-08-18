@@ -146,7 +146,7 @@ DIACRITIZATION_MAP = {
     # Urdu "seena mein dard" never met - 3279 and 4215 rows of the same
     # complaint sitting in two different tokens. Merged here rather than at
     # inference time, because both spellings are frequent in training.
-    "sēna":     ["seena", "seenay", "sina", "sena", "seenaa", "sinaa",
+    "sēna":     ["seena", "seenay", "seene", "sina", "sena", "seenaa", "sinaa",
                  "syna", "seyna", "chati", "chaati", "chatti",
                  "chest", "chst", "chets", "cheast", "thorax", "thoracic"],
 
@@ -187,7 +187,7 @@ DIACRITIZATION_MAP = {
                  "palpitation", "palpitations", "palpi", "heartbeat", "hrtbt",
                  "tachycardia", "bradycardia", "fluttering", "flutter",
                  "pounding", "thumping",
-                 "dhadak", "dhadakna", "dhadakta", "dhadakti",
+                 "beat", "beats", "dhadak", "dhadakna", "dhadakta", "dhadakti",
                  "dharakna", "dharakta", "dharakti", "dhadkanein",
                  # "racing" occurs 0 times in cardiac_multilingual_10000_v3.csv,
                  # so mapping it cannot desync inference from training - the
@@ -578,11 +578,78 @@ RULE_REPLACEMENTS = {
     "loose motion":      "loosemotion",
     "heat stroke":       "heatstroke",
     "sugar level":       "sugar",
+    "bhaari pan":        "bhaari",
+    "bhari pan":         "bhaari",
 }
 
 # ============================================================
 # TEXT NORMALIZATION  (normalization -> fuzzy -> diacritization)
 # ============================================================
+
+# ============================================================
+# FUZZY MATCHING PROTECTION LIST
+#
+# THE BUG THIS FIXES: RapidFuzz was rewriting ordinary Roman Urdu and
+# English function words into medical concepts the patient never
+# mentioned. Measured on cardiac_multilingual_10000_v3.csv, 3,373 rows
+# (33.7%) carried at least one phantom symptom:
+#
+#     par   (on/upon)      -> pair   -> pāir     leg        1276 rows
+#     hoon  (I am)         -> khoon  -> khūn     blood       274
+#     kaha  (said/where)   -> kandha -> kāndha   shoulder    245
+#     chaar (four)         -> chakkar-> chákkar  dizziness   230
+#     bhar  (full)         -> bukhar -> bukhār   fever       191
+#     pan   (in bhaari pan)-> pain   -> dárd     pain        135
+#     das   (ten)          -> dast   -> dast     diarrhoea   120
+#
+# Phantom legs outnumbered genuine "pair" mentions 1276 to 111, so the
+# model's leg feature was mostly noise.
+#
+# Tuning cannot fix this. The false positives score 80.0-88.9 against
+# CANONICAL_VOCAB while the one CORRECT rescue in the corpus ("seene" ->
+# "seena") scores 80.0 - the lowest of the set - so no threshold
+# separates them, and a minimum-length rule that skipped the bad ones
+# would skip the good one too. The only honest fix is to name the words
+# that must never be guessed at, the same way stopwords.py names the
+# clinical vocabulary its statistics must not remove.
+#
+# Words that genuinely belong to a canonical concept are handled by
+# adding them to DIACRITIZATION_MAP instead ("seene", "beat"), which is
+# an exact lookup and skips fuzzy matching anyway.
+# ============================================================
+
+FUZZY_PROTECTED = {
+    # postpositions, conjunctions, particles
+    "par", "se", "ka", "ki", "ke", "ko", "mein", "main", "aur", "ya", "to",
+    "bhi", "hi", "na", "nahi", "tak", "sath", "saath", "bina", "bagair",
+    "jab", "tab", "ab", "phir", "magar", "lekin", "kyunke", "wala", "wali",
+    # verb forms
+    "hoon", "hain", "hai", "tha", "thi", "the", "raha", "rahi", "rahe",
+    "gaya", "gayi", "gaye", "karta", "karti", "karte", "hota", "hoti",
+    "hote", "jata", "jati", "jate", "laga", "lagi", "lage", "lagta",
+    "lagti", "hua", "hui", "huay", "hue", "chuka", "chuki", "lena", "lene",
+    "dena", "dene", "kar", "karna", "hona", "jana",
+    # numbers - "chaar" became dizziness, "das" became diarrhoea
+    "ek", "do", "teen", "chaar", "char", "panch", "chhe", "saat", "aath",
+    "nau", "das", "gyara", "barah", "bees", "pachaas", "sau", "aadha",
+    "aadhay", "dono",
+    # question words and pronouns
+    "kaha", "kahan", "kya", "kyun", "kaise", "kab", "kaun", "mera", "meri",
+    "apna", "apni", "uska", "uski", "mujhe", "mujhko", "usko", "unko",
+    # time and quantity
+    "kal", "aaj", "shaam", "waqt", "ghante", "ghanta", "minute", "roz",
+    "hafte", "hafta", "mahine", "mahina", "saal", "baar", "dafa", "der",
+    "zyada", "kam", "thora", "thori", "bohat", "bahut", "sara", "sari",
+    # ordinary nouns that collided with medical terms
+    "bhar", "pan", "kaam", "ghar", "log", "baat", "cheez", "tarah",
+    "jaisa", "jaisi", "khud", "sab", "koi", "kuch",
+    # English function words
+    "on", "in", "at", "of", "and", "or", "but", "the", "is", "was", "are",
+    "has", "have", "had", "with", "from", "after", "before", "since",
+    "when", "while", "for", "this", "that", "not", "no", "yes", "also",
+    "very", "some", "any", "all", "one", "two", "ten",
+}
+
 
 def fuzzy_correct_word(word, threshold=80):
     """Replace a word with the closest canonical term if score >= threshold.
@@ -612,6 +679,8 @@ def fuzzy_correct_word(word, threshold=80):
         return word
     if word in _DIACRITIZATION_KNOWN:
         return word
+    if word in FUZZY_PROTECTED:
+        return word
     match, score, _ = process.extractOne(word, CANONICAL_VOCAB, scorer=fuzz.token_sort_ratio)
     return match if score >= threshold else word
 
@@ -621,8 +690,40 @@ def fuzzy_correct_text(text):
 
 
 def apply_diacritization(text):
-    """Map every spelling variant to its canonical diacritized form."""
-    return ' '.join(VARIANT_TO_CANONICAL.get(w, w) for w in text.split())
+    """Map every spelling variant to its canonical diacritized form.
+
+    Collapses a stutter created BY this mapping: when two adjacent but
+    DIFFERENT source words resolve to the same canonical token, the token
+    is emitted once.
+
+    THE BUG THIS FIXES: "seedhiyan chadhte waqt" (climbing stairs) became
+    "mehnat mehnat waqt", because "seedhiyan" and "chadhte" are both
+    listed under the exertion concept. This is not cosmetic. The
+    Bag-of-Words block COUNTS tokens and then multiplies them by the
+    attention weights, so a stutter silently doubles that concept's
+    contribution for the affected rows and biases the model toward
+    whichever concepts happen to own a colliding pair. Measured on
+    cardiac_multilingual_10000_v3.csv: 493 rows (4.9%) contained a
+    stutter, dominated by "khana khane" -> "khānā khānā" (309 rows) and
+    "seedhiyan chadhte" -> "mehnat mehnat" (180).
+
+    Only mappings collapse. A word genuinely repeated in the source is
+    left alone, because Urdu reduplicates for meaning - "rukk rukk kar
+    dard" is intermittent pain and "kabhi kabhi" is occasionally, and
+    flattening those would destroy information rather than restore it.
+    The rule is therefore "same canonical, different source word", not
+    "same canonical".
+    """
+    out = []
+    prev_src = prev_canon = None
+    for word in text.split():
+        canon = VARIANT_TO_CANONICAL.get(word, word)
+        if canon == prev_canon and word != prev_src:
+            prev_src = word          # collision - fold into the previous token
+            continue
+        out.append(canon)
+        prev_src, prev_canon = word, canon
+    return ' '.join(out)
 
 
 def clean_text(text):

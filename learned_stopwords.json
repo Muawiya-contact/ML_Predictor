@@ -3,8 +3,8 @@
   "thresholds": {
     "min_df": 0.02,
     "df_percentile": 75.0,
-    "df_cutoff_from_percentile": 0.0486,
-    "effective_df_cutoff": 0.0486,
+    "df_cutoff_from_percentile": 0.0479,
+    "effective_df_cutoff": 0.0479,
     "mi_threshold": 0.01,
     "cramers_v_threshold": 0.12,
     "alpha": 0.05,
@@ -13,8 +13,8 @@
   },
   "corpus": {
     "n_documents": 10000,
-    "n_unique_tokens": 234,
-    "n_tokens_tested": 59,
+    "n_unique_tokens": 239,
+    "n_tokens_tested": 60,
     "triage_classes": [
       1,
       2,
@@ -22,7 +22,7 @@
       4
     ]
   },
-  "n_stopwords": 21,
+  "n_stopwords": 22,
   "stopwords": [
     "ab",
     "aur",
@@ -30,6 +30,7 @@
     "do",
     "hai",
     "ho",
+    "hone",
     "hota",
     "jaisa",
     "karte",
@@ -305,31 +306,17 @@
       "is_stopword": true
     },
     {
-      "token": "pāir",
-      "document_frequency": 0.1382,
-      "document_count": 1382,
-      "normalized_mutual_information": 0.024478,
-      "cramers_v": 0.238392,
-      "chi_square": 568.3065,
+      "token": "par",
+      "document_frequency": 0.1276,
+      "document_count": 1276,
+      "normalized_mutual_information": 0.026646,
+      "cramers_v": 0.251016,
+      "chi_square": 630.0894,
       "chi_square_dof": 3,
       "chi_square_p_value": 0.0,
       "is_high_frequency": true,
       "is_uninformative": false,
-      "clinically_protected": true,
-      "is_stopword": false
-    },
-    {
-      "token": "sāns",
-      "document_frequency": 0.1272,
-      "document_count": 1272,
-      "normalized_mutual_information": 0.004337,
-      "cramers_v": 0.0945,
-      "chi_square": 89.302,
-      "chi_square_dof": 3,
-      "chi_square_p_value": 0.0,
-      "is_high_frequency": true,
-      "is_uninformative": true,
-      "clinically_protected": true,
+      "clinically_protected": false,
       "is_stopword": false
     },
     {
@@ -347,6 +334,20 @@
       "is_stopword": false
     },
     {
+      "token": "dháḍkan",
+      "document_frequency": 0.1193,
+      "document_count": 1193,
+      "normalized_mutual_information": 0.002502,
+      "cramers_v": 0.075773,
+      "chi_square": 57.415,
+      "chi_square_dof": 3,
+      "chi_square_p_value": 0.0,
+      "is_high_frequency": true,
+      "is_uninformative": true,
+      "clinically_protected": true,
+      "is_stopword": false
+    },
+    {
       "token": "dil",
       "document_frequency": 0.1167,
       "document_count": 1167,
@@ -355,6 +356,20 @@
       "chi_square": 31.2548,
       "chi_square_dof": 3,
       "chi_square_p_value": 1e-06,
+      "is_high_frequency": true,
+      "is_uninformative": true,
+      "clinically_protected": true,
+      "is_stopword": false
+    },
+    {
+      "token": "sāns",
+      "document_frequency": 0.11,
+      "document_count": 1100,
+      "normalized_mutual_information": 0.003726,
+      "cramers_v": 0.08817,
+      "chi_square": 77.7395,
+      "chi_square_dof": 3,
+      "chi_square_p_value": 0.0,
       "is_high_frequency": true,
       "is_uninformative": true,
       "clinically_protected": true,
@@ -414,20 +429,6 @@
       "is_high_frequency": true,
       "is_uninformative": false,
       "clinically_protected": false,
-      "is_stopword": false
-    },
-    {
-      "token": "dháḍkan",
-      "document_frequency": 0.1017,
-      "document_count": 1017,
-      "normalized_mutual_information": 0.002467,
-      "cramers_v": 0.077052,
-      "chi_square": 59.3694,
-      "chi_square_dof": 3,
-      "chi_square_p_value": 0.0,
-      "is_high_frequency": true,
-      "is_uninformative": true,
-      "clinically_protected": true,
       "is_stopword": false
     },
     {
@@ -891,6 +892,20 @@
       "is_uninformative": false,
       "clinically_protected": true,
       "is_stopword": false
+    },
+    {
+      "token": "hone",
+      "document_frequency": 0.048,
+      "document_count": 480,
+      "normalized_mutual_information": 0.000929,
+      "cramers_v": 0.047422,
+      "chi_square": 22.4882,
+      "chi_square_dof": 3,
+      "chi_square_p_value": 5.2e-05,
+      "is_high_frequency": true,
+      "is_uninformative": true,
+      "clinically_protected": false,
+      "is_stopword": true
     }
   ],
   "note": "Learned on the full dataset for deployment. The evaluation in train_embedding_pipeline.py uses a training-split-only list to avoid label leakage; see 'training_split_stopwords' for that list.",

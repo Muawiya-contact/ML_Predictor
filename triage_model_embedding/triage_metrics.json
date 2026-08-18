@@ -10,48 +10,48 @@
   "uses_embeddings": true,
   "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
   "embedding_dim": 384,
-  "accuracy": 85.15,
-  "under_triage_pct": 9.0,
-  "over_triage_pct": 5.85,
+  "accuracy": 84.8,
+  "under_triage_pct": 9.25,
+  "over_triage_pct": 5.95,
   "safety_grade": "A",
   "efficiency_grade": "A",
   "n_features": 1110,
   "confusion_matrix": [
     [
-      537,
-      63,
+      539,
+      61,
       0,
       0
     ],
     [
-      46,
-      680,
-      70,
-      4
+      49,
+      674,
+      74,
+      3
     ],
     [
-      3,
-      50,
-      424,
-      43
+      1,
+      53,
+      419,
+      47
     ],
     [
       0,
       0,
-      18,
-      62
+      16,
+      64
     ]
   ],
   "n_train": 8000,
   "n_test": 2000,
   "random_state": 42,
   "preprocessing": "clean -> fuzzy normalize -> learned stop-word removal",
-  "n_stopwords_deployed": 21,
+  "n_stopwords_deployed": 22,
   "all_methods": [
     {
       "method": "A) Dictionary + BoW (current)",
-      "accuracy": 86.35,
-      "under_triage_pct": 8.45,
+      "accuracy": 86.5,
+      "under_triage_pct": 8.3,
       "over_triage_pct": 5.2,
       "safety_grade": "A",
       "efficiency_grade": "A",
@@ -71,8 +71,8 @@
     {
       "method": "C) Embeddings + preprocessing",
       "accuracy": 82.4,
-      "under_triage_pct": 11.8,
-      "over_triage_pct": 5.8,
+      "under_triage_pct": 12.0,
+      "over_triage_pct": 5.6,
       "safety_grade": "B",
       "efficiency_grade": "A",
       "n_features": 410,
@@ -80,9 +80,9 @@
     },
     {
       "method": "D) Hybrid: dictionary + embeddings",
-      "accuracy": 85.15,
-      "under_triage_pct": 9.0,
-      "over_triage_pct": 5.85,
+      "accuracy": 84.8,
+      "under_triage_pct": 9.25,
+      "over_triage_pct": 5.95,
       "safety_grade": "A",
       "efficiency_grade": "A",
       "n_features": 1110,
