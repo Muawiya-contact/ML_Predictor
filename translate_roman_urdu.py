@@ -9,7 +9,9 @@ API_KEY = os.environ.get("OPENROUTER_API_KEY")
 if not API_KEY:
     raise SystemExit("Set OPENROUTER_API_KEY before running this script.")
 
-MODEL = "openai/gpt-4o-mini"
+# Overridable so the free-tier model can be swapped in without editing code:
+#   OPENROUTER_MODEL=openai/gpt-oss-20b:free
+MODEL = os.environ.get("OPENROUTER_MODEL", "openai/gpt-oss-20b:free")
 
 URL = "https://openrouter.ai/api/v1/chat/completions"
 
@@ -119,7 +121,14 @@ def translate_roman_urdu(text):
             }
         ],
         "temperature": 0,
-        "max_tokens": 200
+        # 1000, not 200. The free-tier models on OpenRouter are REASONING
+        # models: they emit a chain of thought before the answer, and at 200
+        # the response came back with reasoning_tokens=197, content=None and
+        # finish_reason="length" - the budget was spent thinking and nothing
+        # was left to translate with. Measured on gpt-oss-20b:free over the
+        # same 5 complaints: 1/5 usable at 200, 4/5 at 1000. Paid models are
+        # unaffected by the larger ceiling because they stop when done.
+        "max_tokens": 1000
     }
 
     try:
