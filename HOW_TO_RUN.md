@@ -68,6 +68,13 @@ folder that has the program files**. The easiest way on Windows:
 
 Now install the few things the program needs (this downloads them once):
 
+If your terminal opens one folder above the project, first run:
+
+```bash
+cd ML_Predictor
+cp .env.example .env
+```
+
 ```
 pip install -r requirements.txt
 ```
