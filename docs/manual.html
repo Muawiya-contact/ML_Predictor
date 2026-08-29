@@ -1,0 +1,298 @@
+<title>Triage System Manual</title>
+<style>
+  :root {
+    --ground: #FFFFFF;
+    --surface: #F4F6F7;
+    --ink: #12171B;
+    --ink-2: #46545D;
+    --ink-3: #7C8A93;
+    --rule: #CFD8DC;
+    --rule-strong: #A9B6BD;
+    --accent: #A82D26;
+    --l1: #A82D26;
+    --l2: #A56312;
+    --l3: #2C6E49;
+    --l4: #3A5F80;
+    --warn-bg: #FBF1EF;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 10.5pt; line-height: 1.45;
+    margin: 0; padding: 0;
+  }
+  .page { page-break-after: always; break-after: page; padding-bottom: 4mm; }
+  .page:last-child { page-break-after: auto; break-after: auto; }
+
+  .masthead { border-bottom: 2.5pt solid var(--ink); padding-bottom: 8px; margin-bottom: 14px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 7.5pt; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ink-3); margin: 0 0 6px;
+  }
+  h1 { font-family: var(--mono); font-size: 21pt; font-weight: 600; letter-spacing: -.02em;
+       line-height: 1.1; margin: 0 0 6px; }
+  .standfirst { font-size: 11pt; color: var(--ink-2); margin: 0; max-width: 62ch; }
+
+  h2 {
+    font-family: var(--mono); font-size: 8.5pt; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink-3);
+    margin: 0 0 3px; padding-top: 2px;
+  }
+  h3 { font-size: 13pt; font-weight: 650; letter-spacing: -.01em; margin: 0 0 7px; }
+  h4 { font-size: 10.5pt; font-weight: 650; margin: 0 0 3px; }
+  p  { margin: 0 0 7px; max-width: 68ch; }
+  section { margin-bottom: 13px; }
+
+  code { font-family: var(--mono); font-size: .89em; background: var(--surface);
+         padding: .05em .3em; border-radius: 2px; }
+  pre  { font-family: var(--mono); font-size: 8.5pt; line-height: 1.5;
+         background: var(--surface); border-left: 2.5pt solid var(--rule-strong);
+         padding: 8px 11px; margin: 0 0 8px; white-space: pre-wrap; }
+  pre code { background: none; padding: 0; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 9pt;
+          font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+  th, td { text-align: left; padding: 4.5px 8px; border-bottom: .5pt solid var(--rule);
+           vertical-align: top; }
+  th { font-family: var(--mono); font-size: 7.5pt; letter-spacing: .09em;
+       text-transform: uppercase; color: var(--ink-3); font-weight: 600;
+       border-bottom: 1pt solid var(--rule-strong); }
+  tbody tr:last-child td { border-bottom: none; }
+  td.n { font-family: var(--mono); white-space: nowrap; }
+
+  .step { display: table; width: 100%; margin-bottom: 8px; }
+  .step-n {
+    display: table-cell; width: 20px; vertical-align: top;
+    font-family: var(--mono); font-size: 9pt; font-weight: 600; color: var(--accent);
+  }
+  .step-b { display: table-cell; vertical-align: top; }
+  .step-b p { margin: 0 0 3px; font-size: 9.5pt; color: var(--ink-2); }
+
+  .box { border: .5pt solid var(--rule); padding: 9px 12px; margin-bottom: 9px; }
+  .box p:last-child { margin-bottom: 0; }
+  .warn { background: var(--warn-bg); border-left: 2.5pt solid var(--accent); }
+  .warn h4 { color: var(--accent); }
+
+  ul { margin: 0 0 8px; padding-left: 16px; max-width: 68ch; }
+  li { margin-bottom: 3px; }
+
+  .lvl { font-family: var(--mono); font-weight: 700; }
+  .l1 { color: var(--l1); } .l2 { color: var(--l2); }
+  .l3 { color: var(--l3); } .l4 { color: var(--l4); }
+
+  .foot { border-top: .5pt solid var(--rule); padding-top: 6px; margin-top: 10px;
+          font-size: 8pt; color: var(--ink-3); }
+  .pagenum { font-family: var(--mono); font-size: 7.5pt; color: var(--ink-3);
+             letter-spacing: .1em; text-align: right; }
+</style>
+
+<!-- ============================ PAGE 1 ============================ -->
+<div class="page">
+  <div class="masthead">
+    <p class="eyebrow">ML_Predictor · Roman Urdu Emergency Triage · Operator Manual</p>
+    <h1>Triage System Manual</h1>
+    <p class="standfirst">How to run the system, what happens to a complaint between typing it and reading a triage level, and the four things it will not tell you.</p>
+  </div>
+
+  <section>
+    <h2>Before you start</h2>
+    <h3>Two services must be running</h3>
+    <p>The system translates every complaint on this machine before it scores it. Nothing reaches the internet — but nothing works without the local translator either.</p>
+<pre><code>ollama serve                  # the local translator
+ollama pull llama3.2          # once, ~2 GB
+./run_gui.sh                  # the app</code></pre>
+    <p>Ollama does not always survive a reboot. If it keeps stopping:</p>
+<pre><code>sudo systemctl enable --now ollama</code></pre>
+    <p>To check everything the pipeline needs without running a patient through it:</p>
+<pre><code>python run_inference.py --check</code></pre>
+  </section>
+
+  <section>
+    <h2>Triaging one patient</h2>
+    <h3>The everyday task</h3>
+    <div class="step"><span class="step-n">1</span><div class="step-b">
+      <h4>Type the complaint in Roman Urdu</h4>
+      <p>Spelling does not need to be consistent. <code>bukar</code>, <code>payt</code> and <code>darad</code> are repaired before the translator sees them.</p>
+    </div></div>
+    <div class="step"><span class="step-n">2</span><div class="step-b">
+      <h4>Fill in the vitals and the four dropdowns</h4>
+      <p>A blank or unreadable vital is replaced with the training average, and the substitution is written into the notes. It is never silent.</p>
+    </div></div>
+    <div class="step"><span class="step-n">3</span><div class="step-b">
+      <h4>Press "Triage this patient"</h4>
+      <p>Translation takes about 11 seconds. The stage panel on the right shows all five steps, so you can see what the system did rather than only what it concluded.</p>
+    </div></div>
+    <div class="step"><span class="step-n">4</span><div class="step-b">
+      <h4>Read the level, then read the confidence</h4>
+      <p>They are different claims. See <em>Reading the output</em> on page 3.</p>
+    </div></div>
+  </section>
+
+  <section>
+    <h2>Triaging a file</h2>
+    <h3>Batch runs are slow by design</h3>
+    <p>One local translation per row, roughly 11 seconds each. A 100-patient sheet takes about <strong>18 minutes</strong>; 500 takes an hour and a half. The progress bar shows the row count and an estimate — it makes the wait legible, not shorter.</p>
+    <p>Rows the system could not translate, or whose translation failed the anatomical check, are <strong>not scored</strong>. They appear in the table with a gate status and no triage level, and the summary line states how many were skipped. A run that quietly dropped them would read as a complete triage of the file.</p>
+  </section>
+
+  <p class="pagenum">1 / 4</p>
+</div>
+
+<!-- ============================ PAGE 2 ============================ -->
+<div class="page">
+  <section>
+    <h2>How it works</h2>
+    <h3>Five stages, and where each one can fail</h3>
+    <p>Every stage runs on this machine. Ollama is a service on <code>127.0.0.1</code>, the encoder loads from an on-disk cache, and the classifier is a file in the model folder.</p>
+  </section>
+
+  <section>
+    <div class="step"><span class="step-n">1</span><div class="step-b">
+      <h4>Dictionary and fuzzy repair &nbsp;<span style="color:var(--ink-3);font-weight:400">— local, instant</span></h4>
+      <p>Spelling variants collapse onto one canonical word: <code>payt</code> and <code>paet</code> both become <code>pait</code>. Typos are repaired only when they are close to a known word and long enough to be a typo rather than a different word — a deliberately cautious rule, because a careless version of it once turned <code>peene</code> ("to drink") into <code>seene</code> ("chest").</p>
+    </div></div>
+    <div class="step"><span class="step-n">2</span><div class="step-b">
+      <h4>Translation by Ollama &nbsp;<span style="color:var(--ink-3);font-weight:400">— ~11 s</span></h4>
+      <p>The complaint is sent to llama3.2 wrapped as a data record, at temperature 0 so the same input always gives the same English. If the model replies with a refusal or a safety disclaimer, that text is stripped and the row is retried once. A disclaimer that reached the encoder would be scored <em>as if it were the patient's symptoms</em>.</p>
+    </div></div>
+    <div class="step"><span class="step-n">3</span><div class="step-b">
+      <h4>Anatomical check &nbsp;<span style="color:var(--ink-3);font-weight:400">— this is the safety gate</span></h4>
+      <p>Every body part named in the complaint must appear in the English. A stomach complaint rendered as chest pain is refused outright — no triage level is produced. This check is deterministic: it either finds the word or it does not.</p>
+    </div></div>
+    <div class="step"><span class="step-n">4</span><div class="step-b">
+      <h4>Encoding</h4>
+      <p>Common English words carrying no clinical signal are removed, and the remaining text becomes a 384-number vector.</p>
+    </div></div>
+    <div class="step"><span class="step-n">5</span><div class="step-b">
+      <h4>Classification</h4>
+      <p>The vector, the six vitals and the four categories go to a random forest, which votes on a triage level.</p>
+    </div></div>
+  </section>
+
+  <section>
+    <h2>Why the anatomical check, and not a similarity score</h2>
+    <h3>A measurement that changed the design</h3>
+    <p>The system used to compare the Roman Urdu and English texts numerically and reject the translation if they were too far apart. Measured against <code>seena mein shadeed dard aur pasina</code> (severe chest pain with sweating):</p>
+    <table>
+      <thead><tr><th>Candidate translation</th><th>Similarity</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>"Severe chest pain and sweating."</td><td class="n">0.8054</td><td>correct</td></tr>
+        <tr><td>"I have a headache and dizziness."</td><td class="n">0.7908</td><td>wrong organ</td></tr>
+        <tr><td>"My leg is broken after a fall."</td><td class="n">0.7922</td><td>unrelated</td></tr>
+      </tbody>
+    </table>
+    <p>Correct and catastrophically wrong sit <strong>0.013 apart</strong>, and the unrelated sentence scores <em>higher</em> than the merely wrong one. No cut-off separates them. The similarity number is still calculated and displayed, and it decides nothing.</p>
+  </section>
+
+  <p class="pagenum">2 / 4</p>
+</div>
+
+<!-- ============================ PAGE 3 ============================ -->
+<div class="page">
+  <section>
+    <h2>Reading the output</h2>
+    <h3>The triage level</h3>
+    <table>
+      <thead><tr><th>Level</th><th>Meaning</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td class="lvl l1">1</td><td>Emergency</td><td>immediate</td></tr>
+        <tr><td class="lvl l2">2</td><td>Urgent</td><td>within 15 minutes</td></tr>
+        <tr><td class="lvl l3">3</td><td>Standard</td><td>within 60 minutes</td></tr>
+        <tr><td class="lvl l4">4</td><td>Non-urgent</td><td>can wait or be redirected</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h3>The confidence number</h3>
+    <p>Confidence is the share of trees in the forest that voted for the winning level. It is <strong>not calibrated</strong>: 76% does not mean this patient is Level 1 in 76% of comparable cases. Use it to compare one prediction against another, never as a probability to act on numerically.</p>
+    <p>When a complaint carries no usable text — blank, <code>n/a</code>, punctuation only — the confidence is capped at <strong>50%</strong> and a warning says why. The vital signs alone can push the forest above 90%, and a screen showing that would be indistinguishable from a real reading. Where the cap applies, the bar chart labels both numbers so the raw vote and the reported figure never silently disagree.</p>
+  </section>
+
+  <section>
+    <h2>What the tabs are for</h2>
+    <table>
+      <thead><tr><th>Tab</th><th>Use it when</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Triage a Patient</strong></td><td>Scoring one patient. The everyday screen.</td></tr>
+        <tr><td><strong>Pipeline Explorer</strong></td><td>A result looks wrong and you want to see which stage caused it.</td></tr>
+        <tr><td><strong>Stop Words</strong></td><td>Checking which English words are discarded before encoding, and the statistics behind each decision.</td></tr>
+        <tr><td><strong>Batch File</strong></td><td>Scoring a spreadsheet of patients.</td></tr>
+        <tr><td><strong>Results</strong></td><td>Precision, recall and F1 for the model currently serving.</td></tr>
+        <tr><td><strong>Cluster Analysis</strong></td><td>Checking whether complaints that mean the same thing land near each other.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>When something goes wrong</h2>
+    <table>
+      <thead><tr><th>What you see</th><th>What it means</th></tr></thead>
+      <tbody>
+        <tr><td>"Ollama is not reachable"</td><td>The translator is not running. <code>ollama serve</code>. Nothing can be scored until it is.</td></tr>
+        <tr><td>"returned nothing"</td><td>The model refused twice. The console prints its exact reply.</td></tr>
+        <tr><td>"Anatomical check failed"</td><td>The translation moved the complaint to a different body part. No prediction was made — this is the gate working.</td></tr>
+        <tr><td>Translation timeout</td><td>Cold start under load. Re-run it; the second attempt is usually immediate.</td></tr>
+        <tr><td>Batch row marked NOT TRANSLATED</td><td>That row alone was skipped. The rest of the file is scored.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="box warn">
+      <h4>Do not start a batch while the app is loading its first prediction</h4>
+      <p>Both load models onto the same CPU, and the translator's cold start can then exceed its timeout — producing a translation failure for a service that is running perfectly well. It is the single most common false alarm in this system.</p>
+    </div>
+
+  <p class="pagenum">3 / 4</p>
+</div>
+
+<!-- ============================ PAGE 4 ============================ -->
+<div class="page">
+  <section>
+    <h2>Limits</h2>
+    <h3>Four things this system will not tell you</h3>
+    <p>Each of these is measured, not hypothetical. A reader who takes only one page from this manual should take this one.</p>
+  </section>
+
+  <section>
+    <div class="box">
+      <h4>1 &nbsp; The training data is synthetic</h4>
+      <p>The deployed model was fitted on complaints produced by a generator script, not on real patient records. It must not be described as trained on real cases in any evaluation, publication or deployment.</p>
+    </div>
+    <div class="box">
+      <h4>2 &nbsp; The gate checks anatomy, not accuracy</h4>
+      <p>It guarantees the body part survives translation. It cannot see a wrong <em>symptom</em> attached to the right body part — "chest pain" rendered as "chest burning" passes. It is one specific guarantee, not a general one.</p>
+    </div>
+    <div class="box">
+      <h4>3 &nbsp; The serving model was trained on 2,252 rows, not 10,000</h4>
+      <p>A larger Roman Urdu model exists in the project but expects untranslated text, so it cannot be fed the English the app now produces. The app serves the smaller English-trained model. This was a deliberate trade and it is a real reduction in training data.</p>
+    </div>
+    <div class="box">
+      <h4>4 &nbsp; The spelling repair is unproven on real input</h4>
+      <p>Across the 10,000-row training corpus it changes nothing, because that corpus was generated from clean text and has no typos to repair. What has been demonstrated is that it corrupts nothing. Its benefit on real typed input is expected, not measured.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Status</h2>
+    <h3>Research prototype — not a medical device</h3>
+    <p>This system has not been clinically validated, registered, or approved for use in patient care. It is a decision-support prototype for research. Every output is a suggestion to a qualified clinician, and no output should be acted on without one.</p>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <p>Two test batteries ship with the project and can be re-run at any time. Both need a live Ollama; there is no continuous integration, so they are run by hand.</p>
+<pre><code>python tests/audit_pipeline.py    # 15 checks: prompt, guardrail,
+                                  # gate, dictionary, train/serve skew
+python tests/audit_gui.py         # 16 checks: builds the real window
+                                  # and drives every tab</code></pre>
+    <p>Figures in this manual — the 0.013 similarity gap, the 11-second translation, the 50% cap — were measured on the running system, not estimated.</p>
+  </section>
+
+  <div class="foot">
+    ML_Predictor · Roman Urdu Emergency Triage · operator manual · every stage runs offline on the local machine
+  </div>
+  <p class="pagenum">4 / 4</p>
+</div>

@@ -240,6 +240,27 @@ def t_run_end_to_end():
                   f"cosine={sim.get('roman_urdu_vs_english', 0):.4f} (diagnostic)")
 
 
+def t_pull_success_check():
+    """A failed pull must not be called a success because ANOTHER model exists."""
+    import src.offline_pipeline as o
+    real = o.ollama_models
+    try:
+        def arrived(model, installed):
+            o.ollama_models = lambda *a, **k: installed
+            base = model.split(":")[0]
+            return any(n == model or n.split(":")[0] == base
+                       for n in o.ollama_models())
+        wrong = arrived("llama3.2", ["qwen2.5:7b"])
+        right = arrived("llama3.2", ["llama3.2:latest"])
+    finally:
+        o.ollama_models = real
+    ok = (wrong is False and right is True)
+    return ok, ("a pull of llama3.2 onto a qwen-only machine reports NOT "
+                "arrived; llama3.2:latest reports arrived"
+                if ok else f"qwen-only={wrong} llama-present={right}")
+
+
+check("2.6  pull_model success requires THAT model", t_pull_success_check)
 check("2.1  prompt shape (<record>, few-shot, shoulder rule)", t_prompt_shape)
 check("2.2  temperature pinned to 0.0", t_temperature_zero)
 check("2.3  sanitize_translation() refusals + disclaimers", t_sanitize)

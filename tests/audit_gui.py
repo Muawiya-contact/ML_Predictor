@@ -224,6 +224,30 @@ except Exception as e:
         f"{type(e).__name__}: {e}")
     traceback.print_exc()
 
+# ---- Tab 4: a header-only sheet must not be reported as an Ollama fault --
+try:
+    hdr = os.path.join("tests", "fixtures", "batch_empty.csv")
+    os.makedirs(os.path.dirname(hdr), exist_ok=True)
+    with open(hdr, "w", encoding="utf-8") as f:
+        f.write("Complaint_Text,Age,Gender,Mode_of_Arrival,Heart_Rate,"
+                "Systolic_BP,Diastolic_BP,Temperature,SpO2,AVPU,ECG_Status\n")
+    app._batch_target = os.path.abspath(hdr)
+    app._batch_progress = {"done": 0, "total": 0, "text": "", "finished": False}
+    err = None
+    try:
+        results, out_base = app._batch_worker()
+        rows = len(results)
+    except Exception as e:
+        err, rows = f"{type(e).__name__}: {e}", None
+    app._end_batch_ui()
+    ok = err is None and rows == 0
+    rec("tab4  header-only sheet returns 0 rows, not an Ollama error", ok,
+        "empty result frame returned with the full output schema" if ok
+        else f"raised {err}")
+except Exception as e:
+    rec("tab4  header-only sheet returns 0 rows, not an Ollama error", False,
+        f"{type(e).__name__}: {e}")
+
 # ---- no dangling references to the removed sections ---------------------
 try:
     gone = [n for n in ("_results_section_methods", "_results_section_embedding",
