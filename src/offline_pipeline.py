@@ -374,7 +374,7 @@ def _ollama_chat(messages: list, model: str, url: str,
 
 def translate_roman_urdu(text: str, model: str = OLLAMA_MODEL,
                          url: str = OLLAMA_URL,
-                         timeout: float = 120.0) -> Optional[str]:
+                         timeout: float = TRANSLATE_TIMEOUT) -> Optional[str]:
     """Roman Urdu -> English via local Ollama. None on any failure.
 
     Raw urllib rather than the ollama SDK: one fewer dependency, and the
@@ -468,6 +468,15 @@ _REFUSAL_PATTERNS = re.compile(
     )""")
 
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
+
+#: Seconds to wait on one /api/chat call. Was 120, which is ample once the
+#: model is resident and not enough for a cold start: llama3.2 loading while
+#: the GUI loads its sentence encoders on the same CPU overran it three
+#: times in one session, and each overrun surfaced as "Is it running?" for a
+#: service that was running perfectly well. A slow first translation beats a
+#: failed one. Note the refusal retry means a fully wedged call can now take
+#: up to 2x this before returning.
+TRANSLATE_TIMEOUT = 300.0
 
 #: Below this, whatever survived the strip is too thin to be a translation
 #: of a real complaint - treat it as nothing rather than embed a fragment.
