@@ -60,3 +60,5 @@ learned_stopwords_v*.json
 How Effective is Embeddings Generator-*.zip
 # Local rollback copy from the fuzzy-matching fix, superseded by the merged bundle.
 triage_model_embedding_PRE_FUZZYFIX/
+tests/fixtures/*_predictions.csv
+tests/fixtures/*_predictions.xlsx

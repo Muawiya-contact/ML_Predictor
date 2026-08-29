@@ -115,6 +115,59 @@ except Exception as e:
         f"{type(e).__name__}: {e}")
     traceback.print_exc()
 
+# ---- Tab 4: drive the batch file end to end -----------------------------
+try:
+    import pandas as pd
+    fixture = os.path.join("tests", "fixtures", "batch_sample.csv")
+    app.batch_path.set(os.path.abspath(fixture))
+    app._do_batch()
+    # _do_batch hands off to a background thread; pump until the worker
+    # drains its queue rather than sleeping a fixed guess.
+    out_csv = os.path.splitext(os.path.abspath(fixture))[0] + "_predictions.csv"
+    if os.path.exists(out_csv):
+        os.remove(out_csv)
+    deadline = time.time() + 900
+    while not os.path.exists(out_csv) and time.time() < deadline:
+        app.update()
+        time.sleep(0.2)
+    time.sleep(1.0)
+    app.update()
+
+    src_rows = len(pd.read_csv(fixture))
+    res = pd.read_csv(out_csv)
+    problems = []
+    if len(res) != src_rows:
+        problems.append(f"{len(res)} rows out of {src_rows} in")
+    for col in ("Predicted_Triage_Level", "Confidence", "Notes",
+                "Translation", "Gate_Status", "Gate_Detail"):
+        if col not in res.columns:
+            problems.append(f"missing column {col}")
+    if not problems:
+        # every row must carry a gate verdict
+        if res["Gate_Status"].isna().any():
+            problems.append("a row has no gate verdict")
+        # blocked rows must carry no triage level
+        blocked = res[res["Gate_Status"] != "PASS"]
+        if len(blocked) and blocked["Predicted_Triage_Level"].notna().any():
+            problems.append("a blocked row still carries a triage level")
+        # the unreadable vital must be reported, not silently mean-filled
+        if not res["Notes"].fillna("").str.contains("Heart_Rate").any():
+            problems.append("unreadable Heart_Rate not reported in Notes")
+        # the junk complaint must be capped
+        junk = res[res["Complaint_Text"].fillna("").str.contains("n/a|unknown",
+                                                                 case=False)]
+        scored = junk["Confidence"].dropna()
+        if len(scored) and (scored > 0.5 + 1e-9).any():
+            problems.append(f"junk complaint scored {scored.max():.3f} > cap")
+    counts = res["Gate_Status"].value_counts().to_dict() if "Gate_Status" in res else {}
+    rec("tab4  Batch File: end-to-end on the fixture", not problems,
+        "; ".join(problems) or
+        f"{len(res)} rows scored, gate {counts}, notes on substituted vitals")
+except Exception as e:
+    rec("tab4  Batch File: end-to-end on the fixture", False,
+        f"{type(e).__name__}: {e}")
+    traceback.print_exc()
+
 # ---- no dangling references to the removed sections ---------------------
 try:
     gone = [n for n in ("_results_section_methods", "_results_section_embedding",
