@@ -799,8 +799,15 @@ class TriageGUI(tk.Tk):
         art = self.active_artifacts()
         return (art or {}).get("manifest", {}) if art else {}
 
-    def translate_for_mode(self, text):
-        """Mode 2 only. Returns (english_text, error_message).
+    def translate_for_mode(self, text, allow_blocked=False):
+        """Returns (english_text, error_message).
+
+        allow_blocked=True returns the translation even when the anatomical
+        gate rejects it, and leaves the verdict in self._last_gate. The batch
+        path needs that: aborting a 500-row file because one row drifted
+        would be a worse failure than the drift, and the operator cannot act
+        on rows they are never shown. The single-patient path keeps the
+        default, where a blocked translation yields no prediction at all.
 
         Routed through the LOCAL Ollama service. Every failure path here
         returns a message rather than raising: this is called from the
@@ -861,7 +868,10 @@ class TriageGUI(tk.Tk):
                                           verify_anatomical_integrity)
         ok, failures = verify_anatomical_integrity(
             fuzzy_normalize_roman_urdu(text, verbose=False), out)
-        if not ok:
+        # Recorded so the batch path can report per row instead of inferring
+        # the reason from an error string.
+        self._last_gate = (ok, failures, out)
+        if not ok and not allow_blocked:
             return None, (
                 "Anatomical check failed - the translation moved the "
                 "complaint to a different part of the body.\n\n"
@@ -1553,12 +1563,17 @@ class TriageGUI(tk.Tk):
         # 4. encoding
         man = self.active_manifest() or {}
         enc = man.get("embedding_model") or "sentence-transformer"
+        # The previous wording claimed the stop-word list was NOT applied
+        # here. It is. skip_normalization skips the Roman Urdu DICTIONARY
+        # stages, not stop-word removal - the bundle carries its own list and
+        # build_text_features() applies it on every prediction.
+        n_stops = len(self.active_artifacts().get("stopwords") or [])
         panel("4  Sentence-transformer", en,
-              f"The English text is encoded by {enc} directly. The learned "
-              f"Roman Urdu stop-word list is NOT applied here - this bundle "
-              f"was trained with skip_normalization, and serving it any other "
-              f"way is the train/serve skew that cost 38 points of accuracy "
-              f"once already.", ("encoded", True))
+              f"The English text is preprocessed using the bundle's "
+              f"{n_stops}-token English stop-word list and encoded directly "
+              f"via {enc}. The Roman Urdu dictionary pipeline is skipped to "
+              f"prevent train/serve skew - serving this bundle any other way "
+              f"cost 38 points of accuracy once already.", ("encoded", True))
 
     def _explain_kept_fillers(self, final_text):
         if not self.stopword_report:
@@ -1657,19 +1672,22 @@ class TriageGUI(tk.Tk):
         t = r["thresholds"]
         c = r["corpus"]
         review = r.get("review_recommended") or []
-        if self.in_english_mode():
-            self.stop_summary.configure(text=(
-                "The learned Roman Urdu stop-word list below is NOT applied "
-                "to the triage path: complaints are translated first, and the "
-                "English text goes to the sentence-transformer directly. The "
-                "table is shown for reference - it documents how the list was "
-                "derived, not what runs on your input."))
-            return
+        # This early-returned before filling the table, on the belief that
+        # stop-word removal did not apply once complaints were translated.
+        # It does. skip_normalization skips the Roman Urdu DICTIONARY stages,
+        # not stop-word removal - the serving bundle carries its own list and
+        # build_text_features() applies it on every prediction. The return
+        # left the table permanently empty; the tab rendered its headers and
+        # nothing else, which reads as "no stop words" rather than "not
+        # drawn".
         self.stop_summary.configure(text=(
             f"A token is removed only when ALL THREE hold:  document frequency "
             f">= {t['effective_df_cutoff']:.4f}"
             f"   AND   normalized mutual information <= {t['mi_threshold']}"
             f"   AND   Cramer's V <= {t['cramers_v_threshold']}\n"
+            f"This is the list the SERVING bundle applies - "
+            f"{ENGLISH_MODEL_DIR}/learned_stopwords.json, not the project-root "
+            f"file, which belongs to whichever model trained last.\n"
             f"{c['n_documents']} complaints, {c['n_unique_tokens']} unique tokens, "
             f"{c['n_tokens_tested']} high-frequency tokens tested, "
             f"{r['n_stopwords']} learned as stop words: "
@@ -1793,7 +1811,28 @@ class TriageGUI(tk.Tk):
             messagebox.showwarning("File not found", f"No such file:\n{path}")
             return
         self._batch_target = path
+        # Translation is ~11s per row and strictly serial, so a 100-row sheet
+        # is ~18 minutes. The old single status line never changed in that
+        # time, which is indistinguishable from a hang - the most common
+        # reason this tab gets reported as broken. The worker publishes a
+        # counter and a poller on the UI thread reads it; Tk is not
+        # thread-safe, so the worker must never touch a widget itself.
+        self._batch_progress = {"done": 0, "total": 0, "text": "reading file",
+                                "finished": False}
         self._run_async(self._batch_worker, f"Triaging {os.path.basename(path)}...")
+        self._poll_batch_progress()
+
+    def _poll_batch_progress(self):
+        pr = getattr(self, "_batch_progress", None)
+        if not pr or pr.get("finished"):
+            return
+        total, done = pr.get("total", 0), pr.get("done", 0)
+        if total:
+            secs = int((total - done) * 11)
+            eta = f"{secs // 60}m {secs % 60}s" if secs >= 60 else f"{secs}s"
+            self.status.set(f"Translating row {done}/{total}  -  about {eta} "
+                            f"left  |  {pr.get('text', '')[:48]}")
+        self.after(300, self._poll_batch_progress)
 
     def _batch_worker(self):
         # read_table() is shared with predict_batch.py and tries a chain of
@@ -1805,6 +1844,7 @@ class TriageGUI(tk.Tk):
 
         path = self._batch_target
         df = read_table(path)
+        gate_status, gate_detail, texts = [], [], []
         if self.in_english_mode():
             # Translate the whole column first, then score the English.
             # Done up front rather than row-by-row inside predict_dataframe
@@ -1812,25 +1852,74 @@ class TriageGUI(tk.Tk):
             # instead of leaving half the sheet scored by a pipeline the
             # operator did not pick.
             texts, failures = [], 0
-            for t in df["Complaint_Text"].fillna("").astype(str):
-                en, err = self.translate_for_mode(t)
+            gate_status, gate_detail = [], []
+            pr = getattr(self, "_batch_progress", {})
+            pr["total"] = len(df)
+            for _i, t in enumerate(df["Complaint_Text"].fillna("").astype(str)):
+                pr["done"] = _i
+                pr["text"] = t
+                self._last_gate = (True, [], None)
+                en, err = self.translate_for_mode(t, allow_blocked=True)
+                ok, why, _ = self._last_gate
                 if err:
                     failures += 1
                     texts.append(t)
+                    gate_status.append("NOT TRANSLATED")
+                    gate_detail.append(err.splitlines()[0][:120])
                 else:
                     texts.append(en)
-            if failures:
+                    gate_status.append("PASS" if ok else "BLOCKED")
+                    gate_detail.append("" if ok else "; ".join(why)[:120])
+            if failures == len(df):
+                # Nothing survived. This IS fatal - there is no table to show.
                 raise RuntimeError(
-                    f"English (local LLM) mode: {failures} of {len(df)} rows "
-                    f"failed to translate. Check the console: the usual causes "
-                    f"are Ollama not running (start it with 'ollama serve') or "
-                    f"the model refusing, which the guardrail logs. "
-                    f"No results are shown, because mixing translated "
-                    f"and untranslated rows would put two different pipelines in "
-                    f"one table.")
+                    f"None of the {len(df)} rows could be translated. Check "
+                    f"the console: the usual causes are Ollama not running "
+                    f"(start it with 'ollama serve') or the model refusing, "
+                    f"which the guardrail logs.")
+
+            # A partial failure is NOT fatal any more. It used to abort the
+            # whole run, on the reasoning that mixing translated and
+            # untranslated rows would put two pipelines in one table. The
+            # reasoning was right; the remedy was too blunt. One "n/a"
+            # complaint - which a real spreadsheet always has - destroyed the
+            # other 499 rows, and the operator was shown nothing at all.
+            #
+            # Now every row carries its own verdict and untranslated rows are
+            # scored by nobody, so the two pipelines still never mix: a row
+            # either has an English translation and a triage level, or it has
+            # neither and says why.
+            self._batch_failures = failures
+
             df = df.copy()
             df["Complaint_Text"] = texts
+        pr = getattr(self, "_batch_progress", {})
+        pr["done"] = pr.get("total", 0)
+        pr["text"] = "scoring"
         results, _ = predict_dataframe(self.active_artifacts(), df)
+        pr["finished"] = True
+
+        if gate_status:
+            results["Translation"] = texts
+            results["Gate_Status"] = gate_status
+            results["Gate_Detail"] = gate_detail
+            # A blocked row must not carry a triage level. Scoring it anyway
+            # and hoping the operator reads a status column is how a stomach
+            # complaint gets actioned as cardiac; the single-patient path
+            # already refuses outright, and a spreadsheet should not be the
+            # laxer of the two.
+            blocked = [i for i, g in enumerate(gate_status) if g != "PASS"]
+            for col in ("Predicted_Level_0to3", "Predicted_Triage_Level",
+                        "Predicted_Label", "Confidence",
+                        "P_L0", "P_L1", "P_L2", "P_L3"):
+                if col in results.columns:
+                    results.loc[results.index[blocked], col] = None
+            import pandas as _pd
+            for i in blocked:
+                prev = results.at[results.index[i], "Notes"]
+                prev = "" if prev is None or _pd.isna(prev) else str(prev)
+                results.at[results.index[i], "Notes"] = (
+                    f"{prev}NOT SCORED - {gate_status[i]}: {gate_detail[i]}; ")
 
         out_base = os.path.splitext(path)[0] + "_predictions"
         results.to_csv(out_base + ".csv", index=False)
@@ -1845,9 +1934,22 @@ class TriageGUI(tk.Tk):
         for row in self.batch_tree.get_children():
             self.batch_tree.delete(row)
 
+        import pandas as _pd
         counts = {i: 0 for i in range(1, 5)}
+        skipped = 0
         for _, r in results.iterrows():
-            level = int(r["Predicted_Triage_Level"])
+            raw_level = r.get("Predicted_Triage_Level")
+            # A row the gate blocked, or one that never translated, carries
+            # no level by design. int(nan) raises, and a row shown with a
+            # fabricated level would defeat the point of withholding it.
+            if raw_level is None or _pd.isna(raw_level):
+                skipped += 1
+                self.batch_tree.insert(
+                    "", "end", text=str(r.get("Complaint_Text", ""))[:110],
+                    values=("-", r.get("Gate_Status", "NOT SCORED"), "-",
+                            str(r.get("Gate_Detail") or r.get("Notes", ""))[:90]))
+                continue
+            level = int(raw_level)
             counts[level] = counts.get(level, 0) + 1
             self.batch_tree.insert(
                 "", "end", text=str(r.get("Complaint_Text", ""))[:110],
@@ -1858,9 +1960,14 @@ class TriageGUI(tk.Tk):
         total = len(results)
         parts = [f"Level {lvl} {LEVEL_NAMES[lvl - 1]}: {counts.get(lvl, 0)}"
                  for lvl in range(1, 5)]
+        line = f"{total - skipped} of {total} patients triaged.   " + "    ".join(parts)
+        if skipped:
+            # Stated on the summary line, not buried in a column. A run that
+            # silently drops rows reads as a complete triage of the file.
+            line += (f"\n{skipped} row(s) NOT scored - blocked by the "
+                     f"anatomical gate or not translated. See Gate_Status.")
         self.batch_summary.configure(
-            text=f"{total} patients triaged.   " + "    ".join(parts)
-                 + f"\nSaved to {os.path.basename(out_base)}.csv and .xlsx")
+            text=line + f"\nSaved to {os.path.basename(out_base)}.csv and .xlsx")
         self.status.set(f"Batch complete: {total} patients.")
 
     # =================================================================

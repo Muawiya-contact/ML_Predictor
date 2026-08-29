@@ -1383,6 +1383,11 @@ NO_TEXT_SIGNAL_WARNING = (
 )
 
 
+#: Tokens that mean "no complaint was recorded".
+TEXT_PLACEHOLDERS = {"na", "nil", "none", "nan", "null", "unknown", "nothing",
+                     "empty", "blank", "nd", "unk"}
+
+
 def has_text_signal(text):
     """True when any token survives the normalization pipeline.
 
@@ -1398,9 +1403,17 @@ def has_text_signal(text):
     if text is None:
         return False
     try:
-        return bool(normalize_roman_urdu(text).split())
+        tokens = normalize_roman_urdu(text).split()
     except Exception:
         return False
+    # "n/a" cleans to the two tokens "n" and "a", which counted as signal and
+    # took the full-confidence path. Single characters carry no clinical
+    # meaning on their own, and these placeholders are how an operator writes
+    # "nothing here" - including 'unknown', which this module itself
+    # substitutes for a missing complaint before predicting.
+    meaningful = [t for t in tokens
+                  if len(t) > 1 and t not in TEXT_PLACEHOLDERS]
+    return bool(meaningful)
 
 
 def encode_categoricals(art, codes):
@@ -1448,13 +1461,28 @@ def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
     text_feat = build_text_features(art, [complaint])
 
     import pandas as pd
+    # Coerce exactly as predict_dataframe does. This path used to hand raw
+    # values to the scaler, so a typo'd vital ("l10" for 110) raised
+    # ValueError out of sklearn instead of falling back to the training mean
+    # with a note. The GUI never hit it - fnum() rejects bad input at the
+    # form - but every other caller of predict_one() was one typo from a
+    # traceback, and the batch path had handled this correctly for ages.
+    cat_warns = []
+    means = {f: m for f, m in zip(NUMERICAL_FEATURES, art['scaler'].mean_)}
+    raw_vitals = [age, heart_rate, systolic_bp, diastolic_bp, temperature, spo2]
+    vitals = []
+    for field, raw in zip(NUMERICAL_FEATURES, raw_vitals):
+        val, substituted = _safe_float(raw, means[field])
+        if substituted:
+            blank = raw is None or (isinstance(raw, float) and np.isnan(raw))
+            cat_warns.append(f"{field} {'missing' if blank else f'unreadable ({raw!r})'}"
+                             f" -> replaced with the training mean")
+        vitals.append(val)
     numerical = art['scaler'].transform(pd.DataFrame(
-        [[age, heart_rate, systolic_bp, diastolic_bp, temperature, spo2]],
-        columns=NUMERICAL_FEATURES))
+        [vitals], columns=NUMERICAL_FEATURES))
     # Unknown-category fallbacks were previously computed and thrown away
     # here; only the batch path ever surfaced them. Collect them so a
     # single prediction can say "ECG_Status was not recognised" too.
-    cat_warns = []
     categorical = encode_categoricals(art, [[
         safe_encode(art['le_gender'], gender,         cat_warns, 'Gender'),
         safe_encode(art['le_mode'],   mode_of_arrival, cat_warns, 'Mode_of_Arrival'),

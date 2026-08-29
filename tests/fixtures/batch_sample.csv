@@ -1,0 +1,9 @@
+Complaint_Text,Age,Gender,Mode_of_Arrival,Heart_Rate,Systolic_BP,Diastolic_BP,Temperature,SpO2,AVPU,ECG_Status
+seena mein shadeed dard aur pasina aa raha hai,62,Male,Ambulance,118,158,96,37.1,93,A,ST elevation
+paet may darad aur bukar hai,34,Female,Walk-in,96,124,78,38.4,97,A,Normal
+sar mein chot lagi hai accident ke baad,27,Male,Ambulance,102,136,84,36.9,96,V,Normal
+seena mein dard kandhay tak ja raha hai,58,Male,Ambulance,110,150,92,37.0,94,A,ST depression
+saans phool rahi hai aur seena tight hai,71,Female,Wheelchair,124,142,88,37.2,89,A,Sinus tachycardia
+n/a,45,Male,Walk-in,88,120,80,36.8,98,A,Normal
+gala kharab hai aur khansi,19,Female,Walk-in,l10,118,76,37.6,99,A,Normal
+dil ki dhadkan bohat tez ho rahi hai,66,Female,Ambulance,,166,98,37.0,92,A,Atrial fibrillation
