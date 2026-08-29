@@ -800,8 +800,8 @@ class TriageGUI(tk.Tk):
                 return None, (
                     f"Ollama is not reachable at {OLLAMA_URL}.\n\n"
                     f"Start it with:\n    ollama serve\n\n"
-                    f"Or switch back to Roman Urdu (Offline), which needs no "
-                    f"service at all.")
+                    f"Translation is the only triage path now, so nothing "
+                    f"can be scored until it is running.")
 
             have = ollama_models()
             model = select_translation_model(have)
@@ -810,8 +810,8 @@ class TriageGUI(tk.Tk):
                 self._offer_model_pull()
                 return None, (
                     "Ollama is running but has no models installed.\n\n"
-                    "Use the download prompt, or switch back to "
-                    "Roman Urdu (Offline).")
+                    "Use the download prompt. Without a model the app "
+                    "cannot translate, and no prediction will be made.")
 
             if model != self._ollama_model_note:
                 # Say so once when a fallback is in play, so a different
@@ -822,14 +822,32 @@ class TriageGUI(tk.Tk):
             out = translate_roman_urdu(text, model=model)
         except Exception as e:
             return None, (f"Translation failed: {type(e).__name__}: {e}\n\n"
-                          f"Roman Urdu (Offline) mode is unaffected.")
+                          f"No prediction was made.")
 
         if not out:
             return None, (
                 f"{model} returned nothing. The console shows the reason.\n\n"
-                f"No prediction was made - this mode does not fall back to "
-                f"the offline Roman Urdu model, so the level you see is never "
-                f"from a pipeline you did not choose.")
+                f"No prediction was made - the app never falls back to a "
+                f"different model, so the level you see is never from a "
+                f"pipeline you did not ask for.")
+
+        # Deterministic anatomical gate. The GUI has no second pipeline to
+        # fall back to any more, so a drifted translation must BLOCK rather
+        # than quietly score: a stomach complaint rendered as chest pain
+        # would otherwise produce a confident cardiac triage level with
+        # nothing on screen to suggest the body part had changed.
+        from src.offline_pipeline import (fuzzy_normalize_roman_urdu,
+                                          verify_anatomical_integrity)
+        ok, failures = verify_anatomical_integrity(
+            fuzzy_normalize_roman_urdu(text, verbose=False), out)
+        if not ok:
+            return None, (
+                "Anatomical check failed - the translation moved the "
+                "complaint to a different part of the body.\n\n"
+                + "\n".join(failures) +
+                f"\n\nTranslation was: {out!r}\n\n"
+                f"No prediction was made. Rephrase the complaint, or retry - "
+                f"the translator is not deterministic across model versions.")
         return out, None
 
     def _offer_model_pull(self, model="llama3.2"):
@@ -870,8 +888,7 @@ class TriageGUI(tk.Tk):
         status.pack(fill="x", pady=(4, 6))
         bar = ttk.Progressbar(frame, length=380, mode="determinate", maximum=100)
         bar.pack(fill="x")
-        tk.Label(frame, text="You can keep using Roman Urdu (Offline) while "
-                             "this downloads.",
+        tk.Label(frame, text="Triage stays unavailable until this finishes.",
                  bg=CARD, fg=MUTED, font=("Segoe UI", 8),
                  anchor="w", wraplength=380).pack(fill="x", pady=(8, 0))
 
@@ -1679,11 +1696,11 @@ class TriageGUI(tk.Tk):
         review = r.get("review_recommended") or []
         if self.in_english_mode():
             self.stop_summary.configure(text=(
-                "MODE: ENGLISH (GPT). The learned Roman Urdu stop-word list "
-                "below is NOT applied in this mode - the English text goes "
-                "to the sentence-transformer directly. The table is shown for "
-                "reference; switch to Roman Urdu (Offline) to see the list "
-                "that is actually in use."))
+                "The learned Roman Urdu stop-word list below is NOT applied "
+                "to the triage path: complaints are translated first, and the "
+                "English text goes to the sentence-transformer directly. The "
+                "table is shown for reference - it documents how the list was "
+                "derived, not what runs on your input."))
             return
         self.stop_summary.configure(text=(
             f"A token is removed only when ALL THREE hold:  document frequency "
