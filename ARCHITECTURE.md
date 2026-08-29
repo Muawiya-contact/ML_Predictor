@@ -59,18 +59,47 @@ Existing files this builds on:
 - `triage_pipeline.py` — shared module: text normalization, fuzzy matching,
   diacritization, Bag-of-Words + attention, structured-feature helpers,
   `predict_*` functions, artifact loading.
-- `triage_bow_fuzzy_diac.py` — training script (dictionary + BoW path).
-- `predict_batch.py`, `prediction.py`, `prediction_interactive.py` — inference.
-- `embedding_experiment.py` — already compares dictionary vs embeddings vs both,
+- `train_embedding_pipeline.py` — training script for the deployed bundle.
+- `predict_batch.py` — file-based inference.
+- `run_inference.py` — CLI over the offline Ollama pipeline.
+- `src/offline_pipeline.py` — prompt, translation, refusal guardrail, fuzzy
+  dictionary, anatomical assertion gate. This is where the serving path lives.
+- `embedding_evaluation.py` — compares dictionary vs embeddings vs both,
   using `sentence-transformers`. **This is the starting point for the embedding
   work** — it already loads an offline model, encodes complaints, fuses with the
   structured features, and trains the same classifier.
 - `triage_mixed_language_dataset.csv` — 1,204 labelled patients.
 
-Reuse `embedding_experiment.py`'s encoding + fuse + train logic rather than
+Reuse `train_embedding_pipeline.py`'s encoding + fuse + train logic rather than
 writing it again.
 
 ---
+
+
+### The serving path today
+
+The document below describes the embedding pipeline as designed. What actually
+serves a patient now has two stages in front of it and one after:
+
+```
+raw Roman Urdu
+  1. fuzzy_normalize_roman_urdu()   src/offline_pipeline.py  - local, deterministic
+  2. translate_roman_urdu()         Ollama on localhost, llama3.2, temperature 0
+  3. verify_anatomical_integrity()  deterministic gate - THIS is the safety check
+  4. build_text_features()          triage_pipeline.py - stop words + encoder
+  5. predict_proba -> argmax        confidence is the winning class probability
+```
+
+Three things this changed, all of them load-bearing:
+
+- **The gate replaced cosine similarity as the decision.** Cosine is still
+  measured and reported and decides nothing: a correct translation scores
+  0.8054 and *"My leg is broken after a fall"* scores 0.7922, so no threshold
+  separates them.
+- **The GUI has one pipeline.** The mode toggle is gone; it serves
+  `triage_model_embedding_english/` (2,252 rows), not the 10,000-row bundle.
+- **The dictionary runs before the LLM, not instead of it.** Variants collapse
+  onto a canonical Roman Urdu token so the model sees one spelling per word.
 
 ## 3. Task list
 
@@ -119,7 +148,7 @@ raw text -> lowercase/clean -> fuzzy normalize -> remove learned stop words -> e
 
 Wire the pipeline so preprocessed complaint text goes through the sentence
 transformer, and the resulting embedding is concatenated with the structured
-features and fed to the Logistic Regression classifier. `embedding_experiment.py`
+features and fed to the classifier. `embedding_evaluation.py`
 already does the encode + fuse + train; promote that path into the main training
 flow once Task 1's preprocessing is in front of it.
 

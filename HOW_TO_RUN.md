@@ -228,7 +228,7 @@ Easiest fix — type:
 pip install scikit-learn==1.6.1
 ```
 (Or, if you want to keep your newer version, run
-`python triage_bow_fuzzy_diac.py` once to rebuild the model on your version.)
+`python train_embedding_pipeline.py` once to rebuild the model on your version.)
 
 **It opened the wrong folder in PowerShell**
 The command only works if PowerShell is "inside" the folder with
@@ -246,13 +246,25 @@ address bar).
 | **Open the app with buttons and tabs**    | `python triage_gui.py`                             |
 | Triage the 100 example patients           | `python predict_batch.py sample_100_patients.xlsx` |
 | Triage my own file                        | `python predict_batch.py my_patients.xlsx`         |
-| Triage one patient by hand (Q&A style)    | `python prediction_interactive.py`                 |
+| Triage one complaint from the terminal    | `python run_inference.py "seena mein dard"`        |
+| Check Ollama, encoder and classifiers     | `python run_inference.py --check`                  |
+| Start the local translator                | `ollama serve` then `ollama pull llama3.2`         |
 | See files in the current folder           | `dir`                                              |
 | Check Python is installed                 | `python --version`                                 |
 
 If you would rather click than type, `python triage_gui.py` opens a window with
-six tabs — enter a patient, upload a spreadsheet, or look at the results and
-charts. A green bar at the top of each tab names the method doing the work.
+six tabs — enter a patient, upload a spreadsheet, or look at the results. A
+green bar at the top of each tab names the method doing the work.
+
+> **The app needs Ollama running.** Every complaint is translated locally
+> before it is scored, so with no translator there is no prediction — the app
+> reports that rather than answering from a different model. Start it with
+> `ollama serve`, and `sudo systemctl enable --now ollama` if it keeps
+> stopping.
+>
+> **Batch runs are slow by nature.** One local translation per row, about 11
+> seconds each, so 100 patients is roughly 18 minutes. The progress bar shows
+> the row count and an estimate; it makes the wait legible, not shorter.
 
 ---
 
