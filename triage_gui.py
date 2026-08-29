@@ -106,27 +106,25 @@ EMBED_MODEL_DIR = resolve_project_file("triage_model_embedding")
 STOPWORDS_FILE = resolve_project_file("learned_stopwords.json")
 
 # ======================================================================
-# MODE SWITCH  (experimental branch only)
+# SINGLE PIPELINE
 #
-# MODE_URDU is the submitted system, byte-for-byte: the offline Roman Urdu
-# pipeline against triage_model_embedding/. It makes zero network calls.
+# The mode toggle is gone. The GUI now has ONE triage path: translate the
+# typed complaint with Ollama on localhost, then score it with the
+# English-trained bundle. No network call is made either way.
 #
-# MODE_ENGLISH translates the typed complaint with Ollama on localhost,
-# encodes the English result directly, and predicts with the
-# English-trained bundle. It makes zero network calls either: the
-# gpt-4o-mini/OpenRouter path this used to take was removed once the local
-# model matched it, so BOTH modes are now fully offline.
+# READ THIS BEFORE QUOTING A NUMBER FROM THIS APP. Removing the toggle also
+# removed access to the 10,000-row submitted model - that bundle expects
+# Roman Urdu and cannot be fed translated English without train/serve skew,
+# so it could not simply be pointed at the new path. What the GUI scores
+# with now is the 2,252-row English bundle, which the banner has always
+# marked EXPERIMENTAL. That is a real reduction in training data and it is
+# deliberate; triage_model_embedding/ is still on disk and still what
+# predict_batch.py and the docs refer to as the submitted system.
 #
-# It still reports translation failures rather than quietly answering from
-# the offline Roman Urdu model - a silent fallback would mean the operator
-# could not tell which pipeline produced the triage level in front of them.
-#
-# The English BUNDLE, though, was trained on text that gpt-4o-mini
-# translated. That is a fact about the training data and it does not change
-# by serving it locally, which is why the banner still says so.
-# ======================================================================
-MODE_URDU = "urdu"
-MODE_ENGLISH = "english"
+# Translation failures are reported, never silently swapped for a different
+# model. There is no second pipeline to fall back to, and an operator who
+# cannot tell which model produced a triage level is worse off than one
+# facing an honest error.
 ENGLISH_MODEL_DIR = "triage_model_embedding_english"
 PIPELINE_RESULTS = resolve_project_file("embedding_pipeline_results.csv")
 EVAL_RESULTS = resolve_project_file("embedding_evaluation_results.csv")
@@ -642,25 +640,9 @@ class TriageGUI(tk.Tk):
         tk.Label(bar, text="  Roman Urdu Emergency Triage",
                  bg=ACCENT, fg="white",
                  font=("Segoe UI Semibold", 15)).pack(side="left", padx=(14, 0))
-        # ONE mode switch, in the header, so every tab reads the same value.
-        # Per-tab settings were the obvious alternative and the wrong one:
-        # two tabs disagreeing about which pipeline is live is exactly how a
-        # result gets attributed to the wrong model.
-        self.mode = tk.StringVar(value=MODE_URDU)
-        self.mode.trace_add("write", lambda *_: self._on_mode_change())
-        box = tk.Frame(bar, bg=ACCENT)
-        box.pack(side="right", padx=(0, 12))
-        tk.Label(box, text="Mode:", bg=ACCENT, fg="#cfe0f2",
-                 font=("Segoe UI", 9)).pack(side="left", padx=(0, 6))
-        for value, label in [(MODE_URDU, "Roman Urdu (Offline)"),
-                             (MODE_ENGLISH, "English (Local LLM)")]:
-            tk.Radiobutton(box, text=label, value=value, variable=self.mode,
-                           bg=ACCENT, fg="white", selectcolor=ACCENT,
-                           activebackground=ACCENT, activeforeground="white",
-                           font=("Segoe UI", 9), highlightthickness=0,
-                           bd=0).pack(side="left", padx=3)
-        self.header_note = tk.Label(bar, text="offline  |  CPU only  |  research prototype",
-                                    bg=ACCENT, fg="#cfe0f2", font=("Segoe UI", 9))
+        self.header_note = tk.Label(
+            bar, text="English via local Ollama  |  offline  |  CPU only  |  research prototype",
+            bg=ACCENT, fg="#cfe0f2", font=("Segoe UI", 9))
         self.header_note.pack(side="right", padx=(0, 10))
 
     def _build_statusbar(self):
@@ -778,17 +760,12 @@ class TriageGUI(tk.Tk):
     # ---------------- mode plumbing ----------------
 
     def in_english_mode(self):
-        return getattr(self, "mode", None) is not None and \
-            self.mode.get() == MODE_ENGLISH
+        """Always true now. Kept as a method rather than inlined at ~12 call
+        sites, so restoring a second pipeline stays a one-line change."""
+        return True
 
     def active_artifacts(self):
-        """The bundle the current mode predicts with.
-
-        The English bundle is loaded lazily and cached: Mode 1 must never
-        pay for it, and must never touch it.
-        """
-        if not self.in_english_mode():
-            return self.artifacts
+        """The English bundle - the only one the GUI predicts with."""
         if getattr(self, "artifacts_en", None) is None:
             from triage_pipeline import load_artifacts, describe_model
             d = resolve_project_file(ENGLISH_MODEL_DIR)
@@ -872,9 +849,10 @@ class TriageGUI(tk.Tk):
                 f"Download {model} now? It is about 2 GB and needs a network "
                 f"connection for the download only - translation afterwards "
                 f"is fully offline.\n\n"
-                f"Choosing No keeps you on Roman Urdu (Offline), which works "
-                f"without any download."):
-            self.mode.set(MODE_URDU)
+                f"Without it the app cannot translate, and triage will "
+                f"report a translation error rather than guess."):
+            self.status.set(f"{model} not installed - triage will fail until "
+                            f"it is pulled.")
             return
 
         self._pull_active = True
@@ -930,38 +908,12 @@ class TriageGUI(tk.Tk):
                 else:
                     messagebox.showerror(
                         "Download failed",
-                        f"{shared['msg']}\n\nStaying on Roman Urdu (Offline).")
-                    self.mode.set(MODE_URDU)
+                        f"{shared['msg']}\n\nTriage will report a "
+                        f"translation error until a model is installed.")
                 return
             win.after(300, poll)
 
         win.after(300, poll)
-
-    def _on_mode_change(self):
-        """Repaint everything that states which pipeline is live."""
-        english = self.in_english_mode()
-        if hasattr(self, "header_note"):
-            self.header_note.configure(
-                text=("English via local Ollama - still offline"
-                      if english else "offline  |  CPU only  |  research prototype"),
-                fg="#ffd9d9" if english else "#cfe0f2")
-        try:
-            if english:
-                self.active_artifacts()       # surface load errors immediately
-        except Exception as e:
-            messagebox.showerror(
-                "English mode unavailable",
-                f"Could not load {ENGLISH_MODEL_DIR}/:\n\n{e}\n\n"
-                f"Staying in the offline Roman Urdu model.")
-            self.mode.set(MODE_URDU)
-            return
-        self._refresh_deployed_banners()
-        if self.stopword_report is not None:
-            self._populate_stopwords()
-        self.status.set(
-            ("English (Local LLM) mode - translation runs on this machine."
-             if english else
-             "Roman Urdu (Offline) mode - no network calls."))
 
     def _deployed_line(self):
         """One-line 'this is the model making the predictions' summary."""
