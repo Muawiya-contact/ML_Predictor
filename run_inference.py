@@ -116,19 +116,24 @@ def render(res: dict) -> None:
         print("\n  embedding alignment")
         if "roman_urdu_vs_english" in sim:
             v = sim["roman_urdu_vs_english"]
-            passed = sim.get("passes_threshold")
-            mark = "PASS" if passed else "BELOW"
-            thr = sim.get("threshold", DEFAULT_THRESHOLD)
             print(f"    Roman Urdu  vs  English      {v:.4f}   "
-                  f"{mark} @ {thr:.2f}")
-            src = res.get("accepted_source")
-            if src:
-                print(f"    accepted source              "
-                      f"{'ENGLISH translation' if src == 'english' else 'ROMAN URDU original'}")
+                  f"(diagnostic only - decides nothing)")
         for key, label in [("english_vs_reference", "English     vs  reference  "),
                            ("roman_urdu_vs_reference", "Roman Urdu  vs  reference  ")]:
             if key in sim:
                 print(f"    {label}  {sim[key]:.4f}")
+
+    gate = res.get("anatomical_gate")
+    if gate:
+        print("\n  anatomical gate  (deterministic - this is the decision)")
+        print(f"    result                       "
+              f"{'PASS' if gate['passed'] else 'BLOCKED'}")
+        for f in gate.get("failures", []):
+            print(f"    blocked because              {f}")
+        src = res.get("accepted_source")
+        if src:
+            print(f"    accepted source              "
+                  f"{'ENGLISH translation' if src == 'english' else 'ROMAN URDU original'}")
 
     for note in res.get("notes", []):
         print(f"\n  [note] {note}")

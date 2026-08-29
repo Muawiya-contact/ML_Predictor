@@ -46,6 +46,7 @@ from __future__ import annotations
 import json
 import os
 import re
+from difflib import get_close_matches
 import sys
 import urllib.error
 import urllib.request
@@ -134,6 +135,7 @@ Always map Roman Urdu body parts strictly to their precise English anatomical eq
 - Heart: "dil"
 - Eye / Eyes: "aankh", "aankhen", "aakhein"
 - Ear / Ears: "kaan"
+- Shoulder: "kandha", "kandhay", "kandhe", "kandha" (NEVER translate as arm or hand - a shoulder is not an arm, and pain radiating to the shoulder is a different clinical sign)
 - Arm / Hand: "baazu", "bazu", "haath", "hath"
 - Leg / Foot: "taang", "tang", "paon", "pair"
 
@@ -315,6 +317,16 @@ def pull_model(model: str = "llama3.2", url: str = OLLAMA_URL,
 #: rather than someone in the room asking for help.
 USER_TEMPLATE = "<record>{}</record>"
 
+#: Seconds to wait on one /api/chat call. Was 120, which is ample once the
+#: model is resident and not enough for a cold start: llama3.2 loading while
+#: the GUI loads its sentence encoders on the same CPU overran it three
+#: times in one session, and each overrun surfaced as "Is it running?" for a
+#: service that was running perfectly well. A slow first translation beats a
+#: failed one. Note the refusal retry means a fully wedged call can now take
+#: up to 2x this before returning.
+TRANSLATE_TIMEOUT = 300.0
+
+
 #: Two completed conversions, replayed as real conversation turns rather than
 #: described in the system prompt.
 #:
@@ -373,7 +385,7 @@ def _ollama_chat(messages: list, model: str, url: str,
 
 def translate_roman_urdu(text: str, model: str = OLLAMA_MODEL,
                          url: str = OLLAMA_URL,
-                         timeout: float = 120.0) -> Optional[str]:
+                         timeout: float = TRANSLATE_TIMEOUT) -> Optional[str]:
     """Roman Urdu -> English via local Ollama. None on any failure.
 
     Raw urllib rather than the ollama SDK: one fewer dependency, and the
@@ -389,6 +401,9 @@ def translate_roman_urdu(text: str, model: str = OLLAMA_MODEL,
     text = (text or "").strip()
     if not text:
         return None
+    # Dictionary pass first, so Ollama sees one spelling per word. Local,
+    # deterministic, and logged.
+    text = fuzzy_normalize_roman_urdu(text)
     # Resolve to something actually installed. Calling a missing tag returns
     # a 404 that reads like a server fault rather than "you have no model".
     resolved = select_translation_model(preferred=model)
@@ -510,6 +525,164 @@ def sanitize_translation(out: str, original: str = "") -> Optional[str]:
               f"text. Full reply: {out[:160]!r}", flush=True)
         return None
     return cleaned
+
+
+# ----------------------------------------------------------------------
+# 1b. Dictionary normalization + the anatomical assertion gate
+# ----------------------------------------------------------------------
+
+#: Spelling variants collapsed onto one canonical Roman Urdu token before
+#: the text ever reaches Ollama. The English glosses are documentation -
+#: nothing translates from this table, the LLM still does that. Mapping to
+#: a canonical ROMAN URDU key rather than to English is deliberate: it
+#: leaves one spelling for the model to have seen, without pre-empting the
+#: translation and without the train/serve skew that pushing English back
+#: through a Roman Urdu dictionary caused before.
+ROMAN_URDU_DICTIONARY = {
+    # anatomy
+    "pait": "stomach", "paet": "stomach", "pet": "stomach", "shikm": "stomach",
+    "maida": "stomach", "mayda": "stomach", "payt": "stomach", "peit": "stomach",
+    "seena": "chest", "seene": "chest", "chati": "chest", "chaati": "chest",
+    "sar": "head", "sir": "head", "sear": "head", "khopri": "head",
+    "gala": "throat", "galao": "throat", "gardan": "neck",
+    "kamar": "back", "peeth": "back", "pith": "back",
+    "kandha": "shoulder", "kandhay": "shoulder", "kandhe": "shoulder",
+    "baazu": "arm", "bazu": "arm", "haath": "hand",
+    "taang": "leg", "tang": "leg", "paon": "foot", "pair": "foot",
+    "dil": "heart", "aankh": "eye", "kaan": "ear",
+    # symptoms and modifiers
+    "dard": "pain", "darad": "pain", "daard": "pain", "dukhna": "pain",
+    "dardd": "pain", "dhard": "pain",
+    "ghabrahat": "anxiety", "bechaini": "restlessness",
+    "bukhar": "fever", "bookhar": "fever",
+    "ulti": "vomiting", "oolti": "vomiting", "matli": "nausea",
+    "pasina": "sweating", "paseena": "sweating",
+    "chakkar": "dizziness", "behoshi": "fainting",
+    "khansi": "cough", "sujan": "swelling", "chot": "injury",
+    "shadeed": "severe",
+}
+
+#: Words that must NEVER be fuzzy-matched, measured against this project's
+#: own 10,000-row corpus rather than guessed. Every entry here was observed
+#: being remapped onto a medical term:
+#:
+#:     sa      -> sar      729x   comparison particle, "aag sa jalna"
+#:     si      -> sir      452x   the same particle
+#:     bhar    -> bukhar   191x   "din bhar", all day  ->  FEVER
+#:     peene   -> seene    116x   "to drink"           ->  CHEST
+#:     chalti  -> chati     24x   "walking"            ->  CHEST
+#:     chadhti -> chati     24x   "climbing"           ->  CHEST
+#:
+#: This is the same failure that fuzzy matching produced here once before,
+#: when it invented symptoms in 33.7% of rows. The lesson then and now: no
+#: single cutoff separates a typo from a different word. Raising the cutoff
+#: to 0.85 kills five of the six, and 'chalti' -> 'chati' survives even at
+#: 0.90, because they genuinely are one edit apart. A threshold cannot fix
+#: that; only naming the word can.
+FUZZY_BLOCKLIST = {
+    "sa", "si", "bhar", "peene", "peena", "chalti", "chadhti", "chadte",
+    "chalte", "chal", "hai", "hay", "par", "pas", "kar", "kia", "kya",
+    "raha", "rahi", "meri", "mera", "mein", "may", "aur", "phir", "tak",
+    "koi", "kuch", "bohat", "buhat", "bahut", "zyada", "thora", "thoda",
+}
+
+#: A typo is a small perturbation of a longish word. Short tokens are
+#: mostly function words, where one edit is the difference between two
+#: unrelated words rather than a misspelling.
+FUZZY_MIN_LEN = 4
+FUZZY_CUTOFF = 0.88
+
+#: Roman Urdu body part -> the English terms any faithful translation of it
+#: must contain. Order does not matter; one match is enough.
+ANATOMICAL_ASSERTIONS = {
+    r"\b(pait|paet|pet|payt|peit|shikm|maida|mayda)\b": ["stomach", "abdomen", "abdominal", "belly"],
+    r"\b(seena|seene|chati|chaati)\b": ["chest", "thorax", "thoracic"],
+    r"\b(sar|sir|sear|khopri)\b": ["head", "skull", "cranial", "scalp"],
+    r"\b(gala|galao|gardan)\b": ["throat", "neck", "pharyn"],
+    r"\b(peeth|pith|kamar)\b": ["back", "lumbar", "spine"],
+    r"\b(kandha|kandhay|kandhe)\b": ["shoulder"],
+    r"\b(taang|tang|paon|pair)\b": ["leg", "foot", "feet", "limb"],
+    r"\b(baazu|bazu|haath|hath)\b": ["arm", "hand", "forearm"],
+}
+
+_ANATOMICAL_COMPILED = [(re.compile(p, re.I), kws)
+                        for p, kws in ANATOMICAL_ASSERTIONS.items()]
+_WORD_SPLIT = re.compile(r"(\W+)")
+
+
+def fuzzy_normalize_roman_urdu(text: str, verbose: bool = True) -> str:
+    """Collapse spelling variants onto canonical Roman Urdu, typos included.
+
+    Runs entirely locally, before Ollama sees anything. Punctuation and
+    spacing are preserved - the string is split on word boundaries rather
+    than whitespace, so "dard, ulti" does not become "dard ulti".
+
+    Fuzzy matching here is deliberately timid. See FUZZY_BLOCKLIST for what
+    an aggressive cutoff did to this corpus.
+    """
+    if not text:
+        return text
+    keys = list(ROMAN_URDU_DICTIONARY.keys())
+    out, changes = [], []
+
+    for token in _WORD_SPLIT.split(str(text)):
+        low = token.lower()
+        if not token.isalpha() or low in ROMAN_URDU_DICTIONARY:
+            out.append(token)
+            continue
+        if low in FUZZY_BLOCKLIST or len(low) < FUZZY_MIN_LEN:
+            out.append(token)
+            continue
+        match = get_close_matches(low, keys, n=1, cutoff=FUZZY_CUTOFF)
+        # A typo should not change the word's length much. "chalti"/"chati"
+        # slipped through on ratio alone; requiring a near-equal length as
+        # well as a high ratio is a second, independent constraint.
+        if match and abs(len(match[0]) - len(low)) <= 1:
+            out.append(match[0])
+            changes.append(f"{low}->{match[0]}")
+        else:
+            out.append(token)
+
+    if changes and verbose:
+        # Every substitution is announced. A normalizer that silently
+        # rewrites a complaint is indistinguishable from one that corrupts
+        # it, and this project has already shipped the corrupting version.
+        print(f"[dictionary] fuzzy: {', '.join(changes)}", flush=True)
+    return "".join(out)
+
+
+def verify_anatomical_integrity(roman_urdu: str, translated_english: str) -> tuple:
+    """Deterministic gate: every body part named in the source must survive.
+
+    Returns (ok, list_of_failures). This replaces the cosine check as the
+    DECISION. Cosine is still measured and reported, but it cannot decide
+    anything: against "seena mein shadeed dard aur pasina", a correct
+    translation scored 0.8054 and "My leg is broken after a fall" scored
+    0.7922 - 0.013 apart, with the badly drifted candidate outscoring the
+    mildly drifted one. No threshold separates those. This does, exactly,
+    for the one failure mode that actually matters here.
+
+    Pass the NORMALIZED Roman Urdu, not the raw string. A typo the
+    dictionary just repaired ("payt" -> "pait") will not match these
+    patterns in its raw form, and the gate would score a silent pass on
+    precisely the input that most needed checking.
+
+    Deliberately one-directional. It asserts that a named body part is
+    present in the output; it does not assert that nothing else was added.
+    An English translation may legitimately name a region the Roman Urdu
+    only implied, and failing those would make the gate untrustworthy in
+    the direction that gets it switched off.
+    """
+    if not translated_english:
+        return False, ["no translation to check"]
+    english_lower = translated_english.lower()
+    failures = []
+    for pattern, keywords in _ANATOMICAL_COMPILED:
+        found = pattern.search(roman_urdu or "")
+        if found and not any(kw in english_lower for kw in keywords):
+            failures.append(f"{found.group(0)!r} -> expected one of "
+                            f"{keywords}, got none")
+    return (not failures), failures
 
 
 # ----------------------------------------------------------------------
@@ -705,37 +878,35 @@ def run(text: str, reference: Optional[str] = None,
     result["similarity"]["roman_urdu_vs_english"] = sim
     result["similarity"]["passes_threshold"] = sim >= threshold
     result["similarity"]["threshold"] = threshold
+    result["similarity"]["is_gate"] = False
 
-    # SAFETY FALLBACK. Below threshold the translation has moved the
-    # complaint far enough that the English prediction should not be
-    # trusted, so the Roman Urdu answer becomes the accepted one and the
-    # reason is recorded. This is the check earning its keep rather than
-    # printing a number nobody acts on: llama3.2 rendered "seena ... pasina"
-    # (chest pain, sweating) as "headache ... dizziness", which scored 0.79
-    # and flipped the department from Cardiac to Neurological.
-    #
-    # The threshold is doing double duty and cannot be tuned to perfection.
-    # The SAME complaint in Roman Urdu and English sits around 0.84 on this
-    # encoder even when the translation is flawless, which is why the bar is
-    # 0.75 and not the 0.90 that "are these the same sentence" would want:
-    # at 0.90 a correct translation scoring 0.7684 was rejected. The two
-    # bands are close, so this gate catches gross drift, not subtle drift.
-    result["accepted_source"] = "english" if sim >= threshold else "roman_urdu"
-    result["accepted_prediction"] = (result["english_prediction"]
-                                     if sim >= threshold
+    # THE GATE. Deterministic anatomical assertion, on the NORMALIZED source:
+    # a typo the dictionary just repaired would not match the patterns in its
+    # raw form, and the gate would pass exactly the input that needed it most.
+    normalized_source = fuzzy_normalize_roman_urdu(text, verbose=False)
+    ok, failures = verify_anatomical_integrity(normalized_source, english)
+    result["anatomical_gate"] = {"passed": ok, "failures": failures,
+                                 "checked_source": normalized_source}
+
+    # Cosine is measured and reported, and decides nothing. It was the gate
+    # until it was measured: a correct translation of "seena mein shadeed
+    # dard aur pasina" scores 0.8054 and "My leg is broken after a fall"
+    # scores 0.7922, so no threshold separates them. Keeping the number
+    # visible is useful; keeping it in charge was not.
+    result["accepted_source"] = "english" if ok else "roman_urdu"
+    result["accepted_prediction"] = (result["english_prediction"] if ok
                                      else result["roman_urdu_prediction"])
-    if sim < threshold:
+    if ok:
         result["notes"].append(
-            f"SAFETY FALLBACK: similarity {sim:.4f} is below {threshold:.2f}, "
-            f"so the ROMAN URDU prediction is the accepted one. The English "
-            f"translation moved the complaint too far to score from.")
+            "ANATOMICAL GATE PASSED: every body part named in the complaint "
+            "survives into the English, so the ENGLISH prediction is the "
+            "accepted one. The gate checks anatomy, not overall fidelity - "
+            "it cannot see a wrong symptom attached to the right body part.")
     else:
         result["notes"].append(
-            f"Similarity {sim:.4f} clears {threshold:.2f}, so the ENGLISH "
-            f"prediction is the accepted one. Caveat that does not go away: "
-            f"the classifiers were fitted on Roman Urdu vectors, so a passing "
-            f"gate means the translation did not drift - not that the English "
-            f"head is better calibrated.")
+            "ANATOMICAL GATE FAILED: " + "; ".join(failures) + ". The "
+            "translation moved the complaint to a different part of the body, "
+            "so the ROMAN URDU prediction is the accepted one.")
 
     if reference:
         vec_ref = predictor.get_embedding(reference)
