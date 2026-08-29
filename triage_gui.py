@@ -111,12 +111,19 @@ STOPWORDS_FILE = resolve_project_file("learned_stopwords.json")
 # MODE_URDU is the submitted system, byte-for-byte: the offline Roman Urdu
 # pipeline against triage_model_embedding/. It makes zero network calls.
 #
-# MODE_ENGLISH sends the typed complaint to gpt-4o-mini, encodes the
-# English result directly, and predicts with the English-trained bundle.
-# It REQUIRES internet and OPENROUTER_API_KEY, and on any failure it
-# reports the error rather than quietly answering from the offline model -
-# a silent fallback would mean the operator could not tell which pipeline
-# produced the triage level in front of them.
+# MODE_ENGLISH translates the typed complaint with Ollama on localhost,
+# encodes the English result directly, and predicts with the
+# English-trained bundle. It makes zero network calls either: the
+# gpt-4o-mini/OpenRouter path this used to take was removed once the local
+# model matched it, so BOTH modes are now fully offline.
+#
+# It still reports translation failures rather than quietly answering from
+# the offline Roman Urdu model - a silent fallback would mean the operator
+# could not tell which pipeline produced the triage level in front of them.
+#
+# The English BUNDLE, though, was trained on text that gpt-4o-mini
+# translated. That is a fact about the training data and it does not change
+# by serving it locally, which is why the banner still says so.
 # ======================================================================
 MODE_URDU = "urdu"
 MODE_ENGLISH = "english"
@@ -590,6 +597,8 @@ class TriageGUI(tk.Tk):
         self.artifacts = None
         self.stopword_report = None
         self.model_info = None          # which method is actually deployed
+        self._ollama_model_note = None  # last Ollama tag reported to the user
+        self._pull_active = False
         self.model_dir = None
         self._work_queue = queue.Queue()
 
@@ -644,7 +653,7 @@ class TriageGUI(tk.Tk):
         tk.Label(box, text="Mode:", bg=ACCENT, fg="#cfe0f2",
                  font=("Segoe UI", 9)).pack(side="left", padx=(0, 6))
         for value, label in [(MODE_URDU, "Roman Urdu (Offline)"),
-                             (MODE_ENGLISH, "English (GPT)")]:
+                             (MODE_ENGLISH, "English (Local LLM)")]:
             tk.Radiobutton(box, text=label, value=value, variable=self.mode,
                            bg=ACCENT, fg="white", selectcolor=ACCENT,
                            activebackground=ACCENT, activeforeground="white",
@@ -793,38 +802,147 @@ class TriageGUI(tk.Tk):
         return (art or {}).get("manifest", {}) if art else {}
 
     def translate_for_mode(self, text):
-        """Mode 2 only. Returns (english_text, error_message)."""
-        import os as _os
-        if not _os.environ.get("OPENROUTER_API_KEY"):
-            return None, ("OPENROUTER_API_KEY is not set. English (GPT) mode "
-                          "needs it to call the translation API.\n\n"
-                          "Set it and restart, or switch back to "
-                          "Roman Urdu (Offline).")
+        """Mode 2 only. Returns (english_text, error_message).
+
+        Routed through the LOCAL Ollama service. Every failure path here
+        returns a message rather than raising: this is called from the
+        "Triage this patient" handler, and an exception escaping would
+        take the button down with it. A dead translator must degrade to a
+        clear message, never to a dead UI.
+        """
         try:
-            from translate_roman_urdu import translate_roman_urdu
-        except SystemExit as e:
-            return None, f"Translation module refused to load: {e}"
+            from src.offline_pipeline import (OLLAMA_URL, ollama_available,
+                                              ollama_models,
+                                              select_translation_model,
+                                              translate_roman_urdu)
         except Exception as e:
-            return None, f"Could not import the translator: {e}"
+            return None, f"Offline pipeline failed to import: {e}"
+
         try:
-            out = translate_roman_urdu(text)
+            if not ollama_available():
+                return None, (
+                    f"Ollama is not reachable at {OLLAMA_URL}.\n\n"
+                    f"Start it with:\n    ollama serve\n\n"
+                    f"Or switch back to Roman Urdu (Offline), which needs no "
+                    f"service at all.")
+
+            have = ollama_models()
+            model = select_translation_model(have)
+            if model is None:
+                # No model at all - this is the case worth offering to fix.
+                self._offer_model_pull()
+                return None, (
+                    "Ollama is running but has no models installed.\n\n"
+                    "Use the download prompt, or switch back to "
+                    "Roman Urdu (Offline).")
+
+            if model != self._ollama_model_note:
+                # Say so once when a fallback is in play, so a different
+                # translator is never mistaken for the configured one.
+                self._ollama_model_note = model
+                self.status.set(f"English mode: translating with {model}")
+
+            out = translate_roman_urdu(text, model=model)
         except Exception as e:
-            return None, f"Translation request raised: {e}"
+            return None, (f"Translation failed: {type(e).__name__}: {e}\n\n"
+                          f"Roman Urdu (Offline) mode is unaffected.")
+
         if not out:
-            return None, ("The translation API returned nothing. The console "
-                          "shows the status code - a 402 means the OpenRouter "
-                          "account is out of credits.\n\nNo prediction was "
-                          "made. This mode does NOT fall back to the offline "
-                          "model, so that the level you see is never from a "
-                          "pipeline you did not choose.")
+            return None, (
+                f"{model} returned nothing. The console shows the reason.\n\n"
+                f"No prediction was made - this mode does not fall back to "
+                f"the offline Roman Urdu model, so the level you see is never "
+                f"from a pipeline you did not choose.")
         return out, None
+
+    def _offer_model_pull(self, model="llama3.2"):
+        """Offer to download a model, with a live progress bar.
+
+        The pull runs on a worker thread; Tk is not thread-safe, so the
+        worker only stores numbers and a poller on the main thread paints
+        them. Declining leaves the app on the offline Roman Urdu model,
+        which is the whole point - the user is never stuck.
+        """
+        if getattr(self, "_pull_active", False):
+            return
+        if not messagebox.askyesno(
+                "No Ollama model installed",
+                f"English (Local LLM) mode needs a model, and Ollama has "
+                f"none installed.\n\n"
+                f"Download {model} now? It is about 2 GB and needs a network "
+                f"connection for the download only - translation afterwards "
+                f"is fully offline.\n\n"
+                f"Choosing No keeps you on Roman Urdu (Offline), which works "
+                f"without any download."):
+            self.mode.set(MODE_URDU)
+            return
+
+        self._pull_active = True
+        win = tk.Toplevel(self)
+        win.title(f"Downloading {model}")
+        win.transient(self)
+        win.resizable(False, False)
+        frame = tk.Frame(win, bg=CARD, padx=18, pady=16)
+        frame.pack(fill="both", expand=True)
+        tk.Label(frame, text=f"Pulling {model} via Ollama",
+                 bg=CARD, fg=INK, font=("Segoe UI Semibold", 10),
+                 anchor="w").pack(fill="x")
+        status = tk.Label(frame, text="starting...", bg=CARD, fg=MUTED,
+                          font=("Segoe UI", 9), anchor="w", width=52)
+        status.pack(fill="x", pady=(4, 6))
+        bar = ttk.Progressbar(frame, length=380, mode="determinate", maximum=100)
+        bar.pack(fill="x")
+        tk.Label(frame, text="You can keep using Roman Urdu (Offline) while "
+                             "this downloads.",
+                 bg=CARD, fg=MUTED, font=("Segoe UI", 8),
+                 anchor="w", wraplength=380).pack(fill="x", pady=(8, 0))
+
+        shared = {"pct": 0.0, "text": "starting...", "done": False, "ok": None,
+                  "msg": ""}
+
+        def on_progress(st, completed, total):
+            shared["pct"] = (100.0 * completed / total) if total else 0.0
+            shared["text"] = (f"{st}  {completed/1e9:.2f} / {total/1e9:.2f} GB"
+                              if total else st)
+
+        def worker():
+            from src.offline_pipeline import pull_model
+            ok, msg = pull_model(model, progress=on_progress)
+            shared["ok"], shared["msg"], shared["done"] = ok, msg, True
+
+        threading.Thread(target=worker, daemon=True).start()
+
+        def poll():
+            if not win.winfo_exists():
+                return
+            bar["value"] = shared["pct"]
+            status.configure(text=shared["text"][:64])
+            if shared["done"]:
+                self._pull_active = False
+                win.destroy()
+                if shared["ok"]:
+                    messagebox.showinfo(
+                        "Download complete",
+                        f"{model} is installed. English (Local LLM) mode is "
+                        f"ready - translation now runs entirely on this "
+                        f"machine.")
+                    self.status.set(f"{model} installed - English mode ready.")
+                else:
+                    messagebox.showerror(
+                        "Download failed",
+                        f"{shared['msg']}\n\nStaying on Roman Urdu (Offline).")
+                    self.mode.set(MODE_URDU)
+                return
+            win.after(300, poll)
+
+        win.after(300, poll)
 
     def _on_mode_change(self):
         """Repaint everything that states which pipeline is live."""
         english = self.in_english_mode()
         if hasattr(self, "header_note"):
             self.header_note.configure(
-                text=("LIVE API CALL REQUIRED - not offline"
+                text=("English via local Ollama - still offline"
                       if english else "offline  |  CPU only  |  research prototype"),
                 fg="#ffd9d9" if english else "#cfe0f2")
         try:
@@ -841,7 +959,7 @@ class TriageGUI(tk.Tk):
         if self.stopword_report is not None:
             self._populate_stopwords()
         self.status.set(
-            ("English (GPT) mode - every prediction calls the translation API."
+            ("English (Local LLM) mode - translation runs on this machine."
              if english else
              "Roman Urdu (Offline) mode - no network calls."))
 
@@ -867,10 +985,9 @@ class TriageGUI(tk.Tk):
             if i["uses_embeddings"]:
                 line += (f"\nembedding model: {i['embedding_model']}"
                          f"  ({i['embedding_dim']} dims)")
-            line = ("*** MODE: ENGLISH (GPT) - LIVE API CALL REQUIRED, "
-                    "NOT OFFLINE IN THIS MODE ***\n"
-                    "every prediction sends the complaint to gpt-4o-mini "
-                    "before it is scored\n") + line
+            line = ("*** MODE: ENGLISH (LOCAL LLM) - translated on this machine ***\n"
+                    "every prediction is translated by Ollama on localhost "
+                    "before it is scored - no network call\n") + line
         else:
             line = "*** MODE: ROMAN URDU (OFFLINE) - no network calls ***\n" + line
 
@@ -1037,6 +1154,19 @@ class TriageGUI(tk.Tk):
                                       state="disabled", command=self._do_predict)
         self.predict_btn.pack(fill="x", pady=(14, 0))
 
+        # Read the complaint back aloud, slowly. In a noisy resus room a
+        # nurse cannot always read a screen, and 0.8x is deliberate rather
+        # than decorative - it is the rate at which a clinical phrase stays
+        # intelligible over background noise.
+        row = tk.Frame(pad, bg=CARD)
+        row.pack(fill="x", pady=(8, 0))
+        self.speak_btn = ttk.Button(row, text="Speak complaint  (0.8x)",
+                                    command=self._do_speak)
+        self.speak_btn.pack(side="left")
+        self._last_spoken = None
+        tk.Label(row, text="offline, via eSpeak NG", bg=CARD, fg=MUTED,
+                 font=("Segoe UI", 8)).pack(side="left", padx=(10, 0))
+
         # ---- result card ----
         res = card(right)
         res.pack(fill="both", expand=True)
@@ -1124,6 +1254,36 @@ class TriageGUI(tk.Tk):
             want = defaults.get(name)
             self.combos[name].set(want if want in values else values[0])
 
+    def _do_speak(self):
+        """Read the standardised English aloud, or the raw complaint.
+
+        Prefers the translation when one exists, since that is the text the
+        model actually scored. Never raises - a missing audio device must
+        not take the window with it.
+        """
+        try:
+            from src.offline_pipeline import speak, tts_available
+        except Exception as e:
+            messagebox.showerror("Speech unavailable",
+                                 f"Could not load the speech module:\n{e}")
+            return
+        text = self._last_spoken or self.complaint.get("1.0", "end").strip()
+        if not text:
+            messagebox.showinfo("Nothing to speak",
+                                "Enter a complaint, or run a triage first.")
+            return
+        if not tts_available():
+            messagebox.showerror(
+                "eSpeak NG not installed",
+                "Offline speech needs eSpeak NG.\n\nInstall it with:\n"
+                "    sudo dnf install espeak-ng")
+            return
+        ok, msg = speak(text)
+        self.status.set(f"Speaking: {text[:48]}..." if ok
+                        else f"Speech failed: {msg}")
+        if not ok:
+            messagebox.showerror("Speech failed", msg)
+
     def _do_predict(self):
         from triage_pipeline import predict_one, preprocess_stages
 
@@ -1146,15 +1306,50 @@ class TriageGUI(tk.Tk):
 
         original_text = text
         english_text = None
+        fell_back = False
+        self._last_similarity = None
+        self._last_spoken = text
         if self.in_english_mode():
-            self.status.set("English mode: calling the translation API...")
+            self.status.set("English mode: translating locally via Ollama...")
             self.update_idletasks()
             english_text, err = self.translate_for_mode(text)
             if err:
-                messagebox.showerror("English (GPT) mode failed", err)
+                messagebox.showerror("English (Local LLM) mode failed", err)
                 self.status.set("English mode: translation failed - no prediction made.")
                 return
             text = english_text
+            self._last_spoken = english_text
+
+            # SAFETY FALLBACK. If the translation has drifted too far from
+            # the original, score the ORIGINAL instead and say so - the
+            # similarity number is only worth computing if something acts
+            # on it.
+            try:
+                from src.offline_pipeline import FALLBACK_THRESHOLD
+                import numpy as _np
+                from stopwords import load_stopwords, remove_stopwords
+                enc = get_text_encoder(self.active_artifacts())
+                v = enc.encode([original_text, english_text],
+                               convert_to_numpy=True,
+                               normalize_embeddings=True,
+                               show_progress_bar=False)
+                sim = float(_np.dot(v[0], v[1]))
+                self._last_similarity = sim
+                if sim < FALLBACK_THRESHOLD:
+                    fell_back = True
+                    text = original_text
+                    self._last_spoken = original_text
+                    messagebox.showwarning(
+                        "Translation drifted - falling back",
+                        f"The English translation scored {sim:.3f} against "
+                        f"the original, below the {FALLBACK_THRESHOLD:.2f} "
+                        f"safety threshold.\n\nThe complaint was scored "
+                        f"from the ROMAN URDU text instead, using the "
+                        f"offline model.\n\nTranslation was:\n"
+                        f"{english_text}")
+            except Exception:
+                # A failed similarity check must not block the prediction.
+                self._last_similarity = None
 
         input_warnings = []
         try:
@@ -1185,7 +1380,7 @@ class TriageGUI(tk.Tk):
             self.stages.delete("1.0", "end")
             self.stages.insert("end", "0. raw input (as typed)\n", "h")
             self.stages.insert("end", f"   {original_text}\n")
-            self.stages.insert("end", "1. gpt-4o-mini translation  (LIVE API CALL)\n", "h")
+            self.stages.insert("end", "1. local Ollama translation\n", "h")
             self.stages.insert("end", f"   {english_text}\n")
             self.stages.insert("end", "2. sentence-transformer\n", "h")
             self.stages.insert("end", "   English encoded directly - the Roman Urdu\n"
@@ -1333,8 +1528,8 @@ class TriageGUI(tk.Tk):
             for title, txt, note in [
                 ("0  Raw input (as typed)", raw,
                  "exactly what the triage nurse typed"),
-                ("1  gpt-4o-mini translation  (LIVE API CALL)", en,
-                 "sent to OpenRouter; this mode is NOT offline"),
+                ("1  Local Ollama translation", en,
+                 "translated on this machine by Ollama on localhost"),
                 ("2  Sentence-transformer", en,
                  "the English text is encoded directly. The Roman Urdu "
                  "dictionary, fuzzy matching and learned stop-word stages "
@@ -2087,6 +2282,7 @@ class TriageGUI(tk.Tk):
         self._score_model_box.pack(fill="x")
         self._score_section_model(self._score_model_box)
         self._score_section_pairs(holder)
+        self._score_section_cluster(holder)
         self._score_section_demo(holder)
 
     # ----------------------------------------------------- (a) score
@@ -2403,6 +2599,152 @@ class TriageGUI(tk.Tk):
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(8, 0))
 
     # --------------------------------------------- (c) embedding demo
+    # --------------------------------------- (c) cluster inspector
+    def _score_section_cluster(self, parent):
+        """Pairwise similarity over a 10-complaint cluster.
+
+        The work is slow - one local LLM call per sentence - so it runs on
+        a worker thread and the table is filled from the main thread when
+        it lands. Blocking here would freeze every other tab, including
+        the triage button.
+        """
+        box = card(parent)
+        box.pack(fill="x", padx=4, pady=(0, 10))
+        pad = tk.Frame(box, bg=CARD)
+        pad.pack(fill="both", expand=True, padx=18, pady=16)
+
+        heading(pad, "Cluster Embedding Inspector").pack(fill="x")
+        body(pad,
+             "Runs a cluster of complaints through the full offline pipeline "
+             "(Ollama translation -> lowercase + stop-word removal -> "
+             "MiniLM-L12-v2) and shows the pairwise cosine matrix. Because "
+             "every vector is L2-normalised, the dot product IS the cosine, "
+             "so the diagonal must read 1.00 - it doubles as a check that the "
+             "encoder is behaving.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 8))
+
+        row = tk.Frame(pad, bg=CARD)
+        row.pack(fill="x", pady=(0, 8))
+        self.cluster_btn = ttk.Button(
+            row, text="Load sample cluster (10 complaints)  and analyse",
+            style="Accent.TButton", command=self._do_cluster_analysis)
+        self.cluster_btn.pack(side="left")
+        self.cluster_status = tk.StringVar(value="not run yet")
+        tk.Label(row, textvariable=self.cluster_status, bg=CARD, fg=MUTED,
+                 font=("Segoe UI", 9)).pack(side="left", padx=(12, 0))
+
+        cols = tuple(f"s{i}" for i in range(10))
+        self.cluster_tree = ttk.Treeview(pad, columns=cols,
+                                         show="tree headings", height=12)
+        self.cluster_tree.heading("#0", text="complaint")
+        self.cluster_tree.column("#0", width=300)
+        for i, c in enumerate(cols):
+            self.cluster_tree.heading(c, text=f"S{i + 1}")
+            self.cluster_tree.column(c, width=58, anchor="center")
+        self.cluster_tree.pack(fill="x")
+        # Colour by band so the structure is visible without reading 100
+        # numbers: high similarity green, low red.
+        self.cluster_tree.tag_configure("hi", foreground="#2e9e5b")
+        self.cluster_tree.tag_configure("lo", foreground="#c0392b")
+        self.cluster_tree.tag_configure("diag", font=("Segoe UI Semibold", 9))
+
+        self.cluster_summary = body(pad, "", fg=MUTED, size=9, wraplength=1000)
+        self.cluster_summary.pack(fill="x", pady=(8, 0))
+
+    def _do_cluster_analysis(self):
+        """Kick the analysis onto a worker thread; never block the UI."""
+        if getattr(self, "_cluster_running", False):
+            return
+        try:
+            from src.cluster_analyzer import SAMPLE_CLUSTER
+        except Exception as e:
+            messagebox.showerror("Cluster analysis unavailable",
+                                 f"Could not import the analyser:\n{e}")
+            return
+
+        self._cluster_running = True
+        self.cluster_btn.configure(state="disabled")
+        shared = {"done": False, "result": None, "error": None, "msg": ""}
+
+        def worker():
+            try:
+                from src.cluster_analyzer import analyze_sentence_cluster
+                def prog(i, n, text):
+                    shared["msg"] = f"translating {i + 1}/{n}: {text[:34]}..."
+                shared["result"] = analyze_sentence_cluster(
+                    SAMPLE_CLUSTER, translate=True, progress=prog)
+            except Exception as e:
+                shared["error"] = f"{type(e).__name__}: {e}"
+            shared["done"] = True
+
+        threading.Thread(target=worker, daemon=True).start()
+
+        def poll():
+            if shared["done"]:
+                self._cluster_running = False
+                self.cluster_btn.configure(state="normal")
+                if shared["error"]:
+                    self.cluster_status.set("failed")
+                    messagebox.showerror("Cluster analysis failed",
+                                         shared["error"])
+                else:
+                    self._render_cluster(shared["result"])
+                return
+            self.cluster_status.set(shared["msg"] or "working...")
+            self.after(400, poll)
+
+        self.cluster_status.set("starting...")
+        self.after(400, poll)
+
+    def _render_cluster(self, res):
+        for row in self.cluster_tree.get_children():
+            self.cluster_tree.delete(row)
+        if res is None or res.get("matrix") is None:
+            self.cluster_status.set("no matrix produced")
+            self.cluster_summary.configure(
+                text="\n".join(res.get("errors", [])) if res else "")
+            return
+
+        S = res["matrix"]
+        for k, sent in enumerate(res["sentences"]):
+            label = f"S{k + 1}  {(sent['translated'] or sent['raw'])[:34]}"
+            vals, tag = [], ""
+            for j in range(len(S)):
+                v = S[k][j]
+                vals.append(f"{v:.2f}")
+                if k == j:
+                    tag = "diag"
+            self.cluster_tree.insert("", "end", text=label, values=tuple(vals),
+                                     tags=(tag,))
+
+        n_ok = sum(1 for s in res["sentences"] if s["translated_ok"])
+        self.cluster_status.set(
+            f"{len(res['sentences'])} embedded, {n_ok} translated")
+
+        parts = [
+            f"mean intra-cluster similarity {res['mean_similarity']:.4f}   "
+            f"(min {res['min_similarity']:.4f}, max {res['max_similarity']:.4f})",
+            f"vectors: {len(res['sentences'])} x 384, all L2-normalised "
+            f"(diagonal reads 1.00: {res['diagonal_ok']})",
+            f"pairs at or above {res['threshold']:.2f}: {len(res['top_pairs'])}",
+        ]
+        for pr in res["top_pairs"][:3]:
+            parts.append(f"    {pr['similarity']:.3f}   S{pr['i'] + 1} <-> "
+                         f"S{pr['j'] + 1}")
+        if res.get("outlier"):
+            o = res["outlier"]
+            parts.append(f"outlier: S{o['index'] + 1} at mean "
+                         f"{o['mean_similarity']:.3f} - {o['text'][:56]}")
+            parts.append(f"    {o['note']}")
+        parts.append(
+            "Mean similarity alone does not grade an encoder: a model that "
+            "maps every medical sentence to nearly the same vector scores "
+            "well here and is useless. Compare against a second cluster and "
+            "read the GAP.")
+        if res.get("errors"):
+            parts.append("errors: " + "; ".join(res["errors"][:2]))
+        self.cluster_summary.configure(text="\n".join(parts))
+
     def _score_section_demo(self, parent):
         box = card(parent)
         box.pack(fill="x", padx=4, pady=(0, 10))
@@ -2479,7 +2821,7 @@ class TriageGUI(tk.Tk):
         import time
 
         import numpy as np
-        from triage_pipeline import (load_sentence_transformer,
+        from triage_pipeline import (get_text_encoder,load_sentence_transformer,
                                      preprocess_corpus_for_embedding,
                                      preprocess_for_embedding, read_manifest)
 

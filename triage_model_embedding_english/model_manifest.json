@@ -52,7 +52,7 @@
     ]
   },
   "trained_on_date": "2026-08-18",
-  "experiment": "English-translation pipeline (gpt-4o-mini), 2,252 rows vs the submitted model 10,000",
+  "experiment": "English-translation pipeline, 2,252 rows vs the submitted model 10,000 - TRAINING text translated by gpt-4o-mini; serving now translates locally via Ollama",
   "experiment_caveats": [
     "Trained on 2,252 rows because the translation API ran out of credits at 22.5%.",
     "The submitted Roman Urdu model used all 10,000 rows, so accuracy is NOT comparable.",
