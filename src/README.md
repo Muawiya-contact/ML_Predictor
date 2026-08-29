@@ -5,14 +5,26 @@ with an offline evaluation path and a live inference path that are held to the
 same representation.
 
 ```
-src/encoders.py   StaticEncoder (.npy)  |  DynamicEncoder (live text)
-src/models.py     LogReg / RandomForest / HistGradientBoosting + metrics
-src/baseline.py   stratified 5-fold CV over both targets
-src/train.py      refit on all rows, persist to models_src/
-src/predict.py    raw complaint -> triage level + department
+src/offline_pipeline.py   THE SERVING PATH - prompt, Ollama translation,
+                          refusal guardrail, fuzzy dictionary, anatomical gate
+src/embedding_pipeline.py translate -> normalize -> 384-dim vector
+src/cluster_analyzer.py   pairwise similarity over a cluster of complaints
+src/encoders.py           StaticEncoder (.npy)  |  DynamicEncoder (live text)
+src/models.py             LogReg / RandomForest / HistGradientBoosting + metrics
+src/baseline.py           stratified 5-fold CV over both targets
+src/train.py              refit on all rows, persist to models_src/
+src/predict.py            raw complaint -> triage level + department
 ```
 
+**Two encoders live in this project and both emit 384 dimensions**, so a vector
+from one will load into the other, predict, and be wrong with nothing to signal
+it. `embed_for_classifier()` is kept separate from `embed_text()` and reads its
+encoder name from the `models_src/` manifest rather than a constant, so the two
+spaces cannot be swapped by accident.
+
 ```bash
+.venv/bin/python run_inference.py --check       # Ollama + encoder + classifiers
+.venv/bin/python run_inference.py "seena mein dard kandhay tak ja raha hai"
 .venv/bin/python -m src.baseline                 # cross-validated benchmark
 .venv/bin/python -m src.train                    # persist production models
 .venv/bin/python -m src.predict "Mera sar dard ho raha hai"

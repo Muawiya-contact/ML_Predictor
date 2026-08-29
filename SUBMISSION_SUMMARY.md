@@ -138,6 +138,34 @@ majority-class baseline, confirming the text carries real but partial signal.
 
 ## Reproducibility
 
+## The Ollama migration, and what it cost
+
+The GUI now has one triage path: fuzzy dictionary -> Ollama on localhost ->
+anatomical gate -> encoder -> RandomForest. Every stage is local.
+
+Four limitations a reviewer should have in front of them:
+
+1. **The GUI scores with 2,252 rows, not 10,000.** Removing the mode toggle
+   removed access to the larger Roman Urdu bundle, which expects Roman Urdu and
+   cannot be fed translated English without train/serve skew. This is a real
+   reduction in training data and it was a deliberate choice.
+2. **Cosine similarity is no longer a safety check.** It was, at 0.90 and then
+   0.75, and measurement retired it: a correct translation of
+   `seena mein shadeed dard aur pasina` scores 0.8054 and "My leg is broken
+   after a fall" scores 0.7922. No threshold separates 0.013. The deterministic
+   anatomical gate replaced it and blocks chest->head, stomach->chest,
+   head->leg and shoulder->arm.
+3. **The gate checks anatomy, not fidelity.** A wrong symptom attached to the
+   right body part passes. It is one specific guarantee, not a general one.
+4. **The fuzzy dictionary changes nothing on the 10,000-row corpus.** That file
+   is synthetic and generated from a clean phrase bank, so it has no typos to
+   repair. What is demonstrated is zero false positives, not a measured gain;
+   the gain is on real typed input.
+
+Two test batteries are committed - `tests/audit_pipeline.py` (15 checks) and
+`tests/audit_gui.py` (16 checks, builds the real window and drives every tab).
+Both need a live Ollama and there is no CI, so they are run by hand.
+
 ```bash
 python generate_cardiac_dataset.py --out cardiac_multilingual_10000_v3.csv
 python train_embedding_pipeline.py --data cardiac_multilingual_10000_v3.csv --deploy D

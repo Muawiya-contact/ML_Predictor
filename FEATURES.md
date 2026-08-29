@@ -291,7 +291,12 @@ numbers from `embedding_evaluation_results.csv`.
 | **Stop Words** | Every tested token as a table, with the specific criterion that decided it — removed, kept because chi-square says it tracks triage, kept because its mutual information is too high, or rescued by the clinical safety guard |
 | **Batch File** | Triage a whole spreadsheet, with a results table and level counts |
 | **Results** | The four-method comparison and the per-cluster embedding scores as charts, each row labelled with the pipeline that produced it |
-| **Model Score & Embedding Analysis** | The real accuracy figures for both pipelines side by side, a visual explanation of the "45 pairs" maths, and a live embedding demo |
+| **Cluster Analysis** | Pairwise similarity over a 10-complaint cluster, each sentence translated through Ollama before embedding so it measures the path that actually ships |
+
+> The model-score panel, the "45 pairs" explainer and the embedding demo were
+> removed in the Ollama migration. All three scored bundles the operator can no
+> longer reach, and accuracy figures shown beside a live triage level read as
+> describing it.
 
 **Which model is live is stated, never implied.** A green banner on the Triage,
 Batch, Results and Model Score tabs names the deployed method, the text features

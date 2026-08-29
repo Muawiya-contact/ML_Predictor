@@ -62,7 +62,7 @@ WHY A SEPARATE MODEL DIRECTORY
 -----------------------------------------------------------------------
 Artifacts go to `triage_model_embedding/`, NOT `triage_model/`. The
 existing predictors (predict_batch.py, prediction.py,
-prediction_interactive.py) load `triage_model/` and must keep working
+predict_batch.py) load `triage_model/` and must keep working
 unchanged; overwriting it with an embedding-based model whose feature
 layout is different would break all three.
 
@@ -171,7 +171,7 @@ RESULTS_FILE = project_path("embedding_pipeline_results.csv")
 
 # TODO(Sir - open question 1 in ARCHITECTURE.md section 6): standardize the
 # embedding model. This is the safe default already used by
-# embedding_experiment.py - multilingual, small, CPU-friendly, 384 dims.
+# Chosen for being multilingual, small, CPU-friendly and 384 dims.
 # The whiteboard's "364" was a placeholder; this model outputs 384.
 DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
@@ -180,7 +180,7 @@ TEST_SIZE = 0.2
 
 
 # ----------------------------------------------------------------------
-# Metrics (identical definitions to triage_bow_fuzzy_diac.py)
+# Metrics
 # ----------------------------------------------------------------------
 
 def evaluate(y_true, pred):

@@ -51,12 +51,17 @@ python triage_gui.py
 
 | Tab | What it shows |
 |---|---|
-| **Triage a Patient** | Enter one patient → triage level, confidence bars, **and** what the text pipeline did to the complaint at each stage |
-| **Pipeline Explorer** | Type any complaint and watch it move through clean → fuzzy → stop-word removal, with the statistics justifying every removed word |
-| **Stop Words** | The learned list (Contribution 1) as a filterable table: document frequency, mutual information, chi-square, and why each token was kept or dropped |
-| **Batch File** | Triage a whole Excel/CSV, see the results table and level distribution |
-| **Results** | The four-method comparison and the embedding-effectiveness study as charts |
-| **Model Score & Embedding Analysis** | Real accuracy / under-triage / over-triage from the saved metrics files, a visual explanation of the "45 pairs" maths, and a live embedding demo |
+| **Triage a Patient** | One patient → triage level, confidence bars, and the five stages the complaint passed through |
+| **Pipeline Explorer** | Type any complaint and watch it move through all five stages, each rendered by calling the same function the serving path calls |
+| **Stop Words** | The 68 English stop-words the serving bundle removes, with the document frequency, mutual information and Cramér's V behind each decision |
+| **Batch File** | Triage a whole Excel/CSV, with a progress bar, a per-row anatomical gate verdict, and a level distribution |
+| **Results** | Precision / recall / F1 / support for the serving bundle, computed from its saved confusion matrix at render time |
+| **Cluster Analysis** | Pairwise similarity over a 10-complaint cluster, translated through Ollama first so it measures the path that actually ships |
+
+Four tabs were removed in the Ollama migration: the A/B/C/D method comparison,
+the embedding-effectiveness study, the model-score panel and the embedding
+demo. All four scored bundles the operator can no longer reach, and accuracy
+figures shown beside a live triage level read as describing it.
 
 Uses only the Python standard library (`tkinter`), so it adds **no new
 dependencies** and runs fully offline — in keeping with the project's
@@ -120,9 +125,12 @@ Adding automatic stop-word removal lifted the embeddings from 91.29% → 92.12%
 **C is deployed.** Deployment is an explicit choice (`--deploy`, default `C`),
 not a by-product of the scoring rule — see *How the deployed method is chosen*
 below. Artifacts go to `triage_model_embedding/`, which is what
-`triage_gui.py`, `predict_batch.py`, `prediction.py` and
-`prediction_interactive.py` all load by default. `triage_model/` is left
-untouched and is the fallback for machines without `sentence-transformers`.
+`predict_batch.py` loads by default. `triage_model/` is left untouched and is
+the fallback for machines without `sentence-transformers`.
+
+> **Note.** `triage_gui.py` no longer loads this bundle for scoring. Since the
+> mode toggle was removed it serves `triage_model_embedding_english/` — see
+> *Project Structure*.
 
 **The cost of that choice, stated plainly:** C carries **+0.83 points more
 under-triage** than A (4.56% vs 3.73%). Under-triage is the error that harms
@@ -229,66 +237,91 @@ import. Training and inference can no longer drift apart.
 
 Patients in Pakistani EDs describe symptoms in **Roman Urdu** (Urdu written in
 the English alphabet) with no standard spelling. _Fever_ alone can appear as
-`bukhar`, `bukhaar`, `bukhr`, `bkhar`, or `garmi`. This system normalizes that
-variation with a three-stage text pipeline, then classifies with a small
-logistic-regression model that uses under ~3,000 parameters and 5-10 MB on disk.
+`bukhar`, `bukhaar`, `bukhr`, `bkhar`, or `garmi`.
+
+The system now has **one** triage path, and every stage of it runs on the
+machine in front of you:
+
+```
+raw Roman Urdu
+   │  1. dictionary + fuzzy normalization      local, deterministic, logged
+   ▼
+canonical Roman Urdu
+   │  2. Ollama on localhost                   llama3.2, temperature 0
+   ▼
+clinical English
+   │  3. anatomical assertion gate             deterministic; blocks or passes
+   ▼
+   │  4. stop-word removal + sentence-transformer
+   ▼
+384-dim vector  →  RandomForest  →  triage level 1-4 + confidence
+```
+
+No stage reaches the internet. Ollama is a service on `127.0.0.1`, the encoder
+loads from the on-disk Hugging Face cache, and the classifiers are pickles in
+the model bundle.
+
+**The anatomical gate is the safety check, not cosine similarity.** Every body
+part named in the complaint must survive into the English translation, or the
+prediction is refused. Cosine is still measured and printed, and it decides
+nothing: against `seena mein shadeed dard aur pasina`, a correct translation
+scores 0.8054 and *"My leg is broken after a fall"* scores 0.7922 — 0.013
+apart, with the badly drifted candidate outscoring the mildly drifted one. No
+threshold separates those. The gate does, exactly, for the one failure mode
+that matters here.
+
+**What the gate cannot do:** it checks anatomy, not fidelity. A wrong *symptom*
+attached to the right body part passes.
 
 ---
 
 ## Project Structure
 
 ```
-ED/
+ML_Predictor/
 |
-|-- triage_gui.py                   # NEW: desktop GUI, 6 tabs (tkinter, no extra dependencies)
-|-- FEATURES.md                     # NEW: every feature explained (what / how / why), plain English
-|-- triage_pipeline.py              # SHARED pipeline: dictionaries, normalize, predict (single source of truth)
-|-- triage_bow_fuzzy_diac.py        # Training script (imports triage_pipeline)
-|-- stopwords.py                    # NEW: automatic stop-word learner (Contribution 1)
-|-- learned_stopwords.json          # NEW: learned list + per-token statistics
-|-- train_embedding_pipeline.py     # NEW: embedding -> fuse -> classify training flow
-|-- embedding_evaluation.py         # NEW: embedding-effectiveness study (Contribution 2)
-|-- evaluation_clusters.json        # NEW: 10 manual meaning-clusters (editable)
-|-- embedding_evaluation_results.csv    # NEW: per-cluster summary
-|-- embedding_evaluation_pairs.csv      # NEW: all 441 pairwise comparisons
-|-- embedding_evaluation_neighbours.csv # NEW: nearest neighbour of each complaint
-|-- embedding_pipeline_results.csv      # NEW: 4-way method comparison
-|-- predict_batch.py                # NEW: batch prediction from an Excel/CSV file
-|-- embedding_experiment.py         # OPTIONAL: test offline AI embeddings vs the dictionary
-|-- EXPERIMENT_GUIDE.md             # OPTIONAL: simple friend-facing guide for the experiment
-|-- ARCHITECTURE.md                 # NEW: target embedding-pipeline design + task spec (for implementation)
-|-- prediction.py                   # Single / example-patient prediction
-|-- prediction_interactive.py       # Interactive terminal prediction
-|-- preprocessing new code.py       # (original exploratory preprocessing script)
-|-- requirements.txt                # Python dependencies (core)
-|-- requirements-embedding.txt      # OPTIONAL deps for embedding_experiment.py
-|-- README.md                       # this file (full documentation)
-|-- HOW_TO_RUN.md                   # NEW: simple step-by-step run guide for beginners / friends
+|-- triage_gui.py                   # desktop GUI, 6 tabs (tkinter, no extra dependencies)
+|-- triage_pipeline.py              # SHARED pipeline: dictionaries, normalize, features, predict
+|-- stopwords.py                    # automatic stop-word learner (Contribution 1)
+|-- train_embedding_pipeline.py     # embedding -> fuse -> classify training flow
+|-- predict_batch.py                # batch prediction from an Excel/CSV file
+|-- generate_cardiac_dataset.py     # reviewable synthetic dataset generator
+|-- embedding_evaluation.py         # embedding-effectiveness study (Contribution 2)
+|-- check_embedding_pairs.py        # verifies the similarity figures quoted in SUBMISSION_SUMMARY
 |
-|-- triage_mixed_language_dataset.csv   # Training dataset (1,204 patients)
+|-- src/                            # the offline Ollama pipeline
+|   |-- offline_pipeline.py         # prompt, translation, guardrail, fuzzy dictionary, anatomical gate
+|   |-- embedding_pipeline.py       # translate -> normalize -> 384-dim vector
+|   |-- cluster_analyzer.py         # pairwise similarity over a cluster of complaints
+|   |-- train.py / predict.py       # the 185-row professor-baseline reproduction
+|   |-- README.md
+|-- run_inference.py                # CLI: Roman Urdu in, triage + department out
+|-- Modelfile                       # optional custom Ollama model (med-translator)
 |
-|-- batch_input_template.xlsx       # NEW: blank template to fill in your patients (Excel)
-|-- batch_input_template.csv        # NEW: same template as CSV
-|-- sample_100_patients.xlsx        # NEW: 100 ready-to-run example patients (Excel)
-|-- sample_100_patients.csv         # NEW: same 100 patients as CSV
-|-- sample_100_patients_predictions.xlsx/.csv   # NEW: example output produced by predict_batch.py
+|-- tests/
+|   |-- audit_pipeline.py           # 15 checks: prompt, guardrail, gate, fuzzy, skew, live translations
+|   |-- audit_gui.py                # 16 checks: builds the real window and drives every tab
+|   |-- fixtures/batch_sample.csv   # 8 rows chosen for edge cases, not the happy path
 |
-|-- triage_model_embedding/         # NEW: saved embedding-pipeline model (separate on purpose)
-|-- triage_model/                   # Saved model (regenerated by training)
-|   |-- model.pkl
-|   |-- word_bow.pkl
-|   |-- char_bow.pkl
-|   |-- scaler.pkl
-|   |-- gender_enc.pkl
-|   |-- mode_enc.pkl
-|   |-- avpu_enc.pkl
-|   |-- ecg_enc.pkl
-|   |-- triage_metrics.json
+|-- learned_stopwords.json          # learned list + per-token statistics
+|-- evaluation_clusters.json        # 10 manual meaning-clusters (editable)
+|-- cardiac_multilingual_10000_v3.csv    # deployed training data (SYNTHETIC - see DATASET_PROVENANCE.md)
+|-- batch_input_template.xlsx/.csv  # blank template to fill in your patients
 |
-|-- visualizations/
-    |-- word_frequency_histogram.png
-    |-- word_frequencies.csv
+|-- triage_model_embedding/         # 10,000-row Roman Urdu bundle
+|-- triage_model_embedding_english/ # 2,252-row English bundle  <- THIS IS WHAT THE GUI SERVES
+|-- models_src/                     # 185-row professor-baseline bundle (used by run_inference.py)
+|
+|-- docs/architecture_flow.html     # rendered architecture walkthrough
+|-- professor_baseline/             # the original baseline scripts, kept as-is for provenance
 ```
+
+> **Which bundle serves?** `triage_model_embedding_english/`. The mode toggle
+> was removed, and with it GUI access to the 10,000-row Roman Urdu bundle —
+> that bundle expects Roman Urdu and cannot be fed translated English without
+> train/serve skew. The GUI therefore scores with 2,252 rows, not 10,000. This
+> is deliberate and it is a real reduction in training data.
+
 
 ---
 
@@ -368,7 +401,7 @@ python predict_batch.py sample_100_patients.xlsx
 To retrain from scratch first (optional):
 
 ```bash
-python triage_bow_fuzzy_diac.py
+python train_embedding_pipeline.py
 ```
 
 > **New to Python / sharing this with non-technical friends?**
@@ -500,15 +533,21 @@ Run every command from inside the project folder — the one containing
 | Triage a file of patients | `python predict_batch.py sample_100_patients.xlsx` |
 | Triage your own file | `python predict_batch.py my_patients.xlsx` |
 | Choose where to save results | `python predict_batch.py my_patients.xlsx my_results.xlsx` |
-| See five built-in example patients | `python prediction.py` |
-| Type in one patient, step by step | `python prediction_interactive.py` |
+| Triage one complaint from the terminal | `python run_inference.py "seena mein dard hai"` |
+| Check Ollama, the encoder and the classifiers | `python run_inference.py --check` |
 | Force the dictionary model instead of the deployed one | `python predict_batch.py my_patients.xlsx --model-dir triage_model` |
 
-**Which model do these use?** All of them load `triage_model_embedding/` — the
-deployed sentence-embedding pipeline — and fall back to `triage_model/` if
-`sentence-transformers` is not installed. Each one prints the method it is
-using at startup, and the app shows it on the Triage, Batch, Results and
-Model Score tabs. You never have to guess which method produced a result.
+**Which model do these use?** `predict_batch.py` loads
+`triage_model_embedding/` and falls back to `triage_model/` if
+`sentence-transformers` is missing. `triage_gui.py` serves
+`triage_model_embedding_english/`. `run_inference.py` uses `models_src/`, the
+185-row professor-baseline bundle, and also predicts a department.
+
+Three bundles, three consumers — and **two of the encoders both emit 384
+dimensions**, so a vector from one will load into the other, predict, and be
+wrong with nothing to signal it. Every bundle therefore reads its encoder name
+from its own `manifest.json` rather than a constant. Each entry point prints
+the method it is using at startup.
 
 CSV files are read with encoding detection (`utf-8` → `utf-8-sig` → `cp1252` →
 `latin-1`), so a sheet exported from Excel on Windows loads instead of failing
@@ -521,17 +560,18 @@ dictionaries, or if you are writing up the results.
 
 | What you want to do | Command |
 |---|---|
-| Train the dictionary model (the fallback) | `python triage_bow_fuzzy_diac.py` |
 | Learn the stop-word list on its own | `python stopwords.py` |
 | **Train + deploy the embedding model** | `python train_embedding_pipeline.py` |
 | Deploy a different method instead | `python train_embedding_pipeline.py --deploy D` |
 | Let the safety rule decide (old behaviour) | `python train_embedding_pipeline.py --deploy auto` |
 | Measure how good the embeddings are | `python embedding_evaluation.py` |
-| Compare dictionary vs embeddings (older experiment) | `python embedding_experiment.py` |
+| Run the pipeline test battery (15 checks) | `python tests/audit_pipeline.py` |
+| Run the GUI test battery (16 checks) | `python tests/audit_gui.py` |
+
+Both batteries need a live Ollama. There is no CI — they are run by hand.
 
 **What each one writes:**
 
-- `triage_bow_fuzzy_diac.py` → updates `triage_model/` and `visualizations/`
 - `stopwords.py` → updates `learned_stopwords.json`
 - `train_embedding_pipeline.py` → updates `triage_model_embedding/` (including
   `model_manifest.json`, which is how every predictor knows what that directory
@@ -563,13 +603,31 @@ Two PowerShell helpers are included if you prefer them:
 ### 1. Train the model
 
 ```bash
-python triage_bow_fuzzy_diac.py
+python train_embedding_pipeline.py
 ```
 
-Reads `triage_mixed_language_dataset.csv`, runs the full text pipeline, trains
-the classifier, prints accuracy + safety metrics, and saves everything to
-`triage_model/` and `visualizations/`. **Run this whenever you change any
-dictionary in `triage_pipeline.py`.**
+Reads the deployed dataset, runs the full text pipeline, trains the classifier,
+prints accuracy + safety metrics, and saves to `triage_model_embedding/`.
+**Run this whenever you change any dictionary in `triage_pipeline.py`.**
+
+### 1b. Start Ollama (required for the GUI and `run_inference.py`)
+
+```bash
+ollama serve
+ollama pull llama3.2
+```
+
+`ollama serve` does not survive a reboot on its own. If it keeps stopping:
+
+```bash
+sudo systemctl enable --now ollama
+```
+
+Check everything the pipeline needs, without running an inference:
+
+```bash
+python run_inference.py --check
+```
 
 ### 2. Batch prediction from a file (NEW, 100 patients at a time)
 
@@ -608,23 +666,21 @@ There is no hard limit on the number of patients (100, 500, 1000+ all work).
 python predict_batch.py sample_100_patients.xlsx
 ```
 
-### 3. Single / example prediction
+### 3. Triage one complaint from the terminal
 
 ```bash
-python prediction.py
+python run_inference.py "seena mein dard kandhay tak ja raha hai"
 ```
 
-Runs five built-in example patients (cardiac, respiratory, fever, **seizure**,
-and **trauma**) and prints the triage level, confidence, and probabilities.
+Prints the resolved Ollama model, the translation, predictions from BOTH the
+Roman Urdu and English vectors, the cosine similarity (diagnostic only), and
+the anatomical gate verdict — which is what decides the accepted answer.
 
-### 4. Interactive prediction
+### 4. Interactive mode
 
 ```bash
-python prediction_interactive.py
+python run_inference.py --interactive
 ```
-
-Asks you for one patient's complaint and vitals step by step and prints the
-result with a probability bar chart. Enter `n` (or press `Ctrl+C`) to exit.
 
 ---
 
@@ -705,31 +761,13 @@ embedding model** turn each complaint into a "meaning vector," so that
 `dard`, `drd`, and `pain` land close together automatically — no dictionary
 entry needed.
 
-`embedding_experiment.py` tests whether that actually helps **on our own data**,
-instead of assuming it does. It trains the _same_ Logistic Regression on the
-_same_ train/test split with the _same_ vital-sign features, and changes only
-how the complaint text becomes numbers, comparing three options:
+`embedding_evaluation.py` measures whether that actually helps **on our own
+data**, instead of assuming it does — see *Contribution 2* above.
 
-| Method                  | Text representation                                                 |
-| ----------------------- | ------------------------------------------------------------------- |
-| **A. Dictionary + BoW** | what we use now (fuzzy + diacritization + Bag-of-Words + attention) |
-| **B. Embeddings only**  | an offline `sentence-transformers` model encodes each complaint     |
-| **C. Both combined**    | dictionary features **and** embeddings together                     |
-
-It prints accuracy + under/over-triage for each, names the winner, and runs a
-short **synonym test** showing whether Roman Urdu words like `dard / drd / pain`
-truly cluster in the embedding space.
-
-**Run it:**
-
-```bash
-pip install -r requirements-embedding.txt      # once, needs internet to download
-python embedding_experiment.py
-```
-
-The first run downloads a small multilingual model (a few hundred MB) into a
-local cache; afterwards it runs fully offline. Results are also written to
-`embedding_experiment_results.csv`.
+> The older `embedding_experiment.py` comparison was removed along with the
+> GUI panels that displayed it. Both described bundles the operator can no
+> longer reach. The measurements it produced are still in
+> `embedding_evaluation_results.csv` and in git history.
 
 > **Honest expectation.** These embedding models are trained mostly on
 > _native-script_ Urdu (اردو) and English, so _Roman_ (Latin-script) Urdu is
@@ -852,7 +890,7 @@ Beyond accuracy, two clinical safety metrics matter most:
 **Efficiency grading (over-triage):** A <15%, B <25%, C <35%, D >=35%.
 
 Exact numbers are written to the relevant `triage_metrics.json` each time you
-train — `triage_model/` by `triage_bow_fuzzy_diac.py`, and
+train — `triage_model/` by the archived dictionary trainer, and
 `triage_model_embedding/` by `train_embedding_pipeline.py`.
 
 ---
@@ -887,7 +925,7 @@ Pass the correct path, e.g. `python predict_batch.py sample_100_patients.xlsx`,
 and run the command from inside the `ED/` folder.
 
 **`FileNotFoundError: triage_model/model.pkl`**
-Train first: `python triage_bow_fuzzy_diac.py`. The app needs only *one* of the
+Train first: `python train_embedding_pipeline.py`. The app needs only *one* of the
 two bundles to start, so `python train_embedding_pipeline.py` also works.
 
 **`UnicodeDecodeError: 'utf-8' codec can't decode byte 0xfb...` on a CSV**
@@ -906,7 +944,7 @@ Some distributions ship tkinter separately from Python. On Fedora/RHEL:
 It is part of the standard library, so there is no `pip` package for it.
 
 **Predictions look off after editing a dictionary in `triage_pipeline.py`**
-You must retrain (`python triage_bow_fuzzy_diac.py`) so the saved model and the
+You must retrain (`python train_embedding_pipeline.py`) so the saved model and the
 attention weights match the new vocabulary.
 
 **Rows have text in the `Notes` column**
@@ -917,7 +955,7 @@ The prediction is still produced; review the note if accuracy matters for that r
 The saved model in `triage_model/` was built with **scikit-learn 1.6.1** (pinned in
 `requirements.txt`). A different installed version can fail to load the pickle.
 Fix by matching the version: `pip install scikit-learn==1.6.1`. If you prefer a
-newer scikit-learn, just retrain once with it (`python triage_bow_fuzzy_diac.py`),
+newer scikit-learn, just retrain once with it (`python train_embedding_pipeline.py`),
 which regenerates the model files against your installed version.
 
 Note that **1.6.1 has no wheel for Python 3.14** and needs a C compiler to build
@@ -926,7 +964,7 @@ retrain both bundles rather than fighting the pin:
 
 ```bash
 pip install scikit-learn
-python triage_bow_fuzzy_diac.py        # regenerates triage_model/
+python train_embedding_pipeline.py     # regenerates triage_model_embedding/
 python train_embedding_pipeline.py     # regenerates triage_model_embedding/
 ```
 

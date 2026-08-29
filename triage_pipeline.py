@@ -11,13 +11,13 @@
 #   * the text normalization pipeline
 #   * model / encoder loading + a vectorized predict function
 #
-# Training (triage_bow_fuzzy_diac.py) and all predictors
-# (prediction.py, prediction_interactive.py, predict_batch.py)
+# Training (train_embedding_pipeline.py) and the predictors
+# (triage_gui.py, predict_batch.py, run_inference.py)
 # import from here, so the text pipeline can NEVER drift out of
 # sync between training and inference.
 #
 # NOTE: If you edit any dictionary below you MUST retrain
-#       (python triage_bow_fuzzy_diac.py) so the saved model,
+#       (python train_embedding_pipeline.py) so the saved model,
 #       vectorizers and attention weights stay consistent.
 # ============================================================
 
@@ -868,7 +868,7 @@ normalize = normalize_roman_urdu
 #   WITHOUT stop-word removal. Changing normalize_roman_urdu() would
 #   feed the existing vectorizers text they were never fitted on and
 #   silently degrade predict_batch.py / prediction.py /
-#   prediction_interactive.py. The dictionary+BoW path therefore keeps
+#   predict_batch.py. The dictionary+BoW path therefore keeps
 #   its exact current behaviour, and the new embedding path gets its
 #   own preprocessing entry point.
 # ============================================================
