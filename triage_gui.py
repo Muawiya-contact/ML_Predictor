@@ -87,6 +87,11 @@ ACCENT = "#2563a8"
 
 # Triage level colours: 0 = emergency (red) ... 3 = non-urgent (green)
 LEVEL_COLOURS = ["#c0392b", "#e08e0b", "#2f7fbf", "#2e9e5b"]
+#: Measured on this machine: 10.3 / 10.8 / 11.6 seconds for three
+#: complaints through llama3.2. Used only to render an ETA, so being wrong
+#: costs a misleading countdown, not a wrong prediction.
+SECONDS_PER_ROW = 11
+
 LEVEL_NAMES = ["EMERGENCY", "URGENT", "STANDARD", "NON-URGENT"]
 LEVEL_BLURB = [
     "Immediate attention required",
@@ -699,6 +704,8 @@ class TriageGUI(tk.Tk):
                 kind, name, payload = self._work_queue.get_nowait()
                 if kind == "err":
                     self.status.set(f"Error in {name}")
+                    if name == "_batch_worker":
+                        self._end_batch_ui()
                     # Re-enable any button the failed job had disabled, so a
                     # single failure does not leave the tab permanently dead.
                     if hasattr(self, "demo_btn"):
@@ -1633,7 +1640,7 @@ class TriageGUI(tk.Tk):
         filt = tk.Frame(pad, bg=CARD)
         filt.pack(fill="x", pady=(4, 6))
         body(filt, "Show:", fg=MUTED, size=9).pack(side="left", padx=(0, 6))
-        self.stop_filter = tk.StringVar(value="all")
+        self.stop_filter = tk.StringVar(value="stop")
         for value, label in [("all", "all tested tokens"),
                              ("stop", "removed (learned stop words)"),
                              ("kept", "kept (everything else)"),
@@ -1680,19 +1687,24 @@ class TriageGUI(tk.Tk):
         # left the table permanently empty; the tab rendered its headers and
         # nothing else, which reads as "no stop words" rather than "not
         # drawn".
+        n_removed = len(r["stopwords"])
         self.stop_summary.configure(text=(
+            f"These {n_removed} English stop-words are removed from translated "
+            f"complaints on the active serving path before sentence-transformer "
+            f"encoding.\n"
             f"A token is removed only when ALL THREE hold:  document frequency "
             f">= {t['effective_df_cutoff']:.4f}"
             f"   AND   normalized mutual information <= {t['mi_threshold']}"
             f"   AND   Cramer's V <= {t['cramers_v_threshold']}\n"
-            f"This is the list the SERVING bundle applies - "
-            f"{ENGLISH_MODEL_DIR}/learned_stopwords.json, not the project-root "
-            f"file, which belongs to whichever model trained last.\n"
+            f"Read from {ENGLISH_MODEL_DIR}/learned_stopwords.json - the "
+            f"serving bundle's own list, not the project-root file, which "
+            f"belongs to whichever model trained last.\n"
             f"{c['n_documents']} complaints, {c['n_unique_tokens']} unique tokens, "
             f"{c['n_tokens_tested']} high-frequency tokens tested, "
             f"{r['n_stopwords']} learned as stop words: "
             f"{', '.join(r['stopwords'])}.\n"
-            "Most rows in this table are tokens that were TESTED and KEPT - the "
+            "The table shows the removed tokens by default. Switch to 'all "
+            "tested tokens' to see the ones that were tested and KEPT - the "
             "'decision' column names the criterion that saved each one. The "
             "chi-square statistic and p-value are shown for transparency only: "
             "the decision uses Cramer's V (effect size), which does not shrink "
@@ -1773,6 +1785,18 @@ class TriageGUI(tk.Tk):
         self._deployed_banner(
             pad, "Every row is triaged by:").pack(fill="x", pady=(10, 0))
 
+        # Progress furniture. Hidden until a run starts: an idle progress bar
+        # sitting at zero reads as a job that has stalled.
+        self.batch_progress_box = tk.Frame(pad, bg=CARD)
+        self.batch_progress_label = body(
+            self.batch_progress_box,
+            "Translating complaints locally via Ollama... Please wait, "
+            "processing patient records.", fg=MUTED, size=9)
+        self.batch_progress_label.pack(fill="x")
+        self.batch_bar = ttk.Progressbar(self.batch_progress_box,
+                                         mode="determinate", maximum=100)
+        self.batch_bar.pack(fill="x", pady=(4, 0))
+
         self.batch_summary = body(pad, "", fg=INK, size=9)
         self.batch_summary.pack(fill="x", pady=(10, 0))
 
@@ -1781,12 +1805,14 @@ class TriageGUI(tk.Tk):
         bpad = tk.Frame(bottom, bg=CARD)
         bpad.pack(fill="both", expand=True, padx=18, pady=14)
 
-        cols = ("level", "label", "conf", "notes")
+        cols = ("level", "label", "conf", "gate", "notes")
         self.batch_tree = ttk.Treeview(bpad, columns=cols, show="tree headings")
         self.batch_tree.heading("#0", text="complaint")
-        self.batch_tree.column("#0", width=430)
-        for col, label, w in [("level", "level", 70), ("label", "label", 130),
-                              ("conf", "confidence", 95), ("notes", "notes", 260)]:
+        self.batch_tree.column("#0", width=380)
+        for col, label, w in [("level", "level", 60), ("label", "label", 120),
+                              ("conf", "confidence", 90),
+                              ("gate", "anatomical gate", 120),
+                              ("notes", "notes", 240)]:
             self.batch_tree.heading(col, text=label)
             self.batch_tree.column(col, width=w,
                                    anchor="w" if col == "notes" else "center")
@@ -1819,19 +1845,42 @@ class TriageGUI(tk.Tk):
         # thread-safe, so the worker must never touch a widget itself.
         self._batch_progress = {"done": 0, "total": 0, "text": "reading file",
                                 "finished": False}
+        # Disable the trigger for the duration. Two overlapping batch runs
+        # write to the same _predictions.csv and interleave rows in the same
+        # tree, and the second one silently wins.
+        self.batch_btn.config(state="disabled")
+        self.batch_progress_box.pack(fill="x", pady=(8, 0))
+        self.batch_bar.configure(value=0, maximum=100)
+        self.batch_progress_label.configure(
+            text="Translating complaints locally via Ollama... Please wait, "
+                 "processing patient records.")
         self._run_async(self._batch_worker, f"Triaging {os.path.basename(path)}...")
         self._poll_batch_progress()
 
     def _poll_batch_progress(self):
+        """Render the worker's counter. Runs on the UI thread by design.
+
+        Tk is not thread-safe, so the worker publishes plain ints into a dict
+        and every widget touch happens here.
+        """
         pr = getattr(self, "_batch_progress", None)
-        if not pr or pr.get("finished"):
+        if not pr:
             return
         total, done = pr.get("total", 0), pr.get("done", 0)
         if total:
-            secs = int((total - done) * 11)
+            secs = int((total - done) * SECONDS_PER_ROW)
             eta = f"{secs // 60}m {secs % 60}s" if secs >= 60 else f"{secs}s"
+            self.batch_bar.configure(maximum=total, value=done)
+            self.batch_progress_label.configure(
+                text=f"Processing patient {min(done + 1, total)} of {total}...  "
+                     f"about {eta} left.\n"
+                     f"Translating complaints locally via Ollama - each row is "
+                     f"one call to the local model, so this is slow by nature. "
+                     f"Please wait.")
             self.status.set(f"Translating row {done}/{total}  -  about {eta} "
                             f"left  |  {pr.get('text', '')[:48]}")
+        if pr.get("finished"):
+            return
         self.after(300, self._poll_batch_progress)
 
     def _batch_worker(self):
@@ -1929,8 +1978,19 @@ class TriageGUI(tk.Tk):
             pass
         return results, out_base
 
+    def _end_batch_ui(self):
+        """Restore the tab. Called on success AND on failure - a crashed run
+        that leaves the button disabled makes the tab permanently dead."""
+        self._batch_progress = {"finished": True}
+        try:
+            self.batch_progress_box.pack_forget()
+            self.batch_btn.config(state="normal")
+        except Exception:
+            pass
+
     def _done_batch_worker(self, payload):
         results, out_base = payload
+        self._end_batch_ui()
         for row in self.batch_tree.get_children():
             self.batch_tree.delete(row)
 
@@ -1946,7 +2006,8 @@ class TriageGUI(tk.Tk):
                 skipped += 1
                 self.batch_tree.insert(
                     "", "end", text=str(r.get("Complaint_Text", ""))[:110],
-                    values=("-", r.get("Gate_Status", "NOT SCORED"), "-",
+                    values=("-", "not scored", "-",
+                            r.get("Gate_Status", "NOT SCORED"),
                             str(r.get("Gate_Detail") or r.get("Notes", ""))[:90]))
                 continue
             level = int(raw_level)
@@ -1955,6 +2016,7 @@ class TriageGUI(tk.Tk):
                 "", "end", text=str(r.get("Complaint_Text", ""))[:110],
                 tags=(f"L{level - 1}",),
                 values=(level, r["Predicted_Label"], r["Confidence"],
+                        r.get("Gate_Status", "PASS"),
                         str(r.get("Notes", ""))[:90]))
 
         total = len(results)

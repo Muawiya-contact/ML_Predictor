@@ -168,6 +168,62 @@ except Exception as e:
         f"{type(e).__name__}: {e}")
     traceback.print_exc()
 
+# ---- Tab 3: the removed list must be the default view -------------------
+try:
+    n_removed = len(app.stopword_report["stopwords"])
+    rows = len(app.stop_tree.get_children())
+    summary = app.stop_summary.cget("text")
+    problems = []
+    if app.stop_filter.get() != "stop":
+        problems.append(f"default filter is {app.stop_filter.get()!r}, not 'stop'")
+    if rows != n_removed:
+        problems.append(f"{rows} rows rendered for {n_removed} stop words")
+    if f"These {n_removed} English stop-words are removed" not in summary:
+        problems.append("header text does not state the serving-path claim")
+    rec("tab3  default view shows exactly the removed tokens", not problems,
+        "; ".join(problems) or
+        f"filter='stop', {rows} rows == {n_removed} stop words, header states "
+        f"the serving path")
+except Exception as e:
+    rec("tab3  default view shows exactly the removed tokens", False,
+        f"{type(e).__name__}: {e}")
+
+# ---- Tab 4: the button must lock during a run and unlock after ----------
+try:
+    states = {"before": str(app.batch_btn.cget("state"))}
+    app._batch_progress = {"done": 3, "total": 10, "text": "x",
+                           "finished": False}
+    app.batch_btn.config(state="disabled")
+    app.batch_progress_box.pack(fill="x")
+    app._poll_batch_progress()
+    app.update()
+    states["during"] = str(app.batch_btn.cget("state"))
+    bar_max = int(app.batch_bar.cget("maximum"))
+    bar_val = int(app.batch_bar.cget("value"))
+    label = app.batch_progress_label.cget("text")
+    app._end_batch_ui()
+    app.update()
+    states["after"] = str(app.batch_btn.cget("state"))
+    problems = []
+    if states["during"] != "disabled":
+        problems.append(f"button not locked during run ({states['during']})")
+    if states["after"] == "disabled":
+        problems.append("button left disabled after the run - tab is dead")
+    if (bar_max, bar_val) != (10, 3):
+        problems.append(f"bar shows {bar_val}/{bar_max}, expected 3/10")
+    if "Processing patient 4 of 10" not in label:
+        problems.append(f"label reads {label[:60]!r}")
+    if "Ollama" not in label:
+        problems.append("label does not explain the delay")
+    rec("tab4  progress bar, button lock, and unlock", not problems,
+        "; ".join(problems) or
+        f"bar {bar_val}/{bar_max}, 'Processing patient 4 of 10', button "
+        f"{states['during']} -> {states['after']}")
+except Exception as e:
+    rec("tab4  progress bar, button lock, and unlock", False,
+        f"{type(e).__name__}: {e}")
+    traceback.print_exc()
+
 # ---- no dangling references to the removed sections ---------------------
 try:
     gone = [n for n in ("_results_section_methods", "_results_section_embedding",
