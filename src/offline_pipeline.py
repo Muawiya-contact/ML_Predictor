@@ -135,6 +135,7 @@ Always map Roman Urdu body parts strictly to their precise English anatomical eq
 - Heart: "dil"
 - Eye / Eyes: "aankh", "aankhen", "aakhein"
 - Ear / Ears: "kaan"
+- Shoulder: "kandha", "kandhay", "kandhe", "kandha" (NEVER translate as arm or hand - a shoulder is not an arm, and pain radiating to the shoulder is a different clinical sign)
 - Arm / Hand: "baazu", "bazu", "haath", "hath"
 - Leg / Foot: "taang", "tang", "paon", "pair"
 

@@ -774,6 +774,16 @@ class TriageGUI(tk.Tk):
             self.model_dir_en = ENGLISH_MODEL_DIR
         return self.artifacts_en
 
+    def active_model_dir(self):
+        """The directory of the bundle that actually serves predictions.
+
+        self.model_dir is the Roman Urdu bundle discovered at startup. Since
+        the mode toggle was removed, that is NOT what scores a patient, so
+        any tab describing "the deployed model" from it is describing a
+        model the operator can no longer reach.
+        """
+        return resolve_project_file(ENGLISH_MODEL_DIR)
+
     def active_manifest(self):
         art = self.active_artifacts()
         return (art or {}).get("manifest", {}) if art else {}
@@ -1196,10 +1206,15 @@ class TriageGUI(tk.Tk):
 
     def _fill_dropdowns(self):
         mapping = {
-            "Gender": self.artifacts["le_gender"],
-            "Mode_of_Arrival": self.artifacts["le_mode"],
-            "AVPU": self.artifacts["le_avpu"],
-            "ECG_Status": self.artifacts["le_ecg"],
+            # From the SERVING bundle. The two bundles' categorical
+            # vocabularies happen to be identical today, so this is latent
+            # rather than active - but a dropdown offering a category the
+            # scoring model never saw would silently fall back to a default
+            # and the operator would never know which value was used.
+            "Gender": self.active_artifacts()["le_gender"],
+            "Mode_of_Arrival": self.active_artifacts()["le_mode"],
+            "AVPU": self.active_artifacts()["le_avpu"],
+            "ECG_Status": self.active_artifacts()["le_ecg"],
         }
         # ECG_Status defaults to "Normal", NOT to an infarct pattern.
         #
@@ -1254,9 +1269,8 @@ class TriageGUI(tk.Tk):
             messagebox.showerror("Speech failed", msg)
 
     def _do_predict(self):
-        from triage_pipeline import predict_one, preprocess_stages
+        from triage_pipeline import predict_one
 
-        uses_emb = bool(self.model_info and self.model_info["uses_embeddings"])
         text = self.complaint.get("1.0", "end").strip()
         if not text:
             messagebox.showwarning("No complaint", "Please enter a complaint.")
@@ -1275,7 +1289,6 @@ class TriageGUI(tk.Tk):
 
         original_text = text
         english_text = None
-        fell_back = False
         self._last_similarity = None
         self._last_spoken = text
         if self.in_english_mode():
@@ -1289,35 +1302,28 @@ class TriageGUI(tk.Tk):
             text = english_text
             self._last_spoken = english_text
 
-            # SAFETY FALLBACK. If the translation has drifted too far from
-            # the original, score the ORIGINAL instead and say so - the
-            # similarity number is only worth computing if something acts
-            # on it.
+            # The cosine fallback that used to live here is gone. It never
+            # ran: it called get_text_encoder() without importing it, and
+            # its own except-clause swallowed the NameError, so for its
+            # entire life this block computed nothing and fell back never.
+            # It is not restored, because the number it gated on could not
+            # tell a correct translation (0.8054) from "My leg is broken
+            # after a fall" (0.7922). The anatomical gate in
+            # translate_for_mode() has already blocked drift by this point.
+            #
+            # Similarity is still computed, for display only, and this time
+            # with the encoder imported.
             try:
-                from src.offline_pipeline import FALLBACK_THRESHOLD
                 import numpy as _np
-                from stopwords import load_stopwords, remove_stopwords
+                from triage_pipeline import get_text_encoder
                 enc = get_text_encoder(self.active_artifacts())
                 v = enc.encode([original_text, english_text],
                                convert_to_numpy=True,
                                normalize_embeddings=True,
                                show_progress_bar=False)
-                sim = float(_np.dot(v[0], v[1]))
-                self._last_similarity = sim
-                if sim < FALLBACK_THRESHOLD:
-                    fell_back = True
-                    text = original_text
-                    self._last_spoken = original_text
-                    messagebox.showwarning(
-                        "Translation drifted - falling back",
-                        f"The English translation scored {sim:.3f} against "
-                        f"the original, below the {FALLBACK_THRESHOLD:.2f} "
-                        f"safety threshold.\n\nThe complaint was scored "
-                        f"from the ROMAN URDU text instead, using the "
-                        f"offline model.\n\nTranslation was:\n"
-                        f"{english_text}")
+                self._last_similarity = float(_np.dot(v[0], v[1]))
             except Exception:
-                # A failed similarity check must not block the prediction.
+                # Display-only: never let it take the prediction down.
                 self._last_similarity = None
 
         input_warnings = []
@@ -1344,68 +1350,42 @@ class TriageGUI(tk.Tk):
 
         self._draw_proba(proba, level)
 
-        if self.in_english_mode():
-            self.stages.config(state="normal")
-            self.stages.delete("1.0", "end")
-            self.stages.insert("end", "0. raw input (as typed)\n", "h")
-            self.stages.insert("end", f"   {original_text}\n")
-            self.stages.insert("end", "1. local Ollama translation\n", "h")
-            self.stages.insert("end", f"   {english_text}\n")
-            self.stages.insert("end", "2. sentence-transformer\n", "h")
-            self.stages.insert("end", "   English encoded directly - the Roman Urdu\n"
-                                      "   dictionary and stop-word stages do not apply\n")
-            self.stages.tag_config("h", foreground=ACCENT,
-                                   font=("Consolas", 9, "bold"))
-            self.stages.config(state="disabled")
-            self.status.set(f"English mode: Level {level + 1} "
-                            f"({LEVEL_NAMES[level]}) at {confidence * 100:.1f}%.")
-            return
-
-        stages = preprocess_stages(text)
-        removed = stages[-1].get("dropped") or []
+        # The stage list must name every stage that ran. It used to skip the
+        # dictionary pass entirely and assert that "the Roman Urdu dictionary
+        # and stop-word stages do not apply" - half right. The stop-word list
+        # does not apply; the dictionary does, and runs before the translator.
+        from src.offline_pipeline import fuzzy_normalize_roman_urdu
+        normalized = fuzzy_normalize_roman_urdu(original_text, verbose=False)
 
         self.stages.config(state="normal")
         self.stages.delete("1.0", "end")
-        for i, stage in enumerate(stages):
-            mark = "" if stage["key"] == "raw" else (
-                "" if stage["changed"] else "   (no change)")
-            self.stages.insert("end", f"{i}. {stage['title'].lower()}{mark}\n", "h")
-            self.stages.insert("end", f"   {stage['text']}\n")
-        if removed:
-            self.stages.insert("end",
-                               f"\n   stop words dropped: {', '.join(removed)}\n")
-        else:
-            self.stages.insert("end",
-                               "\n   no learned stop words were present\n")
-        # Which stage the live model is actually fed differs by method: the
-        # Bag-of-Words vectorizers were fitted WITHOUT stop-word removal, so
-        # they get the diacritized text; the embedding path gets the stripped
-        # text. Saying "this is what the model received" under the last panel
-        # regardless would have been wrong for one of them.
-        if uses_emb:
-            fed = f"step {len(stages) - 1} ({stages[-1]['title'].lower()})"
-            consumer = "the sentence-transformer"
-        else:
-            fed = f"step {len(stages) - 2} ({stages[-2]['title'].lower()})"
-            consumer = ("the Bag-of-Words vectorizers, which were fitted "
-                        "before stop-word removal existed")
-        self.stages.insert("end", f"\n   {consumer} received {fed}\n")
+        self.stages.insert("end", "0. raw input (as typed)\n", "h")
+        self.stages.insert("end", f"   {original_text}\n")
+        self.stages.insert("end", "1. dictionary + fuzzy normalization"
+                                  f"{'' if normalized != original_text else '   (no change)'}\n", "h")
+        self.stages.insert("end", f"   {normalized}\n")
+        self.stages.insert("end", "2. local Ollama translation\n", "h")
+        self.stages.insert("end", f"   {english_text}\n")
+        self.stages.insert("end", "3. anatomical gate\n", "h")
+        self.stages.insert("end", "   passed - every body part named in the\n"
+                                  "   complaint survives into the English\n")
+        self.stages.insert("end", "4. sentence-transformer\n", "h")
+        self.stages.insert("end", "   English encoded directly - the learned\n"
+                                  "   stop-word list does not apply to this bundle\n")
+        # Input-quality warnings. These lived only in the branch below,
+        # which is now unreachable; a capped confidence with no stated
+        # reason reads as a weak case rather than a bad input.
+        if input_warnings:
+            self.stages.insert("1.0", "!! " + "\n!! ".join(input_warnings) + "\n\n")
         self.stages.tag_config("h", foreground=ACCENT,
                                font=("Consolas", 9, "bold"))
         self.stages.config(state="disabled")
-
-        # Input-quality warnings used to be computed and dropped on this
-        # path - only the batch tab ever showed them. A capped confidence
-        # with no stated reason reads as a weak case, not a bad input.
-        if input_warnings:
-            self.stages.config(state="normal")
-            self.stages.insert("1.0", "!! " + "\n!! ".join(input_warnings) + "\n\n")
-            self.stages.config(state="disabled")
-
         self.status.set(
-            f"Predicted Level {level + 1} ({LEVEL_NAMES[level]}) "
-            f"at {confidence * 100:.1f}% confidence."
-            + ("   |  ⚠ " + input_warnings[0].split(':')[0] if input_warnings else ""))
+            f"Level {level + 1} ({LEVEL_NAMES[level]}) at "
+            f"{confidence * 100:.1f}% confidence."
+            + ("   |  " + input_warnings[0].split(':')[0] if input_warnings else ""))
+        return
+
 
     def _draw_proba(self, proba, chosen):
         self._last_proba = (proba, chosen)
@@ -1466,136 +1446,108 @@ class TriageGUI(tk.Tk):
         self.explore_out.pack(fill="both", expand=True, pady=(16, 0))
 
     def _do_explore(self):
-        # preprocess_stages() runs the SAME functions, in the same order, that
-        # normalize_roman_urdu() and preprocess_for_embedding() run. The tab
-        # used to re-implement the pipeline inline and skipped the rule
-        # replacement stage entirely, so "saans phulna" -> "saans phoolna" and
-        # "thanda pasina" -> "sweating" happened invisibly and words appeared
-        # to vanish between the last two panels for no stated reason.
-        from triage_pipeline import preprocess_stages
+        """Show the five stages a complaint actually passes through.
+
+        This tab drifted badly from the code it claims to document. It had
+        two branches, one per mode; with the toggle gone the Roman Urdu
+        branch became unreachable and its ~60 lines described a pipeline
+        nobody could run. Worse, the surviving branch told the operator the
+        "Roman Urdu dictionary, fuzzy matching and learned stop-word stages
+        are skipped" - which stopped being true the moment
+        fuzzy_normalize_roman_urdu() was wired in ahead of the translator.
+        A pipeline explorer that misreports the pipeline is worse than no
+        explorer, because it is believed.
+
+        Every stage below is produced by calling the SAME function the
+        serving path calls, never a re-implementation.
+        """
+        from src.offline_pipeline import (fuzzy_normalize_roman_urdu,
+                                          verify_anatomical_integrity)
 
         for w in self.explore_out.winfo_children():
             w.destroy()
 
         raw = self.explore_var.get().strip()
         if not raw:
-            # Say so. Returning silently cleared the panel and left the tab
-            # blank, which is indistinguishable from the analysis crashing.
             body(self.explore_out,
                  "Type a complaint above and press Analyse. "
                  "There is nothing to run the pipeline on yet.",
                  fg=MUTED, size=9).pack(fill="x")
             return
 
-        if self.in_english_mode():
-            en, err = self.translate_for_mode(raw)
-            if err:
-                body(self.explore_out,
-                     "English (GPT) mode - translation failed:\n\n" + err,
-                     fg="#c0392b", size=9, wraplength=980).pack(fill="x")
-                return
-            for title, txt, note in [
-                ("0  Raw input (as typed)", raw,
-                 "exactly what the triage nurse typed"),
-                ("1  Local Ollama translation", en,
-                 "translated on this machine by Ollama on localhost"),
-                ("2  Sentence-transformer", en,
-                 "the English text is encoded directly. The Roman Urdu "
-                 "dictionary, fuzzy matching and learned stop-word stages "
-                 "are skipped - they exist to normalise Roman Urdu and do "
-                 "not apply to English."),
-            ]:
-                blk = tk.Frame(self.explore_out, bg=CARD)
-                blk.pack(fill="x", pady=(0, 10))
-                tk.Label(blk, text=title, bg=CARD, fg=ACCENT,
-                         font=("Segoe UI Semibold", 10), anchor="w").pack(fill="x")
-                tk.Label(blk, text=txt or "(empty)", bg="#fbfcfd", fg=INK,
-                         font=("Consolas", 11), anchor="w", justify="left",
-                         wraplength=1000, padx=10, pady=7, relief="solid",
-                         bd=1).pack(fill="x", pady=(2, 1))
-                tk.Label(blk, text=note, bg=CARD, fg=MUTED, font=("Segoe UI", 8),
-                         anchor="w", justify="left",
-                         wraplength=1000).pack(fill="x")
-            return
-
-        stages = preprocess_stages(raw)
-        final = stages[-1]["text"]
-
-        for i, stage in enumerate(stages):
-            block = tk.Frame(self.explore_out, bg=CARD)
-            block.pack(fill="x", pady=(0, 10))
-            head = tk.Frame(block, bg=CARD)
+        def panel(title, text, note, tone=None):
+            blk = tk.Frame(self.explore_out, bg=CARD)
+            blk.pack(fill="x", pady=(0, 10))
+            head = tk.Frame(blk, bg=CARD)
             head.pack(fill="x")
-            tk.Label(head, text=f"{i}  {stage['title']}", bg=CARD, fg=ACCENT,
+            tk.Label(head, text=title, bg=CARD, fg=ACCENT,
                      font=("Segoe UI Semibold", 10), anchor="w").pack(side="left")
-            if stage["key"] != "raw":
-                # Say explicitly whether the stage did anything. Without this a
-                # stage that legitimately had nothing to correct is
-                # indistinguishable from a stage that never ran.
-                changed = stage["changed"]
-                tk.Label(head,
-                         text=("changed this text" if changed
-                               else "ran - nothing to change here"),
-                         bg="#eaf3ea" if changed else "#eef1f4",
-                         fg="#1e5c2e" if changed else MUTED,
+            if tone:
+                label, ok = tone
+                tk.Label(head, text=label,
+                         bg="#eaf3ea" if ok else "#f7e9e7",
+                         fg="#1e5c2e" if ok else "#a33228",
                          font=("Segoe UI", 8), padx=6).pack(side="right")
-            tk.Label(block, text=stage["text"] or "(empty)", bg="#fbfcfd", fg=INK,
+            tk.Label(blk, text=text or "(empty)", bg="#fbfcfd", fg=INK,
                      font=("Consolas", 11), anchor="w", justify="left",
-                     wraplength=1000, padx=10, pady=7,
-                     relief="solid", bd=1).pack(fill="x", pady=(2, 1))
-            tk.Label(block, text=stage["note"], bg=CARD, fg=MUTED,
-                     font=("Segoe UI", 8), anchor="w", justify="left",
+                     wraplength=1000, padx=10, pady=7, relief="solid",
+                     bd=1).pack(fill="x", pady=(2, 1))
+            tk.Label(blk, text=note, bg=CARD, fg=MUTED, font=("Segoe UI", 8),
+                     anchor="w", justify="left",
                      wraplength=1000).pack(fill="x")
 
-        # ---- word-by-word accounting ----
-        dropped = stages[-1].get("dropped") or []
-        if dropped and self.stopword_report:
-            stats = {t["token"]: t for t in self.stopword_report["token_statistics"]}
-            box = tk.Frame(self.explore_out, bg=CARD)
-            box.pack(fill="x", pady=(4, 0))
-            tk.Label(box, text="Why those words were dropped", bg=CARD, fg=ACCENT,
-                     font=("Segoe UI Semibold", 10), anchor="w").pack(fill="x")
-            tree = ttk.Treeview(box, columns=("df", "mi", "chi", "p"),
-                                show="tree headings", height=min(6, len(dropped)))
-            tree.heading("#0", text="token")
-            tree.column("#0", width=150)
-            for col, label, w in [("df", "doc frequency", 110),
-                                  ("mi", "normalized MI", 110),
-                                  ("chi", "chi-square", 100),
-                                  ("p", "p-value", 90)]:
-                tree.heading(col, text=label)
-                tree.column(col, width=w, anchor="center")
-            for token in dropped:
-                s = stats.get(token)
-                if s:
-                    tree.insert("", "end", text=token, values=(
-                        f"{s['document_frequency']:.3f}",
-                        f"{s['normalized_mutual_information']:.5f}",
-                        f"{s['chi_square']:.2f}",
-                        f"{s['chi_square_p_value']:.4f}"))
-                else:
-                    tree.insert("", "end", text=token,
-                                values=("-", "-", "-", "-"))
-            tree.pack(fill="x", pady=(4, 2))
-            tk.Label(box,
-                     text=("Dropped because the token is common AND its mutual information "
-                           "with the triage level is near zero AND the chi-square test is "
-                           "not significant (p > 0.05)."),
-                     bg=CARD, fg=MUTED, font=("Segoe UI", 8),
-                     anchor="w", wraplength=980, justify="left").pack(fill="x")
-        elif not dropped:
-            tk.Label(self.explore_out,
-                     text="No learned stop words were present in this complaint.",
-                     bg=CARD, fg=MUTED, font=("Segoe UI", 9),
-                     anchor="w").pack(fill="x")
+        panel("0  Raw input (as typed)", raw,
+              "exactly what the triage nurse typed - nothing has run yet")
 
-        # ---- and, just as importantly, what was KEPT ----
-        # "Stop words removed" reads as "all the filler is gone", and it is
-        # not: a frequent word survives when either its mutual information or
-        # its Cramer's V effect size says it genuinely tracks the triage level
-        # on this dataset. Showing the surviving filler with its reason is the
-        # difference between a misleading label and an explained one.
-        self._explain_kept_fillers(final)
+        # 1. dictionary + fuzzy, the stage the tab used to deny existed
+        normalized = fuzzy_normalize_roman_urdu(raw, verbose=False)
+        changed = normalized != raw
+        panel("1  Dictionary + fuzzy normalization", normalized,
+              "Local and deterministic, before Ollama sees anything. Spelling "
+              "variants collapse onto one canonical Roman Urdu token "
+              "(\"payt\" -> \"pait\"). Fuzzy matching is deliberately timid: "
+              "cutoff 0.88, a 4-character minimum and a blocklist, because at "
+              "0.80 it rewrote 1,619 words in this project's own corpus - "
+              "\"peene\" (to drink) became \"seene\" (chest).",
+              ("changed this text" if changed else "ran - nothing to change",
+               True))
+
+        # 2. translation
+        en, err = self.translate_for_mode(raw)
+        if err:
+            panel("2  Ollama translation  -  FAILED", err,
+                  "The pipeline stops here. No prediction is made, and no "
+                  "other model answers in its place.", ("failed", False))
+            return
+        panel("2  Local Ollama translation", en,
+              "translated on this machine by Ollama on localhost - no network "
+              "call. temperature 0, so the same complaint gives the same "
+              "English every run.", ("translated", True))
+
+        # 3. the gate. translate_for_mode() already enforces it - reaching
+        #    this line means it passed, so re-running it here is for display,
+        #    and it is the same function, not a second opinion.
+        ok, failures = verify_anatomical_integrity(normalized, en)
+        panel("3  Anatomical assertion gate",
+              "PASSED - every body part named in the complaint survives "
+              "into the English translation."
+              if ok else "BLOCKED\n" + "\n".join(failures),
+              "Deterministic, and this is the decision. It replaced cosine "
+              "similarity, which could not tell a correct translation "
+              "(0.8054) from \"My leg is broken after a fall\" (0.7922). "
+              "The gate checks anatomy only - it cannot see a wrong symptom "
+              "attached to the right body part.",
+              ("passed" if ok else "blocked", ok))
+
+        # 4. encoding
+        man = self.active_manifest() or {}
+        enc = man.get("embedding_model") or "sentence-transformer"
+        panel("4  Sentence-transformer", en,
+              f"The English text is encoded by {enc} directly. The learned "
+              f"Roman Urdu stop-word list is NOT applied here - this bundle "
+              f"was trained with skip_normalization, and serving it any other "
+              f"way is the train/serve skew that cost 38 points of accuracy "
+              f"once already.", ("encoded", True))
 
     def _explain_kept_fillers(self, final_text):
         if not self.stopword_report:
@@ -2032,11 +1984,10 @@ class TriageGUI(tk.Tk):
         # Read the DEPLOYED bundle's own metrics file, the same way the
         # other sections on this page do, so the table can never describe a
         # different model than the one serving predictions.
-        # model_dir is None until the background load finishes, so a
-        # getattr default is not enough - the attribute exists, it is just
-        # empty. Fall back to the embedding bundle so the tab paints at
-        # startup, and re-render once the real model is known.
-        model_dir = getattr(self, "model_dir", None) or EMBED_MODEL_DIR
+        # The bundle that SERVES, not the one found at startup. These are
+        # different directories now, and a precision/recall table describing
+        # the unreachable one is worse than no table.
+        model_dir = self.active_model_dir()
         path = os.path.join(resolve_project_file(model_dir),
                             "triage_metrics.json")
         if not os.path.exists(path):
