@@ -705,8 +705,6 @@ class TriageGUI(tk.Tk):
                         self._end_batch_ui()
                     # Re-enable any button the failed job had disabled, so a
                     # single failure does not leave the tab permanently dead.
-                    if hasattr(self, "demo_btn"):
-                        self.demo_btn.config(state="normal")
                     messagebox.showerror("Error", payload)
                 else:
                     handler = getattr(self, f"_done{name}", None)
@@ -1373,7 +1371,7 @@ class TriageGUI(tk.Tk):
             bg=colour, fg="#f2f6fa",
             text=f"{LEVEL_BLURB[level]}    ·    confidence {confidence * 100:.1f}%")
 
-        self._draw_proba(proba, level)
+        self._draw_proba(proba, level, shown_confidence=confidence)
 
         # The stage list must name every stage that ran. It used to skip the
         # dictionary pass entirely and assert that "the Roman Urdu dictionary
@@ -1412,8 +1410,17 @@ class TriageGUI(tk.Tk):
         return
 
 
-    def _draw_proba(self, proba, chosen):
-        self._last_proba = (proba, chosen)
+    def _draw_proba(self, proba, chosen, shown_confidence=None):
+        """Bars for every class, plus a note when the headline was capped.
+
+        The bars are the model's RAW output and stay that way - redrawing
+        them to match a capped headline would misreport what the classifier
+        said. But leaving the contradiction unexplained was worse: a
+        complaint with no usable text showed "confidence 50.0%" above a bar
+        labelled 94.0%, and the cap exists precisely so a blank complaint
+        cannot look confident.
+        """
+        self._last_proba = (proba, chosen, shown_confidence)
         c = self.proba_canvas
         c.delete("all")
         width = c.winfo_width()
@@ -1432,12 +1439,21 @@ class TriageGUI(tk.Tk):
             c.create_rectangle(label_w, y, label_w + bar_w, y + 16,
                                fill="#eef1f4", outline="")
             filled = max(2, int(bar_w * float(p)))
+            capped_here = (i == chosen and shown_confidence is not None
+                           and float(p) - shown_confidence > 1e-6)
             c.create_rectangle(label_w, y, label_w + filled, y + 16,
                                fill=LEVEL_COLOURS[i], outline="")
             c.create_text(width - 2, y + 8, anchor="e",
                           text=f"{float(p) * 100:.1f}%",
                           font=("Segoe UI Semibold" if i == chosen else "Segoe UI", 9),
                           fill=INK if i == chosen else MUTED)
+            if capped_here:
+                # Say WHY the headline disagrees with this bar, on the bar.
+                c.create_text(label_w + 6, y + 8, anchor="w",
+                              text=f"raw {float(p) * 100:.1f}%  →  reported "
+                                   f"{shown_confidence * 100:.1f}% (capped: "
+                                   f"no usable complaint text)",
+                              font=("Segoe UI", 8), fill="#7a2f28")
 
     # =================================================================
     # TAB 2 - Pipeline explorer
@@ -1537,8 +1553,11 @@ class TriageGUI(tk.Tk):
               ("changed this text" if changed else "ran - nothing to change",
                True))
 
-        # 2. translation
-        en, err = self.translate_for_mode(raw)
+        # 2. translation. allow_blocked=True on purpose: a gate rejection is
+        # NOT a translation failure, and reporting it as one made this tab -
+        # whose entire job is saying which stage failed - blame the wrong
+        # stage and skip rendering the stage that actually rejected the row.
+        en, err = self.translate_for_mode(raw, allow_blocked=True)
         if err:
             panel("2  Ollama translation  -  FAILED", err,
                   "The pipeline stops here. No prediction is made, and no "
@@ -1549,9 +1568,9 @@ class TriageGUI(tk.Tk):
               "call. temperature 0, so the same complaint gives the same "
               "English every run.", ("translated", True))
 
-        # 3. the gate. translate_for_mode() already enforces it - reaching
-        #    this line means it passed, so re-running it here is for display,
-        #    and it is the same function, not a second opinion.
+        # 3. the gate, reported whichever way it went. This panel is the
+        #    only place a blocked translation is shown beside the English
+        #    that caused it.
         ok, failures = verify_anatomical_integrity(normalized, en)
         panel("3  Anatomical assertion gate",
               "PASSED - every body part named in the complaint survives "
@@ -1898,7 +1917,7 @@ class TriageGUI(tk.Tk):
             # instead of leaving half the sheet scored by a pipeline the
             # operator did not pick.
             texts, failures = [], 0
-            gate_status, gate_detail = [], []
+            gate_status, gate_detail, failed_rows = [], [], []
             pr = getattr(self, "_batch_progress", {})
             pr["total"] = len(df)
             for _i, t in enumerate(df["Complaint_Text"].fillna("").astype(str)):
@@ -1909,6 +1928,11 @@ class TriageGUI(tk.Tk):
                 ok, why, _ = self._last_gate
                 if err:
                     failures += 1
+                    # The ORIGINAL goes into the scored column so the row
+                    # still shows what the operator typed, but the
+                    # Translation column gets None - it promises English, and
+                    # Roman Urdu printed there reads as its own translation.
+                    failed_rows.append(len(texts))
                     texts.append(t)
                     gate_status.append("NOT TRANSLATED")
                     gate_detail.append(err.splitlines()[0][:120])
@@ -1916,7 +1940,13 @@ class TriageGUI(tk.Tk):
                     texts.append(en)
                     gate_status.append("PASS" if ok else "BLOCKED")
                     gate_detail.append("" if ok else "; ".join(why)[:120])
-            if failures == len(df):
+            # `len(df) and` matters: a header-only sheet has 0 rows and 0
+            # failures, and 0 == 0 fired this guard, so exporting the template
+            # and uploading it unedited raised "None of the 0 rows could be
+            # translated ... the usual causes are Ollama not running" against
+            # a perfectly healthy service. predict_dataframe has a 0-row path
+            # built for exactly that upload; this made it unreachable.
+            if len(df) and failures == len(df):
                 # Nothing survived. This IS fatal - there is no table to show.
                 raise RuntimeError(
                     f"None of the {len(df)} rows could be translated. Check "
@@ -1946,7 +1976,8 @@ class TriageGUI(tk.Tk):
         pr["finished"] = True
 
         if gate_status:
-            results["Translation"] = texts
+            results["Translation"] = [None if i in set(failed_rows) else v
+                                      for i, v in enumerate(texts)]
             results["Gate_Status"] = gate_status
             results["Gate_Detail"] = gate_detail
             # A blocked row must not carry a triage level. Scoring it anyway
@@ -2345,211 +2376,13 @@ class TriageGUI(tk.Tk):
             parts.append("errors: " + "; ".join(res["errors"][:2]))
         self.cluster_summary.configure(text="\n".join(parts))
 
-    def _demo_reference_corpus(self):
-        """Complaints to match against, with their meaning group if known.
-
-        Prefers the hand-labelled evaluation clusters, because then the match
-        can be shown with the meaning it belongs to. Falls back to the raw
-        dataset when that file is absent.
-        """
-        if os.path.exists(CLUSTERS_FILE):
-            try:
-                with open(CLUSTERS_FILE, "r", encoding="utf-8") as f:
-                    clusters = json.load(f)["clusters"]
-                pairs = [(t, name) for name, items in clusters.items()
-                         for t in items]
-                if pairs:
-                    return pairs, CLUSTERS_FILE
-            except (OSError, ValueError, KeyError):
-                pass
-        if os.path.exists(DATASET_FILE):
-            import pandas as pd
-            texts = (pd.read_csv(DATASET_FILE)["Complaint_Text"]
-                     .dropna().astype(str).drop_duplicates().tolist())
-            return [(t, "") for t in texts], DATASET_FILE
-        return [], ""
-
-    def _run_demo(self):
-        text = self.demo_var.get().strip()
-        if not text:
-            return
-        self.demo_btn.config(state="disabled")
-        self._demo_text = text
-        self._run_async(self._demo_worker, "Embedding the complaint...")
-
-    def _demo_worker(self):
-        import time
-
-        import numpy as np
-        from triage_pipeline import (get_text_encoder,load_sentence_transformer,
-                                     preprocess_corpus_for_embedding,
-                                     preprocess_for_embedding, read_manifest)
-
-        if self._demo_model is None:
-            try:
-                import sentence_transformers          # noqa: F401
-            except ImportError:
-                return {"error":
-                        "The 'sentence-transformers' library is not installed, so "
-                        "the embedding demo cannot run.\n\n"
-                        "Install it once (needs internet), then try again:\n"
-                        "    pip install -r requirements-embedding.txt\n\n"
-                        "Everything else in this app works without it."}
-            # Prefer the model the DEPLOYED bundle actually uses, so the demo
-            # shows the same encoder that produced the live prediction. Fall
-            # back to the one the evaluation study used.
-            name = None
-            if self.model_info and self.model_info.get("embedding_model"):
-                name = self.model_info["embedding_model"]
-            if not name:
-                name = read_manifest(EMBED_MODEL_DIR).get("embedding_model")
-            name = name or "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-            # Cache-first, same as the deployed predictor - see
-            # triage_pipeline.load_sentence_transformer for why.
-            self._demo_model = load_sentence_transformer(name)
-            self._demo_model_name = name
-
-        if self._demo_corpus is None:
-            pairs, source = self._demo_reference_corpus()
-            if not pairs:
-                return {"error": "No reference complaints found. Expected "
-                                 f"{CLUSTERS_FILE} or {DATASET_FILE}."}
-            # preprocess_corpus_for_embedding loads learned_stopwords.json ONCE.
-            # The per-item preprocess_for_embedding() used before re-read and
-            # re-parsed that JSON for every complaint in the pool.
-            texts = preprocess_corpus_for_embedding([t for t, _ in pairs])
-            vecs = self._demo_model.encode(texts, batch_size=32,
-                                           convert_to_numpy=True,
-                                           show_progress_bar=False,
-                                           normalize_embeddings=True)
-            self._demo_corpus = (pairs, texts, vecs, source)
-
-        pairs, pool_texts, vecs, source = self._demo_corpus
-        raw = self._demo_text
-        cleaned = preprocess_for_embedding(raw)
-
-        # Timed so the panel can show the encode really happened on this
-        # click. Nothing here is cached per input text.
-        t0 = time.perf_counter()
-        vec = self._demo_model.encode([cleaned], convert_to_numpy=True,
-                                      normalize_embeddings=True)[0]
-        encode_ms = (time.perf_counter() - t0) * 1000
-
-        # vecs is L2-normalized and so is vec, so the dot product IS the
-        # cosine similarity. Computed here, now, against the live pool.
-        sims = vecs @ vec
-        order = np.argsort(-sims)[:5]
-        return {
-            "raw": raw,
-            "cleaned": cleaned,
-            "vector": vec,
-            "vector_norm": float(np.linalg.norm(vec)),
-            "vector_sum": float(vec.sum()),
-            "vector_min": float(vec.min()),
-            "vector_max": float(vec.max()),
-            "encode_ms": encode_ms,
-            "model": self._demo_model_name,
-            "source": source,
-            "pool_size": len(pairs),
-            "pool_groups": len({g for _, g in pairs if g}),
-            "sim_mean": float(sims.mean()),
-            "sim_min": float(sims.min()),
-            "matches": [(pairs[i][0], pool_texts[i], pairs[i][1], float(sims[i]))
-                        for i in order],
-        }
-
-    def _done_demo_worker(self, payload):
-        self.demo_btn.config(state="normal")
-        for w in self.demo_out.winfo_children():
-            w.destroy()
-
-        if payload is None:
-            return
-        if payload.get("error"):
-            body(self.demo_out, payload["error"], fg="#c0392b", size=9).pack(fill="x")
-            self.status.set("Embedding demo could not run.")
-            return
-
-        vec = payload["vector"]
-        out = self.demo_out
-
-        body(out, f"1.  Preprocessed exactly like training "
-                  f"(clean -> fuzzy -> learned stop-word removal):",
-             size=9).pack(fill="x")
-        tk.Label(out, text=payload["cleaned"] or "(empty)", bg="#fbfcfd", fg=INK,
-                 font=("Consolas", 10), anchor="w", justify="left",
-                 wraplength=980, padx=10, pady=6, relief="solid",
-                 bd=1).pack(fill="x", pady=(2, 0))
-
-        body(out, f"2.  The model turns that into {len(vec)} numbers "
-                  f"(only the first 24 are shown):",
-             size=9).pack(fill="x", pady=(8, 2))
-
-        nums = "  ".join(f"{v:+.4f}" for v in vec[:24])
-        tk.Label(out, text=nums, bg="#fbfcfd", fg=INK, font=("Consolas", 9),
-                 anchor="w", justify="left", wraplength=980, padx=10, pady=8,
-                 relief="solid", bd=1).pack(fill="x")
-        # Fingerprints of the WHOLE vector, not just the 24 shown. These move
-        # whenever the text changes, which is how you can tell at a glance
-        # that the numbers were computed and not fetched from a file.
-        body(out,
-             f"whole-vector fingerprint:   sum {payload['vector_sum']:+.6f}"
-             f"    min {payload['vector_min']:+.4f}"
-             f"    max {payload['vector_max']:+.4f}"
-             f"    L2 norm {payload['vector_norm']:.6f}"
-             f"    computed in {payload['encode_ms']:.0f} ms on this click",
-             fg=MUTED, size=8).pack(fill="x", pady=(3, 0))
-        body(out,
-             f"That list of {len(vec)} numbers IS the complaint, as far as the "
-             "model is concerned. Two complaints that mean the same thing get "
-             "two similar lists. Change a word above and every one of these "
-             "figures changes.",
-             fg=MUTED, size=8, wraplength=1000).pack(fill="x", pady=(1, 0))
-
-        body(out, f"3.  Compared live against all {payload['pool_size']} "
-                  f"complaints in {payload['source']}"
-                  + (f" ({payload['pool_groups']} meaning groups)"
-                     if payload["pool_groups"] else "")
-                  + ".  Closest matches (1.00 = identical meaning):",
-             size=9).pack(fill="x", pady=(10, 2))
-
-        tree = ttk.Treeview(out, columns=("prep", "group", "sim"),
-                            show="tree headings", height=5)
-        tree.heading("#0", text="complaint (as written in the reference file)")
-        tree.column("#0", width=360)
-        tree.heading("prep", text="what was actually compared (preprocessed)")
-        tree.column("prep", width=330, anchor="w")
-        tree.heading("group", text="meaning group")
-        tree.column("group", width=150, anchor="center")
-        tree.heading("sim", text="cosine similarity")
-        tree.column("sim", width=110, anchor="center")
-        for i, (text, prepped, group, sim) in enumerate(payload["matches"]):
-            tag = "best" if i == 0 else ""
-            tree.insert("", "end", text=text, tags=(tag,),
-                        values=(prepped, group or "-", f"{sim:.3f}"))
-        tree.tag_configure("best", foreground="#2e9e5b",
-                           font=("Segoe UI Semibold", 9))
-        tree.pack(fill="x")
-
-        best_sim = payload["matches"][0][3]
-        verdict = ("a confident match" if best_sim >= 0.7 else
-                   "a usable match" if best_sim >= 0.5 else
-                   "a WEAK match - below the 0.5 cut-off")
-        body(out,
-             f"Top match scores {best_sim:.3f}, which is {verdict}. "
-             f"For contrast, the mean similarity across the whole pool is "
-             f"{payload['sim_mean']:.3f} and the worst is {payload['sim_min']:.3f} - "
-             "if the top match were not grounded in the pool these three numbers "
-             "would not spread apart.",
-             fg=MUTED, size=8, wraplength=1000).pack(fill="x", pady=(6, 0))
-        body(out,
-             f"model: {payload['model']}    reference set: {payload['source']} "
-             f"({payload['pool_size']} complaints, encoded once per session, then "
-             "cosine-compared on every click)",
-             fg=MUTED, size=8, wraplength=1000).pack(fill="x")
-        self.status.set(f"Embedded {len(vec)} dimensions in "
-                        f"{payload['encode_ms']:.0f} ms; "
-                        f"best match {best_sim:.3f} of {payload['pool_size']}.")
+    # The embedding demo lived here: four methods that encoded a typed
+    # complaint against evaluation_clusters.json and ranked the pool. Its UI
+    # section was removed with the other panels that scored bundles the
+    # operator can no longer reach, but the worker survived - including a
+    # self.demo_btn reference to a button that no longer exists, so any call
+    # would have raised AttributeError. Removed rather than left as dead
+    # weight reading the non-serving bundle.
 
 
 def main():

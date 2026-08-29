@@ -301,9 +301,17 @@ def pull_model(model: str = "llama3.2", url: str = OLLAMA_URL,
     except Exception as e:
         return False, f"{type(e).__name__}: {e}"
     # The stream ended without an explicit success; verify by asking.
-    return (model in ollama_models() or
-            select_translation_model(preferred=model) is not None,
-            "pull stream ended")
+    #
+    # Ask ONLY whether this model arrived. The old check also accepted
+    # select_translation_model(preferred=model) is not None, which falls back
+    # to any installed model as a last resort - so on a machine with qwen2.5
+    # a dropped llama3.2 download returned ok=True and the GUI announced
+    # "Download complete: llama3.2 is installed" for a model that was not.
+    base = model.split(":")[0]
+    arrived = any(n == model or n.split(":")[0] == base for n in ollama_models())
+    return arrived, ("pull stream ended" if arrived else
+                     f"{model} did not arrive - the pull stream ended without "
+                     f"a success line and the model is not installed")
 
 
 #: The input is wrapped as a data record before it reaches the model.
