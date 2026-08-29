@@ -1,0 +1,574 @@
+<title>Triage Pipeline Anatomy</title>
+<style>
+  :root {
+    --ground: #F4F6F7;
+    --surface: #FFFFFF;
+    --surface-2: #EAEEF0;
+    --ink: #12171B;
+    --ink-2: #4C5A63;
+    --ink-3: #7C8A93;
+    --rule: #D3DBDF;
+    --rule-strong: #B4C0C6;
+    --accent: #B3302A;
+    --l1: #B3302A;
+    --l2: #B26A12;
+    --l3: #2C6E49;
+    --l4: #3A5F80;
+    --warn-bg: #FBF0EE;
+    --warn-rule: #E0B4AF;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0E1317;
+      --surface: #161C21;
+      --surface-2: #1E262C;
+      --ink: #E3E9ED;
+      --ink-2: #A3B1BA;
+      --ink-3: #75858F;
+      --rule: #2A343B;
+      --rule-strong: #3D4A53;
+      --accent: #E8756D;
+      --l1: #E8756D;
+      --l2: #D9A05B;
+      --l3: #63B189;
+      --l4: #7FA5C4;
+      --warn-bg: #24191A;
+      --warn-rule: #4E2F2E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0E1317;
+    --surface: #161C21;
+    --surface-2: #1E262C;
+    --ink: #E3E9ED;
+    --ink-2: #A3B1BA;
+    --ink-3: #75858F;
+    --rule: #2A343B;
+    --rule-strong: #3D4A53;
+    --accent: #E8756D;
+    --l1: #E8756D;
+    --l2: #D9A05B;
+    --l3: #63B189;
+    --l4: #7FA5C4;
+    --warn-bg: #24191A;
+    --warn-rule: #4E2F2E;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0 20px 96px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; }
+
+  header.masthead {
+    padding: 64px 0 32px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 44px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(30px, 5.4vw, 46px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+  .standfirst {
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 60ch;
+    margin: 0;
+  }
+
+  h2 {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 6px;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-size: 24px;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    text-wrap: balance;
+    margin: 0 0 16px;
+  }
+  h4 {
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 650;
+    margin: 0 0 8px;
+  }
+  p { max-width: 66ch; margin: 0 0 16px; }
+  p:last-child { margin-bottom: 0; }
+  a { color: var(--accent); }
+
+  section.band {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 0 52px;
+    margin-bottom: 52px;
+    border-bottom: 1px solid var(--rule);
+  }
+  section.band:last-of-type { border-bottom: none; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.88em;
+    background: var(--surface-2);
+    padding: 0.1em 0.36em;
+    border-radius: 3px;
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.62;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--rule-strong);
+    padding: 18px 20px;
+    margin: 0;
+    overflow-x: auto;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  /* ---- stage spine ---- */
+  .spine { display: flex; flex-direction: column; gap: 0; }
+  .stage {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  .stage-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    align-self: stretch;
+  }
+  .stage-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-3);
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    flex: none;
+  }
+  .stage-line { width: 1px; flex: 1; background: var(--rule); min-height: 18px; }
+  .stage:last-child .stage-line { background: transparent; }
+  .stage-body { padding-bottom: 26px; }
+  .stage-where {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    margin: 0 0 6px;
+  }
+  .stage-body h4 { margin-bottom: 6px; }
+  .stage-body p { font-size: 15px; color: var(--ink-2); margin-bottom: 10px; }
+
+  /* ---- vector strip ---- */
+  .vector {
+    display: flex;
+    width: 100%;
+    border: 1px solid var(--rule-strong);
+    overflow: hidden;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .vector div {
+    padding: 12px 8px;
+    text-align: center;
+    border-right: 1px solid var(--rule-strong);
+    color: var(--ink);
+    line-height: 1.35;
+  }
+  .vector div:last-child { border-right: none; }
+  .vseg-num { background: var(--surface-2); flex: 0 0 15%; }
+  .vseg-cat { background: var(--surface); flex: 0 0 16%; }
+  .vseg-bow { background: var(--surface-2); flex: 1 1 34%; }
+  .vseg-emb { background: var(--surface); flex: 1 1 35%; }
+  .vector b { display: block; font-weight: 600; letter-spacing: 0.04em; }
+  .vector span { color: var(--ink-3); }
+
+  /* ---- tables ---- */
+  .scroller { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  th, td {
+    text-align: left;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num { font-family: var(--mono); white-space: nowrap; }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .p-pass { color: var(--l3); }
+  .p-fail { color: var(--l1); }
+
+  .callout {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-rule);
+    border-left: 3px solid var(--accent);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .callout h4 { color: var(--accent); margin: 0; }
+  .callout p { margin: 0; font-size: 15px; }
+
+  .two-up {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .card h4 { margin: 0; }
+  .card p { margin: 0; font-size: 14.5px; color: var(--ink-2); }
+  .card .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .card dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13px; }
+  .card dt { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.04em; }
+  .card dd { margin: 0; font-family: var(--mono); font-size: 12.5px; }
+
+  ul { max-width: 66ch; padding-left: 20px; margin: 0 0 16px; }
+  li { margin-bottom: 7px; }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 24px;
+    font-size: 13.5px;
+    color: var(--ink-3);
+    max-width: 66ch;
+  }
+  footer p { font-size: 13.5px; }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">ML_Predictor · verified against the code on 29 Aug 2026</p>
+  <h1>How a complaint becomes a triage level</h1>
+  <p class="standfirst">Every stage from raw Roman Urdu to a percentage on screen — which model runs where, which parameters are actually sent, and exactly what the confidence number is computed from.</p>
+</header>
+
+<section class="band">
+  <div>
+    <h2>Read this first</h2>
+    <h3>There are two pipelines, and they share almost nothing</h3>
+  </div>
+  <p>The single most confusable thing in this project: two separate model bundles, two different sentence encoders, both emitting <strong>384 dimensions</strong>. A vector from one will load into the other, predict, and be wrong, with nothing to signal it.</p>
+  <div class="two-up">
+    <div class="card">
+      <span class="tag">Bundle A · the GUI's main tab</span>
+      <h4>Hybrid, 10,000 rows</h4>
+      <p>The deployed system. Reads vitals, categoricals and complaint text together. This is what "Triage this patient" runs.</p>
+      <dl>
+        <dt>dir</dt><dd>triage_model_embedding/</dd>
+        <dt>method</dt><dd>D) dictionary + embeddings</dd>
+        <dt>encoder</dt><dd>MiniLM-L12-v2</dd>
+        <dt>data</dt><dd>cardiac_…_v3.csv (synthetic)</dd>
+        <dt>output</dt><dd>Triage_Level 1–4</dd>
+      </dl>
+    </div>
+    <div class="card">
+      <span class="tag">Bundle B · src/ and run_inference.py</span>
+      <h4>Embedding-only, 185 rows</h4>
+      <p>The professor-baseline reproduction. Text is the <em>only</em> input — no vitals reach it. Also predicts department.</p>
+      <dl>
+        <dt>dir</dt><dd>models_src/</dd>
+        <dt>estimator</dt><dd>RandomForest ×2</dd>
+        <dt>encoder</dt><dd>e5-small, "passage: "</dd>
+        <dt>data</dt><dd>dataset.csv, 185 rows</dd>
+        <dt>output</dt><dd>Level 1–4 + 11 departments</dd>
+      </dl>
+    </div>
+  </div>
+  <p>Each bundle reads its encoder name from its own <code>manifest.json</code> rather than a constant, so the two spaces cannot be swapped by accident. <code>embed_for_classifier()</code> is kept separate from <code>embed_text()</code> for the same reason.</p>
+</section>
+
+<section class="band">
+  <div>
+    <h2>The flow</h2>
+    <h3>Seven stages, in the order they execute</h3>
+  </div>
+  <p>Stages 2–3 only run in English mode. In Roman Urdu mode the typed text goes straight to stage 4 and Ollama is never contacted.</p>
+
+  <div class="spine">
+
+    <div class="stage">
+      <div class="stage-rail"><span class="stage-num">1</span><span class="stage-line"></span></div>
+      <div class="stage-body">
+        <p class="stage-where">triage_gui.py · form submit</p>
+        <h4>Collect the patient record</h4>
+        <p>Six vitals (age, heart rate, systolic BP, diastolic BP, temperature, SpO₂), four categoricals (gender, mode of arrival, AVPU, ECG status), and the free-text complaint. Unreadable or missing vitals fall back to the <strong>training mean</strong>, and every substitution is recorded in Notes — a triage level computed from a vital the patient never had must not look identical to a real one.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-rail"><span class="stage-num">2</span><span class="stage-line"></span></div>
+      <div class="stage-body">
+        <p class="stage-where">src/offline_pipeline.py · select_translation_model()</p>
+        <h4>Pick a local model</h4>
+        <p>Queries <code>GET /api/tags</code> and matches against a preference chain — <code>llama3.2</code> first, then med-translator, qwen2.5, mistral, gemma, phi3. Calling a tag that isn't pulled returns a 404 that reads like a server fault, so resolution happens before the request, and the CLI reports the <em>resolved</em> tag rather than the requested one.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-rail"><span class="stage-num">3</span><span class="stage-line"></span></div>
+      <div class="stage-body">
+        <p class="stage-where">src/offline_pipeline.py · translate_roman_urdu()</p>
+        <h4>Translate on localhost</h4>
+        <p>One <code>POST /api/chat</code>. The message array is doing load-bearing work here, not just carrying the text — see the next section.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-rail"><span class="stage-num">4</span><span class="stage-line"></span></div>
+      <div class="stage-body">
+        <p class="stage-where">triage_pipeline.py · build_text_features()</p>
+        <h4>Normalize, then encode</h4>
+        <p>Clean → fuzzy dictionary mapping → stop-word removal, then encode. A bundle trained with <code>skip_normalization</code> must be <em>served</em> that way: feeding the English model text pushed back through the Roman Urdu dictionary ("chest pain" → "sēna dárd") was a train/serve skew that cost <strong>38 points of accuracy</strong>, 52.5% → 90.5%.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-rail"><span class="stage-num">5</span><span class="stage-line"></span></div>
+      <div class="stage-body">
+        <p class="stage-where">triage_pipeline.py · predict_one()</p>
+        <h4>Assemble one feature vector</h4>
+        <p>Four blocks concatenated in a fixed order that must match training exactly.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-rail"><span class="stage-num">6</span><span class="stage-line"></span></div>
+      <div class="stage-body">
+        <p class="stage-where">predict_proba → argmax</p>
+        <h4>Predict, then cap</h4>
+        <p>The class probability is the confidence. If the complaint carries no usable text signal, it is capped — a model that scores a blank complaint at 94% is worse than useless.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="stage-rail"><span class="stage-num">7</span><span class="stage-line"></span></div>
+      <div class="stage-body">
+        <p class="stage-where">src/offline_pipeline.py · run()</p>
+        <h4>Compare the two language paths</h4>
+        <p>Cosine between the Roman Urdu and English vectors decides which prediction is accepted. Read the limitation section before trusting this stage.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="band">
+  <div>
+    <h2>Stage 3, in detail</h2>
+    <h3>What is actually sent to Ollama</h3>
+  </div>
+  <p>llama3.2 refused outright on cardiac complaints — <em>"I can't provide medical advice. If you are experiencing chest pain, please seek medical attention immediately."</em> System-prompt instructions did not stop it. Two changes to the <strong>request shape</strong> did.</p>
+
+<pre><code>POST http://localhost:11434/api/chat
+
+  model     : llama3.2:latest        resolved, never the requested tag
+  stream    : false
+  timeout   : 120 s
+  options   : { temperature: 0.0 }   same input → same English, every run
+
+  messages  :
+    system     SYSTEM_PROMPT  (5,723 chars — anatomical dictionary,
+                               phonetic variants, no clinical inference)
+    user       &lt;record&gt;gala kharab hai aur khansi&lt;/record&gt;   ┐ few-shot
+    assistant  Sore throat and cough                          │ as real
+    user       &lt;record&gt;taang mein sujan hai&lt;/record&gt;          │ turns
+    assistant  Leg swelling                                   ┘
+    user       &lt;record&gt;{the patient's complaint}&lt;/record&gt;</code></pre>
+
+  <ul>
+    <li><strong>The <code>&lt;record&gt;</code> wrapper.</strong> Handed a bare complaint, the model reads a person in the room asking for help. Tagged as stored text, it converts without hesitating.</li>
+    <li><strong>Few-shot as conversation turns, not prose.</strong> Two completed conversions establish by demonstration that records get converted. Instructions describing that rule did not work; turns showing it did.</li>
+    <li><strong>Those two examples use throat and leg</strong> — anatomy that appears nowhere in the test battery. Reusing a test sentence would let the model echo the answer back and score a hit that proves only that it can copy.</li>
+  </ul>
+
+  <p>Then a three-layer net: one retry with an explicit non-refusal instruction, and <code>sanitize_translation()</code> filtering per sentence. A good translation with "Please consult a doctor" bolted on keeps the translation; a whole-response refusal returns <code>None</code>, which routes into the fallback every caller already has. Passing it through would embed <em>"I am not a medical professional"</em> as though it were the patient's symptoms.</p>
+
+  <p>Refusal patterns are anchored to a refusal-specific object — <code>cannot translate</code>, never bare <code>cannot</code>. A real complaint legitimately translates to "I cannot walk", and a loose pattern would silently delete the most urgent line in the record. Result: <strong>8/8 complaints translate, zero refusals.</strong></p>
+</section>
+
+<section class="band">
+  <div>
+    <h2>Stage 5, in detail</h2>
+    <h3>The feature vector</h3>
+  </div>
+  <p>Bundle A concatenates four blocks. Block order is fixed by <code>REPRESENTATION_BLOCKS</code> and must match the <code>np.hstack</code> order used at training time.</p>
+
+  <div class="vector">
+    <div class="vseg-num"><b>NUMERIC</b><span>6 vitals<br>StandardScaler</span></div>
+    <div class="vseg-cat"><b>CATEGORICAL</b><span>4 fields<br>one-hot</span></div>
+    <div class="vseg-bow"><b>BAG OF WORDS</b><span>word + char n-grams<br>× attention weights</span></div>
+    <div class="vseg-emb"><b>EMBEDDING</b><span>MiniLM-L12-v2, 384-d<br>L2-normalised</span></div>
+  </div>
+
+  <p>Two details that are easy to get wrong. Categoricals are <strong>one-hot, not ordinal</strong> — encoding ECG_Status as an ordinal integer into a linear model scored 49.2% against 84.7% one-hot, because it asserts an ordering between rhythms that does not exist. And each text block gets its own <code>block_scaler</code> before concatenation, so a 384-dimension embedding block cannot drown out six vitals purely on width.</p>
+
+  <p>Bundle B skips all of this. Its vector <em>is</em> the 384-dimension e5-small embedding, with the <code>"passage: "</code> prefix the model was trained with. No vitals reach it — which is why its department output can disagree with the main tab.</p>
+</section>
+
+<section class="band">
+  <div>
+    <h2>Stage 6, in detail</h2>
+    <h3>Where the percentage comes from</h3>
+  </div>
+  <p>The confidence on screen is the winning class's probability, and nothing more sophisticated than that.</p>
+
+<pre><code>proba      = model.predict_proba(X)[0]      # e.g. [0.08, 0.56, 0.27, 0.09]
+level      = int(np.argmax(proba))          # 1  →  Level 2, URGENT
+confidence = float(proba[level])            # 0.558  →  "55.8%"
+
+if not has_text_signal(complaint):
+    confidence = min(confidence, MAX_CONFIDENCE_WITHOUT_TEXT)   # 0.50</code></pre>
+
+  <p>For a RandomForest, that probability is the share of trees voting for the winning class — an ensemble agreement measure. It is <strong>not calibrated</strong>: 55.8% does not mean this patient is Level 2 in 55.8% of comparable cases. Treat it as a relative signal between predictions, never as a probability you could act on numerically.</p>
+
+  <p>The cap is the one place the number is overridden. A complaint of "..." or "n/a" still produces a full feature vector — the vitals alone can push the forest to 94% — and the resulting screen is indistinguishable from a real reading. Capping at 0.50 plus an explicit warning makes the absence visible. Bundle B has no equivalent cap; instead the CLI prints a warning under 40%, because 11 departments across 185 rows cannot support a confident answer.</p>
+
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Level</th><th>Label</th><th>Target</th></tr></thead>
+      <tbody>
+        <tr><td class="num" style="color:var(--l1);font-weight:600">1</td><td>Emergency</td><td>immediate</td></tr>
+        <tr><td class="num" style="color:var(--l2);font-weight:600">2</td><td>Urgent</td><td>within 15 min</td></tr>
+        <tr><td class="num" style="color:var(--l3);font-weight:600">3</td><td>Standard</td><td>within 60 min</td></tr>
+        <tr><td class="num" style="color:var(--l4);font-weight:600">4</td><td>Non-urgent</td><td>can wait / redirect</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="band">
+  <div>
+    <h2>Stage 7, in detail</h2>
+    <h3>The embedding gate — and why it does not work</h3>
+  </div>
+  <p>Both vectors are L2-normalised, so the dot product <em>is</em> the cosine. If it clears the threshold the English prediction is accepted; otherwise the pipeline falls back to the Roman Urdu one, which is the language the classifiers were actually fitted on.</p>
+
+<pre><code>sim = float(np.dot(vec_roman_urdu, vec_english))
+
+DEFAULT_THRESHOLD  = 0.75
+FALLBACK_THRESHOLD = DEFAULT_THRESHOLD    # alias, not a second literal
+
+accepted = "english" if sim >= DEFAULT_THRESHOLD else "roman_urdu"</code></pre>
+
+  <p>The threshold was 0.90, which is the right bar for "are these the same sentence" and the wrong one for a cross-language pair: the same complaint in both languages sits near 0.80 on e5-small even when the translation is flawless. At 0.90 the gate rejected correct translations. Lowering it to 0.75 fixed that — and exposed something worse.</p>
+
+  <div class="callout">
+    <h4>Measured, not theoretical: this gate currently blocks nothing</h4>
+    <p>Against <code>seena mein shadeed dard aur pasina</code> (severe chest pain with sweating):</p>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Candidate English</th><th>Cosine</th><th>Gate</th></tr></thead>
+        <tbody>
+          <tr><td>"Severe chest pain and sweating."</td><td class="num">0.8054</td><td><span class="pill p-pass">PASS</span></td></tr>
+          <tr><td>"I have a headache and dizziness."</td><td class="num">0.7908</td><td><span class="pill p-fail">PASS</span></td></tr>
+          <tr><td>"My leg is broken after a fall."</td><td class="num">0.7922</td><td><span class="pill p-fail">PASS</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Correct and catastrophically wrong sit <strong>0.013 apart</strong>, and the badly drifted candidate outscores the mildly drifted one. No threshold value separates them — 0.90 rejects everything, 0.75 accepts everything. The encoder's cross-language geometry does not encode translation fidelity at this resolution.</p>
+    <p>A viewer reading "PASS @ 0.75" on a demo screen will believe a safety check ran. The fix is not a number: a deterministic anatomical check — pull <code>seena</code> / <code>pait</code> / <code>sar</code> from the source with the dictionary already in the prompt, and assert the matching English term appears in the output — catches chest→head with certainty. Cosine will not.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div>
+    <h2>Standing caveats</h2>
+    <h3>What this system is not</h3>
+  </div>
+  <ul>
+    <li><strong>The training data is synthetic.</strong> <code>cardiac_multilingual_10000_v3.csv</code> was produced by <code>generate_cardiac_dataset.py</code>, seed 20260816. These are not real patient records and must not be described as such in any publication or evaluation.</li>
+    <li><strong>Bundle B's department head is weak.</strong> 11 departments over 185 rows. It called a correctly-translated stomach complaint <em>Infectious_Disease</em> at 14% confidence.</li>
+    <li><strong>The English bundle was trained on gpt-4o-mini translations.</strong> Serving it locally through Ollama does not change what it was fitted on, which is why the banner still says so.</li>
+    <li><strong>Known translation defect:</strong> <code>kandhay</code> (shoulder) renders as "arm".</li>
+    <li><strong>Research prototype, not a medical device.</strong></li>
+  </ul>
+</section>
+
+<footer>
+  <p>Every figure on this page was measured against the running code, not estimated. Accuracy and under-triage figures come from stratified 5-fold cross-validation; the 8/8 translation and guardrail results are single-run, temperature 0.</p>
+</footer>
+
+</div>

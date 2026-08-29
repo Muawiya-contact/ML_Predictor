@@ -1390,6 +1390,13 @@ def has_text_signal(text):
     clean to nothing (clean_text keeps only a-z and whitespace) and
     therefore return False.
     """
+    # None must be rejected before normalization, not after: str(None) is
+    # "none", which survives cleaning as a real token, so a failed
+    # translation scored 58.6% with no low-signal warning. That path is no
+    # longer hypothetical - translation failure is now the only way the
+    # complaint can arrive empty.
+    if text is None:
+        return False
     try:
         return bool(normalize_roman_urdu(text).split())
     except Exception:
