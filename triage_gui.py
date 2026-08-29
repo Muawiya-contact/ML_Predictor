@@ -1889,9 +1889,11 @@ class TriageGUI(tk.Tk):
                     texts.append(en)
             if failures:
                 raise RuntimeError(
-                    f"English (GPT) mode: {failures} of {len(df)} rows failed to "
-                    f"translate (a 402 means the OpenRouter account is out of "
-                    f"credits). No results are shown, because mixing translated "
+                    f"English (local LLM) mode: {failures} of {len(df)} rows "
+                    f"failed to translate. Check the console: the usual causes "
+                    f"are Ollama not running (start it with 'ollama serve') or "
+                    f"the model refusing, which the guardrail logs. "
+                    f"No results are shown, because mixing translated "
                     f"and untranslated rows would put two different pipelines in "
                     f"one table.")
             df = df.copy()
