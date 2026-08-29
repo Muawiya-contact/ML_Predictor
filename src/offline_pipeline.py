@@ -605,6 +605,21 @@ ANATOMICAL_ASSERTIONS = {
     r"\b(baazu|bazu|haath|hath)\b": ["arm", "hand", "forearm"],
 }
 
+#: variant -> canonical Roman Urdu token, derived from the table above by
+#: grouping on the English gloss and keeping the first spelling as canonical.
+#:
+#: Without this the dictionary was decorative. fuzzy_normalize_roman_urdu()
+#: passed any word it recognised straight through unchanged, so "payt" and
+#: "chaati" stayed exactly as typed and the only thing the table ever did
+#: was serve as a list of fuzzy targets. Its docstring claimed variants were
+#: "collapsed onto one canonical Roman Urdu token"; they were not, and the
+#: anatomical gate was carrying the whole burden through its own regex
+#: alternations.
+_CANONICAL = {}
+for _variant, _gloss in ROMAN_URDU_DICTIONARY.items():
+    _CANONICAL[_variant] = next(k for k, v in ROMAN_URDU_DICTIONARY.items()
+                                if v == _gloss)
+
 _ANATOMICAL_COMPILED = [(re.compile(p, re.I), kws)
                         for p, kws in ANATOMICAL_ASSERTIONS.items()]
 _WORD_SPLIT = re.compile(r"(\W+)")
@@ -627,8 +642,14 @@ def fuzzy_normalize_roman_urdu(text: str, verbose: bool = True) -> str:
 
     for token in _WORD_SPLIT.split(str(text)):
         low = token.lower()
-        if not token.isalpha() or low in ROMAN_URDU_DICTIONARY:
+        if not token.isalpha():
             out.append(token)
+            continue
+        if low in _CANONICAL:
+            canon = _CANONICAL[low]
+            out.append(canon)
+            if canon != low:
+                changes.append(f"{low}->{canon}")
             continue
         if low in FUZZY_BLOCKLIST or len(low) < FUZZY_MIN_LEN:
             out.append(token)

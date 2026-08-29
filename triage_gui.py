@@ -1657,19 +1657,22 @@ class TriageGUI(tk.Tk):
         t = r["thresholds"]
         c = r["corpus"]
         review = r.get("review_recommended") or []
-        if self.in_english_mode():
-            self.stop_summary.configure(text=(
-                "The learned Roman Urdu stop-word list below is NOT applied "
-                "to the triage path: complaints are translated first, and the "
-                "English text goes to the sentence-transformer directly. The "
-                "table is shown for reference - it documents how the list was "
-                "derived, not what runs on your input."))
-            return
+        # This early-returned before filling the table, on the belief that
+        # stop-word removal did not apply once complaints were translated.
+        # It does. skip_normalization skips the Roman Urdu DICTIONARY stages,
+        # not stop-word removal - the serving bundle carries its own list and
+        # build_text_features() applies it on every prediction. The return
+        # left the table permanently empty; the tab rendered its headers and
+        # nothing else, which reads as "no stop words" rather than "not
+        # drawn".
         self.stop_summary.configure(text=(
             f"A token is removed only when ALL THREE hold:  document frequency "
             f">= {t['effective_df_cutoff']:.4f}"
             f"   AND   normalized mutual information <= {t['mi_threshold']}"
             f"   AND   Cramer's V <= {t['cramers_v_threshold']}\n"
+            f"This is the list the SERVING bundle applies - "
+            f"{ENGLISH_MODEL_DIR}/learned_stopwords.json, not the project-root "
+            f"file, which belongs to whichever model trained last.\n"
             f"{c['n_documents']} complaints, {c['n_unique_tokens']} unique tokens, "
             f"{c['n_tokens_tested']} high-frequency tokens tested, "
             f"{r['n_stopwords']} learned as stop words: "
