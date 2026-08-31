@@ -130,6 +130,11 @@ def analyze_sentence_cluster(sentences_list: Sequence[str],
 
     off = ~np.eye(n, dtype=bool)
     result["matrix"] = S
+    # The vectors themselves, not just their pairwise scores. A caller that
+    # wants to compare a NEW complaint against this cluster would otherwise
+    # have to re-translate all ten - one local LLM call each - to rebuild
+    # what was already computed here.
+    result["vectors"] = M
     result["mean_similarity"] = float(S[off].mean()) if n > 1 else 1.0
     result["min_similarity"] = float(S[off].min()) if n > 1 else 1.0
     result["max_similarity"] = float(S[off].max()) if n > 1 else 1.0

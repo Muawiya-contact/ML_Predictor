@@ -1200,6 +1200,8 @@ class TriageGUI(tk.Tk):
         # Redraw on resize so the bars track the window instead of keeping
         # the width they happened to have when the prediction was made.
         self._last_proba = None
+        self._cluster_vectors = None
+        self._cluster_labels = []
         self.proba_canvas.bind(
             "<Configure>",
             lambda e: self._draw_proba(*self._last_proba) if self._last_proba else None)
@@ -2228,7 +2230,202 @@ class TriageGUI(tk.Tk):
         # bundle does not use. The cluster inspector is kept: it runs the
         # CURRENT path, translating each sentence through Ollama before
         # embedding it, so it measures what actually ships.
+        self._score_section_compare(holder)
         self._score_section_cluster(holder)
+
+    # ------------------------------------------- (b) compare your own text
+    def _score_section_compare(self, parent):
+        """Type one complaint, see it become numbers, see what it matches.
+
+        The matrix below this shows 100 numbers at once, which is correct
+        and unreadable: it answers "how does this set hang together", not
+        "what happens to MY sentence". This section answers the second
+        question, one sentence at a time, and shows every intermediate value
+        rather than only the verdict.
+        """
+        box = card(parent)
+        box.pack(fill="x", padx=4, pady=(0, 10))
+        pad = tk.Frame(box, bg=CARD)
+        pad.pack(fill="both", expand=True, padx=18, pady=16)
+
+        heading(pad, "Try it  -  turn one complaint into numbers").pack(fill="x")
+        body(pad,
+             "Type any complaint in Roman Urdu or English. It goes through "
+             "the SAME steps as a real prediction - translate, clean, encode - "
+             "and is then compared against the ten reference complaints "
+             "below. Every value is shown, so you can follow the arithmetic "
+             "rather than trust it.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 8))
+
+        row = tk.Frame(pad, bg=CARD)
+        row.pack(fill="x", pady=(0, 8))
+        self.compare_var = tk.StringVar(value="seena mein dard aur pasina")
+        tk.Entry(row, textvariable=self.compare_var, font=("Segoe UI", 10),
+                 relief="solid", bd=1).pack(side="left", fill="x", expand=True,
+                                            ipady=4, padx=(0, 8))
+        self.compare_btn = ttk.Button(row, text="Compare",
+                                      style="Accent.TButton",
+                                      command=self._do_compare)
+        self.compare_btn.pack(side="left")
+        self.compare_status = tk.StringVar(value="")
+        tk.Label(row, textvariable=self.compare_status, bg=CARD, fg=MUTED,
+                 font=("Segoe UI", 9)).pack(side="left", padx=(10, 0))
+
+        self.compare_out = tk.Frame(pad, bg=CARD)
+        self.compare_out.pack(fill="x")
+        body(self.compare_out,
+             "Press Analyse on the cluster below first - the ten reference "
+             "complaints have to be embedded before anything can be compared "
+             "against them.",
+             fg=MUTED, size=9, wraplength=1000).pack(fill="x")
+
+    def _do_compare(self):
+        text = self.compare_var.get().strip()
+        if not text:
+            return
+        if getattr(self, "_cluster_vectors", None) is None:
+            messagebox.showinfo(
+                "Run the cluster first",
+                "The ten reference complaints have not been embedded yet.\n\n"
+                "Press \"Load sample cluster and analyse\" below, wait for it "
+                "to finish, then Compare.")
+            return
+        if getattr(self, "_compare_running", False):
+            return
+
+        self._compare_running = True
+        self.compare_btn.configure(state="disabled")
+        self.compare_status.set("translating and encoding...")
+        shared = {"done": False, "step": None, "error": None}
+
+        def worker():
+            try:
+                from src.embedding_pipeline import preprocess_and_embed
+                shared["step"] = preprocess_and_embed(text, translate=True)
+            except Exception as e:
+                shared["error"] = f"{type(e).__name__}: {e}"
+            shared["done"] = True
+
+        threading.Thread(target=worker, daemon=True).start()
+
+        def poll():
+            if not shared["done"]:
+                self.after(300, poll)
+                return
+            self._compare_running = False
+            self.compare_btn.configure(state="normal")
+            self.compare_status.set("")
+            if shared["error"]:
+                messagebox.showerror("Compare failed", shared["error"])
+                return
+            self._render_compare(text, shared["step"])
+
+        self.after(300, poll)
+
+    def _render_compare(self, raw, step):
+        import numpy as np
+
+        for w in self.compare_out.winfo_children():
+            w.destroy()
+
+        if step is None or step.get("embedding") is None:
+            body(self.compare_out,
+                 f"Could not encode this complaint.\n{step.get('error') if step else ''}",
+                 fg="#c0392b", size=9, wraplength=1000).pack(fill="x")
+            return
+
+        vec = step["embedding"]
+        norm = float(np.linalg.norm(vec))
+
+        def stage(n, title, value, note):
+            blk = tk.Frame(self.compare_out, bg=CARD)
+            blk.pack(fill="x", pady=(0, 7))
+            head = tk.Frame(blk, bg=CARD)
+            head.pack(fill="x")
+            tk.Label(head, text=f"{n}", bg=CARD, fg=ACCENT,
+                     font=("Consolas", 10, "bold")).pack(side="left", padx=(0, 8))
+            tk.Label(head, text=title, bg=CARD, fg=INK,
+                     font=("Segoe UI Semibold", 10)).pack(side="left")
+            tk.Label(blk, text=value, bg="#fbfcfd", fg=INK,
+                     font=("Consolas", 10), anchor="w", justify="left",
+                     wraplength=980, padx=10, pady=6, relief="solid",
+                     bd=1).pack(fill="x", padx=(24, 0), pady=(2, 1))
+            tk.Label(blk, text=note, bg=CARD, fg=MUTED, font=("Segoe UI", 8),
+                     anchor="w", justify="left", wraplength=980).pack(
+                fill="x", padx=(24, 0))
+
+        stage("1", "What you typed", raw,
+              "the raw complaint, before anything touches it")
+        stage("2", "English translation",
+              step["translated"] or "(not translated - embedded as typed)",
+              "by Ollama on this machine. If translation fails the original "
+              "text is embedded instead, and this line says so.")
+        stage("3", "Cleaned for encoding", step["normalized"],
+              "lowercased, punctuation dropped, common words removed - the "
+              "exact text handed to the encoder")
+
+        preview = ", ".join(f"{float(x):+.3f}" for x in vec[:8])
+        stage("4", f"The vector  -  {len(vec)} numbers",
+              f"[{preview}, ...  {len(vec) - 8} more ]\n"
+              f"length of this vector = {norm:.4f}",
+              "Every complaint becomes exactly 384 numbers. The length is "
+              "always 1.0000 - the encoder normalises them - and that is what "
+              "makes the comparison below a simple multiply-and-add.")
+
+        # ---- comparison ------------------------------------------------
+        sims = self._cluster_vectors @ vec
+        order = list(np.argsort(-sims))
+
+        blk = tk.Frame(self.compare_out, bg=CARD)
+        blk.pack(fill="x", pady=(6, 0))
+        head = tk.Frame(blk, bg=CARD)
+        head.pack(fill="x")
+        tk.Label(head, text="5", bg=CARD, fg=ACCENT,
+                 font=("Consolas", 10, "bold")).pack(side="left", padx=(0, 8))
+        tk.Label(head, text="Compared against the ten reference complaints",
+                 bg=CARD, fg=INK, font=("Segoe UI Semibold", 10)).pack(side="left")
+        tk.Label(blk,
+                 text="score = v1·w1 + v2·w2 + ... + v384·w384      "
+                      "(1.00 = identical meaning, 0.00 = unrelated)",
+                 bg=CARD, fg=MUTED, font=("Consolas", 9), anchor="w").pack(
+            fill="x", padx=(24, 0), pady=(3, 4))
+
+        table = tk.Frame(blk, bg=CARD)
+        table.pack(fill="x", padx=(24, 0))
+        for rank, idx in enumerate(order):
+            sim = float(sims[idx])
+            label = (self._cluster_labels[idx] or "")[:52]
+            r = tk.Frame(table, bg=CARD)
+            r.pack(fill="x", pady=1)
+            tk.Label(r, text=f"{sim:.4f}", bg=CARD,
+                     fg="#1e5c2e" if rank == 0 else INK,
+                     font=("Consolas", 10, "bold" if rank == 0 else "normal"),
+                     width=8, anchor="w").pack(side="left")
+            # a bar, because ten four-decimal numbers do not show a gap
+            bar = tk.Frame(r, bg="#eef1f4", height=13, width=210)
+            bar.pack(side="left", padx=(0, 10))
+            bar.pack_propagate(False)
+            fill = max(2, int(210 * max(0.0, min(1.0, sim))))
+            tk.Frame(bar, bg="#2e9e5b" if rank == 0 else "#9db3c0",
+                     height=13, width=fill).place(x=0, y=0)
+            tk.Label(r, text=("closest  " if rank == 0 else "") + label,
+                     bg=CARD, fg=INK if rank == 0 else MUTED,
+                     font=("Segoe UI", 9), anchor="w").pack(side="left")
+
+        best, worst = float(sims[order[0]]), float(sims[order[-1]])
+        tk.Label(blk,
+                 text=(f"Closest {best:.4f}, furthest {worst:.4f}, "
+                       f"gap {best - worst:.4f}.  A large gap (e.g. > 0.50) "
+                       f"means the encoder clearly separates this complaint "
+                       f"from unrelated ones. A small gap indicates the "
+                       f"encoder struggles to differentiate distinct medical "
+                       f"conditions.  This is also why the safety check in "
+                       f"this project is a word test rather than a similarity "
+                       f"score: on cross-language pairs the gap collapses to "
+                       f"0.013 and the number stops being usable."),
+                 bg=CARD, fg=MUTED, font=("Segoe UI", 8), anchor="w",
+                 justify="left", wraplength=980).pack(fill="x", padx=(24, 0),
+                                                      pady=(6, 0))
 
     # --------------------------------------- (c) cluster inspector
     def _score_section_cluster(self, parent):
@@ -2337,6 +2534,12 @@ class TriageGUI(tk.Tk):
             return
 
         S = res["matrix"]
+        # Hold on to the vectors so "Try it" can compare a new complaint
+        # against this cluster without re-translating all ten.
+        self._cluster_vectors = res.get("vectors")
+        self._cluster_labels = [
+            f"S{k + 1}  {(x['translated'] or x['raw'])}"
+            for k, x in enumerate(res["sentences"])]
         for k, sent in enumerate(res["sentences"]):
             label = f"S{k + 1}  {(sent['translated'] or sent['raw'])[:34]}"
             vals, tag = [], ""
