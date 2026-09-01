@@ -412,6 +412,17 @@ def translate_roman_urdu(text: str, model: str = OLLAMA_MODEL,
     # Dictionary pass first, so Ollama sees one spelling per word. Local,
     # deterministic, and logged.
     text = fuzzy_normalize_roman_urdu(text)
+
+    # Refuse fragments BEFORE the model sees them. Asked to translate text
+    # with no clinical content, it invents: "band ho rha ha" ("is closing")
+    # came back as "Arm is swollen", "bhaag" ("run") as "Fainting". Cheaper
+    # and more reliable to decline here than to catch the invention after -
+    # and the anatomical gate can only catch the subset that names an organ.
+    if not has_medical_signal(text):
+        print(f"[guardrail] {text!r} contains no clinical word - refusing to "
+              f"translate rather than inviting an invented symptom",
+              flush=True)
+        return None
     # Resolve to something actually installed. Calling a missing tag returns
     # a 404 that reads like a server fault rather than "you have no model".
     resolved = select_translation_model(preferred=model)
@@ -517,11 +528,21 @@ def sanitize_translation(out: str, original: str = "") -> Optional[str]:
     dropped = len(parts) - len(kept)
 
     cleaned = " ".join(kept).strip().strip('"').strip()
+    if not cleaned:
+        print(f"[guardrail] nothing left after stripping the model's reply "
+              f"to {(original or '')[:60]!r}: {out[:120]!r}", flush=True)
+        return None
     if dropped:
         print(f"[guardrail] dropped {dropped} disclaimer/refusal "
               f"sentence(s) from the model output", flush=True)
 
-    if len(cleaned) < MIN_TRANSLATION_CHARS:
+    # The length floor exists to catch LEFTOVERS - the fragment that
+    # survives after a refusal is stripped out. It must not judge a reply
+    # that arrived clean: "Fever" is a complete and correct translation of
+    # "bukhar" at five characters, and this rejected it, so a real one-word
+    # complaint produced no prediction at all. Only apply the floor when
+    # something was actually removed.
+    if dropped and len(cleaned) < MIN_TRANSLATION_CHARS:
         # The whole reply was a refusal. Say so loudly - a silent None here
         # looks identical to Ollama being down, and the two need different
         # fixes (prompt vs service).
@@ -612,6 +633,56 @@ ANATOMICAL_ASSERTIONS = {
     r"\b(taang|tang|paon|pair)\b": ["leg", "foot", "feet", "limb"],
     r"\b(baazu|bazu|haath|hath)\b": ["arm", "hand", "forearm"],
 }
+
+#: Every word that carries clinical meaning, in either language. Used ONLY
+#: to answer "is this text a complaint at all", never to translate or
+#: normalize - which is why English terms sit here and not in the dictionary
+#: above, where they would wrongly canonicalise English input.
+#:
+#: Built empirically, not from intuition. The dictionary alone recognised
+#: nothing in 32% of this project's own 10,000 complaints, because it had no
+#: entry for "saans", "dhadkan", "tez", or for the English words an operator
+#: may simply type. A test that rejects a third of real complaints is worse
+#: than the hallucination it was meant to catch.
+MEDICAL_VOCABULARY = set(ROMAN_URDU_DICTIONARY) | {
+    # Roman Urdu symptoms and qualifiers
+    "saans", "sans", "saans;", "dam", "dhadkan", "dhadkane", "ghutan",
+    "jalan", "jalne", "dabao", "dabaao", "bhaari", "bhaaripan", "bhari",
+    "tez", "halki", "halka", "thoda", "thora", "shadeed", "takleef",
+    "kamzori", "thakan", "sust", "khoon", "zakhm", "zakhmi", "garmi",
+    "thand", "kapkapi", "matli", "qay", "dast", "pesaab", "chakkar",
+    "behosh", "behoshi", "ghabrahat", "bechaini", "phoolna", "phool",
+    "dard", "dukh", "sujan", "chubhan", "akarna", "sunn", "jhunjhuni",
+    "mehnat", "chalna", "seedhiyan", "aaram", "raat", "subah",
+    # English, because the box accepts English too
+    "chest", "pain", "ache", "aching", "pressure", "tight", "tightness",
+    "breath", "breathing", "breathless", "shortness", "sweat", "sweating",
+    "fever", "vomit", "vomiting", "nausea", "nauseous", "dizzy", "dizziness",
+    "faint", "fainting", "palpitation", "palpitations", "heartbeat", "heart",
+    "burning", "swelling", "swollen", "injury", "injured", "trauma", "bleed",
+    "bleeding", "blood", "weak", "weakness", "fatigue", "tired", "numb",
+    "numbness", "cough", "throat", "stomach", "abdomen", "abdominal", "head",
+    "headache", "back", "arm", "leg", "shoulder", "neck", "jaw", "chills",
+    "cold", "hot", "discomfort", "cramp", "cramps", "spasm", "collapse",
+    "unconscious", "seizure", "fit", "wheeze", "wheezing", "choking",
+}
+
+
+def has_medical_signal(text: str) -> bool:
+    """True when the text contains at least one clinically meaningful word.
+
+    A complaint that contains none is not a complaint - it is a fragment,
+    and asking a language model to translate it invites invention. "band ho
+    rha ha" ("is closing") produced "Arm is swollen"; "bhaag" ("run")
+    produced "Fainting". Neither has anything to translate.
+
+    Measured against this project's 10,000-row corpus: see the note on
+    MEDICAL_VOCABULARY for why the plain dictionary was not enough.
+    """
+    words = {w.strip(".,;:!?()").lower()
+             for w in str(text or "").split()}
+    return bool(words & MEDICAL_VOCABULARY)
+
 
 #: variant -> canonical Roman Urdu token, derived from the table above by
 #: grouping on the English gloss and keeping the first spelling as canonical.

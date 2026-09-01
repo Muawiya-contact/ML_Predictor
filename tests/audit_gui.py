@@ -77,18 +77,24 @@ except Exception as e:
     rec("tab1  Triage a Patient: full submit", False, f"{type(e).__name__}: {e}")
     traceback.print_exc()
 
-# ---- Tab 1: junk complaint must cap and warn ----------------------------
+# ---- Tab 1: a junk complaint must be REFUSED, not scored ---------------
+# It used to be scored with confidence capped at 50%. It is now refused
+# outright before translation, which is stronger: a fragment produced no
+# triage level at all rather than a low-confidence one. The cap still
+# applies on the batch path, where rows are scored in bulk.
 try:
     app.complaint.delete("1.0", "end")
     app.complaint.insert("1.0", "n/a")
     app._do_predict()
     app.update()
     status = app.status.get()
-    pct = float(status.split("at ")[1].split("%")[0]) if "at " in status else 100.0
-    rec("tab1  junk complaint capped at 50%", pct <= 50.0,
-        f"status={status[:80]!r}")
+    refused = "Refused" in status and "No prediction" in status
+    named = "not a complaint" in status.lower() or "no symptom" in status.lower()
+    rec("tab1  junk complaint refused, and the reason is named",
+        refused and named, f"status={status[:88]!r}")
 except Exception as e:
-    rec("tab1  junk complaint capped at 50%", False, f"{type(e).__name__}: {e}")
+    rec("tab1  junk complaint refused, and the reason is named", False,
+        f"{type(e).__name__}: {e}")
 
 # ---- Tab 2: Pipeline Explorer must render all five stages ---------------
 try:

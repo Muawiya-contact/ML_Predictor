@@ -847,7 +847,7 @@ class TriageGUI(tk.Tk):
                 # Say so once when a fallback is in play, so a different
                 # translator is never mistaken for the configured one.
                 self._ollama_model_note = model
-                self.status.set(f"English mode: translating with {model}")
+                self.status.set(f"translating locally with {model}")
 
             out = translate_roman_urdu(text, model=model)
         except Exception as e:
@@ -855,6 +855,17 @@ class TriageGUI(tk.Tk):
                           f"No prediction was made.")
 
         if not out:
+            from src.offline_pipeline import has_medical_signal
+            if not has_medical_signal(text):
+                return None, (
+                    "This does not look like a complaint.\n\n"
+                    f"{text!r} contains no symptom and no body part, so there "
+                    f"is nothing to translate. Asked to translate it anyway, "
+                    f"the model invents a symptom - which then gets scored as "
+                    f"though the patient reported it.\n\n"
+                    f"What to do: describe the symptom and where it is, for "
+                    f"example \"seena mein dard\" or \"pait mein dard aur "
+                    f"ulti\".")
             return None, (
                 f"{model} returned nothing. The console shows the reason.\n\n"
                 f"No prediction was made - the app never falls back to a "
@@ -875,12 +886,16 @@ class TriageGUI(tk.Tk):
         self._last_gate = (ok, failures, out)
         if not ok and not allow_blocked:
             return None, (
-                "Anatomical check failed - the translation moved the "
-                "complaint to a different part of the body.\n\n"
+                "Anatomical check failed - the English does not match the "
+                "body part in the complaint.\n\n"
                 + "\n".join(failures) +
-                f"\n\nTranslation was: {out!r}\n\n"
-                f"No prediction was made. Rephrase the complaint, or retry - "
-                f"the translator is not deterministic across model versions.")
+                f"\n\nThe translator produced: {out!r}\n\n"
+                f"No triage level was produced, on purpose. Scoring this "
+                f"would attribute a body part to the patient that they did "
+                f"not report.\n\n"
+                f"What to do: write the complaint more fully - name the body "
+                f"part and the symptom, for example \"seena mein dard\" "
+                f"rather than a fragment.")
         return out, None
 
     def _offer_model_pull(self, model="llama3.2"):
@@ -1304,12 +1319,37 @@ class TriageGUI(tk.Tk):
         self._last_similarity = None
         self._last_spoken = text
         if self.in_english_mode():
-            self.status.set("English mode: translating locally via Ollama...")
+            self.status.set("translating locally via Ollama...")
             self.update_idletasks()
             english_text, err = self.translate_for_mode(text)
             if err:
-                messagebox.showerror("English (Local LLM) mode failed", err)
-                self.status.set("English mode: translation failed - no prediction made.")
+                # A gate block and a dead translator arrive through the same
+                # return value and are completely different events. The old
+                # title called both "English (Local LLM) mode failed", which
+                # names a mode that no longer exists and reads as the app
+                # breaking - when a gate block is the app doing its job.
+                # THREE different events arrive through this one return
+                # value and must not share a message. A refusal by design
+                # ("this is not a complaint", "the body part changed") is the
+                # app working; a dead translator is the app unable to work.
+                # Calling all three "failed" taught the operator to retry
+                # until something got through, which is the opposite of what
+                # a safety refusal should invite.
+                if err.startswith("Anatomical check failed"):
+                    title = "Refused: the translation changed the body part"
+                    short = ("Refused - the English named a body part the "
+                             "complaint did not. No prediction made.")
+                    messagebox.showwarning(title, err)
+                elif err.startswith("This does not look like a complaint"):
+                    title = "Not a complaint"
+                    short = ("Refused - no symptom or body part in the text. "
+                             "No prediction made.")
+                    messagebox.showwarning(title, err)
+                else:
+                    title = "Cannot translate this complaint"
+                    short = "Translation unavailable - no prediction made."
+                    messagebox.showerror(title, err)
+                self.status.set(short)
                 return
             text = english_text
             self._last_spoken = english_text

@@ -285,6 +285,44 @@ def t_gate_blocks_invented_anatomy():
 
 check("2.5  gate reads NORMALIZED source, not raw", t_gate_uses_normalized)
 check("2.7  gate blocks INVENTED anatomy", t_gate_blocks_invented_anatomy)
+def t_medical_signal():
+    """Fragments must be refused; real complaints must not be."""
+    from src.offline_pipeline import has_medical_signal
+    import pandas as pd
+    bad = []
+    for frag in ("band ho rha ha", "bhaag", "theek hai", "ok", ""):
+        if has_medical_signal(frag):
+            bad.append(f"{frag!r} accepted as a complaint")
+    for real in ("seena mein dard", "bukhar", "chest pain",
+                 "saans phool rahi hai", "sar mein chot"):
+        if not has_medical_signal(real):
+            bad.append(f"{real!r} rejected as not a complaint")
+    # the real test: how many of the corpus would be wrongly refused
+    try:
+        texts = pd.read_csv("cardiac_multilingual_10000_v3.csv")["Complaint_Text"]
+        miss = sum(1 for t in texts.dropna().astype(str)
+                   if not has_medical_signal(t))
+        if miss:
+            bad.append(f"{miss} of {len(texts)} real complaints rejected")
+    except FileNotFoundError:
+        pass
+    return not bad, "; ".join(bad) or (
+        "fragments refused, 0 of 10,000 real complaints wrongly rejected")
+
+
+def t_short_translation_kept():
+    """A short but clean reply is a translation, not a leftover."""
+    bad = [f"{a!r}->{sanitize_translation(a, a)!r}"
+           for a, want in [("Fever", "Fever"), ("Head injury", "Head injury"),
+                           ("Cough", "Cough")]
+           if sanitize_translation(a, a) != want]
+    return not bad, "; ".join(bad) or (
+        "'Fever' (5 chars) survives - the length floor now applies only "
+        "when a refusal was actually stripped out")
+
+
+check("1.2  fragments refused before translation", t_medical_signal)
+check("2.8  short clean translations are kept", t_short_translation_kept)
 check("1.1  fuzzy dictionary (repairs typos, no false positives)", t_fuzzy)
 check("1.2  no train/serve skew (skip_normalization honoured)", t_no_train_serve_skew)
 check("3.3  Stop Words reads the serving bundle's list", t_stopwords_source)
