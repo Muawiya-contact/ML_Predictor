@@ -265,7 +265,26 @@ check("2.1  prompt shape (<record>, few-shot, shoulder rule)", t_prompt_shape)
 check("2.2  temperature pinned to 0.0", t_temperature_zero)
 check("2.3  sanitize_translation() refusals + disclaimers", t_sanitize)
 check("2.4  verify_anatomical_integrity() drift blocking", t_gate)
+def t_gate_blocks_invented_anatomy():
+    """A source naming NO body part must not accept English that names one."""
+    cases = [("band ho rha ha", "Arm is swollen", False),
+             ("bhaag", "Fainting", True),
+             ("bukhar", "Fever", True),
+             ("saans band ho rahi hai", "Shortness of breath", True),
+             ("seena mein dard", "Chest pain radiating to the arm", True)]
+    bad = []
+    for ru, en, want in cases:
+        ok, _ = verify_anatomical_integrity(
+            fuzzy_normalize_roman_urdu(ru, verbose=False), en)
+        if ok != want:
+            bad.append(f"{ru!r}->{en!r} got {ok} want {want}")
+    return not bad, "; ".join(bad) or (
+        "'band ho rha ha' -> 'Arm is swollen' blocked as invented; "
+        "elaboration onto a named part still allowed")
+
+
 check("2.5  gate reads NORMALIZED source, not raw", t_gate_uses_normalized)
+check("2.7  gate blocks INVENTED anatomy", t_gate_blocks_invented_anatomy)
 check("1.1  fuzzy dictionary (repairs typos, no false positives)", t_fuzzy)
 check("1.2  no train/serve skew (skip_normalization honoured)", t_no_train_serve_skew)
 check("3.3  Stop Words reads the serving bundle's list", t_stopwords_source)

@@ -706,11 +706,37 @@ def verify_anatomical_integrity(roman_urdu: str, translated_english: str) -> tup
         return False, ["no translation to check"]
     english_lower = translated_english.lower()
     failures = []
+    source_named_any = False
     for pattern, keywords in _ANATOMICAL_COMPILED:
         found = pattern.search(roman_urdu or "")
-        if found and not any(kw in english_lower for kw in keywords):
-            failures.append(f"{found.group(0)!r} -> expected one of "
-                            f"{keywords}, got none")
+        if found:
+            source_named_any = True
+            if not any(kw in english_lower for kw in keywords):
+                failures.append(f"{found.group(0)!r} -> expected one of "
+                                f"{keywords}, got none")
+
+    # INVENTED ANATOMY. The check above only compares body parts the SOURCE
+    # names, so a source naming none could not fail it - and that is exactly
+    # where the worst output appeared: "band ho rha ha" ("is closing", no
+    # body part, not really a complaint) came back as "Arm is swollen", and
+    # the gate passed it because there was nothing to compare.
+    #
+    # Deliberately narrow. It fires ONLY when the source names no body part
+    # at all and the English names one, which is unambiguous invention. When
+    # the source does name a part, English is free to add related regions -
+    # "seena mein dard" legitimately becoming "chest pain radiating to the
+    # arm" - and that case is not touched. Widening this to "any part in
+    # English not in the source" would reject good translations, which is
+    # how a safety check ends up switched off.
+    if not source_named_any:
+        for pattern, keywords in _ANATOMICAL_COMPILED:
+            hit = next((kw for kw in keywords if kw in english_lower), None)
+            if hit:
+                failures.append(
+                    f"the complaint names no body part, but the translation "
+                    f"says {hit!r} - invented anatomy")
+                break
+
     return (not failures), failures
 
 
