@@ -287,9 +287,20 @@ check("2.5  gate reads NORMALIZED source, not raw", t_gate_uses_normalized)
 check("2.7  gate blocks INVENTED anatomy", t_gate_blocks_invented_anatomy)
 def t_medical_signal():
     """Fragments must be refused; real complaints must not be."""
-    from src.offline_pipeline import has_medical_signal
+    from src.offline_pipeline import (has_medical_signal,
+                                      load_clinical_vocabulary,
+                                      CLINICAL_VOCAB_FILE)
+    import os
     import pandas as pd
     bad = []
+    # The vocabulary must come from the data file. If someone re-inlines it
+    # into the module, editing the JSON would silently stop having any
+    # effect - the exact failure this file was created to prevent.
+    if not os.path.exists(CLINICAL_VOCAB_FILE):
+        bad.append(f"{CLINICAL_VOCAB_FILE} missing")
+    elif len(load_clinical_vocabulary()) < 100:
+        bad.append(f"only {len(load_clinical_vocabulary())} terms loaded - "
+                   f"is the data file being read?")
     for frag in ("band ho rha ha", "bhaag", "theek hai", "ok", ""):
         if has_medical_signal(frag):
             bad.append(f"{frag!r} accepted as a complaint")
@@ -307,7 +318,8 @@ def t_medical_signal():
     except FileNotFoundError:
         pass
     return not bad, "; ".join(bad) or (
-        "fragments refused, 0 of 10,000 real complaints wrongly rejected")
+        f"{len(load_clinical_vocabulary())} terms from clinical_vocabulary"
+        f".json; fragments refused, 0 of 10,000 real complaints rejected")
 
 
 def t_short_translation_kept():

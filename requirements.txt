@@ -18,5 +18,40 @@ scikit-learn==1.9.0
 scipy>=1.13
 joblib>=1.4
 rapidfuzz>=3.9
-sentence-transformers>=3.0
+# PINNED, and for a second reason beyond reproducibility: an unpinned
+# upgrade of this package is what broke this environment on 2026-09-02.
+# Something pulled sentence-transformers from 5.7.0 to 6.0.1, and torch,
+# transformers and tokenizers - its own dependencies - went missing in the
+# process. Four tests failed with ModuleNotFoundError until they were
+# reinstalled by hand.
+#
+# The encoder is loaded from source each run rather than unpickled, so this
+# pin is not load-bearing the way the scikit-learn one is. It is here so an
+# environment that works keeps working, and so a version bump is a decision
+# someone makes deliberately rather than something pip does on a Tuesday.
+sentence-transformers==6.0.1
+
+# Pulled in BY sentence-transformers, listed explicitly anyway. When that
+# package was upgraded these three vanished, and a requirements file that
+# does not name them cannot restore them. Naming a transitive dependency you
+# actually rely on is cheap; discovering it is missing mid-demo is not.
+#
+# transformers is bounded on BOTH sides. ">=4.40" was written here first and
+# was wrong: sentence-transformers 6.x requires transformers 5.x, so a clean
+# install could have satisfied the old floor with a 4.x release that cannot
+# work with the pinned sentence-transformers. Caught by running the tests
+# before pushing rather than by a user hitting it.
+#
+# torch: install the CPU build explicitly. A plain "pip install torch" pulls
+# the CUDA wheel and several GB of NVIDIA libraries this project never
+# touches - it ran for 69 minutes here before being stopped, against under a
+# minute from the CPU index:
+#
+#     pip install --index-url https://download.pytorch.org/whl/cpu torch
+#
+torch>=2.0
+transformers>=5.0,<6.0
+tokenizers>=0.19
+huggingface-hub>=1.3,<2.0
+tqdm>=4.0
 openpyxl>=3.1

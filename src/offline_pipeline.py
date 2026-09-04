@@ -634,54 +634,75 @@ ANATOMICAL_ASSERTIONS = {
     r"\b(baazu|bazu|haath|hath)\b": ["arm", "hand", "forearm"],
 }
 
-#: Every word that carries clinical meaning, in either language. Used ONLY
-#: to answer "is this text a complaint at all", never to translate or
-#: normalize - which is why English terms sit here and not in the dictionary
-#: above, where they would wrongly canonicalise English input.
-#:
-#: Built empirically, not from intuition. The dictionary alone recognised
-#: nothing in 32% of this project's own 10,000 complaints, because it had no
-#: entry for "saans", "dhadkan", "tez", or for the English words an operator
-#: may simply type. A test that rejects a third of real complaints is worse
-#: than the hallucination it was meant to catch.
-MEDICAL_VOCABULARY = set(ROMAN_URDU_DICTIONARY) | {
-    # Roman Urdu symptoms and qualifiers
-    "saans", "sans", "saans;", "dam", "dhadkan", "dhadkane", "ghutan",
-    "jalan", "jalne", "dabao", "dabaao", "bhaari", "bhaaripan", "bhari",
-    "tez", "halki", "halka", "thoda", "thora", "shadeed", "takleef",
-    "kamzori", "thakan", "sust", "khoon", "zakhm", "zakhmi", "garmi",
-    "thand", "kapkapi", "matli", "qay", "dast", "pesaab", "chakkar",
-    "behosh", "behoshi", "ghabrahat", "bechaini", "phoolna", "phool",
-    "dard", "dukh", "sujan", "chubhan", "akarna", "sunn", "jhunjhuni",
-    "mehnat", "chalna", "seedhiyan", "aaram", "raat", "subah",
-    # English, because the box accepts English too
-    "chest", "pain", "ache", "aching", "pressure", "tight", "tightness",
-    "breath", "breathing", "breathless", "shortness", "sweat", "sweating",
-    "fever", "vomit", "vomiting", "nausea", "nauseous", "dizzy", "dizziness",
-    "faint", "fainting", "palpitation", "palpitations", "heartbeat", "heart",
-    "burning", "swelling", "swollen", "injury", "injured", "trauma", "bleed",
-    "bleeding", "blood", "weak", "weakness", "fatigue", "tired", "numb",
-    "numbness", "cough", "throat", "stomach", "abdomen", "abdominal", "head",
-    "headache", "back", "arm", "leg", "shoulder", "neck", "jaw", "chills",
-    "cold", "hot", "discomfort", "cramp", "cramps", "spasm", "collapse",
-    "unconscious", "seizure", "fit", "wheeze", "wheezing", "choking",
-}
+#: Where the clinical vocabulary lives. A DATA file, deliberately, not a
+#: Python literal: a maintainer adding "chakkar" for a new dialect should
+#: edit JSON and save, not open a module and risk a syntax error in the
+#: middle of a safety check.
+CLINICAL_VOCAB_FILE = os.path.join(_ROOT, "clinical_vocabulary.json")
+
+#: Loaded once and cached. The file is small and read at import, but the
+#: cache matters for the batch path, where has_medical_signal() is called
+#: once per row and a 500-row sheet would otherwise re-read and re-parse the
+#: same JSON five hundred times.
+_VOCAB_CACHE = None
+
+
+def load_clinical_vocabulary(path: str = None) -> set:
+    """Every word that marks a text as a complaint, from the JSON data file.
+
+    Returns a lowercase set. Groups in the file are organisational only -
+    they exist so a maintainer can see WHERE a new word belongs rather than
+    appending to one flat list; nothing in the code depends on the grouping.
+
+    Falls back to the dictionary keys if the file is missing or malformed
+    rather than raising. A missing vocabulary file must not take the whole
+    application down: the degraded behaviour is more refusals, which is the
+    safe direction, and the console says what happened.
+    """
+    global _VOCAB_CACHE
+    if _VOCAB_CACHE is not None and path is None:
+        return _VOCAB_CACHE
+    target = path or CLINICAL_VOCAB_FILE
+    words = set()
+    try:
+        with open(target, "r", encoding="utf-8") as f:
+            doc = json.load(f)
+        for group in (doc.get("vocabulary") or {}).values():
+            words.update(w.lower() for w in group if isinstance(w, str))
+    except Exception as e:
+        # Say so loudly. Silently falling back would make the system quietly
+        # stricter than it was built to be, and nobody would know why real
+        # complaints started being refused.
+        print(f"[vocab] could not read {target} ({type(e).__name__}: {e}) - "
+              f"falling back to the dictionary keys alone. Expect more "
+              f"refusals until this is fixed.", flush=True)
+    words |= {w.lower() for w in ROMAN_URDU_DICTIONARY}
+    if path is None:
+        _VOCAB_CACHE = words
+    return words
 
 
 def has_medical_signal(text: str) -> bool:
     """True when the text contains at least one clinically meaningful word.
 
-    A complaint that contains none is not a complaint - it is a fragment,
-    and asking a language model to translate it invites invention. "band ho
-    rha ha" ("is closing") produced "Arm is swollen"; "bhaag" ("run")
-    produced "Fainting". Neither has anything to translate.
+    A record containing none is not a complaint - it is a fragment - and
+    asking a language model to translate a fragment invites invention. Two
+    measured examples from this project: "band ho rha ha" ("is closing")
+    came back as "Arm is swollen"; "bhaag" ("run") came back as "Fainting".
+    Neither had anything to translate.
 
-    Measured against this project's 10,000-row corpus: see the note on
-    MEDICAL_VOCABULARY for why the plain dictionary was not enough.
+    THE FAILURE DIRECTION IS CHOSEN. A word missing from the vocabulary
+    causes a refusal, never a wrong triage level - the complaint goes to a
+    clinician to read instead. For a triage system that is the correct way
+    round: an unscored patient is an inconvenience, an invented symptom is a
+    hazard.
+
+    Punctuation is stripped per word because operators type "dard," and
+    "bukhar." with trailing marks, and a set membership test would miss both.
     """
-    words = {w.strip(".,;:!?()").lower()
-             for w in str(text or "").split()}
-    return bool(words & MEDICAL_VOCABULARY)
+    vocab = load_clinical_vocabulary()
+    words = {w.strip(".,;:!?()[]'\"").lower() for w in str(text or "").split()}
+    return bool(words & vocab)
 
 
 #: variant -> canonical Roman Urdu token, derived from the table above by
