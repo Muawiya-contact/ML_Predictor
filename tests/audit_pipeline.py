@@ -284,7 +284,42 @@ def t_gate_blocks_invented_anatomy():
 
 
 check("2.5  gate reads NORMALIZED source, not raw", t_gate_uses_normalized)
+def t_gate_edge_cases():
+    """Edge cases found by hand-testing on 2026-09-05, locked in."""
+    cases = [
+        # English and mixed-language input must NOT read as invented anatomy.
+        # The source patterns listed only Roman Urdu, so an English complaint
+        # named no body part as far as the gate could see and its correct
+        # translation was refused.
+        ("chest mein pain ho raha hai", "Chest pain", True),
+        ("crushing chest pain radiating to jaw",
+         "Severe chest pain radiating to the jaw", True),
+        ("severe pait pain since morning", "Severe stomach pain", True),
+        # Knee. llama3.2 rendered "ghutna mein dard" as "Difficulty
+        # breathing" and there was no knee entry to object with.
+        ("ghutna mein dard", "Difficulty breathing", False),
+        ("ghutna mein dard", "Knee pain", True),
+        # ...but "dam ghutna" is choking, not the joint. The lookbehind must
+        # keep the knee requirement off it.
+        ("dam ghutna hai", "Choking sensation", True),
+        ("saans ghutna hai", "Suffocating sensation", True),
+        # Still blocking what it always blocked.
+        ("seena mein dard", "I have a headache", False),
+        ("band ho rha ha", "Arm is swollen", False),
+    ]
+    bad = []
+    for ru, en, want in cases:
+        ok, _ = verify_anatomical_integrity(
+            fuzzy_normalize_roman_urdu(ru, verbose=False), en)
+        if ok != want:
+            bad.append(f"{ru!r}->{en!r} got {ok} want {want}")
+    return not bad, "; ".join(bad) or (
+        f"{len(cases)}/{len(cases)}: English sources accepted, knee caught, "
+        f"'dam ghutna' not mistaken for the joint")
+
+
 check("2.7  gate blocks INVENTED anatomy", t_gate_blocks_invented_anatomy)
+check("2.9  gate edge cases: English input, knee vs choking", t_gate_edge_cases)
 def t_medical_signal():
     """Fragments must be refused; real complaints must not be."""
     from src.offline_pipeline import (has_medical_signal,

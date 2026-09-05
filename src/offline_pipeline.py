@@ -138,13 +138,27 @@ Always map Roman Urdu body parts strictly to their precise English anatomical eq
 - Shoulder: "kandha", "kandhay", "kandhe", "kandha" (NEVER translate as arm or hand - a shoulder is not an arm, and pain radiating to the shoulder is a different clinical sign)
 - Arm / Hand: "baazu", "bazu", "haath", "hath"
 - Leg / Foot: "taang", "tang", "paon", "pair"
+- Knee: "ghutna", "ghutne" on its own is the KNEE (a joint in the leg). Do
+  not confuse it with "ghutan" (suffocation): "dam ghutna" and "saans
+  ghutna" mean choking and have nothing to do with the leg. "ghutna mein
+  dard" is KNEE PAIN, never breathing difficulty.
+- Jaw: "jabra", "jabray"
 
 ### 3. SYMPTOM & SENSORY MAPPING RULES
 - Pain / Ache: "dard", "darad", "daard", "dukhna", "peera" -> Translate as "pain" or "ache"
 - Anxiety / Restlessness: "ghabrahat", "bechaini" -> Translate strictly as "anxiety", "restlessness", or "uneasiness" (NEVER translate as chest tightness or heart pressure)
-- Shortness of Breath / Breathing difficulty: "saans phoolna", "saans ka masla", "dum ghutna" -> Translate as "shortness of breath" or "difficulty breathing"
+- Shortness of Breath / Breathing difficulty: "saans phoolna", "saans ka masla" -> Translate as "shortness of breath" or "difficulty breathing"
+- Choking / suffocation: "dam ghutna", "dum ghutna", "saans ghutna", "ghutan"
+  -> Translate as "choking" or "a suffocating sensation". This is BREATHING.
+  It is not the knee, even though it shares the word "ghutna": the knee
+  reading applies only when "ghutna" stands alone, never after "dam", "dum"
+  or "saans".
 - Fever / Chills: "bukhar", "bookhar", "tap", "thand lagna", "kankani" -> Translate as "fever" or "chills"
-- Vomiting / Nausea: "ulti", "oolti", "qay", "matli", "dil kharab" -> Translate as "vomiting" or "nausea"
+- Vomiting / Nausea: "ulti", "oolti", "qay", "matli" -> Translate as "vomiting" or "nausea"
+- IDIOM, do not read literally: "dil kharab" / "dil kharab ho raha hai" means
+  NAUSEA - feeling sick in the stomach. It is not a heart complaint and not
+  an emotional statement. Translate it as "nausea" or "feeling nauseous".
+  Reading it literally as a failing heart is alarming and wrong.
 - Dizziness / Fainting: "chakkar", "sar ghoomna", "behosh" -> Translate as "dizziness", "vertigo", or "fainting"
 - Sweating: "pasina", "paseena", "paseenay" -> Translate as "sweating" or "diaphoresis"
 - Trauma / Injury / Bleeding: "chot", "zakhmi", "khoon", "bleeding" -> Translate as "injury", "trauma", or "bleeding" (NEVER reduce trauma to simple pain)
@@ -624,14 +638,46 @@ FUZZY_CUTOFF = 0.88
 #: Roman Urdu body part -> the English terms any faithful translation of it
 #: must contain. Order does not matter; one match is enough.
 ANATOMICAL_ASSERTIONS = {
-    r"\b(pait|paet|pet|payt|peit|shikm|maida|mayda)\b": ["stomach", "abdomen", "abdominal", "belly"],
-    r"\b(seena|seene|chati|chaati)\b": ["chest", "thorax", "thoracic"],
-    r"\b(sar|sir|sear|khopri)\b": ["head", "skull", "cranial", "scalp"],
-    r"\b(gala|galao|gardan)\b": ["throat", "neck", "pharyn"],
-    r"\b(peeth|pith|kamar)\b": ["back", "lumbar", "spine"],
-    r"\b(kandha|kandhay|kandhe)\b": ["shoulder"],
-    r"\b(taang|tang|paon|pair)\b": ["leg", "foot", "feet", "limb"],
-    r"\b(baazu|bazu|haath|hath)\b": ["arm", "hand", "forearm"],
+    # Each key matches the body part in the SOURCE; the value lists the
+    # English terms a faithful translation of it must contain. One match is
+    # enough.
+    #
+    # THE SOURCE PATTERNS INCLUDE THE ENGLISH WORDS TOO, and that is not
+    # redundancy. The complaint box accepts English - "chest mein pain ho
+    # raha hai" is normal mixed usage, and the built-in examples are English
+    # - but these patterns only listed Roman Urdu. So an English complaint
+    # named no body part as far as the gate could see, its correct
+    # translation named "chest", and the invented-anatomy rule fired on a
+    # perfect translation. "chest mein pain ho raha hai" and "crushing chest
+    # pain radiating to jaw" were both refused.
+    r"\b(pait|paet|pet|payt|peit|shikm|maida|mayda|stomach|abdomen|abdominal|belly|tummy)\b":
+        ["stomach", "abdomen", "abdominal", "belly"],
+    r"\b(seena|seene|chati|chaati|chest|thorax|thoracic)\b":
+        ["chest", "thorax", "thoracic"],
+    r"\b(sar|sir|sear|khopri|head|skull|scalp)\b":
+        ["head", "skull", "cranial", "scalp"],
+    r"\b(gala|galao|gardan|throat|neck)\b":
+        ["throat", "neck", "pharyn"],
+    r"\b(peeth|pith|kamar|back|lumbar|spine)\b":
+        ["back", "lumbar", "spine"],
+    r"\b(kandha|kandhay|kandhe|shoulder)\b":
+        ["shoulder"],
+    r"\b(taang|tang|paon|pair|leg|foot|feet|ankle)\b":
+        ["leg", "foot", "feet", "limb", "ankle"],
+    r"\b(baazu|bazu|haath|hath|arm|hand|forearm|wrist)\b":
+        ["arm", "hand", "forearm", "wrist"],
+    r"\b(jabra|jabray|jaw)\b":
+        ["jaw", "mandible"],
+    # KNEE, and the trap that comes with it. "ghutna" is the knee; "ghutan"
+    # is suffocation, and "dam ghutna" / "saans ghutna" mean choking, not
+    # anything about a leg. The negative lookbehind keeps those phrases out,
+    # so only a bare "ghutna" is read as the joint.
+    #
+    # Added because llama3.2 rendered "ghutna mein dard" (knee pain) as
+    # "Difficulty breathing" and the gate had no knee entry to object with -
+    # a knee complaint would have been triaged as respiratory.
+    r"(?<!dam )(?<!dum )(?<!saans )\b(ghutna|ghutne|knee)\b":
+        ["knee", "patella"],
 }
 
 #: Where the clinical vocabulary lives. A DATA file, deliberately, not a
