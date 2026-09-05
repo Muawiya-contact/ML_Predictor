@@ -183,9 +183,27 @@ try:
     if len(res) != src_rows:
         problems.append(f"{len(res)} rows out of {src_rows} in")
     for col in ("Predicted_Triage_Level", "Confidence", "Notes",
-                "Translation", "Gate_Status", "Gate_Detail"):
+                "Translation", "Gate_Status", "Gate_Detail",
+                # every pipeline stage, so a reviewer can see WHY a row
+                # scored the way it did without re-running anything
+                "Input_Raw", "Input_Normalized", "Translation_English",
+                "Text_Encoded", "Stopwords_Removed", "Encoder",
+                "Embedding_Dim", "Model_Bundle"):
         if col not in res.columns:
             problems.append(f"missing column {col}")
+    # Input_Raw must be the OPERATOR'S text, not the translation. The worker
+    # overwrites Complaint_Text with the English, and that used to be the
+    # only copy - what was actually typed did not survive into the file.
+    src_first = pd.read_csv(fixture)["Complaint_Text"].fillna("").astype(str)[0]
+    if "Input_Raw" in res.columns and str(res["Input_Raw"][0]) != src_first:
+        problems.append(f"Input_Raw is {res['Input_Raw'][0]!r}, "
+                        f"expected the original {src_first!r}")
+    # a row that was never translated must not carry English text
+    if {"Gate_Status", "Translation_English"} <= set(res.columns):
+        bad_en = res[(res["Gate_Status"] != "PASS")
+                     & res["Translation_English"].notna()]
+        if len(bad_en):
+            problems.append("an untranslated row carries Translation_English")
     if not problems:
         # every row must carry a gate verdict
         if res["Gate_Status"].isna().any():
