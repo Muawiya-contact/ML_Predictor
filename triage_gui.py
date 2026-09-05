@@ -847,7 +847,7 @@ class TriageGUI(tk.Tk):
                 # Say so once when a fallback is in play, so a different
                 # translator is never mistaken for the configured one.
                 self._ollama_model_note = model
-                self.status.set(f"English mode: translating with {model}")
+                self.status.set(f"translating locally with {model}")
 
             out = translate_roman_urdu(text, model=model)
         except Exception as e:
@@ -855,6 +855,34 @@ class TriageGUI(tk.Tk):
                           f"No prediction was made.")
 
         if not out:
+            from src.offline_pipeline import (has_medical_signal,
+                                              is_non_latin_script,
+                                              fuzzy_normalize_roman_urdu)
+            if is_non_latin_script(text):
+                return None, (
+                    "This complaint is not in the Latin alphabet.\n\n"
+                    "The app reads Roman Urdu (Urdu written in English "
+                    "letters) and English. Urdu script is not supported - "
+                    "the dictionary, the vocabulary and the safety checks "
+                    "are all Latin-alphabet.\n\n"
+                    "What to do: type the complaint in Roman Urdu, for "
+                    "example \"seena mein dard\" rather than \u0633\u06cc\u0646\u06d2 \u0645\u06cc\u06ba \u062f\u0631\u062f.")
+            # NORMALIZED, not raw. translate_roman_urdu() repairs spelling
+            # before it checks, so checking the raw string here disagreed
+            # with the pipeline: with Ollama down, "bukar" (a misspelling of
+            # bukhar/fever) was reported as "not a complaint" when the real
+            # problem was the dead translator, sending the operator off to
+            # rewrite text that was fine.
+            if not has_medical_signal(fuzzy_normalize_roman_urdu(text, verbose=False)):
+                return None, (
+                    "This does not look like a complaint.\n\n"
+                    f"{text!r} contains no symptom and no body part, so there "
+                    f"is nothing to translate. Asked to translate it anyway, "
+                    f"the model invents a symptom - which then gets scored as "
+                    f"though the patient reported it.\n\n"
+                    f"What to do: describe the symptom and where it is, for "
+                    f"example \"seena mein dard\" or \"pait mein dard aur "
+                    f"ulti\".")
             return None, (
                 f"{model} returned nothing. The console shows the reason.\n\n"
                 f"No prediction was made - the app never falls back to a "
@@ -875,12 +903,16 @@ class TriageGUI(tk.Tk):
         self._last_gate = (ok, failures, out)
         if not ok and not allow_blocked:
             return None, (
-                "Anatomical check failed - the translation moved the "
-                "complaint to a different part of the body.\n\n"
+                "Anatomical check failed - the English does not match the "
+                "body part in the complaint.\n\n"
                 + "\n".join(failures) +
-                f"\n\nTranslation was: {out!r}\n\n"
-                f"No prediction was made. Rephrase the complaint, or retry - "
-                f"the translator is not deterministic across model versions.")
+                f"\n\nThe translator produced: {out!r}\n\n"
+                f"No triage level was produced, on purpose. Scoring this "
+                f"would attribute a body part to the patient that they did "
+                f"not report.\n\n"
+                f"What to do: write the complaint more fully - name the body "
+                f"part and the symptom, for example \"seena mein dard\" "
+                f"rather than a fragment.")
         return out, None
 
     def _offer_model_pull(self, model="llama3.2"):
@@ -966,63 +998,50 @@ class TriageGUI(tk.Tk):
         win.after(300, poll)
 
     def _deployed_line(self):
-        """One-line 'this is the model making the predictions' summary."""
+        """Four aligned lines: model, pipeline, data, status.
+
+        This was a twelve-line paragraph of asterisk-fenced banners, built up
+        by prepending one warning in front of another, plus a branch for a
+        mode that no longer exists. Everything in it was true and almost none
+        of it was read - a wall of shouting text is skipped exactly like no
+        text at all. The facts that must survive a glance are: which bundle
+        is scoring, that nothing leaves the machine, that the data is
+        synthetic, and that this is not a medical device. Those are the four
+        lines; nothing else earns a place here.
+        """
         if not self.model_info:
-            return "Currently deployed: loading..."
-        i = self.model_info
-        line = (f"Currently deployed: {i['method']}   ·   "
-                f"text features from {i['basis']}   ·   {self.model_dir}/")
-        if i["uses_embeddings"]:
-            line += f"\nembedding model: {i['embedding_model']}  ({i['embedding_dim']} dims)"
+            return "model      loading..."
 
-        # Provenance and scope, read straight from the bundle manifest.
-        # This is deliberately on the banner rather than buried in a tab:
-        # a triage screen that does not say "synthetic, cardiac only" invites
-        # exactly the misreading this project cannot afford.
-        english = self.in_english_mode()
-        if english:
-            i = getattr(self, "model_info_en", None) or i
-            line = (f"Currently deployed: {i['method']}   ·   "
-                    f"text features from {i['basis']}   ·   {ENGLISH_MODEL_DIR}/")
-            if i["uses_embeddings"]:
-                line += (f"\nembedding model: {i['embedding_model']}"
-                         f"  ({i['embedding_dim']} dims)")
-            line = ("*** MODE: ENGLISH (LOCAL LLM) - translated on this machine ***\n"
-                    "every prediction is translated by Ollama on localhost "
-                    "before it is scored - no network call\n") + line
-        else:
-            line = "*** MODE: ROMAN URDU (OFFLINE) - no network calls ***\n" + line
-
+        i = getattr(self, "model_info_en", None) or self.model_info
         man = self.active_manifest() or getattr(self, "manifest", None) or {}
         ds = man.get("dataset", {})
         prov = ds.get("provenance", {})
 
-        # Experiment marker, first line and impossible to miss. This branch
-        # can load an English-translation model that is NOT the submitted
-        # one, and a triage screen that looks identical while running a
-        # different pipeline is exactly how the wrong result gets reported.
-        if man.get("experiment"):
-            line = ("*** EXPERIMENTAL: " + str(man["experiment"]) +
-                    " - NOT the submitted model ***\n") + line
+        rows = ds.get("rows")
+        model_bits = [f"{rows:,} rows" if isinstance(rows, int) else None,
+                      i.get("method"), ENGLISH_MODEL_DIR + "/"]
+        if i.get("uses_embeddings"):
+            model_bits.insert(2, f"{i['embedding_model'].split('/')[-1]} "
+                                 f"({i['embedding_dim']}d)")
+        lines = ["model      " + "  ·  ".join(b for b in model_bits if b),
+                 "pipeline   Roman Urdu  ->  Ollama (local)  ->  anatomical "
+                 "gate  ->  classifier   ·   no network call"]
 
-        bits = []
-        if ds.get("file"):
-            bits.append(f"trained on {ds['file']} ({ds.get('rows', '?')} rows"
-                        + (f", {man['trained_on_date']}" if man.get("trained_on_date") else "")
-                        + ")")
+        data_bits = [ds.get("file")]
+        if prov.get("synthetic") is True:
+            data_bits.append("SYNTHETIC - not real patient records")
+        elif prov.get("synthetic") == "unknown":
+            data_bits.append("provenance UNKNOWN")
         scope = (man.get("scope") or {}).get("clinical_scope")
         if scope:
-            bits.append(f"scope: {scope}")
-        if bits:
-            line += "\n" + "   ·   ".join(bits)
-        if prov.get("synthetic") is True:
-            line += ("\n⚠ SYNTHETIC DATA - generated by "
-                     f"{prov.get('generator', 'a script')}. NOT real patient "
-                     "records. Research prototype only.")
-        elif prov.get("synthetic") == "unknown":
-            line += ("\n⚠ Training data provenance UNKNOWN - not verified as "
-                     "real or synthetic.")
-        return line
+            data_bits.append(scope)
+        lines.append("data       " + "  ·  ".join(b for b in data_bits if b))
+
+        status = "research prototype - not a medical device"
+        if man.get("experiment"):
+            status = "EXPERIMENTAL bundle, not the submitted model   ·   " + status
+        lines.append("status     " + status)
+        return "\n".join(lines)
 
     def _refresh_deployed_banners(self, note=""):
         """Fill in everything that depends on WHICH model finished loading."""
@@ -1317,12 +1336,42 @@ class TriageGUI(tk.Tk):
         self._last_similarity = None
         self._last_spoken = text
         if self.in_english_mode():
-            self.status.set("English mode: translating locally via Ollama...")
+            self.status.set("translating locally via Ollama...")
             self.update_idletasks()
             english_text, err = self.translate_for_mode(text)
             if err:
-                messagebox.showerror("English (Local LLM) mode failed", err)
-                self.status.set("English mode: translation failed - no prediction made.")
+                # A gate block and a dead translator arrive through the same
+                # return value and are completely different events. The old
+                # title called both "English (Local LLM) mode failed", which
+                # names a mode that no longer exists and reads as the app
+                # breaking - when a gate block is the app doing its job.
+                # THREE different events arrive through this one return
+                # value and must not share a message. A refusal by design
+                # ("this is not a complaint", "the body part changed") is the
+                # app working; a dead translator is the app unable to work.
+                # Calling all three "failed" taught the operator to retry
+                # until something got through, which is the opposite of what
+                # a safety refusal should invite.
+                if err.startswith("Anatomical check failed"):
+                    title = "Refused: the translation changed the body part"
+                    short = ("Refused - the English named a body part the "
+                             "complaint did not. No prediction made.")
+                    messagebox.showwarning(title, err)
+                elif err.startswith("This complaint is not in the Latin"):
+                    title = "Script not supported"
+                    short = ("Refused - Urdu script is not supported. Type "
+                             "the complaint in Roman Urdu.")
+                    messagebox.showwarning(title, err)
+                elif err.startswith("This does not look like a complaint"):
+                    title = "Not a complaint"
+                    short = ("Refused - no symptom or body part in the text. "
+                             "No prediction made.")
+                    messagebox.showwarning(title, err)
+                else:
+                    title = "Cannot translate this complaint"
+                    short = "Translation unavailable - no prediction made."
+                    messagebox.showerror(title, err)
+                self.status.set(short)
                 return
             text = english_text
             self._last_spoken = english_text

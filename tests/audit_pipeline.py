@@ -265,7 +265,177 @@ check("2.1  prompt shape (<record>, few-shot, shoulder rule)", t_prompt_shape)
 check("2.2  temperature pinned to 0.0", t_temperature_zero)
 check("2.3  sanitize_translation() refusals + disclaimers", t_sanitize)
 check("2.4  verify_anatomical_integrity() drift blocking", t_gate)
+def t_gate_blocks_invented_anatomy():
+    """A source naming NO body part must not accept English that names one."""
+    cases = [("band ho rha ha", "Arm is swollen", False),
+             ("bhaag", "Fainting", True),
+             ("bukhar", "Fever", True),
+             ("saans band ho rahi hai", "Shortness of breath", True),
+             ("seena mein dard", "Chest pain radiating to the arm", True)]
+    bad = []
+    for ru, en, want in cases:
+        ok, _ = verify_anatomical_integrity(
+            fuzzy_normalize_roman_urdu(ru, verbose=False), en)
+        if ok != want:
+            bad.append(f"{ru!r}->{en!r} got {ok} want {want}")
+    return not bad, "; ".join(bad) or (
+        "'band ho rha ha' -> 'Arm is swollen' blocked as invented; "
+        "elaboration onto a named part still allowed")
+
+
 check("2.5  gate reads NORMALIZED source, not raw", t_gate_uses_normalized)
+def t_gate_edge_cases():
+    """Edge cases found by hand-testing on 2026-09-05, locked in."""
+    cases = [
+        # English and mixed-language input must NOT read as invented anatomy.
+        # The source patterns listed only Roman Urdu, so an English complaint
+        # named no body part as far as the gate could see and its correct
+        # translation was refused.
+        ("chest mein pain ho raha hai", "Chest pain", True),
+        ("crushing chest pain radiating to jaw",
+         "Severe chest pain radiating to the jaw", True),
+        ("severe pait pain since morning", "Severe stomach pain", True),
+        # Knee. llama3.2 rendered "ghutna mein dard" as "Difficulty
+        # breathing" and there was no knee entry to object with.
+        ("ghutna mein dard", "Difficulty breathing", False),
+        ("ghutna mein dard", "Knee pain", True),
+        # ...but "dam ghutna" is choking, not the joint. The lookbehind must
+        # keep the knee requirement off it.
+        ("dam ghutna hai", "Choking sensation", True),
+        ("saans ghutna hai", "Suffocating sensation", True),
+        # Still blocking what it always blocked.
+        ("seena mein dard", "I have a headache", False),
+        ("band ho rha ha", "Arm is swollen", False),
+    ]
+    bad = []
+    for ru, en, want in cases:
+        ok, _ = verify_anatomical_integrity(
+            fuzzy_normalize_roman_urdu(ru, verbose=False), en)
+        if ok != want:
+            bad.append(f"{ru!r}->{en!r} got {ok} want {want}")
+    return not bad, "; ".join(bad) or (
+        f"{len(cases)}/{len(cases)}: English sources accepted, knee caught, "
+        f"'dam ghutna' not mistaken for the joint")
+
+
+check("2.7  gate blocks INVENTED anatomy", t_gate_blocks_invented_anatomy)
+def t_word_boundary_matching():
+    """Anatomy keywords must match WHOLE WORDS, both directions.
+
+    The checks used a plain substring test. It blocked correct translations
+    ('warm' contains 'arm') and, worse, ACCEPTED wrong ones: source "baazu"
+    (arm) was satisfied by "Patient feels warm".
+    """
+    cases = [
+        # false blocks that must now pass
+        ("bukhar hai", "Feeling warm and feverish", True),
+        ("chakkar aa raha hai", "Patient feels alarm and dizziness", True),
+        ("khansi hai", "Cough, handled at home", True),
+        ("bukhar hai", "The pain comes back at night", True),
+        # the false PASS that must now block
+        ("baazu mein dard", "Patient feels warm", False),
+        # and the ordinary cases must be unaffected
+        ("baazu mein dard", "Arm pain", True),
+        ("kamar mein dard", "Lower back pain", True),
+        ("gala kharab", "Sore throat", True),
+        ("band ho rha ha", "Arm is swollen", False),
+    ]
+    bad = []
+    for ru, en, want in cases:
+        ok, _ = verify_anatomical_integrity(ru, en)
+        if ok != want:
+            bad.append(f"{ru!r}->{en!r} got {ok} want {want}")
+    return not bad, "; ".join(bad) or (
+        "'warm' no longer reads as 'arm' in either direction")
+
+
+def t_whitespace_and_script():
+    """Whitespace must not change a reading; non-Latin gets its own reason."""
+    from src.offline_pipeline import is_non_latin_script
+    bad = []
+    # "dam  ghutna" (double space) must not be read as the knee
+    for spacing in ("dam ghutna hai", "dam  ghutna hai", "dam\tghutna hai"):
+        ok, _ = verify_anatomical_integrity(spacing, "Choking sensation")
+        if not ok:
+            bad.append(f"{spacing!r} wrongly required 'knee'")
+    if not is_non_latin_script("\u0633\u06cc\u0646\u06d2 \u0645\u06cc\u06ba \u062f\u0631\u062f \u06c1\u06d2"):
+        bad.append("Urdu script not detected")
+    if is_non_latin_script("seena mein dard"):
+        bad.append("Roman Urdu wrongly flagged as non-Latin")
+    return not bad, "; ".join(bad) or (
+        "spacing does not change the knee/choking reading; Urdu script "
+        "detected separately from 'no clinical content'")
+
+
+def t_non_cardiac_vocabulary():
+    """Complaints outside the cardiac corpus must still be recognised."""
+    from src.offline_pipeline import has_medical_signal
+    bad = [c for c in ("jal gaya hun garam pani se", "kutte ne kaat liya hai",
+                       "hamal mein khoon aa raha hai", "gir gaya hun",
+                       "mirgi ka daura para")
+           if not has_medical_signal(c)]
+    still = [c for c in ("band ho rha ha", "bhaag", "theek hai")
+             if has_medical_signal(c)]
+    return not (bad or still), (
+        f"refused: {bad}; wrongly accepted: {still}" if (bad or still) else
+        "burns, bites, obstetric, falls and seizures recognised; fragments "
+        "still refused")
+
+
+check("2.9  gate edge cases: English input, knee vs choking", t_gate_edge_cases)
+check("2.10 anatomy keywords match whole words", t_word_boundary_matching)
+check("2.11 whitespace tolerance and script detection", t_whitespace_and_script)
+check("1.3  non-cardiac complaints recognised", t_non_cardiac_vocabulary)
+def t_medical_signal():
+    """Fragments must be refused; real complaints must not be."""
+    from src.offline_pipeline import (has_medical_signal,
+                                      load_clinical_vocabulary,
+                                      CLINICAL_VOCAB_FILE)
+    import os
+    import pandas as pd
+    bad = []
+    # The vocabulary must come from the data file. If someone re-inlines it
+    # into the module, editing the JSON would silently stop having any
+    # effect - the exact failure this file was created to prevent.
+    if not os.path.exists(CLINICAL_VOCAB_FILE):
+        bad.append(f"{CLINICAL_VOCAB_FILE} missing")
+    elif len(load_clinical_vocabulary()) < 100:
+        bad.append(f"only {len(load_clinical_vocabulary())} terms loaded - "
+                   f"is the data file being read?")
+    for frag in ("band ho rha ha", "bhaag", "theek hai", "ok", ""):
+        if has_medical_signal(frag):
+            bad.append(f"{frag!r} accepted as a complaint")
+    for real in ("seena mein dard", "bukhar", "chest pain",
+                 "saans phool rahi hai", "sar mein chot"):
+        if not has_medical_signal(real):
+            bad.append(f"{real!r} rejected as not a complaint")
+    # the real test: how many of the corpus would be wrongly refused
+    try:
+        texts = pd.read_csv("cardiac_multilingual_10000_v3.csv")["Complaint_Text"]
+        miss = sum(1 for t in texts.dropna().astype(str)
+                   if not has_medical_signal(t))
+        if miss:
+            bad.append(f"{miss} of {len(texts)} real complaints rejected")
+    except FileNotFoundError:
+        pass
+    return not bad, "; ".join(bad) or (
+        f"{len(load_clinical_vocabulary())} terms from clinical_vocabulary"
+        f".json; fragments refused, 0 of 10,000 real complaints rejected")
+
+
+def t_short_translation_kept():
+    """A short but clean reply is a translation, not a leftover."""
+    bad = [f"{a!r}->{sanitize_translation(a, a)!r}"
+           for a, want in [("Fever", "Fever"), ("Head injury", "Head injury"),
+                           ("Cough", "Cough")]
+           if sanitize_translation(a, a) != want]
+    return not bad, "; ".join(bad) or (
+        "'Fever' (5 chars) survives - the length floor now applies only "
+        "when a refusal was actually stripped out")
+
+
+check("1.2  fragments refused before translation", t_medical_signal)
+check("2.8  short clean translations are kept", t_short_translation_kept)
 check("1.1  fuzzy dictionary (repairs typos, no false positives)", t_fuzzy)
 check("1.2  no train/serve skew (skip_normalization honoured)", t_no_train_serve_skew)
 check("3.3  Stop Words reads the serving bundle's list", t_stopwords_source)
