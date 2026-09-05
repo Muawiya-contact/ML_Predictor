@@ -2510,20 +2510,26 @@ class TriageGUI(tk.Tk):
         tk.Label(row, textvariable=self.cluster_status, bg=CARD, fg=MUTED,
                  font=("Segoe UI", 9)).pack(side="left", padx=(12, 0))
 
-        cols = tuple(f"s{i}" for i in range(10))
-        self.cluster_tree = ttk.Treeview(pad, columns=cols,
-                                         show="tree headings", height=12)
-        self.cluster_tree.heading("#0", text="complaint")
-        self.cluster_tree.column("#0", width=300)
-        for i, c in enumerate(cols):
-            self.cluster_tree.heading(c, text=f"S{i + 1}")
-            self.cluster_tree.column(c, width=58, anchor="center")
-        self.cluster_tree.pack(fill="x")
-        # Colour by band so the structure is visible without reading 100
-        # numbers: high similarity green, low red.
-        self.cluster_tree.tag_configure("hi", foreground="#2e9e5b")
-        self.cluster_tree.tag_configure("lo", foreground="#c0392b")
-        self.cluster_tree.tag_configure("diag", font=("Segoe UI Semibold", 9))
+        # A canvas, not a Treeview. A Treeview tag colours a whole ROW, and a
+        # similarity matrix needs a colour PER CELL - so the widget could
+        # never have shown the structure the old comment promised, and the
+        # "hi"/"lo" tags configured for it were never even applied. It also
+        # clipped: a fixed 24px row height and a fixed 300px complaint column
+        # cut every sentence off mid-word on a high-DPI screen.
+        wrap = tk.Frame(pad, bg=CARD)
+        wrap.pack(fill="x")
+        self.cluster_canvas = tk.Canvas(wrap, bg=CARD, highlightthickness=0,
+                                        height=620)
+        hbar = ttk.Scrollbar(wrap, orient="horizontal",
+                             command=self.cluster_canvas.xview)
+        self.cluster_canvas.configure(xscrollcommand=hbar.set)
+        self.cluster_canvas.pack(side="top", fill="x")
+        hbar.pack(side="top", fill="x")
+
+        # Legend, and under it the complaints in full - the text the old grid
+        # truncated now gets a whole line each.
+        self.cluster_legend = tk.Frame(pad, bg=CARD)
+        self.cluster_legend.pack(fill="x", pady=(8, 4))
 
         self.cluster_summary = body(pad, "", fg=MUTED, size=9, wraplength=1000)
         self.cluster_summary.pack(fill="x", pady=(8, 0))
@@ -2573,9 +2579,54 @@ class TriageGUI(tk.Tk):
         self.cluster_status.set("starting...")
         self.after(400, poll)
 
+    def _cluster_cell_colour(self, v):
+        """Similarity -> a background colour, low red through high green.
+
+        A 10x10 matrix is 100 numbers. Read as text it is a wall; read as
+        colour the structure - which complaints group, which one sits apart -
+        is visible before any number is.
+
+        Bands rather than a continuous gradient, because the eye cannot
+        reliably rank a hundred shades but can rank five. The boundaries are
+        the ones this project already uses: 0.85 is the pair threshold in
+        cluster_analyzer, and 0.50 is the yardstick named in the panel above.
+        """
+        if v >= 0.95:
+            return "#1e7a45", "white"      # near-identical
+        if v >= 0.85:
+            return "#57ab6f", "white"      # a matching pair
+        if v >= 0.65:
+            return "#bcdcc4", "#12171B"    # related
+        if v >= 0.50:
+            return "#f0e6c8", "#12171B"    # weak
+        return "#f2d3ce", "#7a2f28"        # unrelated
+
     def _render_cluster(self, res):
-        for row in self.cluster_tree.get_children():
-            self.cluster_tree.delete(row)
+        """Draw the similarity matrix as a heatmap, not a table.
+
+        This was a ttk.Treeview, and it had two problems that were not
+        cosmetic.
+
+        First, it clipped. The global Treeview rowheight is a fixed 24px and
+        the complaint column a fixed 300px, so on a high-DPI display the rows
+        overlapped and every complaint was cut off mid-sentence.
+
+        Second, and worse, the "hi" and "lo" colour tags configured for it
+        could never have worked: a Treeview tag colours an entire ROW, and a
+        similarity matrix needs a colour PER CELL. They were also never
+        applied - only the "diag" tag was ever set - so the comment promising
+        that "structure is visible without reading 100 numbers" described
+        something the widget cannot do.
+
+        A canvas can. Each cell is drawn and coloured individually, the
+        diagonal is marked, and the full complaint text is listed underneath
+        where it has room to be read.
+        """
+        c = self.cluster_canvas
+        c.delete("all")
+        for w in self.cluster_legend.winfo_children():
+            w.destroy()
+
         if res is None or res.get("matrix") is None:
             self.cluster_status.set("no matrix produced")
             self.cluster_summary.configure(
@@ -2583,58 +2634,74 @@ class TriageGUI(tk.Tk):
             return
 
         S = res["matrix"]
-        # Hold on to the vectors so "Try it" can compare a new complaint
-        # against this cluster without re-translating all ten.
+        n = len(S)
+        sents = res["sentences"]
+
+        # Keep the vectors so the "Try it" panel can compare against them.
         self._cluster_vectors = res.get("vectors")
         self._cluster_labels = [
             f"S{k + 1}  {(x['translated'] or x['raw'])}"
-            for k, x in enumerate(res["sentences"])]
-        for k, sent in enumerate(res["sentences"]):
-            label = f"S{k + 1}  {(sent['translated'] or sent['raw'])[:34]}"
-            vals, tag = [], ""
-            for j in range(len(S)):
-                v = S[k][j]
-                vals.append(f"{v:.2f}")
-                if k == j:
-                    tag = "diag"
-            self.cluster_tree.insert("", "end", text=label, values=tuple(vals),
-                                     tags=(tag,))
+            for k, x in enumerate(sents)]
 
-        n_ok = sum(1 for s in res["sentences"] if s["translated_ok"])
-        self.cluster_status.set(
-            f"{len(res['sentences'])} embedded, {n_ok} translated")
+        CELL, HDR = 56, 34
+        w = HDR + CELL * n + 2
+        h = HDR + CELL * n + 2
+        c.configure(width=w, height=h, scrollregion=(0, 0, w, h))
 
-        parts = [
-            f"mean intra-cluster similarity {res['mean_similarity']:.4f}   "
-            f"(min {res['min_similarity']:.4f}, max {res['max_similarity']:.4f})",
-            f"vectors: {len(res['sentences'])} x 384, all L2-normalised "
-            f"(diagonal reads 1.00: {res['diagonal_ok']})",
-            f"pairs at or above {res['threshold']:.2f}: {len(res['top_pairs'])}",
-        ]
-        for pr in res["top_pairs"][:3]:
-            parts.append(f"    {pr['similarity']:.3f}   S{pr['i'] + 1} <-> "
-                         f"S{pr['j'] + 1}")
-        if res.get("outlier"):
-            o = res["outlier"]
-            parts.append(f"outlier: S{o['index'] + 1} at mean "
-                         f"{o['mean_similarity']:.3f} - {o['text'][:56]}")
-            parts.append(f"    {o['note']}")
-        parts.append(
-            "Mean similarity alone does not grade an encoder: a model that "
-            "maps every medical sentence to nearly the same vector scores "
-            "well here and is useless. Compare against a second cluster and "
-            "read the GAP.")
-        if res.get("errors"):
-            parts.append("errors: " + "; ".join(res["errors"][:2]))
-        self.cluster_summary.configure(text="\n".join(parts))
+        # column and row headers
+        for i in range(n):
+            x = HDR + i * CELL + CELL / 2
+            c.create_text(x, HDR / 2, text=f"S{i + 1}",
+                          font=("Segoe UI Semibold", 9), fill=MUTED)
+            c.create_text(HDR / 2, HDR + i * CELL + CELL / 2, text=f"S{i + 1}",
+                          font=("Segoe UI Semibold", 9), fill=MUTED)
 
-    # The embedding demo lived here: four methods that encoded a typed
-    # complaint against evaluation_clusters.json and ranked the pool. Its UI
-    # section was removed with the other panels that scored bundles the
-    # operator can no longer reach, but the worker survived - including a
-    # self.demo_btn reference to a button that no longer exists, so any call
-    # would have raised AttributeError. Removed rather than left as dead
-    # weight reading the non-serving bundle.
+        for r in range(n):
+            for col in range(n):
+                v = float(S[r][col])
+                bg, fg = self._cluster_cell_colour(v)
+                x0 = HDR + col * CELL
+                y0 = HDR + r * CELL
+                # The diagonal is every complaint against itself. It must
+                # read 1.00 - if it does not, the vectors are not unit
+                # length and every other number on this grid is suspect.
+                # Outlined rather than coloured differently, so it stays
+                # legible without competing with the data.
+                c.create_rectangle(x0, y0, x0 + CELL, y0 + CELL,
+                                   fill=bg,
+                                   outline="#12171B" if r == col else "#ffffff",
+                                   width=2 if r == col else 1)
+                c.create_text(x0 + CELL / 2, y0 + CELL / 2, text=f"{v:.2f}",
+                              font=("Consolas", 9, "bold" if r == col else "normal"),
+                              fill=fg)
+
+        # legend, in the same bands as the cells
+        tk.Label(self.cluster_legend, text="similarity:", bg=CARD, fg=MUTED,
+                 font=("Segoe UI", 8)).pack(side="left", padx=(0, 6))
+        for label, probe in [("< 0.50 unrelated", 0.2), ("0.50-0.65 weak", 0.55),
+                             ("0.65-0.85 related", 0.7),
+                             ("0.85+ matching pair", 0.9),
+                             ("0.95+ near-identical", 0.97)]:
+            bg, fg = self._cluster_cell_colour(probe)
+            tk.Label(self.cluster_legend, text=f" {label} ", bg=bg, fg=fg,
+                     font=("Segoe UI", 8)).pack(side="left", padx=2)
+
+        # the complaints themselves, in full, where there is room to read
+        for k, x in enumerate(sents):
+            row = tk.Frame(self.cluster_legend.master, bg=CARD)
+            row.pack(fill="x")
+            tk.Label(row, text=f"S{k + 1}", bg=CARD, fg=ACCENT,
+                     font=("Consolas", 9, "bold"), width=4,
+                     anchor="w").pack(side="left")
+            tk.Label(row, text=(x["translated"] or x["raw"]), bg=CARD, fg=INK,
+                     font=("Segoe UI", 9), anchor="w",
+                     justify="left").pack(side="left")
+            if x["translated"] and x["raw"] != x["translated"]:
+                tk.Label(row, text=f"   ({x['raw']})", bg=CARD, fg=MUTED,
+                         font=("Segoe UI", 8), anchor="w").pack(side="left")
+
+        n_ok = sum(1 for s in sents if s["translated_ok"])
+        self.cluster_status.set(f"{n} embedded, {n_ok} translated")
 
 
 def main():
