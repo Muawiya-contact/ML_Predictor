@@ -1,0 +1,45 @@
+{
+  // VS Code tasks for this project.
+  //
+  // Press Ctrl+Shift+B (Cmd+Shift+B on Mac) to run the default task - it
+  // starts Ollama if it is down, checks the environment, and opens the app.
+  // No typing, no remembering which script does what.
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Run the triage app",
+      "type": "shell",
+      // run_local.sh on Linux/Mac, run_local.bat on Windows. VS Code picks
+      // per-platform, so one task works for everyone who opens this folder.
+      "command": "./run_local.sh",
+      "windows": { "command": ".\\run_local.bat" },
+      "group": { "kind": "build", "isDefault": true },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        // The script prints an OK/FAIL line per check before launching, and
+        // those lines are the whole point of it - clearing the terminal
+        // first means they are not buried under the previous run.
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check the environment only",
+      "type": "shell",
+      "command": "${workspaceFolder}/.venv/bin/python run_inference.py --check",
+      "windows": { "command": "${workspaceFolder}\\.venv\\Scripts\\python run_inference.py --check" },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run both test batteries",
+      "type": "shell",
+      // Both need a live Ollama. There is no CI, so this is how they get run.
+      "command": "${workspaceFolder}/.venv/bin/python tests/audit_pipeline.py && ${workspaceFolder}/.venv/bin/python tests/audit_gui.py",
+      "windows": { "command": "${workspaceFolder}\\.venv\\Scripts\\python tests/audit_pipeline.py; ${workspaceFolder}\\.venv\\Scripts\\python tests/audit_gui.py" },
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "problemMatcher": []
+    }
+  ]
+}
