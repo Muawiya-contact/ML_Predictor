@@ -758,10 +758,26 @@ class TriageGUI(tk.Tk):
         # scope from what was actually deployed rather than a hardcoded string.
         self.manifest = (self.artifacts or {}).get("manifest", {})
         n_stops = len(self.stopword_report["stopwords"]) if self.stopword_report else 0
+        # NAME THE BUNDLE THAT SCORES, not the one discovered at startup.
+        # self.model_dir is triage_model_embedding/ - the 10,000-row Roman
+        # Urdu bundle - and since the mode toggle was removed that is NOT
+        # what scores a patient. The status bar still announced it, so the
+        # line along the bottom of every screen named a different model from
+        # the Results tab directly above it, and from the banner beside it.
+        # An operator reconciling the two had no way to tell which was
+        # right.
+        #
+        # The row count comes from the SERVING manifest for the same reason:
+        # quoting 10,000 rows beside a model trained on 2,252 overstates the
+        # evidence behind every number on screen.
+        serving = getattr(self, "model_info_en", None) or self.model_info
+        man = self.active_manifest() or {}
+        rows = (man.get("dataset") or {}).get("rows")
+        rows_txt = f"{rows:,} rows" if isinstance(rows, int) else "unknown rows"
         self.status.set(
-            f"Ready.  Deployed: {self.model_info['method']}  "
-            f"({self.model_info['basis']}) from {self.model_dir}/  |  "
-            f"{n_stops} learned stop words  |  everything runs offline."
+            f"Ready.  Serving: {ENGLISH_MODEL_DIR}/  ({rows_txt}, "
+            f"{serving['method']})  |  {n_stops} learned stop words  |  "
+            f"translation and scoring both run locally."
             + (f"  |  {note}" if note else ""))
         self._fill_dropdowns()
         self._populate_stopwords()

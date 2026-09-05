@@ -14,6 +14,33 @@ import tkinter as tk
 
 import triage_gui
 
+# ---------------------------------------------------------------------
+# Modal dialogs must not block this suite.
+#
+# The app shows messagebox dialogs on a refusal - correctly; an operator
+# needs to be told why no triage level was produced. But a modal waits for
+# a click, and in a headless run nobody clicks: driving _do_predict() with
+# a junk complaint hung this battery for nearly two hours before it was
+# noticed.
+#
+# Record the calls instead of showing them, so the tests can ALSO assert
+# that the right dialog appeared - which is stronger than the previous
+# behaviour of never exercising them at all.
+# ---------------------------------------------------------------------
+DIALOGS = []
+
+
+def _capture(kind):
+    def _fn(title=None, message=None, **kw):
+        DIALOGS.append((kind, title, message))
+        return "ok"
+    return _fn
+
+
+for _name in ("showinfo", "showwarning", "showerror"):
+    setattr(triage_gui.messagebox, _name, _capture(_name))
+triage_gui.messagebox.askyesno = lambda *a, **k: False
+
 RESULTS = []
 
 
@@ -90,8 +117,12 @@ try:
     status = app.status.get()
     refused = "Refused" in status and "No prediction" in status
     named = "not a complaint" in status.lower() or "no symptom" in status.lower()
+    # The dialog is now observable, so assert the operator was actually told
+    # - a status-bar line alone is easy to miss.
+    dialog = next((d for d in DIALOGS if d[1] == "Not a complaint"), None)
     rec("tab1  junk complaint refused, and the reason is named",
-        refused and named, f"status={status[:88]!r}")
+        refused and named and dialog is not None,
+        f"status={status[:70]!r}; dialog={'shown' if dialog else 'MISSING'}")
 except Exception as e:
     rec("tab1  junk complaint refused, and the reason is named", False,
         f"{type(e).__name__}: {e}")
