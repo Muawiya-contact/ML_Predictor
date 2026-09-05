@@ -9,8 +9,63 @@
 
 ---
 
+## Run it  -  copy and paste
+
+Open a terminal **inside the `ML_Predictor` folder** and paste one of these.
+Nothing else needs setting up first; the launcher checks everything and
+starts Ollama itself if it is not already running.
+
+**Start the app**
+
+```bash
+./run_local.sh
+```
+
+Windows: `run_local.bat` (double-click it, or run it from PowerShell).
+
+**Run the tests**
+
+```bash
+.venv/bin/python tests/audit_pipeline.py
+```
+
+```bash
+.venv/bin/python tests/audit_gui.py
+```
+
+Windows: replace `.venv/bin/python` with `.venv\Scripts\python`.
+
+**In VS Code**, with the `ML_Predictor` folder open as the workspace root:
+
+| | |
+|---|---|
+| `Ctrl+Shift+B` | start the app |
+| `Ctrl+Shift+P` -> `Run Task` -> *Run both test batteries* | run the tests |
+
+The tasks are defined in `.vscode/tasks.json`. They only work when
+`ML_Predictor` itself is the folder you opened - opening `Desktop` and
+expanding down to it is not the same thing, and VS Code will not find them.
+
+### What to expect
+
+- **The first prediction takes about 11 seconds.** That is the translation
+  running on your own machine. It is not a hang.
+- **A 100-row batch takes roughly 18 minutes**, for the same reason - one
+  local translation per row. The progress bar shows the count and an
+  estimate.
+- **Ollama must be running for the tests.** `./run_local.sh` starts it;
+  the test commands do not. If they fail with "Ollama is not reachable",
+  either run `ollama serve` in a second terminal or launch the app once
+  first.
+- **Close the app with the window's X, not `Ctrl+C`.** Ctrl+C interrupts
+  the event loop and prints a `KeyboardInterrupt` traceback. Nothing is
+  broken when that happens, but it looks alarming and it is avoidable.
+
+---
+
 ## Table of Contents
 
+- [Run it - copy and paste](#run-it----copy-and-paste)
 - [What's New in This Version](#whats-new-in-this-version)
 - [How To Run (Detailed, Beginner-Friendly)](#how-to-run-detailed-beginner-friendly)
 - [Overview](#overview)
