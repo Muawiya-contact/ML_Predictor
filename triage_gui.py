@@ -1236,6 +1236,8 @@ class TriageGUI(tk.Tk):
         # the width they happened to have when the prediction was made.
         self._last_proba = None
         self._cluster_vectors = None
+        self._last_batch_results = None
+        self._last_cluster_result = None
         self._cluster_labels = []
         self.proba_canvas.bind(
             "<Configure>",
@@ -1864,6 +1866,13 @@ class TriageGUI(tk.Tk):
                                     style="Accent.TButton", state="disabled",
                                     command=self._do_batch)
         self.batch_btn.pack(side="left")
+        # Disabled until a run produces something. An export button that is
+        # always live invites a click that can only ever say "nothing to
+        # export".
+        self.batch_export_btn = ttk.Button(row, text="Export CSV...",
+                                           state="disabled",
+                                           command=self._export_batch_csv)
+        self.batch_export_btn.pack(side="left", padx=(8, 0))
 
         self._deployed_banner(
             pad, "Every row is triaged by:").pack(fill="x", pady=(10, 0))
@@ -1913,6 +1922,117 @@ class TriageGUI(tk.Tk):
                        ("All files", "*.*")])
         if path:
             self.batch_path.set(path)
+
+    # ---------------------------------------------------------------- export
+    def _ask_save_csv(self, suggested):
+        """Save dialog for a CSV. Returns a path, or None if cancelled."""
+        return filedialog.asksaveasfilename(
+            title="Export CSV",
+            defaultextension=".csv",
+            initialfile=suggested,
+            filetypes=[("CSV file", "*.csv"), ("All files", "*.*")])
+
+    def _export_batch_csv(self):
+        """Write the batch results exactly as shown, plus what is behind them.
+
+        The batch worker already drops a _predictions.csv beside the input
+        file, which is fine when the operator owns that folder and knows to
+        look. It is no use when the sheet came from a shared drive, a
+        read-only mount, or Downloads - and it never asks where to put it.
+        This does.
+
+        Everything on screen is exported, INCLUDING the rows that were not
+        scored. A file that quietly contained only the successes would read
+        as a complete triage of the input, which is the same failure the
+        summary line was changed to avoid.
+        """
+        results = getattr(self, "_last_batch_results", None)
+        if results is None or not len(results):
+            messagebox.showinfo(
+                "Nothing to export",
+                "Run a batch first. There are no results to write yet.")
+            return
+        src = os.path.splitext(os.path.basename(
+            getattr(self, "_batch_target", "batch")))[0]
+        path = self._ask_save_csv(f"{src}_triage.csv")
+        if not path:
+            return
+        try:
+            # utf-8-sig, not utf-8: Excel on Windows reads a plain UTF-8 CSV
+            # as cp1252 and turns every non-ASCII character into mojibake.
+            # The BOM is what tells it otherwise, and these files are full of
+            # Roman Urdu.
+            results.to_csv(path, index=False, encoding="utf-8-sig")
+        except Exception as e:
+            messagebox.showerror("Export failed",
+                                 f"Could not write {path}:\n\n{e}")
+            return
+        scored = int(results["Predicted_Triage_Level"].notna().sum()) \
+            if "Predicted_Triage_Level" in results else len(results)
+        messagebox.showinfo(
+            "Exported",
+            f"{len(results)} rows written to\n{path}\n\n"
+            f"{scored} scored, {len(results) - scored} not scored (blocked by "
+            f"the anatomical gate, or not translated). Unscored rows are "
+            f"included with their reason in Gate_Status and Gate_Detail - "
+            f"leaving them out would make the file read as a complete triage "
+            f"of the input.")
+        self.status.set(f"Exported {len(results)} rows to "
+                        f"{os.path.basename(path)}")
+
+    def _export_cluster_csv(self):
+        """Write the similarity matrix and the complaints behind it.
+
+        The heatmap is for reading; this is for keeping. Both halves go in:
+        the S-labels alone would be unusable a week later, so each row
+        carries its Roman Urdu original and its English translation beside
+        its similarities.
+        """
+        res = getattr(self, "_last_cluster_result", None)
+        if not res or res.get("matrix") is None:
+            messagebox.showinfo(
+                "Nothing to export",
+                "Run the cluster analysis first. There is no matrix yet.")
+            return
+        path = self._ask_save_csv("cluster_similarity.csv")
+        if not path:
+            return
+        S = res["matrix"]
+        sents = res["sentences"]
+        n = len(sents)
+        try:
+            import csv
+            with open(path, "w", newline="", encoding="utf-8-sig") as f:
+                w = csv.writer(f)
+                # A header block, because a bare matrix in a spreadsheet a
+                # month from now is unreadable without knowing what produced
+                # it or what the numbers mean.
+                w.writerow(["# Cluster similarity matrix"])
+                w.writerow(["# encoder", res.get("encoder", "")])
+                w.writerow(["# vectors", f"{n} x 384, L2-normalised"])
+                w.writerow(["# cosine", "dot product of unit vectors; "
+                                        "1.00 = identical, 0.00 = unrelated"])
+                w.writerow(["# diagonal_ok", res.get("diagonal_ok", "")])
+                w.writerow(["# mean_similarity", res.get("mean_similarity", "")])
+                w.writerow([])
+                w.writerow(["id", "roman_urdu", "english", "translated_ok"]
+                           + [f"S{j + 1}" for j in range(n)])
+                for i, sent in enumerate(sents):
+                    w.writerow(
+                        [f"S{i + 1}", sent["raw"], sent["translated"] or "",
+                         sent["translated_ok"]]
+                        + [f"{float(S[i][j]):.4f}" for j in range(n)])
+        except Exception as e:
+            messagebox.showerror("Export failed",
+                                 f"Could not write {path}:\n\n{e}")
+            return
+        messagebox.showinfo(
+            "Exported",
+            f"{n} complaints and their {n}x{n} similarity matrix written to\n"
+            f"{path}\n\nEach row carries its Roman Urdu original and its "
+            f"English translation, so the numbers can still be read months "
+            f"from now without this window open.")
+        self.cluster_status.set(f"exported to {os.path.basename(path)}")
 
     def _do_batch(self):
         path = self.batch_path.get().strip()
@@ -2085,7 +2205,12 @@ class TriageGUI(tk.Tk):
 
     def _done_batch_worker(self, payload):
         results, out_base = payload
+        # Held for the export button. Without this the only copy is the file
+        # the worker dropped beside the input, which the operator may not be
+        # able to write to or find.
+        self._last_batch_results = results
         self._end_batch_ui()
+        self.batch_export_btn.config(state="normal")
         for row in self.batch_tree.get_children():
             self.batch_tree.delete(row)
 
@@ -2522,6 +2647,10 @@ class TriageGUI(tk.Tk):
             row, text="Load sample cluster (10 complaints)  and analyse",
             style="Accent.TButton", command=self._do_cluster_analysis)
         self.cluster_btn.pack(side="left")
+        self.cluster_export_btn = ttk.Button(row, text="Export CSV...",
+                                             state="disabled",
+                                             command=self._export_cluster_csv)
+        self.cluster_export_btn.pack(side="left", padx=(8, 0))
         self.cluster_status = tk.StringVar(value="not run yet")
         tk.Label(row, textvariable=self.cluster_status, bg=CARD, fg=MUTED,
                  font=("Segoe UI", 9)).pack(side="left", padx=(12, 0))
@@ -2674,6 +2803,8 @@ class TriageGUI(tk.Tk):
         sents = res["sentences"]
 
         # Keep the vectors so the "Try it" panel can compare against them.
+        self._last_cluster_result = res
+        self.cluster_export_btn.config(state="normal")
         self._cluster_vectors = res.get("vectors")
         self._cluster_labels = [
             f"S{k + 1}  {(x['translated'] or x['raw'])}"

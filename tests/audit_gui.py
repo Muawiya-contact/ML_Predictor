@@ -59,6 +59,13 @@ deadline = time.time() + 180
 while app.artifacts is None and time.time() < deadline:
     app.update()
     time.sleep(0.1)
+# Captured BEFORE any test runs anything. The export buttons must start
+# disabled, but tab4's batch and the cluster render legitimately enable them
+# later in this suite, so the check has to happen here rather than at the
+# point of the export test.
+EXPORT_INITIAL = (str(app.batch_export_btn.cget("state")),
+                  str(app.cluster_export_btn.cget("state")))
+
 rec("load  background model load", app.artifacts is not None,
     f"artifacts loaded, model_dir={app.model_dir}")
 
@@ -284,6 +291,62 @@ try:
 except Exception as e:
     rec("tab4  header-only sheet returns 0 rows, not an Ollama error", False,
         f"{type(e).__name__}: {e}")
+
+# ---- CSV export on both tabs -------------------------------------------
+try:
+    import numpy as np, pandas as pd, tempfile
+    problems = []
+    if EXPORT_INITIAL != ("disabled", "disabled"):
+        problems.append(f"export buttons started {EXPORT_INITIAL}, "
+                        f"expected both disabled")
+
+    tmp = tempfile.mkdtemp()
+    # cluster: matrix plus the complaints behind it
+    n = 6
+    V = np.random.RandomState(3).randn(n, 384).astype("float32")
+    V /= np.linalg.norm(V, axis=1, keepdims=True)
+    S = V @ V.T
+    np.fill_diagonal(S, 1.0)
+    sents = [{"raw": f"seena mein dard {i}", "translated": f"Chest pain {i}",
+              "translated_ok": True} for i in range(n)]
+    app._render_cluster({"matrix": S, "vectors": V, "errors": [],
+                         "sentences": sents, "encoder": "e", 
+                         "diagonal_ok": True, "mean_similarity": 0.4})
+    cp = os.path.join(tmp, "c.csv")
+    app._ask_save_csv = lambda s: cp
+    app._export_cluster_csv()
+    head = open(cp, encoding="utf-8-sig").read().splitlines()
+    if not any(l.startswith("id,roman_urdu,english") for l in head):
+        problems.append("cluster csv missing the complaint columns")
+    if sum(1 for l in head if l.startswith("S")) != n:
+        problems.append("cluster csv row count wrong")
+
+    # batch: unscored rows must survive the export
+    df = pd.DataFrame({"Complaint_Text": ["Chest pain", "n/a"],
+                       "Predicted_Triage_Level": [1, None],
+                       "Gate_Status": ["PASS", "NOT TRANSLATED"]})
+    app._last_batch_results = df
+    app._batch_target = "x.xlsx"
+    bp = os.path.join(tmp, "b.csv")
+    app._ask_save_csv = lambda s: bp
+    app._export_batch_csv()
+    out = pd.read_csv(bp)
+    if len(out) != 2:
+        problems.append(f"batch csv has {len(out)} rows, expected 2")
+    if out["Predicted_Triage_Level"].isna().sum() != 1:
+        problems.append("the unscored row was dropped from the export - the "
+                        "file would read as a complete triage")
+    # tab4 ran a real batch earlier in this suite, which is what enables it
+    if str(app.batch_export_btn.cget("state")) != "normal":
+        problems.append("batch export still disabled after tab4's real run")
+    rec("export  CSV from Batch File and Cluster Analysis", not problems,
+        "; ".join(problems) or
+        f"started {EXPORT_INITIAL}; cluster csv carries roman_urdu + english "
+        "beside the matrix; unscored batch rows exported with their reason")
+except Exception as e:
+    rec("export  CSV from Batch File and Cluster Analysis", False,
+        f"{type(e).__name__}: {e}")
+    traceback.print_exc()
 
 # ---- no dangling references to the removed sections ---------------------
 try:
