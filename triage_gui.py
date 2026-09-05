@@ -2579,6 +2579,26 @@ class TriageGUI(tk.Tk):
         self.cluster_status.set("starting...")
         self.after(400, poll)
 
+    def _fit_text(self, text, max_px, font_spec):
+        """Trim text with an ellipsis so it fits max_px in the given font.
+
+        Uses the real font metrics rather than a character count. Character
+        counts are wrong for proportional fonts - "Chest pain and sweating
+        variant number 1" and "IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII" are the
+        same length and nowhere near the same width - and wrong again at a
+        different DPI, which is how the label column came to be overrun by
+        every row at once.
+        """
+        import tkinter.font as tkfont
+        f = tkfont.Font(font=font_spec)
+        if f.measure(text) <= max_px:
+            return text
+        ell = f.measure("...")
+        out = text
+        while out and f.measure(out) + ell > max_px:
+            out = out[:-1]
+        return out.rstrip() + "..."
+
     def _cluster_cell_colour(self, v):
         """Similarity -> a background colour, low red through high green.
 
@@ -2643,36 +2663,56 @@ class TriageGUI(tk.Tk):
             f"S{k + 1}  {(x['translated'] or x['raw'])}"
             for k, x in enumerate(sents)]
 
-        CELL, HDR = 56, 34
-        w = HDR + CELL * n + 2
-        h = HDR + CELL * n + 2
+        # LAYOUT: complaints down the left, their row of the matrix beside
+        # them. The row label IS the complaint, so reading across one line
+        # answers "how does THIS complaint relate to the others" without
+        # cross-referencing an S-number against a list further down. The
+        # separate list underneath is gone; it existed only because the old
+        # grid had nowhere to put the text.
+        LABEL_W, CELL, HDR = 430, 52, 30
+        ROW = 30                      # shorter than CELL: text, not a square
+        w = LABEL_W + CELL * n + 4
+        h = HDR + ROW * n + 4
         c.configure(width=w, height=h, scrollregion=(0, 0, w, h))
 
-        # column and row headers
+        # column headers, over the grid only
         for i in range(n):
-            x = HDR + i * CELL + CELL / 2
-            c.create_text(x, HDR / 2, text=f"S{i + 1}",
-                          font=("Segoe UI Semibold", 9), fill=MUTED)
-            c.create_text(HDR / 2, HDR + i * CELL + CELL / 2, text=f"S{i + 1}",
-                          font=("Segoe UI Semibold", 9), fill=MUTED)
+            c.create_text(LABEL_W + i * CELL + CELL / 2, HDR / 2,
+                          text=f"S{i + 1}", font=("Segoe UI Semibold", 9),
+                          fill=MUTED)
 
         for r in range(n):
+            y0 = HDR + r * ROW
+            src = sents[r]
+            english = (src["translated"] or src["raw"])
+            # Truncated by MEASURED WIDTH, not character count. A 46-char
+            # cut was tried first and still overran the label column by a
+            # wide margin - proportional text has no fixed characters-per-
+            # pixel, and the overrun lands underneath the first heatmap
+            # column where it is unreadable against the cell colours.
+            shown = self._fit_text(english, LABEL_W - 46, ("Segoe UI", 9))
+            c.create_text(6, y0 + ROW / 2, anchor="w",
+                          text=f"S{r + 1}", font=("Consolas", 9, "bold"),
+                          fill=ACCENT)
+            c.create_text(40, y0 + ROW / 2, anchor="w", text=shown,
+                          font=("Segoe UI", 9), fill=INK)
+
             for col in range(n):
                 v = float(S[r][col])
                 bg, fg = self._cluster_cell_colour(v)
-                x0 = HDR + col * CELL
-                y0 = HDR + r * CELL
+                x0 = LABEL_W + col * CELL
                 # The diagonal is every complaint against itself. It must
                 # read 1.00 - if it does not, the vectors are not unit
-                # length and every other number on this grid is suspect.
-                # Outlined rather than coloured differently, so it stays
-                # legible without competing with the data.
-                c.create_rectangle(x0, y0, x0 + CELL, y0 + CELL,
+                # length and every other number here is suspect. Outlined
+                # rather than recoloured, so it stays legible without
+                # competing with the data.
+                c.create_rectangle(x0, y0, x0 + CELL, y0 + ROW,
                                    fill=bg,
                                    outline="#12171B" if r == col else "#ffffff",
                                    width=2 if r == col else 1)
-                c.create_text(x0 + CELL / 2, y0 + CELL / 2, text=f"{v:.2f}",
-                              font=("Consolas", 9, "bold" if r == col else "normal"),
+                c.create_text(x0 + CELL / 2, y0 + ROW / 2, text=f"{v:.2f}",
+                              font=("Consolas", 8,
+                                    "bold" if r == col else "normal"),
                               fill=fg)
 
         # legend, in the same bands as the cells
@@ -2686,19 +2726,23 @@ class TriageGUI(tk.Tk):
             tk.Label(self.cluster_legend, text=f" {label} ", bg=bg, fg=fg,
                      font=("Segoe UI", 8)).pack(side="left", padx=2)
 
-        # the complaints themselves, in full, where there is room to read
+        # The Roman Urdu each row came from. Kept, but compactly and below -
+        # an operator checking a suspicious score needs to see the original,
+        # and it is the one thing the row label has no room for.
+        origins = tk.Frame(self.cluster_legend.master, bg=CARD)
+        origins.pack(fill="x", pady=(6, 0))
+        tk.Label(origins, text="translated from:", bg=CARD, fg=MUTED,
+                 font=("Segoe UI", 8), anchor="w").pack(fill="x")
         for k, x in enumerate(sents):
-            row = tk.Frame(self.cluster_legend.master, bg=CARD)
+            if not x["translated"] or x["raw"] == x["translated"]:
+                continue
+            row = tk.Frame(origins, bg=CARD)
             row.pack(fill="x")
             tk.Label(row, text=f"S{k + 1}", bg=CARD, fg=ACCENT,
-                     font=("Consolas", 9, "bold"), width=4,
+                     font=("Consolas", 8, "bold"), width=4,
                      anchor="w").pack(side="left")
-            tk.Label(row, text=(x["translated"] or x["raw"]), bg=CARD, fg=INK,
-                     font=("Segoe UI", 9), anchor="w",
-                     justify="left").pack(side="left")
-            if x["translated"] and x["raw"] != x["translated"]:
-                tk.Label(row, text=f"   ({x['raw']})", bg=CARD, fg=MUTED,
-                         font=("Segoe UI", 8), anchor="w").pack(side="left")
+            tk.Label(row, text=x["raw"], bg=CARD, fg=MUTED,
+                     font=("Segoe UI", 8), anchor="w").pack(side="left")
 
         n_ok = sum(1 for s in sents if s["translated_ok"])
         self.cluster_status.set(f"{n} embedded, {n_ok} translated")
