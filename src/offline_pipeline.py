@@ -144,10 +144,45 @@ Always map Roman Urdu body parts strictly to their precise English anatomical eq
   dard" is KNEE PAIN, never breathing difficulty.
 - Jaw: "jabra", "jabray"
 
+### 2b. WHO THE PATIENT IS
+Complaints are often reported by a relative. Translate the relationship
+exactly - do not substitute a different one, and do not drop it, because it
+carries the patient's approximate age:
+- "ammi", "walida", "maa" = MOTHER (not grandmother)
+- "abbu", "walid", "baap" = FATHER
+- "bacha", "bachi", "beta", "beti" = CHILD
+- "dadi", "nani" = GRANDMOTHER;  "dada", "nana" = GRANDFATHER
+- "bhai" = BROTHER;  "behen" = SISTER
+- "budha", "budhe aadmi", "buzurg" = an ELDERLY person
+Added because "meri ammi ko seena mein dard hai" (MY MOTHER has chest pain)
+was translated as "My grandmother has chest pain".
+
+### 2c. OBSTETRIC AND GENERAL EMERGENCY TERMS
+These are outside the deployed model's cardiac scope, but they must still be
+translated FAITHFULLY - a wrong translation is worse than an out-of-scope
+one, because it is scored as though it were something else:
+- "hamal", "hamila", "pait se" = PREGNANCY / pregnant. "hamal mein khoon aa
+  raha hai" is BLEEDING IN PREGNANCY - an obstetric emergency. It was
+  translated as "Bleeding in the groin", which is a different complaint
+  entirely.
+- "jalna", "jal gaya", "jhulas" = a BURN (from heat, fire or hot liquid)
+- "kaatna", "kaat liya", "kutte ne kaata" = a BITE
+- "girna", "gir gaya" = a FALL
+- "zeher", "zehreela" = POISON / poisoning
+- "daura", "mirgi" = a SEIZURE / fit
+
 ### 3. SYMPTOM & SENSORY MAPPING RULES
 - Pain / Ache: "dard", "darad", "daard", "dukhna", "peera" -> Translate as "pain" or "ache"
 - Anxiety / Restlessness: "ghabrahat", "bechaini" -> Translate strictly as "anxiety", "restlessness", or "uneasiness" (NEVER translate as chest tightness or heart pressure)
 - Shortness of Breath / Breathing difficulty: "saans phoolna", "saans ka masla" -> Translate as "shortness of breath" or "difficulty breathing"
+- "PHOOLNA" DEPENDS ON WHAT IS SWELLING, and is never choking:
+    "saans phoolna", "saans phool rahi hai"  -> shortness of breath
+    "pait phool raha hai", "pait phoola hua" -> the abdomen is BLOATED or
+        distended. Not choking, not breathlessness.
+    "sujan", "phoola hua" on a limb          -> swelling
+  Added because "pait phool raha hai" started returning "Stomach is
+  choking" - a phrase that means nothing in either language - once the
+  choking rule below was introduced.
 - Choking / suffocation: "dam ghutna", "dum ghutna", "saans ghutna", "ghutan"
   -> Translate as "choking" or "a suffocating sensation". This is BREATHING.
   It is not the knee, even though it shares the word "ghutna": the knee
@@ -159,7 +194,16 @@ Always map Roman Urdu body parts strictly to their precise English anatomical eq
   NAUSEA - feeling sick in the stomach. It is not a heart complaint and not
   an emotional statement. Translate it as "nausea" or "feeling nauseous".
   Reading it literally as a failing heart is alarming and wrong.
-- Dizziness / Fainting: "chakkar", "sar ghoomna", "behosh" -> Translate as "dizziness", "vertigo", or "fainting"
+- Dizziness: "chakkar", "sar ghoomna", "sar chakrana" -> Translate as
+  "dizziness" or "vertigo"
+- UNCONSCIOUS, and never soften it: "behosh", "behoshi", "behosh ho gaya",
+  "hosh nahi" -> Translate as "unconscious" or "loss of consciousness".
+  This is NOT dizziness and NOT fainting-as-a-feeling. Rendering it as
+  "feeling dizzy" downgrades an emergency into a minor symptom - "bacha
+  behosh ho gaya hai" (the child has become unconscious) came back as
+  "Child is feeling dizzy". A patient who is unconscious and a patient who
+  feels dizzy are triaged differently, and nothing downstream can tell them
+  apart once the word is gone.
 - Sweating: "pasina", "paseena", "paseenay" -> Translate as "sweating" or "diaphoresis"
 - Trauma / Injury / Bleeding: "chot", "zakhmi", "khoon", "bleeding" -> Translate as "injury", "trauma", or "bleeding" (NEVER reduce trauma to simple pain)
 - Burning sensation: "jalan", "jalne" -> Translate as "burning" or "heartburn" (if specific to stomach/throat)
@@ -168,6 +212,12 @@ Always map Roman Urdu body parts strictly to their precise English anatomical eq
 Recognize and correctly interpret non-standard Roman Urdu spelling variants before translating:
 - Pronouns & Modifiers:
   * "mujy", "mujhe", "mjhe", "mujhay" -> "I" / "me"
+  * "ammi", "ami", "walida", "maa" -> "mother"   (NEVER "grandmother")
+  * "abbu", "abu", "walid" -> "father"
+  * "dadi", "nani" -> "grandmother"
+  * "dada", "nana" -> "grandfather"
+  * "bacha", "bachi" -> "child"
+  * "bhai" -> "brother";  "behen" -> "sister"
   * "buhat", "bohat", "bht", "bahut", "boht" -> "very", "severe", or "a lot of"
   * "shadeed", "tez" -> "severe" or "intense"
   * "thoda", "thora", "halka", "halki" -> "mild" or "slight"
@@ -432,6 +482,12 @@ def translate_roman_urdu(text: str, model: str = OLLAMA_MODEL,
     # came back as "Arm is swollen", "bhaag" ("run") as "Fainting". Cheaper
     # and more reliable to decline here than to catch the invention after -
     # and the anatomical gate can only catch the subset that names an organ.
+    if is_non_latin_script(text):
+        print(f"[guardrail] {text[:40]!r} is not in the Latin alphabet. This "
+              f"pipeline reads Roman Urdu and English only - the dictionary, "
+              f"vocabulary and anatomical checks are all Latin-alphabet.",
+              flush=True)
+        return None
     if not has_medical_signal(text):
         print(f"[guardrail] {text!r} contains no clinical word - refusing to "
               f"translate rather than inviting an invented symptom",
@@ -657,7 +713,7 @@ ANATOMICAL_ASSERTIONS = {
     r"\b(sar|sir|sear|khopri|head|skull|scalp)\b":
         ["head", "skull", "cranial", "scalp"],
     r"\b(gala|galao|gardan|throat|neck)\b":
-        ["throat", "neck", "pharyn"],
+        ["throat", "neck", "pharynx", "pharyngeal"],
     r"\b(peeth|pith|kamar|back|lumbar|spine)\b":
         ["back", "lumbar", "spine"],
     r"\b(kandha|kandhay|kandhe|shoulder)\b":
@@ -728,6 +784,28 @@ def load_clinical_vocabulary(path: str = None) -> set:
     return words
 
 
+#: Devanagari, Arabic and Urdu letter ranges. Used only to tell a script we
+#: cannot process from text that genuinely has no clinical content - two
+#: very different problems that produced one misleading message.
+_NON_LATIN = re.compile(r"[\u0600-\u06FF\u0750-\u077F\u0900-\u097F]")
+
+
+def is_non_latin_script(text: str) -> bool:
+    """True when the text is written in a script this pipeline cannot read.
+
+    Everything downstream - the dictionary, the vocabulary, the anatomical
+    assertions - is Latin-alphabet. A complaint typed in Urdu script matches
+    nothing anywhere, so has_medical_signal() returned False and the
+    operator was told their text "contains no symptom and no body part".
+    For "سینے میں درد ہے" - chest pain - that is simply untrue, and it sends
+    them off to rewrite a perfectly good complaint.
+
+    The refusal stands; only the explanation changes. Supporting Urdu script
+    would mean a transliteration stage this project does not have.
+    """
+    return bool(_NON_LATIN.search(str(text or "")))
+
+
 def has_medical_signal(text: str) -> bool:
     """True when the text contains at least one clinically meaningful word.
 
@@ -766,8 +844,43 @@ for _variant, _gloss in ROMAN_URDU_DICTIONARY.items():
     _CANONICAL[_variant] = next(k for k, v in ROMAN_URDU_DICTIONARY.items()
                                 if v == _gloss)
 
-_ANATOMICAL_COMPILED = [(re.compile(p, re.I), kws)
-                        for p, kws in ANATOMICAL_ASSERTIONS.items()]
+#: English words that are ALSO everyday non-anatomical words. They stay in
+#: the forward check - if the complaint says "kamar", the translation really
+#: must say "back" - but they are excluded from the reverse invented-anatomy
+#: scan, where "the pain comes back at night" would otherwise be reported as
+#: an invented body part. A word this ambiguous cannot carry the weight of
+#: "the model made this up".
+AMBIGUOUS_ENGLISH = {"back"}
+
+
+def _kw_pattern(kw: str):
+    r"""Compile one anatomy keyword as a WHOLE WORD.
+
+    The checks below used `kw in english_lower`, a plain substring test, and
+    it was wrong in both directions:
+
+      false BLOCK  "bukhar hai" -> "Feeling warm and feverish" was refused,
+                   because 'arm' is inside 'warm'. Also 'alarm', 'harm',
+                   'handled' ('hand'), 'background' ('back').
+      false PASS   source "baazu mein dard" (arm) -> "Patient feels warm"
+                   SATISFIED the arm requirement, again on 'warm'. A wholly
+                   wrong translation was accepted and scored - the exact
+                   failure this gate exists to prevent.
+
+    Word boundaries on both sides fix both. Stems that are meant to match a
+    longer word ("pharyn" for pharynx/pharyngeal) were replaced with the
+    full forms in the table rather than left as prefixes, so every entry
+    here can be a complete word.
+    """
+    return re.compile(rf"\b{re.escape(kw)}\b", re.I)
+
+
+_ANATOMICAL_COMPILED = [
+    (re.compile(pat, re.I),
+     kws,
+     [_kw_pattern(k) for k in kws],
+     [_kw_pattern(k) for k in kws if k not in AMBIGUOUS_ENGLISH])
+    for pat, kws in ANATOMICAL_ASSERTIONS.items()]
 _WORD_SPLIT = re.compile(r"(\W+)")
 
 
@@ -842,14 +955,21 @@ def verify_anatomical_integrity(roman_urdu: str, translated_english: str) -> tup
     """
     if not translated_english:
         return False, ["no translation to check"]
-    english_lower = translated_english.lower()
+    # Collapse runs of whitespace before matching. The knee pattern uses
+    # fixed-width lookbehinds ("dam ", "dum ", "saans "), so "dam  ghutna"
+    # with a double space - or a tab, or a line break - slipped past them
+    # and the phrase was read as the JOINT. A choking complaint then had to
+    # contain the word "knee" to pass, and its correct translation failed
+    # the gate. Whitespace should never change a clinical reading.
+    roman_urdu = re.sub(r"\s+", " ", str(roman_urdu or "")).strip()
+    english_lower = re.sub(r"\s+", " ", translated_english).strip().lower()
     failures = []
     source_named_any = False
-    for pattern, keywords in _ANATOMICAL_COMPILED:
+    for pattern, keywords, kw_res, invent_res in _ANATOMICAL_COMPILED:
         found = pattern.search(roman_urdu or "")
         if found:
             source_named_any = True
-            if not any(kw in english_lower for kw in keywords):
+            if not any(r.search(english_lower) for r in kw_res):
                 failures.append(f"{found.group(0)!r} -> expected one of "
                                 f"{keywords}, got none")
 
@@ -867,8 +987,12 @@ def verify_anatomical_integrity(roman_urdu: str, translated_english: str) -> tup
     # English not in the source" would reject good translations, which is
     # how a safety check ends up switched off.
     if not source_named_any:
-        for pattern, keywords in _ANATOMICAL_COMPILED:
-            hit = next((kw for kw in keywords if kw in english_lower), None)
+        for pattern, keywords, kw_res, invent_res in _ANATOMICAL_COMPILED:
+            # invent_res, not kw_res: the reverse scan drops the words that
+            # are ambiguous in ordinary English. See AMBIGUOUS_ENGLISH.
+            m = next((r.search(english_lower) for r in invent_res
+                      if r.search(english_lower)), None)
+            hit = m.group(0) if m else None
             if hit:
                 failures.append(
                     f"the complaint names no body part, but the translation "

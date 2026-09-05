@@ -855,8 +855,25 @@ class TriageGUI(tk.Tk):
                           f"No prediction was made.")
 
         if not out:
-            from src.offline_pipeline import has_medical_signal
-            if not has_medical_signal(text):
+            from src.offline_pipeline import (has_medical_signal,
+                                              is_non_latin_script,
+                                              fuzzy_normalize_roman_urdu)
+            if is_non_latin_script(text):
+                return None, (
+                    "This complaint is not in the Latin alphabet.\n\n"
+                    "The app reads Roman Urdu (Urdu written in English "
+                    "letters) and English. Urdu script is not supported - "
+                    "the dictionary, the vocabulary and the safety checks "
+                    "are all Latin-alphabet.\n\n"
+                    "What to do: type the complaint in Roman Urdu, for "
+                    "example \"seena mein dard\" rather than \u0633\u06cc\u0646\u06d2 \u0645\u06cc\u06ba \u062f\u0631\u062f.")
+            # NORMALIZED, not raw. translate_roman_urdu() repairs spelling
+            # before it checks, so checking the raw string here disagreed
+            # with the pipeline: with Ollama down, "bukar" (a misspelling of
+            # bukhar/fever) was reported as "not a complaint" when the real
+            # problem was the dead translator, sending the operator off to
+            # rewrite text that was fine.
+            if not has_medical_signal(fuzzy_normalize_roman_urdu(text, verbose=False)):
                 return None, (
                     "This does not look like a complaint.\n\n"
                     f"{text!r} contains no symptom and no body part, so there "
@@ -1339,6 +1356,11 @@ class TriageGUI(tk.Tk):
                     title = "Refused: the translation changed the body part"
                     short = ("Refused - the English named a body part the "
                              "complaint did not. No prediction made.")
+                    messagebox.showwarning(title, err)
+                elif err.startswith("This complaint is not in the Latin"):
+                    title = "Script not supported"
+                    short = ("Refused - Urdu script is not supported. Type "
+                             "the complaint in Roman Urdu.")
                     messagebox.showwarning(title, err)
                 elif err.startswith("This does not look like a complaint"):
                     title = "Not a complaint"

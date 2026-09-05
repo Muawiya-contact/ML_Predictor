@@ -319,7 +319,73 @@ def t_gate_edge_cases():
 
 
 check("2.7  gate blocks INVENTED anatomy", t_gate_blocks_invented_anatomy)
+def t_word_boundary_matching():
+    """Anatomy keywords must match WHOLE WORDS, both directions.
+
+    The checks used a plain substring test. It blocked correct translations
+    ('warm' contains 'arm') and, worse, ACCEPTED wrong ones: source "baazu"
+    (arm) was satisfied by "Patient feels warm".
+    """
+    cases = [
+        # false blocks that must now pass
+        ("bukhar hai", "Feeling warm and feverish", True),
+        ("chakkar aa raha hai", "Patient feels alarm and dizziness", True),
+        ("khansi hai", "Cough, handled at home", True),
+        ("bukhar hai", "The pain comes back at night", True),
+        # the false PASS that must now block
+        ("baazu mein dard", "Patient feels warm", False),
+        # and the ordinary cases must be unaffected
+        ("baazu mein dard", "Arm pain", True),
+        ("kamar mein dard", "Lower back pain", True),
+        ("gala kharab", "Sore throat", True),
+        ("band ho rha ha", "Arm is swollen", False),
+    ]
+    bad = []
+    for ru, en, want in cases:
+        ok, _ = verify_anatomical_integrity(ru, en)
+        if ok != want:
+            bad.append(f"{ru!r}->{en!r} got {ok} want {want}")
+    return not bad, "; ".join(bad) or (
+        "'warm' no longer reads as 'arm' in either direction")
+
+
+def t_whitespace_and_script():
+    """Whitespace must not change a reading; non-Latin gets its own reason."""
+    from src.offline_pipeline import is_non_latin_script
+    bad = []
+    # "dam  ghutna" (double space) must not be read as the knee
+    for spacing in ("dam ghutna hai", "dam  ghutna hai", "dam\tghutna hai"):
+        ok, _ = verify_anatomical_integrity(spacing, "Choking sensation")
+        if not ok:
+            bad.append(f"{spacing!r} wrongly required 'knee'")
+    if not is_non_latin_script("\u0633\u06cc\u0646\u06d2 \u0645\u06cc\u06ba \u062f\u0631\u062f \u06c1\u06d2"):
+        bad.append("Urdu script not detected")
+    if is_non_latin_script("seena mein dard"):
+        bad.append("Roman Urdu wrongly flagged as non-Latin")
+    return not bad, "; ".join(bad) or (
+        "spacing does not change the knee/choking reading; Urdu script "
+        "detected separately from 'no clinical content'")
+
+
+def t_non_cardiac_vocabulary():
+    """Complaints outside the cardiac corpus must still be recognised."""
+    from src.offline_pipeline import has_medical_signal
+    bad = [c for c in ("jal gaya hun garam pani se", "kutte ne kaat liya hai",
+                       "hamal mein khoon aa raha hai", "gir gaya hun",
+                       "mirgi ka daura para")
+           if not has_medical_signal(c)]
+    still = [c for c in ("band ho rha ha", "bhaag", "theek hai")
+             if has_medical_signal(c)]
+    return not (bad or still), (
+        f"refused: {bad}; wrongly accepted: {still}" if (bad or still) else
+        "burns, bites, obstetric, falls and seizures recognised; fragments "
+        "still refused")
+
+
 check("2.9  gate edge cases: English input, knee vs choking", t_gate_edge_cases)
+check("2.10 anatomy keywords match whole words", t_word_boundary_matching)
+check("2.11 whitespace tolerance and script detection", t_whitespace_and_script)
+check("1.3  non-cardiac complaints recognised", t_non_cardiac_vocabulary)
 def t_medical_signal():
     """Fragments must be refused; real complaints must not be."""
     from src.offline_pipeline import (has_medical_signal,
