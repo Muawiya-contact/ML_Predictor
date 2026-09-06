@@ -1897,14 +1897,19 @@ class TriageGUI(tk.Tk):
         bpad = tk.Frame(bottom, bg=CARD)
         bpad.pack(fill="both", expand=True, padx=18, pady=14)
 
-        cols = ("level", "label", "conf", "gate", "notes")
+        # "complaint" now shows the ORIGINAL text, with the translation in
+        # its own column beside it. Showing only the translation - which is
+        # what Complaint_Text holds after the worker overwrites it - meant
+        # the operator could not find their own row by reading it.
+        cols = ("english", "level", "label", "conf", "gate", "notes")
         self.batch_tree = ttk.Treeview(bpad, columns=cols, show="tree headings")
-        self.batch_tree.heading("#0", text="complaint")
-        self.batch_tree.column("#0", width=380)
-        for col, label, w in [("level", "level", 60), ("label", "label", 120),
-                              ("conf", "confidence", 90),
-                              ("gate", "anatomical gate", 120),
-                              ("notes", "notes", 240)]:
+        self.batch_tree.heading("#0", text="complaint (as typed)")
+        self.batch_tree.column("#0", width=260)
+        for col, label, w in [("english", "translation", 240),
+                              ("level", "level", 55), ("label", "label", 110),
+                              ("conf", "confidence", 85),
+                              ("gate", "anatomical gate", 115),
+                              ("notes", "notes", 200)]:
             self.batch_tree.heading(col, text=label)
             self.batch_tree.column(col, width=w,
                                    anchor="w" if col == "notes" else "center")
@@ -2086,6 +2091,73 @@ class TriageGUI(tk.Tk):
             return
         self.after(300, self._poll_batch_progress)
 
+    def _stage_columns(self, originals, translations):
+        """Every intermediate stage, per row, for the results table and CSV.
+
+        The batch used to export the translation under the column name
+        "Complaint_Text" and nothing else about how it got there. Two
+        problems with that. The operator's ORIGINAL text was overwritten and
+        gone - what the nurse actually typed did not survive into the file
+        at all - and a reviewer asking "why did this row score that way" had
+        no stage to look at between the raw input and the level.
+
+        Every column below is a real stage, computed with the SAME function
+        the serving path uses. Nothing here re-implements the pipeline; a
+        column that drifted from what actually ran would be worse than no
+        column.
+        """
+        from src.offline_pipeline import fuzzy_normalize_roman_urdu
+        from stopwords import remove_stopwords
+
+        art = self.active_artifacts()
+        man = art.get("manifest", {}) or {}
+        own_stops = art.get("stopwords") or set()
+        skip_norm = bool(man.get("skip_normalization"))
+
+        normalized, encoded, dropped = [], [], []
+        for raw, en in zip(originals, translations):
+            # Stage 1: dictionary + fuzzy repair, on the Roman Urdu.
+            norm = fuzzy_normalize_roman_urdu(str(raw or ""), verbose=False)
+            normalized.append(norm)
+
+            # Stage 4: what the ENCODER actually receives. This bundle is a
+            # skip_normalization bundle, so the Roman Urdu dictionary stages
+            # do not run on the English - only stop-word removal does. That
+            # asymmetry is exactly the thing people get wrong about this
+            # pipeline, so the column shows the result rather than asking
+            # anyone to reason about it.
+            source = en if en else raw
+            if skip_norm:
+                clean = remove_stopwords(str(source or ""), own_stops)
+            else:
+                from triage_pipeline import preprocess_corpus_for_embedding
+                clean = preprocess_corpus_for_embedding([str(source or "")],
+                                                        own_stops)[0]
+            encoded.append(clean)
+
+            # Which words the stop-word list removed. Reported explicitly
+            # because "the encoder saw less than I typed" is a reasonable
+            # thing to want to check, and diffing two columns by eye is not.
+            before = str(source or "").lower().split()
+            after = set(clean.lower().split())
+            dropped.append(" ".join(w for w in before
+                                    if w.strip(".,;:!?") not in after))
+
+        enc = man.get("embedding_model", "")
+        return {
+            "Input_Raw": list(originals),
+            "Input_Normalized": normalized,
+            "Translation_English": list(translations),
+            "Text_Encoded": encoded,
+            "Stopwords_Removed": dropped,
+            # Constant for the run, but carried per row on purpose: a CSV
+            # that does not say which model and which encoder produced it
+            # cannot be checked against anything six months from now.
+            "Encoder": [enc] * len(originals),
+            "Embedding_Dim": [man.get("embedding_dim", "")] * len(originals),
+            "Model_Bundle": [ENGLISH_MODEL_DIR] * len(originals),
+        }
+
     def _batch_worker(self):
         # read_table() is shared with predict_batch.py and tries a chain of
         # encodings. The old inline pd.read_csv(path) assumed UTF-8 and threw
@@ -2155,6 +2227,12 @@ class TriageGUI(tk.Tk):
             self._batch_failures = failures
 
             df = df.copy()
+            # Captured BEFORE the column is overwritten. Replacing
+            # Complaint_Text with the translation is correct - the English
+            # is what gets scored - but it destroyed the only record of what
+            # the operator typed, and that is the column a reviewer always
+            # wants back first.
+            originals = list(df["Complaint_Text"].fillna("").astype(str))
             df["Complaint_Text"] = texts
         pr = getattr(self, "_batch_progress", {})
         pr["done"] = pr.get("total", 0)
@@ -2163,8 +2241,19 @@ class TriageGUI(tk.Tk):
         pr["finished"] = True
 
         if gate_status:
-            results["Translation"] = [None if i in set(failed_rows) else v
-                                      for i, v in enumerate(texts)]
+            # Every stage the complaint passed through, in pipeline order, so
+            # the CSV reads left to right the way the text actually travelled:
+            # raw -> dictionary -> translation -> what the encoder saw.
+            for name, col in self._stage_columns(originals, texts).items():
+                results[name] = col
+            # Translation_English must agree with Translation: a row that was
+            # never translated has no English, and printing the untranslated
+            # Roman Urdu under an "English" heading is how the old
+            # Translation column came to be wrong.
+            blanked = [None if i in set(failed_rows) else v
+                       for i, v in enumerate(texts)]
+            results["Translation"] = blanked
+            results["Translation_English"] = blanked
             results["Gate_Status"] = gate_status
             results["Gate_Detail"] = gate_detail
             # A blocked row must not carry a triage level. Scoring it anyway
@@ -2225,17 +2314,21 @@ class TriageGUI(tk.Tk):
             if raw_level is None or _pd.isna(raw_level):
                 skipped += 1
                 self.batch_tree.insert(
-                    "", "end", text=str(r.get("Complaint_Text", ""))[:110],
-                    values=("-", "not scored", "-",
+                    "", "end",
+                    text=str(r.get("Input_Raw") or r.get("Complaint_Text", ""))[:90],
+                    values=(str(r.get("Translation_English") or "-")[:80],
+                            "-", "not scored", "-",
                             r.get("Gate_Status", "NOT SCORED"),
                             str(r.get("Gate_Detail") or r.get("Notes", ""))[:90]))
                 continue
             level = int(raw_level)
             counts[level] = counts.get(level, 0) + 1
             self.batch_tree.insert(
-                "", "end", text=str(r.get("Complaint_Text", ""))[:110],
+                "", "end",
+                text=str(r.get("Input_Raw") or r.get("Complaint_Text", ""))[:90],
                 tags=(f"L{level - 1}",),
-                values=(level, r["Predicted_Label"], r["Confidence"],
+                values=(str(r.get("Translation_English") or "")[:80],
+                        level, r["Predicted_Label"], r["Confidence"],
                         r.get("Gate_Status", "PASS"),
                         str(r.get("Notes", ""))[:90]))
 
