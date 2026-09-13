@@ -4,8 +4,9 @@ import os
 import sys
 import traceback
 
-sys.path.insert(0, "/home/muawiya/Desktop/ML_Predictor")
-os.chdir("/home/muawiya/Desktop/ML_Predictor")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+os.chdir(PROJECT_ROOT)
 
 RESULTS = []
 

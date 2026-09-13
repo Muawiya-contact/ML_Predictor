@@ -181,8 +181,7 @@ confirm the headline embedding claim without taking it on trust, and a later
 change to the dictionary or stop-word list cannot leave this write-up
 silently stale.
 
-Deployed bundle: `triage_model_embedding/` (snapshot
-`triage_model_embedding_v9_fuzzyfix/`). The manifest records dataset
+Submitted Roman Urdu bundle: `triage_model_embedding/`. The manifest records dataset
 filename, row count, sha256, class count, synthetic-data provenance, cardiac
 scope and training date; the GUI banner surfaces the synthetic-data warning
 on every screen.

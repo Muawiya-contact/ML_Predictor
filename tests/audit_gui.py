@@ -7,8 +7,9 @@ import os
 import sys
 import traceback
 
-sys.path.insert(0, "/home/muawiya/Desktop/ML_Predictor")
-os.chdir("/home/muawiya/Desktop/ML_Predictor")
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
+os.chdir(PROJECT_ROOT)
 
 import tkinter as tk
 
@@ -66,7 +67,11 @@ while app.artifacts is None and time.time() < deadline:
 EXPORT_INITIAL = (str(app.batch_export_btn.cget("state")),
                   str(app.cluster_export_btn.cget("state")))
 
-rec("load  background model load", app.artifacts is not None,
+rec("load  background model load uses the serving bundle",
+    app.artifacts is not None
+    and app.model_dir == app.active_model_dir()
+    and app.active_artifacts() is app.artifacts
+    and app.artifacts.get("encoder") is not None,
     f"artifacts loaded, model_dir={app.model_dir}")
 
 # ---- tab inventory -------------------------------------------------------
@@ -370,7 +375,9 @@ except Exception as e:
 try:
     gone = [n for n in ("_results_section_methods", "_results_section_embedding",
                         "_score_section_model", "_score_section_pairs",
-                        "_score_section_demo") if hasattr(app, n)]
+                        "_score_section_demo", "in_english_mode",
+                        "artifacts_en", "model_info_en", "model_dir_en",
+                        "_explain_kept_fillers") if hasattr(app, n)]
     rec("clean  removed sections leave no attributes", not gone,
         "none present" if not gone else f"still defined: {gone}")
 except Exception as e:

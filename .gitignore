@@ -1,11 +1,3 @@
-# NOTE: this file previously held two different .gitignore versions
-# concatenated together, with contradictory rules. The old top half ignored
-# `triage_model/`, `*.pkl` and `embedding_*.csv` - which are exactly the
-# artifacts this repo SHIPS. The effect was that anyone who retrained saw a
-# clean `git status` and their updated model was silently never committed,
-# while the bottom half's own comment said those CSVs "ARE tracked".
-# Deduplicated, and the rules that shadowed tracked deliverables removed.
-
 # Python virtual env
 .venv/
 venv/
@@ -42,24 +34,23 @@ eval_raw.txt
 .DS_Store
 Thumbs.db
 
-# Local version snapshots of the model bundle, kept for rollback while
-# iterating. The LIVE bundle in triage_model_embedding/ is the tracked
-# deliverable; these dated copies are local-only and would bloat the repo.
+# Scratch model snapshots and backup reports. Serving and research bundles
+# are tracked; local rollback copies are not project deliverables.
 triage_model_embedding_v*/
+triage_model_embedding*.BACKUP*/
+triage_model_embedding_PRE_FUZZYFIX/
 learned_stopwords_v*.json
+learned_stopwords_*BACKUP*.json
 
-# Secrets. The pre-existing "env/" rule matches a DIRECTORY only - a real
-# .env file was not covered and would have been committed.
+# Local environment settings and secrets.
 .env
 .env.*
 !.env.example
 *.key
 
-# Source archive of the supplied baseline. The extracted professor_baseline/
-# is what the code reads; keeping both would duplicate 3.2 MB.
+# The supplied source archive is local only. Research code reads the
+# extracted professor_baseline/ files, which are tracked.
 How Effective is Embeddings Generator-*.zip
-# Local rollback copy from the fuzzy-matching fix, superseded by the merged bundle.
-triage_model_embedding_PRE_FUZZYFIX/
 tests/fixtures/*_predictions.csv
 tests/fixtures/*_predictions.xlsx
 tests/fixtures/batch_empty*.csv

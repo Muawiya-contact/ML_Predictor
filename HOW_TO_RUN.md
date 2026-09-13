@@ -82,16 +82,10 @@ pip install -r requirements.txt
 Wait for it to finish. You'll see some text scroll by — that's normal. You only
 need to do this once per computer.
 
-Then install the AI part as well:
-
-```
-pip install -r requirements-embedding.txt
-```
-
-This one is a bigger download (a few hundred megabytes) and needs internet. It
-is what the program uses to understand the complaint text. **The program still
-works without it** — it quietly falls back to the older dictionary method and
-tells you so on screen — but the results will not match the ones in the paper.
+The same requirements file includes sentence-transformers, which the GUI
+needs to encode complaints. Use the CPU build of PyTorch described in that
+file. The GUI requires its English-trained model bundle and local translator
+to produce a prediction.
 
 The very first time you run the program after this, it downloads the language
 model (a few hundred megabytes more, once). Every run after that is fully
@@ -118,7 +112,7 @@ Loading model and encoders from 'triage_model_embedding/'...
 ```
 
 If instead it says `triage_model/` and *dictionary + Bag-of-Words*, the AI part
-did not install — go back and run `pip install -r requirements-embedding.txt`.
+did not install — go back and run `pip install -r requirements.txt`.
 
 Then you will see a summary like this:
 
@@ -207,7 +201,7 @@ You skipped the install step. Run `pip install -r requirements.txt` (Step 3).
 
 **It says it is using `triage_model/` and "dictionary + Bag-of-Words"**
 That is the fallback. The AI part is not installed — run
-`pip install -r requirements-embedding.txt` (Step 3) and try again. Nothing is
+`pip install -r requirements.txt` (Step 3) and try again. Nothing is
 broken; the program is telling you which method it used rather than pretending.
 
 **`UnicodeDecodeError: 'utf-8' codec can't decode byte ...` when opening a CSV**
@@ -242,7 +236,6 @@ address bar).
 | I want to...                              | Type this                                          |
 |-------------------------------------------|----------------------------------------------------|
 | Install everything (once)                 | `pip install -r requirements.txt`                  |
-| Install the AI part (once)                | `pip install -r requirements-embedding.txt`        |
 | **Open the app with buttons and tabs**    | `python triage_gui.py`                             |
 | Triage the 100 example patients           | `python predict_batch.py sample_100_patients.xlsx` |
 | Triage my own file                        | `python predict_batch.py my_patients.xlsx`         |

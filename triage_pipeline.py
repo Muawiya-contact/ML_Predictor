@@ -1094,7 +1094,7 @@ def resolve_model_dir(model_dir=None, allow_fallback=True):
                 f"({info['embedding_model']}), which is not installed - "
                 "falling back to the dictionary model in "
                 f"'{DICTIONARY_MODEL_DIR}/'. Install it with: "
-                "pip install -r requirements-embedding.txt")
+                "pip install -r requirements.txt")
     return candidate, ''
 
 
@@ -1195,7 +1195,7 @@ def get_text_encoder(art):
             f"The deployed model in '{art['model_dir']}' uses sentence "
             f"embeddings ({name}), so 'sentence-transformers' is required.\n"
             "Install it once (needs internet), then re-run:\n"
-            "    pip install -r requirements-embedding.txt"
+            "    pip install -r requirements.txt"
         ) from e
     art['encoder'] = load_sentence_transformer(name)
     return art['encoder']
@@ -1429,9 +1429,8 @@ def encode_categoricals(art, codes):
     codes versus 98.3% / 0.5% one-hot. Under-triage is the number that
     matters clinically, and it drops four-fold.
 
-    Bundles record their choice in the manifest, so the model bundles saved
-    before this change (triage_model_embedding_v1_1204rows/ and friends)
-    keep loading and predicting exactly as they always did.
+    Bundles record their choice in the manifest, so ordinal-encoded research
+    bundles keep loading and predicting with their original representation.
     """
     codes = np.asarray(codes, dtype=int)
     if art['manifest'].get('categorical_encoding') != 'onehot':

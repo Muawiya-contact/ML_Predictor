@@ -58,7 +58,7 @@
     "The submitted Roman Urdu model used all 10,000 rows, so accuracy is NOT comparable.",
     "Under-triage 13.08% exceeds the <10% safety band the submitted model holds at 9.25%.",
     "Text bypasses the Roman Urdu dictionary (--skip-normalization).",
-    "learned_stopwords.json in the project root now holds ENGLISH stop words; the Roman Urdu list is saved as learned_stopwords_ROMAN_URDU_BACKUP.json and must be restored before running the submitted model."
+    "Inference uses each model bundle's own learned_stopwords.json: the submitted Roman Urdu model uses triage_model_embedding/learned_stopwords.json, and this English model uses triage_model_embedding_english/learned_stopwords.json. No backup restoration or project-root stopword swap is required."
   ],
   "skip_normalization": true,
   "text_column": "English_Translation"

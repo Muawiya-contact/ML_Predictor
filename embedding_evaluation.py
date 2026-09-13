@@ -54,7 +54,7 @@ Three measurements, per ARCHITECTURE.md Task 4:
 -----------------------------------------------------------------------
 HOW TO RUN
 -----------------------------------------------------------------------
-    pip install -r requirements-embedding.txt      # once, needs internet
+    pip install -r requirements.txt      # once, needs internet
     python embedding_evaluation.py
 
     python embedding_evaluation.py --raw            # skip preprocessing
@@ -158,7 +158,7 @@ def load_embedding_model(model_name):
     except ImportError:
         print("\n[x] 'sentence-transformers' is not installed.")
         print("    Install it once (needs internet), then re-run:")
-        print("        pip install -r requirements-embedding.txt\n")
+        print("        pip install -r requirements.txt\n")
         sys.exit(1)
 
     print(f"Loading embedding model: {model_name}")
