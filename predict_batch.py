@@ -57,7 +57,6 @@ from triage_pipeline import (
     resolve_model_dir,
     resolve_project_file,
     REQUIRED_INPUT_COLUMNS,
-    TRIAGE_LABELS,
 )
 
 # The template ships with the project, so the no-argument run must find it

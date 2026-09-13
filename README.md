@@ -159,7 +159,7 @@ Complaint text now goes `clean → fuzzy normalize → remove learned stop words
 sentence embedding → fuse with vitals → Logistic Regression`.
 
 ```bash
-pip install -r requirements-embedding.txt   # once, needs internet
+pip install -r requirements.txt   # once, needs internet
 python train_embedding_pipeline.py
 ```
 
@@ -411,28 +411,13 @@ Run them from PowerShell inside the project folder:
 .\run_predict.ps1
 ```
 
-`requirements.txt`:
+[`requirements.txt`](requirements.txt) is the single dependency list for
+prediction, training, and embedding evaluation. It includes the pinned
+scikit-learn and sentence-transformers versions used by this project.
+Install the CPU build of PyTorch as described in that file.
 
-```
-pandas>=1.5.0
-numpy>=1.23.0
-scikit-learn==1.6.1  # pinned: the saved model was built with this version
-scipy>=1.9.0         # stopwords.py imports scipy.stats directly
-rapidfuzz>=3.0.0
-joblib>=1.2.0
-matplotlib>=3.6.0
-openpyxl>=3.1.0      # needed for reading/writing Excel (.xlsx) files
-```
-
-`requirements-embedding.txt` (needed for the embedding pipeline, the embedding
-evaluation, and the app's **Embedding Demo**):
-
-```
-sentence-transformers>=3.0.0
-```
-
-The GUI itself needs no extra install — it uses `tkinter`, which ships with
-Python.
+The GUI uses `tkinter`; some Linux distributions require a separate system
+package. See [AGENTS.md](AGENTS.md) for platform-specific setup.
 
 ---
 
@@ -518,20 +503,15 @@ A black or blue window opens. It is already pointing at your project folder.
 
 ### Step 4 — Install what the program needs (one time)
 
-Type this and press Enter. It downloads the basic parts:
+Type this and press Enter. It installs the project dependencies, including
+the sentence encoder:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Then type this and press Enter. It downloads the AI embedding part:
-
-```bash
-pip install -r requirements-embedding.txt
-```
-
-Both are one-time downloads and need internet. **After this the program works
-offline** — you do not need internet again.
+The dependency downloads need internet. Once the local translator and encoder
+models are cached, prediction works offline.
 
 > The very first time you run an embedding command, it also downloads the AI
 > model (a few hundred MB). That is also one time only. Everything after that
@@ -988,10 +968,11 @@ Fixed — CSV reading now detects the encoding. If you still see this, you are o
 an old copy: the shared reader is `read_table()` in `triage_pipeline.py`, used by
 both `predict_batch.py` and the app's Batch File tab.
 
-**The app says it is using the dictionary model, not embeddings**
-`sentence-transformers` is missing, so it fell back on purpose. The status bar
-says so. Install it with `pip install -r requirements-embedding.txt`, or run
-`python train_embedding_pipeline.py` if `triage_model_embedding/` is absent.
+**The batch CLI says it is using the dictionary model, not embeddings**
+`predict_batch.py` can fall back to the dictionary bundle when
+`sentence-transformers` is missing. Install it with
+`pip install -r requirements.txt`. The GUI always uses the supplied
+English-trained bundle and reports an error if its dependencies are missing.
 
 **`ModuleNotFoundError: No module named 'tkinter'` (Linux)**
 Some distributions ship tkinter separately from Python. On Fedora/RHEL:
@@ -1007,25 +988,12 @@ That row had a missing number or an unknown category value that was auto-filled.
 The prediction is still produced; review the note if accuracy matters for that row.
 
 **`InconsistentVersionWarning` or `AttributeError: 'LogisticRegression' object has no attribute 'multi_class'`**
-The saved model in `triage_model/` was built with **scikit-learn 1.6.1** (pinned in
-`requirements.txt`). A different installed version can fail to load the pickle.
-Fix by matching the version: `pip install scikit-learn==1.6.1`. If you prefer a
-newer scikit-learn, just retrain once with it (`python train_embedding_pipeline.py`),
-which regenerates the model files against your installed version.
-
-Note that **1.6.1 has no wheel for Python 3.14** and needs a C compiler to build
-from source. On Python 3.13 or newer, install the current scikit-learn and
-retrain both bundles rather than fighting the pin:
-
-```bash
-pip install scikit-learn
-python train_embedding_pipeline.py     # regenerates triage_model_embedding/
-python train_embedding_pipeline.py     # regenerates triage_model_embedding/
-```
-
-A pickle written by a newer scikit-learn generally will **not** load on an older
-one, so if you hand this project to someone else, either ship the version you
-trained with or tell them to retrain.
+Install the versions in `requirements.txt`; scikit-learn is pinned because
+the saved classifiers are pickle files. If a warning remains, check which
+bundle was loaded and the version named in that warning. Restore its matching
+environment rather than ignoring the warning or overwriting the evaluated
+model. Using another scikit-learn version requires a deliberate retraining
+and evaluation experiment; it is not an installation repair.
 
 ---
 

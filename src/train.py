@@ -32,7 +32,6 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
 import joblib
-import numpy as np
 import pandas as pd
 
 from src.baseline import DEFAULT_DATA, DEFAULT_EMB, TARGETS

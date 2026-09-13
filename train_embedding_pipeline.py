@@ -69,7 +69,7 @@ layout is different would break all three.
 -----------------------------------------------------------------------
 HOW TO RUN
 -----------------------------------------------------------------------
-    pip install -r requirements-embedding.txt     # once, needs internet
+    pip install -r requirements.txt     # once, needs internet
     python train_embedding_pipeline.py
 
     python train_embedding_pipeline.py --model <other-sentence-transformer>
@@ -274,7 +274,7 @@ def load_embedding_model(model_name):
     except ImportError:
         print("\n[x] 'sentence-transformers' is not installed.")
         print("    Install it once (needs internet), then re-run:")
-        print("        pip install -r requirements-embedding.txt\n")
+        print("        pip install -r requirements.txt\n")
         sys.exit(1)
 
     print(f"\nLoading embedding model: {model_name}")
