@@ -22,7 +22,7 @@ needed. Each feature has three short parts:
 3. [Dictionary + fuzzy spelling matching](#3-dictionary--fuzzy-spelling-matching)
 4. [Automatic stop-word removal (Contribution 1)](#4-automatic-stop-word-removal-contribution-1)
 5. [Embeddings — letting AI read the sentence](#5-embeddings--letting-ai-read-the-sentence)
-6. [The hybrid model](#6-the-hybrid-model)
+6. [Embedding classifier](#6-embedding-classifier)
 7. [Embedding-evaluation study (Contribution 2)](#7-embedding-evaluation-study-contribution-2)
 8. [The desktop app (GUI)](#8-the-desktop-app-gui)
 9. [Two safety ideas used everywhere](#9-two-safety-ideas-used-everywhere)
@@ -94,7 +94,7 @@ three passes:
    single canonical form. `dard`, `dardh`, `durd`, and `drd` all become `dárd`.
 
 After this, five different spellings of "pain" have become one word that the
-model can actually count.
+translator can read consistently.
 
 **Why we added it.** Without it, the model treats `dard` and `drd` as two
 completely unrelated words, so it learns almost nothing from either. This step
@@ -184,58 +184,21 @@ script (اردو). *Roman* Urdu is under-represented, so this works less well he
 than it would in English. That is exactly what Feature 7 measures, rather than
 assuming.
 
-**See it:** the **Embedding Demo** on the **Model Score** tab turns your own
+**See it:** the **Pipeline Explorer** tab turns your own
 sentence into numbers in front of you.
 
 ---
 
-## 6. The hybrid model
+## 6. Embedding classifier
 
-**What it does.** Uses the dictionary **and** the embeddings together, instead
-of choosing one.
+The deployed English bundle uses configuration C: 384-dimensional MiniLM
+embeddings plus 26 structured features, with Logistic Regression. The training
+script compares raw (B) and preprocessed (C) text on the same split; the default
+deployment is C. The bundle's manifest and metrics describe the active model.
 
-**How it works.** The dictionary features and the 384 embedding numbers are
-joined into one long list, along with the vital signs (age, heart rate, blood
-pressure, temperature, oxygen, consciousness, ECG). That whole list goes into
-the classifier, which outputs the triage level.
-
-**Why we added it.** The two methods fail in different ways. The dictionary is
-reliable on the spellings it knows and useless on the ones it does not.
-Embeddings are the opposite — broad, but vaguer on Roman Urdu. Keeping both
-was meant to let the dictionary anchor the words the AI model misses.
-
-**Does it work?** Not on this dataset. Once the two feature blocks were
-rescaled so the classifier could actually see both (they were not, for a while —
-see below), the hybrid scored *worse* than either method on its own. It is kept
-because measuring it is the point, not because it won.
-
-**Which one is actually used?** **Method C, embeddings + preprocessing.** The
-program trains all four options on the same patients and the same split and
-reports a safety-first recommendation, but what ships is an explicit choice:
-the `--deploy` flag, default `C`. The app names the deployed method on the
-Triage, Batch, Results and Model Score tabs, and every command-line predictor
-prints it at startup. The live numbers are in `embedding_pipeline_results.csv`
-and on the **Model Score** tab — this document deliberately does not repeat
-them, so it can never go stale or disagree with the real files.
-
-**Why deployment is a separate decision.** The safety rule alone used to decide
-this, and it could not: when two methods tie it silently keeps the first, which
-is the dictionary baseline. Combined with the scaling fault below, that made the
-"embedding pipeline" ship a dictionary-only model — reporting itself as the
-embedding pipeline while recording `embedding_model: null` in its own metrics.
-Separating "what scores best" from "what ships" is what makes that failure
-impossible to repeat quietly.
-
-> **The scaling fault, recorded rather than hidden.** The dictionary features
-> are multiplied by domain attention weights; the embedding features are
-> L2-normalised across 384 dimensions. Joined into one list without rescaling,
-> the two blocks sit on very different scales, and a single penalised classifier
-> responds by ignoring the smaller one entirely — the hybrid reproduced the
-> dictionary-only result to the last decimal. Each block is now standardised
-> separately before being joined, and the training script prints both blocks'
-> scales on every run so the fault cannot creep back unnoticed.
-
----
+Both the GUI and batch CLI use `triage_model_embedding_english/`. Translation
+and anatomical checks precede scoring. Failure produces a reason and no score.
+See README.md for recorded results, experiment details and limitations.
 
 ## 7. Embedding-evaluation study (Contribution 2)
 
@@ -272,7 +235,7 @@ This turns "we used AI embeddings" into a measured claim with numbers behind it.
 It also honestly exposes where the model is weak on Roman Urdu, which points at
 the next step (translating to Urdu script, or fine-tuning on our own data).
 
-**See it:** the **Results** tab and the **Model Score** tab both read the live
+**See it:** the **Results** tab both read the live
 numbers from `embedding_evaluation_results.csv`.
 
 ---
@@ -299,10 +262,10 @@ numbers from `embedding_evaluation_results.csv`.
 > describing it.
 
 **Which model is live is stated, never implied.** A green banner on the Triage,
-Batch, Results and Model Score tabs names the deployed method, the text features
+Batch and Results tabs names the deployed method, the text features
 it uses and the directory it came from. Score cards are marked **LIVE** or
 **not deployed**, and each carries a coloured "Numbers produced by:" line, so a
-dictionary figure can never be read as an embedding figure.
+baseline result can never be read as a deployed classifier result.
 
 It is built with `tkinter`, which ships with Python on Windows and macOS, so it
 needs **no extra installation** and stays fully offline. Some Linux

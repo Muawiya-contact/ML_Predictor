@@ -83,7 +83,7 @@ import numpy as np
 from triage_pipeline import (
     CANONICAL_VOCAB,
     DIACRITIZATION_MAP,
-    MEDICAL_WEIGHTS,
+    PROTECTED_CLINICAL_TERMS,
     make_console_safe,   # re-exported so scripts can import it from here too
     project_path,
     resolve_project_file,
@@ -98,7 +98,7 @@ STOPWORDS_FILE = "learned_stopwords.json"
 # listed under "review_recommended" in the JSON so a clinician signs off.
 # TODO(Sir): confirm whether negation/intensity tokens should be exempted
 # outright. Doing so needs a negation-aware representation, not just a
-# word list, because the embedding step sees bag-of-tokens order anyway.
+# word list, because removing negation can change the clinical meaning.
 REVIEW_WATCHLIST = {
     # negation
     "nahi", "nai", "na", "bina", "bagair",
@@ -118,16 +118,13 @@ def _protected_terms():
     """Clinical tokens that must never be stripped from a complaint.
 
     Covers the fuzzy-match vocabulary, every diacritized canonical form
-    and its spelling variants, and any attention keyword the project
-    boosts (weight > 1.0). Suppressed filler keys such as "hai" (0.6)
-    are intentionally NOT protected - those are exactly the words this
-    learner is meant to find on its own.
+    and its spelling variants, plus the protected clinical vocabulary.
     """
     protected = set(CANONICAL_VOCAB)
     for canonical, variants in DIACRITIZATION_MAP.items():
         protected.add(canonical)
         protected.update(variants)
-    protected.update(k for k, w in MEDICAL_WEIGHTS.items() if w > 1.0)
+    protected.update(PROTECTED_CLINICAL_TERMS)
     return protected
 
 

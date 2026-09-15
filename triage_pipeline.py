@@ -7,7 +7,7 @@
 #
 #   * the diacritization dictionary  (variant -> canonical)
 #   * the canonical fuzzy-match vocabulary
-#   * the domain-guided attention weights
+#   * the protected clinical vocabulary
 #   * the text normalization pipeline
 #   * model / encoder loading + a vectorized predict function
 #
@@ -18,7 +18,7 @@
 #
 # NOTE: If you edit any dictionary below you MUST retrain
 #       (python train_embedding_pipeline.py) so the saved model,
-#       vectorizers and attention weights stay consistent.
+#       preprocessing stays consistent.
 # ============================================================
 
 import json
@@ -35,7 +35,7 @@ from rapidfuzz import process, fuzz
 #
 # Every asset this project ships - the two model bundles, the learned
 # stop-word list, the dataset, the results CSVs - used to be named by a
-# bare relative path ('triage_model', 'learned_stopwords.json', ...).
+# bare relative path ('triage_model_embedding_english', 'learned_stopwords.json', ...).
 # A bare relative path is resolved against the CURRENT WORKING
 # DIRECTORY, not against the code, so the whole project only worked
 # when it happened to be launched from its own folder. Run any script
@@ -43,7 +43,7 @@ from rapidfuzz import process, fuzz
 # desktop shortcut, a scheduled job, `cd ..` - and two things happened:
 #
 #   * load_artifacts() died with
-#     FileNotFoundError: 'triage_model/model.pkl', and
+#     FileNotFoundError: 'triage_model_embedding_english/model.pkl', and
 #   * load_stopwords() silently returned an EMPTY set, because it is
 #     written to degrade gracefully on a fresh clone. That one is the
 #     dangerous case: the model was TRAINED with stop-word removal, so
@@ -165,7 +165,7 @@ DIACRITIZATION_MAP = {
                  "girpara", "girpari", "unconscious", "unconcious", "unconsius",
                  # "collapse"/"blackout" deliberately NOT here: they can
                  # describe a mechanical fall rather than true loss of
-                 # consciousness, and this token feeds a 3.0 attention weight.
+                 # consciousness, and this token is protected from stop-word removal.
                  "faint", "fainted", "fainting", "syncope",
                  # "behoshi" is 506 rows of cardiac_multilingual_10000.csv and
                  # was the single largest normalization hole in the pipeline:
@@ -445,86 +445,24 @@ CANONICAL_VOCAB = [
 ]
 
 # ============================================================
-# DOMAIN-GUIDED LIGHTWEIGHT FEATURE ATTENTION WEIGHTS
-# Each BoW feature whose name CONTAINS one of these keys is
-# multiplied by the given clinical weight (critical terms are
-# boosted; grammatical filler is suppressed).
-#
-# MATCHING RULES (see build_attention_weights): the longest key
-# that matches a feature wins, and keys of 3 characters or fewer
-# ("g", "mi", "tha", "pet") only match a WHOLE token. Without
-# those two rules the short filler keys at the bottom of this
-# dict silently captured most of the vocabulary - "g" alone
-# suppressed every feature containing the letter g, including
-# "sugar", "girna" and "ghabrahat".
+# Clinical terms protected by the statistical stop-word learner.
 # ============================================================
 
-MEDICAL_WEIGHTS = {
-    # ---- PAIN / CHEST ----
-    "pain": 2.0, "dard": 2.2, "dárd": 2.2, "seena": 2.8, "sēna": 2.8,
-    "chest": 2.5, "tight": 2.2, "pressure": 2.3, "bhaari": 2.0, "boojh": 2.0,
-
-    # ---- ARM / SHOULDER / JAW ----
-    "arm": 2.0, "bazo": 2.2, "bāzū": 2.2, "shoulder": 2.0,
-    "kandha": 2.0, "kāndha": 2.0, "jaw": 2.2, "gardan": 2.0,
-
-    # ---- BREATHING ----
-    "saans": 2.8, "sāns": 2.8, "breath": 2.5, "phoolna": 2.5,
-    "phūlna": 2.5, "short": 2.2, "dyspnea": 2.8, "wheezing": 2.3,
-
-    # ---- NEURO ----
-    "behosh": 3.0, "bēhōsh": 3.0, "unconscious": 3.0,
-    "chakkar": 2.2, "chákkar": 2.2, "dizziness": 2.2, "confusion": 2.2,
-
-    # ---- CARDIAC ----
-    "palpitation": 2.2, "dhadkan": 2.3, "dháḍkan": 2.3,
-    "heart": 2.5, "mi": 3.0, "arrest": 3.2,
-
-    # ---- GI ----
-    "ulti": 2.2, "úlṭī": 2.2, "vomit": 2.2, "nausea": 2.0, "gas": 1.5, "pet": 1.8,
-
-    # ---- SYSTEMIC ----
-    "bukhar": 2.0, "bukhār": 2.0, "fever": 2.0,
-    "thakan": 1.8, "kamzori": 2.0, "kamzōrī": 2.0,
-    "pasina": 2.2, "pasīna": 2.2, "sweat": 2.2, "thanda": 1.8,
-
-    # ======== ADDED: TRAUMA ========
-    "chot": 2.2, "chōṭ": 2.2, "zakhm": 2.2, "injury": 2.2, "wound": 2.2,
-    "haddi": 2.0, "haḍḍī": 2.0, "fracture": 2.2, "bone": 1.8,
-    "accident": 2.6, "haadsa": 2.6, "crash": 2.4,
-    "moch": 1.6, "mōch": 1.6, "sprain": 1.6, "girna": 1.8, "fall": 1.8,
-
-    # ======== ADDED: BURNS ========
-    "jalna": 2.5, "jálna": 2.5, "jhulas": 2.3, "scald": 2.3, "burn": 2.3,
-
-    # ======== ADDED: INFECTIOUS ========
-    "dast": 1.8, "diarrhea": 1.8, "loose": 1.6, "infection": 2.0,
-    "sepsis": 3.0, "septic": 3.0,
-
-    # ======== ADDED: NEURO EMERGENCIES ========
-    "daura": 2.8, "seizure": 2.8, "convulsion": 2.8, "mirgi": 2.5,
-    "falij": 3.0, "paralysis": 3.0, "stroke": 3.0, "lakwa": 3.0,
-
-    # ======== ADDED: METABOLIC ========
-    "shugar": 2.0, "shūgar": 2.0, "sugar": 2.0, "diabetes": 2.0,
-    "hypoglycemia": 2.8, "glucose": 1.8,
-
-    # ======== ADDED: HEAT ========
-    "garmīlagna": 2.2, "heatstroke": 2.6, "dehydration": 2.0,
-
-    # ======== ADDED: ALLERGY / SKIN ========
-    "kharish": 1.5, "itch": 1.3, "rash": 1.5, "allergy": 2.0, "reaction": 2.2,
-
-    # ======== ADDED: OBSTETRIC ========
-    "haml": 2.3, "pregnan": 2.3, "labour": 2.5, "labor": 2.5,
-    "delivery": 2.5, "miscarriage": 2.8,
-
-    # ======== ADDED: PSYCH ========
-    "ghabrahat": 1.8, "anxiety": 1.8, "panic": 2.0, "bechaini": 1.6,
-
-    # ---- NOISE REDUCTION ----
-    "hai": 0.6, "hain": 0.5, "tha": 0.7, "hey": 0.5, "g": 0.7,
-}
+PROTECTED_CLINICAL_TERMS = frozenset(['accident', 'allergy', 'anxiety', 'arm', 'arrest', 'bazo', 'bechaini', 'behosh',
+ 'bhaari', 'bone', 'boojh', 'breath', 'bukhar', 'bukhār', 'burn', 'bāzū', 'bēhōsh',
+ 'chakkar', 'chest', 'chot', 'chákkar', 'chōṭ', 'confusion', 'convulsion', 'crash',
+ 'dard', 'dast', 'daura', 'dehydration', 'delivery', 'dhadkan', 'dháḍkan',
+ 'diabetes', 'diarrhea', 'dizziness', 'dyspnea', 'dárd', 'falij', 'fall', 'fever',
+ 'fracture', 'gardan', 'garmīlagna', 'gas', 'ghabrahat', 'girna', 'glucose',
+ 'haadsa', 'haddi', 'haml', 'haḍḍī', 'heart', 'heatstroke', 'hypoglycemia',
+ 'infection', 'injury', 'itch', 'jalna', 'jaw', 'jhulas', 'jálna', 'kamzori',
+ 'kamzōrī', 'kandha', 'kharish', 'kāndha', 'labor', 'labour', 'lakwa', 'loose', 'mi',
+ 'mirgi', 'miscarriage', 'moch', 'mōch', 'nausea', 'pain', 'palpitation', 'panic',
+ 'paralysis', 'pasina', 'pasīna', 'pet', 'phoolna', 'phūlna', 'pregnan', 'pressure',
+ 'rash', 'reaction', 'saans', 'scald', 'seena', 'seizure', 'sepsis', 'septic',
+ 'short', 'shoulder', 'shugar', 'shūgar', 'sprain', 'stroke', 'sugar', 'sweat',
+ 'sāns', 'sēna', 'thakan', 'thanda', 'tight', 'ulti', 'unconscious', 'vomit',
+ 'wheezing', 'wound', 'zakhm', 'úlṭī'])
 
 # ============================================================
 # FUNCTION-WORD SPELLING VARIANTS
@@ -697,16 +635,7 @@ def apply_diacritization(text):
     DIFFERENT source words resolve to the same canonical token, the token
     is emitted once.
 
-    THE BUG THIS FIXES: "seedhiyan chadhte waqt" (climbing stairs) became
-    "mehnat mehnat waqt", because "seedhiyan" and "chadhte" are both
-    listed under the exertion concept. This is not cosmetic. The
-    Bag-of-Words block COUNTS tokens and then multiplies them by the
-    attention weights, so a stutter silently doubles that concept's
-    contribution for the affected rows and biases the model toward
-    whichever concepts happen to own a colliding pair. Measured on
-    cardiac_multilingual_10000_v3.csv: 493 rows (4.9%) contained a
-    stutter, dominated by "khana khane" -> "khānā khānā" (309 rows) and
-    "seedhiyan chadhte" -> "mehnat mehnat" (180).
+    Different source words that resolve to the same concept are emitted once.
 
     Only mappings collapse. A word genuinely repeated in the source is
     left alone, because Urdu reduplicates for meaning - "rukk rukk kar
@@ -734,8 +663,7 @@ def clean_text(text):
     replacements below match on literal single-spaced phrases, and
     collapsing first would make "loose  motion" (two spaces, produced by a
     stripped comma) start matching a rule it does not match today. The
-    saved Bag-of-Words vectorizers in triage_model/ were fitted under the
-    current behaviour, so it is preserved exactly.
+    normalization rules rely on this ordering, so it is preserved.
     """
     return re.sub(r"[^a-z\s]", " ", str(text).lower())
 
@@ -862,15 +790,7 @@ normalize = normalize_roman_urdu
 # embedding model trained mostly on English and native-script Urdu will
 # not do on its own for Roman Urdu.
 #
-# WHY THIS IS A SEPARATE FUNCTION, not a flag flipped on
-# normalize_roman_urdu():
-#   The saved Bag-of-Words model in triage_model/ was fitted on text
-#   WITHOUT stop-word removal. Changing normalize_roman_urdu() would
-#   feed the existing vectorizers text they were never fitted on and
-#   silently degrade predict_batch.py / prediction.py /
-#   predict_batch.py. The dictionary+BoW path therefore keeps
-#   its exact current behaviour, and the new embedding path gets its
-#   own preprocessing entry point.
+# Stop-word removal is separate so diagnostic normalization remains available.
 # ============================================================
 
 def preprocess_for_embedding(text, stopword_set=None):
@@ -909,53 +829,6 @@ def preprocess_corpus_for_embedding(texts, stopword_set=None):
 
 
 # ============================================================
-# ATTENTION
-# ============================================================
-
-#: Minimum key length for substring matching. Anything shorter is a
-#: filler word and must match a whole token instead.
-_MIN_SUBSTRING_KEY_LEN = 4
-
-#: Longest key first, so the most specific medical term wins over a short
-#: filler key that happens to be a substring of it.
-_ORDERED_WEIGHTS = sorted(MEDICAL_WEIGHTS.items(), key=lambda kv: -len(kv[0]))
-
-
-def build_attention_weights(feature_names):
-    """Return the per-feature weight vector for a list of BoW feature names.
-
-    A feature takes the weight of the LONGEST matching key, and the search
-    stops there. Short keys (< 4 characters) are the grammatical filler at
-    the bottom of MEDICAL_WEIGHTS, so they only match a whole token.
-
-    The previous version scanned MEDICAL_WEIGHTS in insertion order with no
-    break, so the LAST matching key won - and the last key in the dict is
-    "g": 0.7. Every feature containing the letter g was therefore suppressed
-    to 0.7 regardless of its clinical weight ("sugar" 2.0 -> 0.7,
-    "garmīlagna" 2.2 -> 0.7, "girna" 1.8 -> 0.7), and unlisted features such
-    as "bleeding" or "emergency" were suppressed too instead of staying at
-    the neutral 1.0. "tha": 0.7 and "mi": 3.0 did the same to "thanda" and
-    "vomit".
-    """
-    weights = np.ones(len(feature_names))
-    for i, feat in enumerate(feature_names):
-        tokens = feat.split()
-        for k, w in _ORDERED_WEIGHTS:
-            if len(k) >= _MIN_SUBSTRING_KEY_LEN:
-                matched = k in feat
-            else:
-                matched = k in tokens
-            if matched:
-                weights[i] = w
-                break
-    return weights
-
-
-def apply_attention(text_matrix, feature_names):
-    return text_matrix * build_attention_weights(feature_names)
-
-
-# ============================================================
 # MODEL LOADING + SAFE ENCODING
 # ============================================================
 
@@ -973,186 +846,85 @@ REQUIRED_INPUT_COLUMNS = [
 # ============================================================
 # MODEL BUNDLE MANIFEST
 #
-# A saved model directory describes ITSELF. Before this existed, every
-# predictor assumed "model.pkl was trained on structured + attention-weighted
-# Bag-of-Words", which is why an embedding-based model could not be deployed
-# at all: nothing downstream could build the features it expects. The
-# manifest names the text representation, so load_artifacts() can assemble
-# the right feature blocks in the right order.
-#
-# A directory with NO manifest is the historical dictionary+BoW bundle
-# (triage_model/), and is loaded exactly as before.
+# The manifest declares the embedding configuration and feature layout.
 # ============================================================
 
 MANIFEST_FILE = 'model_manifest.json'
-
-LEGACY_MANIFEST = {
-    'text_representation': 'dictionary_bow',
-    'method': 'A) Dictionary + BoW',
-    'embedding_model': None,
-    'embedding_dim': None,
-    'text_pipeline': 'clean -> rule replace -> fuzzy -> diacritize -> BoW + attention',
-}
-
-#: Which feature blocks each representation stacks, in training order.
-#: MUST match the np.hstack order in train_embedding_pipeline.py.
+EMBEDDING_MODEL_DIR = 'triage_model_embedding_english'
 REPRESENTATION_BLOCKS = {
-    'dictionary_bow':          ('bow',),
-    'embeddings_raw':          ('embedding',),
+    'embeddings_raw': ('embedding',),
     'embeddings_preprocessed': ('embedding',),
-    'hybrid':                  ('bow', 'embedding'),
 }
 
 
 def read_manifest(model_dir):
-    """Describe a saved model directory. Falls back to the legacy layout."""
+    """Read an explicit embedding bundle manifest; never guess its layout."""
     path = os.path.join(resolve_project_file(model_dir), MANIFEST_FILE)
-    if not os.path.exists(path):
-        return dict(LEGACY_MANIFEST)
-    import json
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, encoding='utf-8') as f:
         manifest = json.load(f)
-    for k, v in LEGACY_MANIFEST.items():
-        manifest.setdefault(k, v)
+    if manifest.get('text_representation') not in REPRESENTATION_BLOCKS:
+        raise ValueError(f"{path}: unsupported text representation")
+    if not manifest.get('embedding_model'):
+        raise ValueError(f"{path}: embedding_model is required")
+    blocks = manifest.get('feature_blocks', [])
+    if [b.get('name') for b in blocks] != ['structured', 'embedding']:
+        raise ValueError(f"{path}: expected structured and embedding feature blocks")
+    if blocks[1].get('rescaled', False):
+        raise ValueError(f"{path}: expected unscaled sentence embeddings")
     return manifest
 
 
-def describe_model(model_dir='triage_model'):
-    """Short human-readable description of what a model directory contains.
-
-    Used by the GUI and the CLI predictors so the operator can always see
-    WHICH method is actually making the prediction in front of them.
-    """
+def describe_model(model_dir=EMBEDDING_MODEL_DIR):
+    """Short description shared by GUI and command-line predictors."""
     manifest = read_manifest(model_dir)
     rep = manifest['text_representation']
-    blocks = REPRESENTATION_BLOCKS.get(rep, ())
-    if 'embedding' in blocks and 'bow' in blocks:
-        basis = 'dictionary BoW + sentence-transformer embeddings'
-    elif 'embedding' in blocks:
-        basis = 'sentence-transformer embeddings'
-    else:
-        basis = 'dictionary + Bag-of-Words'
     return {
         'model_dir': model_dir,
         'method': manifest.get('method') or rep,
         'text_representation': rep,
-        'basis': basis,
-        'uses_embeddings': 'embedding' in blocks,
-        'embedding_model': manifest.get('embedding_model'),
+        'basis': 'sentence-transformer embeddings',
+        'uses_embeddings': True,
+        'embedding_model': manifest['embedding_model'],
         'embedding_dim': manifest.get('embedding_dim'),
     }
 
 
-#: The two model bundles this project ships. The embedding bundle is the
-#: deployed one; the dictionary bundle is the offline-safe fallback for a
-#: machine without sentence-transformers installed.
-EMBEDDING_MODEL_DIR = 'triage_model_embedding'
-DICTIONARY_MODEL_DIR = 'triage_model'
-
-
-def resolve_model_dir(model_dir=None, allow_fallback=True):
-    """Decide which saved model actually runs, and say why.
-
-    Returns (model_dir, note). An explicit model_dir is always honoured.
-    Otherwise the embedding bundle wins, unless it needs
-    sentence-transformers and that is not installed - in which case the
-    dictionary bundle is used and the note says so, rather than the caller
-    crashing on an import deep inside a prediction.
-    """
-    if model_dir:
-        return resolve_project_file(model_dir), ''
-
-    # TRIAGE_MODEL_DIR lets a run point at a different bundle without
-    # editing code. Added for the English-translation experiment, where the
-    # branch's GUI has to load triage_model_embedding_english/ while the
-    # Roman Urdu bundle stays exactly where every other caller expects it.
-    # An override is safer than changing the default: nothing that does not
-    # set the variable can pick up the experimental model by accident.
+def resolve_model_dir(model_dir=None):
+    """Resolve the selected bundle without substituting another classifier."""
     override = os.environ.get('TRIAGE_MODEL_DIR')
-    if override:
-        return resolve_project_file(override), (
-            f"TRIAGE_MODEL_DIR override in effect - loading '{override}/' "
-            f"instead of the default bundle")
-
-    # resolve_project_file() is what makes this work from any working
-    # directory: without it the embedding bundle "was not found" whenever
-    # the caller happened to be standing somewhere else, and every such
-    # run silently downgraded itself to the dictionary model.
-    candidate = resolve_project_file(EMBEDDING_MODEL_DIR)
-    if not os.path.exists(os.path.join(candidate, 'model.pkl')):
-        return resolve_project_file(DICTIONARY_MODEL_DIR), (
-            f"'{EMBEDDING_MODEL_DIR}/' not found - using the dictionary model. "
-            "Run: python train_embedding_pipeline.py")
-
-    info = describe_model(candidate)
-    if info['uses_embeddings'] and allow_fallback:
-        try:
-            import sentence_transformers          # noqa: F401
-        except ImportError:
-            return resolve_project_file(DICTIONARY_MODEL_DIR), (
-                f"'{candidate}/' needs sentence-transformers "
-                f"({info['embedding_model']}), which is not installed - "
-                "falling back to the dictionary model in "
-                f"'{DICTIONARY_MODEL_DIR}/'. Install it with: "
-                "pip install -r requirements.txt")
-    return candidate, ''
+    selected = model_dir or override or EMBEDDING_MODEL_DIR
+    candidate = resolve_project_file(selected)
+    if not os.path.isfile(os.path.join(candidate, 'model.pkl')):
+        raise FileNotFoundError(f"Model bundle missing: {candidate}. Restore the evaluated bundle.")
+    read_manifest(candidate)
+    note = f"TRIAGE_MODEL_DIR override: {override}" if override and not model_dir else ''
+    return candidate, note
 
 
-def load_artifacts(model_dir='triage_model'):
-    """Load the trained model, vectorizers, scaler, encoders and manifest."""
+def load_artifacts(model_dir=EMBEDDING_MODEL_DIR):
+    """Load the embedding classifier, structured encoders and stop words."""
     model_dir = resolve_project_file(model_dir)
-
     def p(name):
         return os.path.join(model_dir, name)
-
     manifest = read_manifest(model_dir)
-    rep = manifest['text_representation']
-    if rep not in REPRESENTATION_BLOCKS:
-        raise ValueError(
-            f"{model_dir}/{MANIFEST_FILE} declares unknown text_representation "
-            f"'{rep}'. Known: {sorted(REPRESENTATION_BLOCKS)}")
-    blocks = REPRESENTATION_BLOCKS[rep]
-
     artifacts = {
-        'model':     joblib.load(p('model.pkl')),
-        'scaler':    joblib.load(p('scaler.pkl')),
+        'model': joblib.load(p('model.pkl')),
+        'scaler': joblib.load(p('scaler.pkl')),
         'le_gender': joblib.load(p('gender_enc.pkl')),
-        'le_mode':   joblib.load(p('mode_enc.pkl')),
-        'le_avpu':   joblib.load(p('avpu_enc.pkl')),
-        'le_ecg':    joblib.load(p('ecg_enc.pkl')),
-        'manifest':  manifest,
+        'le_mode': joblib.load(p('mode_enc.pkl')),
+        'le_avpu': joblib.load(p('avpu_enc.pkl')),
+        'le_ecg': joblib.load(p('ecg_enc.pkl')),
+        'manifest': manifest,
         'model_dir': model_dir,
-        'text_representation': rep,
-        'blocks': blocks,
+        'text_representation': manifest['text_representation'],
+        'blocks': ('embedding',),
+        'encoder': None,
     }
-
-    if 'bow' in blocks:
-        artifacts['word_bow'] = joblib.load(p('word_bow.pkl'))
-        artifacts['char_bow'] = joblib.load(p('char_bow.pkl'))
-        artifacts['feature_names'] = (
-            list(artifacts['word_bow'].get_feature_names_out()) +
-            list(artifacts['char_bow'].get_feature_names_out())
-        )
-        artifacts['attention'] = build_attention_weights(artifacts['feature_names'])
-
-    # Per-block rescaling, saved only by the hybrid path (see
-    # train_embedding_pipeline.py). Without it the attention-weighted BoW
-    # block (values around 8) drowns out the L2-normalized embedding block
-    # (values around 0.05) and the classifier ignores the embeddings.
-    for block in blocks:
-        scaler_path = p(f'{block}_block_scaler.pkl')
-        if os.path.exists(scaler_path):
-            artifacts[f'{block}_block_scaler'] = joblib.load(scaler_path)
-
-    # Bundle-local stop words, when the training run saved them here.
-    # Falls back to None so older bundles keep using the shared file.
-    sw_path = p('learned_stopwords.json')
-    artifacts['stopwords'] = None
-    if os.path.exists(sw_path):
-        with open(sw_path, 'r', encoding='utf-8') as f:
-            artifacts['stopwords'] = set(json.load(f).get('stopwords', []))
-
-    artifacts['encoder'] = None          # loaded lazily on first use
+    expected = sum(b['dim'] for b in manifest['feature_blocks'])
+    if artifacts['model'].n_features_in_ != expected:
+        raise ValueError(f"{model_dir}: classifier and manifest feature dimensions differ")
+    with open(p('learned_stopwords.json'), encoding='utf-8') as f:
+        artifacts['stopwords'] = set(json.load(f).get('stopwords', []))
     return artifacts
 
 
@@ -1202,55 +974,18 @@ def get_text_encoder(art):
 
 
 def build_text_features(art, raw_texts, batch_size=32):
-    """Turn raw complaint strings into the text feature block this model wants.
-
-    The block order here MUST match the np.hstack order used at training
-    time (bow first, then embeddings) - see REPRESENTATION_BLOCKS.
-    """
+    """Encode complaints with exactly the bundle's training preprocessing."""
     raw_texts = ['unknown' if t is None else str(t) for t in raw_texts]
-    rep = art['text_representation']
-    parts = []
-
-    # A bundle trained with --skip-normalization must be SERVED the same way.
-    # Without this the English model was fed text that had been pushed back
-    # through the Roman Urdu dictionary ("chest pain" -> "sēna dárd"), which
-    # is nothing like what it was fitted on - a train/serve skew that made it
-    # look far worse than it is.
-    skip_norm = bool(art['manifest'].get('skip_normalization'))
-    # Each bundle carries its own stop-word list where one was saved beside
-    # it. The project-root learned_stopwords.json is shared, so whichever
-    # model trained last silently owned it - untenable once two bundles are
-    # switchable at runtime.
-    own_stops = art.get('stopwords')
-
-    for block in art['blocks']:
-        if block == 'bow':
-            cleaned = (list(raw_texts) if skip_norm
-                       else [normalize_roman_urdu(t) for t in raw_texts])
-            mat = np.hstack([
-                art['word_bow'].transform(cleaned).toarray(),
-                art['char_bow'].transform(cleaned).toarray(),
-            ]) * art['attention']
-        else:
-            # 'embeddings_raw' deliberately skips preprocessing; every other
-            # embedding representation gets clean -> fuzzy -> stop-word removal,
-            # exactly as train_embedding_pipeline.py did.
-            if rep == 'embeddings_raw':
-                texts = list(raw_texts)
-            elif skip_norm:
-                from stopwords import remove_stopwords
-                texts = [remove_stopwords(t, own_stops or set()) for t in raw_texts]
-            else:
-                texts = preprocess_corpus_for_embedding(raw_texts, own_stops)
-            mat = get_text_encoder(art).encode(
-                texts, batch_size=batch_size, show_progress_bar=False,
-                convert_to_numpy=True, normalize_embeddings=True)
-        block_scaler = art.get(f'{block}_block_scaler')
-        if block_scaler is not None:
-            mat = block_scaler.transform(mat)
-        parts.append(mat)
-
-    return np.hstack(parts)
+    if art['text_representation'] == 'embeddings_raw':
+        texts = raw_texts
+    elif art['manifest'].get('skip_normalization'):
+        from stopwords import remove_stopwords
+        texts = [remove_stopwords(t, art['stopwords']) for t in raw_texts]
+    else:
+        texts = preprocess_corpus_for_embedding(raw_texts, art['stopwords'])
+    return get_text_encoder(art).encode(
+        texts, batch_size=batch_size, show_progress_bar=False,
+        convert_to_numpy=True, normalize_embeddings=True)
 
 
 # ============================================================

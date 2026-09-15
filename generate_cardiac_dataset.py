@@ -441,8 +441,8 @@ def _weighted(r, pairs):
 # row's own severity tier, so the banks were effectively disjoint and the
 # VOCABULARY gave the label away. Measured on v2: 101 of 277 words
 # occurred at exactly one triage level, 76% of rows contained at least
-# one of them, and a plain Bag-of-Words model scored 99.85% - it was
-# reading the answer off the word list. That is the same class of defect
+# one of them, allowing the answer to be read from the word list.
+# That is the same class of defect
 # as the ECG determinism this generator was written to remove; swapping
 # one shortcut for another is not progress.
 #

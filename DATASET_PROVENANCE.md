@@ -15,7 +15,7 @@
 ## Files in this project
 
 | file | rows | unique texts | vocabulary | Level-4 | origin |
-|---|---|---|---|---|---|
+|---|---|---|---|---|
 | `triage_mixed_language_dataset.csv` | 1,204 | 1,076 | 782 | 59 | original project baseline, organic phrasing |
 | `triage_mixed_language_dataset_10000_RECOVERED.csv` | 10,000 | 1,103 | 782 | 407 | recovered from git commit `030f551`; kept as reference and as the phrase-bank source |
 | `cardiac_multilingual_10000.csv` | 10,000 | 10,000 | 120 | **0** | provenance UNKNOWN — arrived without a generator; see "Unknown-provenance file" below |
@@ -62,8 +62,7 @@ them would teach the model something clinically false:
 **Known defect in v2, fixed in v3 (tier bleeding).** v2 drew every phrase
 from the bank matching its own severity tier, so the banks were effectively
 disjoint and the *vocabulary* gave the label away: 101 of 277 words occurred
-at exactly one triage level, 76% of rows contained at least one of them, and
-a bag-of-words model reading only the complaint text scored 99.9%. That is
+at exactly one triage level, 76% of rows contained at least one of them, which is
 the same class of defect as the ECG determinism this generator exists to
 remove. In v3 a row usually draws from its own tier but sometimes from a
 neighbouring one, with probability falling off by tier distance, so every
@@ -76,11 +75,11 @@ skeletons.
 
 Measured effect:
 
-| dataset | single-level words | rows containing one | text-only BoW accuracy |
-|---|---|---|---|
-| v2 | 101 | 76.0% | 99.9% |
-| **v3** | **0** | **0.0%** | **69.0%** |
-| recovered organic (reference) | 4 | 1.8% | 47.4% |
+| dataset | single-level words | rows containing one |
+|---|---|---|
+| v2 | 101 | 76.0% |
+| **v3** | **0** | **0.0%** |
+| recovered organic (reference) | 4 | 1.8% |
 
 **Reproducing it.**
 

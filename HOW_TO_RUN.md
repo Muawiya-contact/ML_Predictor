@@ -105,14 +105,14 @@ Press Enter. First it tells you **which method it is using**, so you always know
 what produced your numbers:
 
 ```
-Loading model and encoders from 'triage_model_embedding/'...
+Loading model and encoders from 'triage_model_embedding_english/'...
 [ok] Model ready.
      Deployed method : C) Embeddings + preprocessing
      Text features   : sentence-transformer embeddings  (384 dims)
 ```
 
-If instead it says `triage_model/` and *dictionary + Bag-of-Words*, the AI part
-did not install — go back and run `pip install -r requirements.txt`.
+Start Ollama before batch prediction. Each complaint is translated locally and
+checked for anatomical consistency; rejected rows are reported without scores.
 
 Then you will see a summary like this:
 
@@ -199,10 +199,9 @@ The program can't find your file. Two usual reasons:
 **`ModuleNotFoundError: No module named 'openpyxl'` (or pandas, sklearn, etc.)**
 You skipped the install step. Run `pip install -r requirements.txt` (Step 3).
 
-**It says it is using `triage_model/` and "dictionary + Bag-of-Words"**
-That is the fallback. The AI part is not installed — run
-`pip install -r requirements.txt` (Step 3) and try again. Nothing is
-broken; the program is telling you which method it used rather than pretending.
+**The embedding model cannot load**
+Install the pinned requirements and restore the evaluated English model bundle.
+Do not substitute another classifier or retrain to fix setup.
 
 **`UnicodeDecodeError: 'utf-8' codec can't decode byte ...` when opening a CSV**
 This used to happen with CSV files saved out of Excel. It is fixed — the program
