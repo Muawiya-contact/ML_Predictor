@@ -1,187 +1,47 @@
-# Submission summary — Roman Urdu cardiac triage decision support
+# Submission summary: Roman Urdu medical triage in Pakistan
 
-**Generated 2026-08-17. Paste-ready; every number below is measured, not estimated.**
+The article configuration is C: preprocessed English sentence embeddings fused
+with structured features, classified by Logistic Regression. The active bundle
+is `triage_model_embedding_english/`, trained on 2026-09-09. This cleanup retains
+its existing weights and recorded results; it does not retrain the classifier.
 
----
+## Methodology points
 
-## Paste-ready paragraph
+1. Frame the study as an offline research prototype for Roman Urdu cardiac triage.
+2. Disclose the synthetic dataset: 2,252 translated cardiac records, not patient data.
+3. Describe the fuzzy clinical dictionary and local Ollama translation at temperature 0.0.
+4. Describe refusal handling and the deterministic body-part consistency check.
+5. Explain statistical stop-word selection, clinical-term protection and saved reports.
+6. Name the multilingual MiniLM checkpoint and its 384-dimensional normalized vectors.
+7. Describe the six numeric inputs and four categorical fields, producing 26 structured columns.
+8. Concatenate these with embeddings to form 410 classifier inputs; use balanced Logistic Regression.
+9. Report the stratified 80/20 split (1,801/451), seed 42, accuracy, under/over-triage and confusion matrix.
+10. Present raw versus preprocessed embedding ablation and separate semantic-cluster diagnostics.
 
-> We present an offline decision-support prototype that triages Roman
-> Urdu/English emergency complaints into four acuity levels, restricted in
-> scope to **cardiac presentations**. The system contributes (1) an automatic
-> stop-word learner for Roman Urdu, which selects tokens by mutual
-> information and Cramér's V effect size rather than a chi-square p-value —
-> the latter fails to scale, admitting only 10 stop words on a 1.2k corpus
-> and vetoing genuinely uninformative filler as the corpus grows — and (2) a
-> canonical-form dictionary that maps English and Roman Urdu spellings of the
-> same clinical concept onto one token before embedding. On five
-> same-meaning complaint pairs written in different languages, mean cosine
-> similarity rises from **0.159 on raw text to 0.721 after normalization**
-> (+0.563), with all five pairs clearing a 0.5 threshold. The deployed hybrid
-> model (attention-weighted bag-of-words + multilingual sentence embeddings +
-> structured vitals) reaches **84.80% accuracy with 9.25% under-triage and
-> 5.95% over-triage** on a held-out 20% split. **The evaluation dataset is
-> synthetic**: complaints were produced by a documented phrase-bank and
-> sentence-skeleton generator whose vocabulary derives from an organic corpus
-> of 887 distinct cardiac complaints, and triage labels were assigned by
-> construction rather than clinician adjudication. No real patient records
-> were used. Results characterise the processing pipeline and do not
-> constitute clinical validation.
+| Recorded configuration | Accuracy | Under-triage | Over-triage |
+|---|---:|---:|---:|
+| B: raw English embeddings | 80.71% | 13.30% | 5.99% |
+| C: preprocessed English embeddings | 80.49% | 12.64% | 6.87% |
 
----
+Preprocessing is associated with 0.66 percentage points less under-triage and
+0.22 points less accuracy in this split. This is not evidence of a general
+accuracy improvement or clinical safety.
 
-## Headline numbers
+## Limits that belong in the article
 
-| metric | value |
-|---|---|
-| deployed method | D) Hybrid — dictionary BoW + sentence embeddings + vitals |
-| accuracy (held-out 20%, n=2000) | **84.80%** |
-| under-triage (missed severity) | **9.25%** — safety grade A |
-| over-triage | 5.95% |
-| classes | 4 (Emergency / Urgent / Standard / Non-Urgent) |
-| dataset | `cardiac_multilingual_10000_v3.csv`, 10,000 rows, 10,000 distinct texts |
-| operation | fully offline, verified with outbound sockets disabled |
+Training translations came from gpt-4o-mini, while serving uses local Ollama.
+The classifier scores therefore do not establish live translation performance.
+The dataset is synthetic and cardiac-only. The historical trainer fits structured
+preprocessing before splitting and exports full-data stop words alongside the
+split-trained classifier. The saved classifier and those preprocessing choices
+must be described accurately, with further evaluation identified as future work.
 
-Method comparison on the same split (all four trained identically):
+The professor baseline is a separate 185-row study with e5-small embeddings,
+two targets and stratified five-fold cross-validation. Do not attribute its
+protocol, classifiers or results to the GUI experiment. Nothing in this project
+constitutes clinical validation of a medical device.
 
-| method | accuracy | under-triage |
-|---|---|---|
-| A) Dictionary + BoW | 86.50% | 8.30% |
-| **D) Hybrid (deployed)** | **84.80%** | **9.25%** |
-| C) Embeddings + preprocessing | 82.40% | 12.00% |
-| B) Embeddings, raw text | 82.05% | 11.90% |
-
-D was deployed over the marginally more accurate A because it retains the
-embedding pathway the study is about while staying inside the <10%
-under-triage safety band. C, the previous default, was rejected for
-exceeding it.
-
-## What the accuracy number actually measures
-
-The labels are a function of complaint text, ECG status and vitals, sampled
-with deliberate overlap so that **no single feature determines the label**.
-This matters: an earlier version of this dataset had `ECG_Status` determine
-the level almost perfectly (ST elevation → Level 1 in 1,930 of 1,932 rows).
-A model on that data scored 98.45%, but structured features alone scored
-99.1% — the text pipeline contributed nothing and the headline was an ECG
-lookup. The 84.80% reported here is lower and more honest: a bag-of-words
-model given only the complaint text scores 69.0% against a 40%
-majority-class baseline, confirming the text carries real but partial signal.
-
-## Known limitations (state these before a reviewer finds them)
-
-1. **Synthetic data.** Labels are assigned by construction, not by clinician
-   adjudication. Inter-rater agreement is therefore undefined, and no claim
-   of clinical validity is made. Full disclosure in `DATASET_PROVENANCE.md`;
-   the generator is `generate_cardiac_dataset.py` and the exact file is
-   reproducible from its seed.
-2. **Synthetic vocabulary ceiling.** The generated corpus has 277 distinct
-   words versus 782 in the organic corpus it derives from. A phrase-bank
-   generator cannot reproduce the variety of human-written complaints, so
-   the text task is easier here than in deployment.
-3. **Embedding weakness on some symptom clusters.** On organic reference
-   text the multilingual sentence encoder clusters same-meaning complaints
-   at 61.9% mean pass rate, but `fracture_sprain` reaches only 35.6% and
-   `dizziness_weakness` 44.4%. Dictionary normalization does not move these;
-   the limitation is the pretrained model's Roman Urdu coverage. Native-script
-   transliteration or a fine-tuned encoder is the plausible remedy and is not
-   attempted here.
-4. **Cluster metrics are sensitive to corpus repetitiveness.** Measured pass
-   rate rises as vocabulary shrinks (95.6% on the most templated corpus,
-   79.6% on the organic one), so cluster scores on synthetic text overstate
-   real-world separation and should be read alongside the organic-text
-   numbers.
-5. **Evaluation split is random, not grouped.** Held-out rows are distinct
-   texts, but templated generation makes them near-duplicates of training
-   rows. A grouped or organic-text evaluation would give a lower and more
-   trustworthy estimate.
-6. **Cardiac scope only.** Non-cardiac complaints are out of scope; the model
-   will still emit a confident level for them. An out-of-scope warning layer
-   is designed but not implemented. Measured: "toota hua pair, chalne mein
-   dard" (a broken leg) returns **Level 3 at 99.1% confidence** with no
-   indication the complaint is outside the validated domain.
-7. **Nonsense input is not detected.** Text that survives cleaning as tokens
-   but carries no clinical meaning is scored as though it were a real
-   complaint. Measured: "asdkfj qwoeiru zxcvbnm" returns **Level 3 at 77.7%
-   confidence**. The system guards the case where *nothing* survives cleaning
-   (empty, digits-only, punctuation-only inputs are flagged and their
-   confidence capped at 50%), but it has no language or plausibility model
-   and cannot tell an unfamiliar Roman Urdu spelling from keyboard mash.
-   Users must not read high confidence as evidence the input was understood.
-8. **No runtime red-flag / reassurance guardrail.** The rule that keeps
-   red-flag phrasing out of low-acuity rows and explicit reassurance out of
-   high-acuity rows lives only in the synthetic data generator. Nothing
-   enforces it at inference, and the structured features outweigh the text
-   whenever the two disagree. Live-tested with *"halka sa seena mein dabao
-   hai, rest se theek ho jata hai"* ("mild chest pressure, resolves with
-   rest"): with `ECG_Status` set to ST elevation it returns **Level 1
-   EMERGENCY at 67.4%**; with a Normal ECG the same sentence returns **Level 3
-   at 99.9%**. So the self-resolving clause is not being ignored — the
-   structured inputs simply dominate it. The consequence to state plainly is
-   that reassuring language cannot pull a prediction down once the ECG
-   indicates an infarct. That is clinically defensible for a genuine STEMI,
-   but it means the complaint text is not a safety net.
-   *(The interface previously shipped with ST elevation preselected, so an
-   operator who predicted without opening the dropdown got EMERGENCY whatever
-   they had typed. The default is now `Normal`. A severe complaint still
-   returns Level 1 at 99.8% on a Normal ECG, so the change does not blunt
-   genuine emergencies. The numeric fields still default to abnormal values —
-   HR 118, SpO2 94 — so the form remains biased upward and should be filled
-   in rather than trusted.)*
-9. **Vitals are not range-checked.** No physiological validation is performed
-   anywhere in the pipeline. Measured: age −5, heart rate 300, blood pressure
-   900/−40, temperature 99 °C and SpO2 150 together return **Level 4 at 100.0%
-   confidence**, with no error and no warning. Out-of-range values are scaled
-   and fed to the model like any other number, so a data-entry slip or a unit
-   mismatch (Fahrenheit for Celsius, say) produces a confident answer built on
-   an impossible patient. Any deployment must validate vitals upstream.
-
-## Reproducibility
-
-## The Ollama migration, and what it cost
-
-The GUI now has one triage path: fuzzy dictionary -> Ollama on localhost ->
-anatomical gate -> encoder -> RandomForest. Every stage is local.
-
-Four limitations a reviewer should have in front of them:
-
-1. **The GUI scores with 2,252 rows, not 10,000.** Removing the mode toggle
-   removed access to the larger Roman Urdu bundle, which expects Roman Urdu and
-   cannot be fed translated English without train/serve skew. This is a real
-   reduction in training data and it was a deliberate choice.
-2. **Cosine similarity is no longer a safety check.** It was, at 0.90 and then
-   0.75, and measurement retired it: a correct translation of
-   `seena mein shadeed dard aur pasina` scores 0.8054 and "My leg is broken
-   after a fall" scores 0.7922. No threshold separates 0.013. The deterministic
-   anatomical gate replaced it and blocks chest->head, stomach->chest,
-   head->leg and shoulder->arm.
-3. **The gate checks anatomy, not fidelity.** A wrong symptom attached to the
-   right body part passes. It is one specific guarantee, not a general one.
-4. **The fuzzy dictionary changes nothing on the 10,000-row corpus.** That file
-   is synthetic and generated from a clean phrase bank, so it has no typos to
-   repair. What is demonstrated is zero false positives, not a measured gain;
-   the gain is on real typed input.
-
-Two test batteries are committed - `tests/audit_pipeline.py` (15 checks) and
-`tests/audit_gui.py` (16 checks, builds the real window and drives every tab).
-Both need a live Ollama and there is no CI, so they are run by hand.
-
-```bash
-python generate_cardiac_dataset.py --out cardiac_multilingual_10000_v3.csv
-python train_embedding_pipeline.py --data cardiac_multilingual_10000_v3.csv --deploy D
-python check_embedding_pairs.py      # verifies the 0.159 -> 0.721 figures above
-./run_gui.sh
-```
-
-`check_embedding_pairs.py` holds the five documented similarities as
-assertions rather than printing them: it re-encodes both phrasings of each
-pair, compares against the figures quoted in this document, and exits
-non-zero if any has drifted by more than 0.02. A reviewer can therefore
-confirm the headline embedding claim without taking it on trust, and a later
-change to the dictionary or stop-word list cannot leave this write-up
-silently stale.
-
-Submitted Roman Urdu bundle: `triage_model_embedding/`. The manifest records dataset
-filename, row count, sha256, class count, synthetic-data provenance, cardiac
-scope and training date; the GUI banner surfaces the synthetic-data warning
-on every screen.
+Dataset identity: `cardiac_english_2252.csv`, SHA-256
+`42ab09e252db94b8f7b0dea38fae47556f8d38c380fdc43fdbb37f2ea728cb1c`.
+The authoritative recorded results and configuration are in the active bundle's
+`triage_metrics.json` and `model_manifest.json`.

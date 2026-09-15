@@ -1,28 +1,25 @@
 {
-  "method": "D) Hybrid: dictionary + embeddings",
-  "text_representation": "hybrid",
+  "method": "C) Embeddings + preprocessing",
+  "text_representation": "embeddings_preprocessed",
   "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
   "embedding_dim": 384,
-  "text_pipeline": "clean -> rule replace -> fuzzy -> diacritize -> learned stop-word removal -> BoW + attention -> sentence-transformer",
+  "text_pipeline": "English text -> learned stop-word removal -> sentence-transformer",
   "feature_blocks": [
     {
       "name": "structured",
       "dim": 26
     },
     {
-      "name": "bow",
-      "dim": 700,
-      "rescaled": true
-    },
-    {
       "name": "embedding",
       "dim": 384,
-      "rescaled": true
+      "rescaled": false
     }
   ],
   "trained_by": "train_embedding_pipeline.py",
-  "deploy_mode": "D",
+  "deploy_mode": "C",
   "categorical_encoding": "onehot",
+  "skip_normalization": true,
+  "text_column": "English_Translation",
   "dataset": {
     "file": "cardiac_english_2252.csv",
     "rows": 2252,
@@ -51,15 +48,5 @@
       "Cardiac"
     ]
   },
-  "trained_on_date": "2026-08-18",
-  "experiment": "English-translation pipeline, 2,252 rows vs the submitted model 10,000 - TRAINING text translated by gpt-4o-mini; serving now translates locally via Ollama",
-  "experiment_caveats": [
-    "Trained on 2,252 rows because the translation API ran out of credits at 22.5%.",
-    "The submitted Roman Urdu model used all 10,000 rows, so accuracy is NOT comparable.",
-    "Under-triage 13.08% exceeds the <10% safety band the submitted model holds at 9.25%.",
-    "Text bypasses the Roman Urdu dictionary (--skip-normalization).",
-    "Inference uses each model bundle's own learned_stopwords.json: the submitted Roman Urdu model uses triage_model_embedding/learned_stopwords.json, and this English model uses triage_model_embedding_english/learned_stopwords.json. No backup restoration or project-root stopword swap is required."
-  ],
-  "skip_normalization": true,
-  "text_column": "English_Translation"
+  "trained_on_date": "2026-09-09"
 }
