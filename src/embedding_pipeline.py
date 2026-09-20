@@ -44,8 +44,15 @@ from src.offline_pipeline import (OLLAMA_URL, ollama_available,
                                   select_translation_model,
                                   translate_roman_urdu)
 
-CLUSTER_ENCODER = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-EMBEDDING_DIM = 384
+#: The deployed SBERT checkpoint, defined once in triage_pipeline.py and
+#: imported here so this offline preprocessing module always embeds with
+#: the exact model live inference reads out of the bundle manifest. The
+#: name is Multilingual MiniLM-L12-v2, which is a Sentence-BERT model, not
+#: a generic MiniLM word-vector loader.
+from triage_pipeline import EMBEDDING_MODEL_NAME, EMBEDDING_VECTOR_DIM
+
+CLUSTER_ENCODER = EMBEDDING_MODEL_NAME
+EMBEDDING_DIM = EMBEDDING_VECTOR_DIM
 
 #: Standard English function words. Deliberately short and generic - this
 #: is not the learned clinical stop-word list from stopwords.py, which is

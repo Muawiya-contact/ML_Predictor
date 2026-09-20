@@ -74,14 +74,14 @@ if errorlevel 1 (
 )
 
 REM --- 4. A translation model ------------------------------------------
-REM Any capable model will do, so this only offers a 2 GB download when
+REM Any capable model will do, so this only offers a 4.7 GB download when
 REM nothing usable is installed at all.
 ollama list 2>nul | findstr /r /c:"[a-z]" >nul
 if errorlevel 1 (
     echo   ..    no model installed
-    set /p ANS="        Download llama3.2 now? About 2 GB, one time. [y/N] "
+    set /p ANS="        Download qwen2.5 now? About 4.7 GB, one time. [y/N] "
     if /i "!ANS!"=="y" (
-        ollama pull llama3.2
+        ollama pull qwen2.5
     ) else (
         echo   FAIL  Without a model nothing can be translated.
         pause

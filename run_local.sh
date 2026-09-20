@@ -70,18 +70,18 @@ fi
 # --- 3. A translation model -------------------------------------------
 # Any of several models will do, so this reports what is there rather
 # than insisting on one. Only offers to download when NOTHING usable is
-# installed - a 2 GB pull should never be triggered by a script that
+# installed - a 4.7 GB pull should never be triggered by a script that
 # could have used a model already on disk.
 MODELS=$(curl -sf --max-time 5 http://localhost:11434/api/tags \
          | .venv/bin/python -c "import sys,json;print(' '.join(m['name'] for m in json.load(sys.stdin).get('models',[])))" 2>/dev/null)
 if [ -z "${MODELS:-}" ]; then
     warn "no model installed"
-    read -r -p "        Download llama3.2 now? About 2 GB, one time. [y/N] " ans
+    read -r -p "        Download qwen2.5 now? About 4.7 GB, one time. [y/N] " ans
     case "$ans" in
-        [yY]*) ollama pull llama3.2 || { fail "pull failed"; exit 1; } ;;
+        [yY]*) ollama pull qwen2.5 || { fail "pull failed"; exit 1; } ;;
         *) fail "Without a model nothing can be translated, so nothing can be scored."; exit 1 ;;
     esac
-    ok "model   llama3.2 pulled"
+    ok "model   qwen2.5 pulled"
 else
     ok "model   $MODELS"
 fi

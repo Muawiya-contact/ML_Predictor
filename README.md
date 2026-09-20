@@ -29,7 +29,7 @@ Install Ollama, start its local service and obtain the translator once:
 
 ```bash
 ollama serve
-ollama pull llama3.2
+ollama pull qwen2.5
 python triage_gui.py
 ```
 
@@ -48,7 +48,7 @@ can use `python triage_gui.py` directly.
 2. Translate to English using local Ollama, temperature 0.0.
 3. Filter refusals and verify that named body parts survive translation.
 4. Remove the English bundle's learned stop words.
-5. Encode the English text with `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`.
+5. Encode the English text with `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` — an SBERT (Sentence-BERT) checkpoint, the multilingual 384-dimensional variant.
 6. Concatenate the L2-normalized 384-dimensional embedding with 26 structured features.
 7. Predict with Logistic Regression (`class_weight="balanced"`, `max_iter=1200`).
 

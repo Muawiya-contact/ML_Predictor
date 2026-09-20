@@ -889,6 +889,28 @@ def describe_model(model_dir=EMBEDDING_MODEL_DIR):
     }
 
 
+#: Canonical sentence-transformer (SBERT) checkpoint and the dimension of
+#: its output vectors.
+#:
+#: Every module that generates or evaluates embeddings for the deployed
+#: bundle - training, evaluation, pair checks, offline preprocessing -
+#: imports these names instead of typing the model id again, so the live
+#: inference path (which reads `embedding_model` from the bundle manifest)
+#: and the offline tooling can never drift apart.
+#:
+#: The name contains "MiniLM", but this is NOT a generic MiniLM word-vector
+#: loader: paraphrase-multilingual-MiniLM-L12-v2 is a fully-trained
+#: Sentence-BERT model (the multilingual member of the SBERT family),
+#: loaded through SentenceTransformer exactly like any other SBERT
+#: checkpoint, and the deployed classifiers were fitted on its
+#: L2-normalised 384-dimensional vectors. Do not substitute an English-only
+#: SBERT model (e.g. bert-base-nli-mean-tokens) here - it would emit 768
+#: dimensions in a different language space and silently break the
+#: committed, evaluated bundle.
+EMBEDDING_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+EMBEDDING_VECTOR_DIM = 384
+
+
 def resolve_model_dir(model_dir=None):
     """Resolve the selected bundle without substituting another classifier."""
     override = os.environ.get('TRIAGE_MODEL_DIR')

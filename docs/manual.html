@@ -101,7 +101,7 @@
     <h3>Two services must be running</h3>
     <p>The system translates every complaint on this machine before it scores it. Nothing reaches the internet — but nothing works without the local translator either.</p>
 <pre><code>ollama serve                  # the local translator
-ollama pull llama3.2          # once, ~2 GB
+ollama pull qwen2.5           # once, ~4.7 GB
 ./run_gui.sh                  # the app</code></pre>
     <p>Ollama does not always survive a reboot. If it keeps stopping:</p>
 <pre><code>sudo systemctl enable --now ollama</code></pre>
@@ -155,7 +155,7 @@ ollama pull llama3.2          # once, ~2 GB
     </div></div>
     <div class="step"><span class="step-n">2</span><div class="step-b">
       <h4>Translation by Ollama &nbsp;<span style="color:var(--ink-3);font-weight:400">— ~11 s</span></h4>
-      <p>The complaint is sent to llama3.2 wrapped as a data record, at temperature 0 so the same input always gives the same English. If the model replies with a refusal or a safety disclaimer, that text is stripped and the row is retried once. A disclaimer that reached the encoder would be scored <em>as if it were the patient's symptoms</em>.</p>
+      <p>The complaint is sent to Qwen2.5 wrapped as a data record, at temperature 0 so the same input always gives the same English. If the model replies with a refusal or a safety disclaimer, that text is stripped and the row is retried once. A disclaimer that reached the encoder would be scored <em>as if it were the patient's symptoms</em>.</p>
     </div></div>
     <div class="step"><span class="step-n">3</span><div class="step-b">
       <h4>Anatomical check &nbsp;<span style="color:var(--ink-3);font-weight:400">— this is the safety gate</span></h4>
@@ -163,7 +163,7 @@ ollama pull llama3.2          # once, ~2 GB
     </div></div>
     <div class="step"><span class="step-n">4</span><div class="step-b">
       <h4>Encoding</h4>
-      <p>Common English words carrying no clinical signal are removed, and the remaining text becomes a 384-number vector.</p>
+      <p>Common English words carrying no clinical signal are removed, and the remaining text becomes a 384-number vector produced by the multilingual SBERT encoder (Sentence-BERT, <code>paraphrase-multilingual-MiniLM-L12-v2</code>).</p>
     </div></div>
     <div class="step"><span class="step-n">5</span><div class="step-b">
       <h4>Classification</h4>

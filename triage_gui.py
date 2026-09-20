@@ -77,8 +77,8 @@ ACCENT = "#2563a8"
 # Triage level colours: 0 = emergency (red) ... 3 = non-urgent (green)
 LEVEL_COLOURS = ["#c0392b", "#e08e0b", "#2f7fbf", "#2e9e5b"]
 #: Measured on this machine: 10.3 / 10.8 / 11.6 seconds for three
-#: complaints through llama3.2. Used only to render an ETA, so being wrong
-#: costs a misleading countdown, not a wrong prediction.
+#: complaints through the local Qwen2.5 translator. Used only to render an
+#: ETA, so being wrong costs a misleading countdown, not a wrong prediction.
 SECONDS_PER_ROW = 11
 
 LEVEL_NAMES = ["EMERGENCY", "URGENT", "STANDARD", "NON-URGENT"]
@@ -770,7 +770,7 @@ class TriageGUI(tk.Tk):
                 f"rather than a fragment.")
         return out, None
 
-    def _offer_model_pull(self, model="llama3.2"):
+    def _offer_model_pull(self, model="qwen2.5"):
         """Offer to download a model, with a live progress bar.
 
         The pull runs on a worker thread; Tk is not thread-safe, so the
@@ -783,7 +783,7 @@ class TriageGUI(tk.Tk):
                 "No Ollama model installed",
                 f"Local translation needs a model, and Ollama has "
                 f"none installed.\n\n"
-                f"Download {model} now? It is about 2 GB and needs a network "
+                f"Download {model} now? It is about 4.7 GB and needs a network "
                 f"connection for the download only - translation afterwards "
                 f"is fully offline.\n\n"
                 f"Without it the app cannot translate, and triage will "

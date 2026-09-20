@@ -336,7 +336,7 @@
 <p>The desktop triage classifier and the professor baseline use different encoders and datasets. Both encoders produce 384 numbers, but those vectors are not interchangeable.</p>
 <div class="two-up"><div class="card"><span class="tag">GUI and batch CLI</span><h4>Embedding classifier, 2,252 rows</h4>
 <p>Cardiac triage using English complaint embeddings, vitals and categorical fields.</p>
-<dl><dt>bundle</dt><dd>triage_model_embedding_english/</dd><dt>method</dt><dd>C: preprocessed embeddings</dd><dt>encoder</dt><dd>MiniLM-L12-v2</dd><dt>classifier</dt><dd>Logistic Regression</dd><dt>inputs</dt><dd>410 features</dd><dt>output</dt><dd>Triage level 1-4</dd></dl></div>
+<dl><dt>bundle</dt><dd>triage_model_embedding_english/</dd><dt>method</dt><dd>C: preprocessed embeddings</dd><dt>encoder</dt><dd>SBERT, multilingual MiniLM-L12-v2 (384-dim)</dd><dt>classifier</dt><dd>Logistic Regression</dd><dt>inputs</dt><dd>410 features</dd><dt>output</dt><dd>Triage level 1-4</dd></dl></div>
 <div class="card"><span class="tag">Professor baseline</span><h4>Text-only classifier, 185 rows</h4>
 <p>A separate reproduction that predicts both triage and department without structured patient features.</p>
 <dl><dt>bundle</dt><dd>models_src/</dd><dt>encoder</dt><dd>multilingual-e5-small</dd><dt>prefix</dt><dd>passage: </dd><dt>classifiers</dt><dd>RandomForest, two targets</dd><dt>inputs</dt><dd>384 embedding features</dd><dt>entry point</dt><dd>run_inference.py</dd></dl></div></div></section>
@@ -345,15 +345,15 @@
 <ol>
 <li><strong>Collect the complaint and structured inputs.</strong> The GUI accepts Roman Urdu text, age, vital signs, gender, arrival mode, AVPU and ECG status. Substituted missing or unreadable structured values are disclosed.</li>
 <li><strong>Normalize spelling.</strong> The fuzzy clinical dictionary corrects known Roman Urdu variants before translation. It also provides inspectable text stages.</li>
-<li><strong>Translate locally.</strong> Ollama runs on localhost. The preferred model is llama3.2; the application reports the installed model actually selected. Requests use temperature 0.0 and few-shot examples.</li>
+<li><strong>Translate locally.</strong> Ollama runs on localhost. The preferred model is Qwen2.5 (the offline CPU translator the paper describes); the application reports the installed model actually selected. Requests use temperature 0.0 and few-shot examples.</li>
 <li><strong>Apply translation guardrails.</strong> Refusal filtering removes unusable answers. A deterministic anatomical check requires named body parts to survive translation. Failed translations or anatomical mismatches receive no triage score.</li>
 <li><strong>Preprocess English.</strong> Remove the active bundle's learned stop words. The English model has skip_normalization=true, so English text is not converted back through the Roman Urdu dictionary.</li>
-<li><strong>Embed and combine features.</strong> MiniLM produces a 384-dimensional L2-normalized vector. Concatenate it after the 26 structured features.</li>
+<li><strong>Embed and combine features.</strong> The SBERT encoder (Sentence-BERT, multilingual MiniLM-L12-v2) produces a 384-dimensional L2-normalized vector. Concatenate it after the 26 structured features.</li>
 <li><strong>Classify and display.</strong> Logistic Regression produces class probabilities and triage level 1-4. The existing low-signal confidence cap and warnings remain part of scoring.</li>
 </ol></section>
 
 <section class="band"><div><h2>Feature assembly</h2><h3>410 classifier inputs</h3></div>
-<div class="vector"><div class="vseg-num"><b>NUMERIC: 6</b><span>age and vitals<br>StandardScaler</span></div><div class="vseg-cat"><b>CATEGORICAL: 20</b><span>four fields<br>one-hot encoding</span></div><div class="vseg-emb"><b>EMBEDDING: 384</b><span>MiniLM-L12-v2<br>L2-normalized</span></div></div>
+<div class="vector"><div class="vseg-num"><b>NUMERIC: 6</b><span>age and vitals<br>StandardScaler</span></div><div class="vseg-cat"><b>CATEGORICAL: 20</b><span>four fields<br>one-hot encoding</span></div><div class="vseg-emb"><b>EMBEDDING: 384</b><span>SBERT MiniLM-L12-v2<br>L2-normalized</span></div></div>
 <p>The six numeric inputs are age, heart rate, systolic and diastolic blood pressure, temperature and SpO2. Gender, arrival mode, AVPU and ECG status supply the categorical columns. The embedding block is not standardized again.</p>
 <p>The manifest must declare structured features followed by embeddings. Model loading rejects unsupported layouts and checks the classifier input width. A missing bundle does not select a replacement classifier.</p></section>
 

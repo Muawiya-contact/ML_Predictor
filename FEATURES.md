@@ -191,8 +191,9 @@ sentence into numbers in front of you.
 
 ## 6. Embedding classifier
 
-The deployed English bundle uses configuration C: 384-dimensional MiniLM
-embeddings plus 26 structured features, with Logistic Regression. The training
+The deployed English bundle uses configuration C: 384-dimensional SBERT
+(Sentence-BERT, multilingual MiniLM-L12-v2) embeddings plus 26 structured
+features, with Logistic Regression. The training
 script compares raw (B) and preprocessed (C) text on the same split; the default
 deployment is C. The bundle's manifest and metrics describe the active model.
 

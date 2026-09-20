@@ -7,7 +7,7 @@ Fully offline: Roman Urdu -> local LLM translation -> triage + department.
     raw Roman Urdu
           |
           v
-    Ollama (llama3.2, localhost:11434)  ....... normalises noisy text
+    Ollama (Qwen2.5, localhost:11434)  ...... normalises noisy text
           |
       standard English
           |
@@ -60,7 +60,7 @@ if _ROOT not in sys.path:
 import numpy as np
 
 OLLAMA_URL = "http://localhost:11434"
-OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2:latest")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:latest")
 MODEL_DIR = os.path.join(_ROOT, "models_src")
 #: ONE threshold for the embedding safety gate, at 0.75.
 #:
@@ -280,12 +280,18 @@ def ollama_models(url: str = OLLAMA_URL, timeout: float = 5.0) -> list:
 
 #: Preference order for translation. Any of these will do the job; the
 #: list exists so a machine that already has SOME capable model is never
-#: told to download another one. Matched by prefix, so "llama3.2:latest",
-#: "llama3.2:3b" and "llama3.2" all satisfy the "llama3.2" entry.
+#: told to download another one. Matched by prefix, so "qwen2.5:latest",
+#: "qwen2.5:7b" and "qwen2.5" all satisfy the "qwen2.5" entry.
 MODEL_PREFERENCE = [
-    # llama3.2 FIRST, on measured evidence rather than size. Head to head on
-    # the same five complaints, with the clinical SYSTEM_PROMPT applied to
-    # both: llama3.2 (2 GB) scored 5/5, med-translator and raw qwen2.5:7b
+    # The deployed architecture (paper, Modelfile at the repo root, GUI,
+    # scripts) targets Qwen2.5 as the offline CPU translator, so qwen2.5
+    # comes first. When it is not installed, llama3.2 is the fallback:
+    # it was measurably the stronger translator in the head-to-head below,
+    # so a machine that already has it keeps it instead of being ordered
+    # to download a bigger model.
+    #
+    # Measured on the same five complaints, clinical SYSTEM_PROMPT applied
+    # to both: llama3.2 (2 GB) scored 5/5, med-translator and raw qwen2.5:7b
     # (4.7 GB) scored 4/5. Both larger models dropped "pait" (abdomen) from
     # "pait mein dard aur ulti", rendering it as bare "pain and vomiting" -
     # the exact anatomical loss the Modelfile rules exist to prevent - and
@@ -296,7 +302,7 @@ MODEL_PREFERENCE = [
     # The earlier "llama3.2 is bad" reading came from BEFORE the clinical
     # prompt existed - it scored 2/5 then. The prompt, not the model size,
     # was the fix.
-    "llama3.2", "med-translator", "qwen2.5", "qwen2", "llama3.1", "llama3",
+    "qwen2.5", "med-translator", "qwen2", "llama3.2", "llama3.1", "llama3",
     "mistral", "gemma2", "gemma", "phi3",
 ]
 
@@ -330,7 +336,7 @@ def select_translation_model(available: Sequence[str] | None = None,
     return names[0]
 
 
-def pull_model(model: str = "llama3.2", url: str = OLLAMA_URL,
+def pull_model(model: str = "qwen2.5", url: str = OLLAMA_URL,
                progress=None, timeout: float = 3600.0) -> tuple:
     """Download a model through Ollama's streaming pull endpoint.
 
@@ -497,7 +503,7 @@ def translate_roman_urdu(text: str, model: str = OLLAMA_MODEL,
     # a 404 that reads like a server fault rather than "you have no model".
     resolved = select_translation_model(preferred=model)
     if resolved is None:
-        print("[ollama] no models installed - try: ollama pull llama3.2",
+        print("[ollama] no models installed - try: ollama pull qwen2.5",
               flush=True)
         return None
     model = resolved

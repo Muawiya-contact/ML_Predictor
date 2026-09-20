@@ -4,7 +4,8 @@
 
 Roman Urdu complaint -> fuzzy spelling normalization -> local Ollama English
 translation -> refusal filtering -> deterministic anatomical gate -> learned
-English stop-word removal -> MiniLM sentence embedding -> concatenation with
+English stop-word removal -> SBERT (Sentence-BERT, multilingual MiniLM-L12-v2)
+sentence embedding -> concatenation with
 structured features -> Logistic Regression -> triage level 1-4.
 
 `triage_model_embedding_english/` is the active 410-feature bundle:

@@ -98,7 +98,7 @@ def predict_translated_dataframe(art, df):
     for i, text in enumerate(originals):
         try:
             if model is None:
-                raise RuntimeError('No local translation model is available. Start Ollama and install llama3.2.')
+                raise RuntimeError('No local translation model is available. Start Ollama and install qwen2.5.')
             english = translate_roman_urdu(text, model=model)
             if not english:
                 raise RuntimeError('Translation failed or the complaint has no medical signal.')

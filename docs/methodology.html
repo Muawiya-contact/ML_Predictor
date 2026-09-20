@@ -355,7 +355,7 @@ trade for a system whose output a person has to be willing to act on.</p>
   <rect x="76" y="104" width="238" height="38" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1.1"/>
   <text x="86" y="117" font-size="7.5" font-weight="700" fill="#8C2620">2</text>
   <text x="195" y="118" font-size="9" font-weight="650" text-anchor="middle" fill="#14181B">Local neural translation</text>
-  <text x="195" y="129" font-size="7.6" text-anchor="middle" fill="#6B767D">Ollama · llama3.2 · temperature 0.0</text>
+  <text x="195" y="129" font-size="7.6" text-anchor="middle" fill="#6B767D">Ollama · Qwen2.5 · temperature 0.0</text>
   <text x="195" y="138" font-size="7.6" text-anchor="middle" fill="#6B767D">127.0.0.1:11434 — no network egress</text>
 
   <line x1="195" y1="142" x2="195" y2="154" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
@@ -608,7 +608,7 @@ corruption counts at 0.80 were measured on the full corpus, not estimated.</figc
 <p>The classifier operates on English. Roman Urdu complaints are therefore
 translated first, by a language model running on the same machine through a
 local HTTP service bound to <span class="m">127.0.0.1:11434</span>. The default
-model is <span class="m">llama3.2</span>, sampled at temperature 0.0 so that the
+model is <span class="m">qwen2.5</span>, sampled at temperature 0.0 so that the
 same complaint yields the same translation on every run — a property the
 regression tests depend on. Translation is the slowest stage in the pipeline at
 roughly eleven seconds per complaint, and it accounts for almost all of the
@@ -1172,7 +1172,7 @@ percentage.</p>
 
 <h4>Training and serving translate differently</h4>
 <p>Training text was translated by <span class="m">gpt-4o-mini</span> via a
-hosted API; serving translates locally with <span class="m">llama3.2</span>.
+hosted API; serving translates locally with <span class="m">qwen2.5</span>.
 The model has therefore learned the vocabulary and phrasing habits of one
 translator and is served text from another. Any systematic divergence between
 them is a distribution shift the reported test accuracy does not capture,
