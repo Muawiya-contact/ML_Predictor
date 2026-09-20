@@ -240,7 +240,7 @@ address bar).
 | Triage my own file                        | `python predict_batch.py my_patients.xlsx`         |
 | Triage one complaint from the terminal    | `python run_inference.py "seena mein dard"`        |
 | Check Ollama, encoder and classifiers     | `python run_inference.py --check`                  |
-| Start the local translator                | `ollama serve` then `ollama pull llama3.2`         |
+| Start the local translator                | `ollama serve` then `ollama pull qwen2.5`         |
 | See files in the current folder           | `dir`                                              |
 | Check Python is installed                 | `python --version`                                 |
 

@@ -80,21 +80,25 @@ design, it reports the problem instead of guessing.
    ollama serve
    ```
    On Linux, `sudo systemctl enable --now ollama` makes it survive a reboot.
-3. Pull the model (about 2 GB, one time, needs internet):
+3. Pull the model (about 4.7 GB, one time, needs internet):
    ```bash
-   ollama pull llama3.2
+   ollama pull qwen2.5
    ```
 
-Any of these also work if one is already installed: `qwen2.5`, `mistral`,
+Any of these also work if one is already installed: `llama3.2`, `mistral`,
 `gemma2`, `phi3`. The app picks whichever it finds and prints which one it
 used — it does not force a download when a usable model is already present.
+Qwen2.5 is the translator the paper describes; llama3.2 is kept as a
+fallback on machines that already have it.
 
 ---
 
 ## Step 4 — First run downloads the sentence encoder
 
-The first prediction downloads a small multilingual encoder (a few hundred
-MB) into the Hugging Face cache and reuses it forever after. **This one step
+The first prediction downloads the SBERT (Sentence-BERT) encoder
+`paraphrase-multilingual-MiniLM-L12-v2` — the 384-dimensional multilingual
+checkpoint the deployed classifier was fitted on — into the Hugging Face
+cache and reuses it forever after (a few hundred MB). **This one step
 needs internet.** Everything after it is offline.
 
 Warm it up before demoing, so a live audience does not sit through a
@@ -124,8 +128,8 @@ of it translation.
 Two test suites ship with the project. Both need Ollama running.
 
 ```bash
-python tests/audit_pipeline.py     # 16 checks - translation, safety gate, dictionary
-python tests/audit_gui.py          # 17 checks - builds the real window, drives every tab
+python tests/audit_pipeline.py     # 23 checks - translation, safety gate, dictionary
+python tests/audit_gui.py          # 18 checks - builds the real window, drives every tab
 ```
 
 All checks passing is the definition of "correctly installed". If any fail,
