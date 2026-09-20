@@ -11,12 +11,10 @@
 #   python predict_batch.py my_patients.xlsx
 #   python predict_batch.py my_patients.csv
 #   python predict_batch.py my_patients.xlsx  results.xlsx
-#   python predict_batch.py my_patients.csv --model-dir triage_model
+#   python predict_batch.py my_patients.csv --model-dir triage_model_embedding_english
 #
-# By default this runs the DEPLOYED model in triage_model_embedding/ (the
-# offline sentence-embedding pipeline). Pass --model-dir triage_model to
-# run the older dictionary + Bag-of-Words model instead. Whichever runs is
-# printed at startup, so the method behind a result sheet is never a guess.
+# The default English embedding bundle requires local translation and the
+# anatomical gate before scoring. Failed rows retain a reason and no score.
 #
 # CSV files are read with encoding detection (utf-8 -> utf-8-sig -> cp1252
 # -> latin-1), so a sheet exported from Excel on Windows no longer fails
@@ -85,6 +83,61 @@ def write_table(df, base_path_no_ext):
     return written
 
 
+def predict_translated_dataframe(art, df):
+    """Translate and gate input rows before passing English to the classifier."""
+    from src.offline_pipeline import (
+        fuzzy_normalize_roman_urdu, ollama_models, select_translation_model,
+        translate_roman_urdu, verify_anatomical_integrity,
+    )
+    if art['manifest'].get('text_column') != 'English_Translation':
+        return predict_dataframe(art, df)[0]
+    work = df.copy().reset_index(drop=True)
+    originals = work.get('Complaint_Text', pd.Series('', index=work.index)).fillna('').astype(str)
+    model = select_translation_model(ollama_models()) if len(work) else None
+    translations, statuses, details, accepted = [], [], [], []
+    for i, text in enumerate(originals):
+        try:
+            if model is None:
+                raise RuntimeError('No local translation model is available. Start Ollama and install llama3.2.')
+            english = translate_roman_urdu(text, model=model)
+            if not english:
+                raise RuntimeError('Translation failed or the complaint has no medical signal.')
+            ok, reasons = verify_anatomical_integrity(
+                fuzzy_normalize_roman_urdu(text, verbose=False), english)
+            translations.append(english)
+            statuses.append('PASS' if ok else 'BLOCKED')
+            details.append('; '.join(reasons))
+            if ok:
+                accepted.append(i)
+        except Exception as exc:
+            translations.append(None)
+            statuses.append('NOT TRANSLATED')
+            details.append(str(exc))
+    work['Complaint_Text'] = translations
+    scored, _ = predict_dataframe(art, work.loc[accepted])
+    results = work.copy()
+    # A previously exported result sheet may be uploaded again. Never retain
+    # its old scores on a row that this run refuses to classify.
+    for col in ('Predicted_Level_0to3', 'Predicted_Triage_Level',
+                'Predicted_Label', 'Confidence', 'P_L0', 'P_L1', 'P_L2', 'P_L3'):
+        results[col] = pd.Series(index=results.index, dtype=object)
+    for col in scored.columns:
+        if col not in results:
+            results[col] = pd.Series(index=results.index, dtype=object)
+    if accepted:
+        for col in scored.columns:
+            results.loc[accepted, col] = scored[col].to_numpy()
+    results['Complaint_Text'] = originals
+    results['Translation_English'] = translations
+    results['Gate_Status'] = statuses
+    results['Gate_Detail'] = details
+    for i, status in enumerate(statuses):
+        if status != 'PASS':
+            results.loc[i, 'Notes'] = f'NOT SCORED - {status}: {details[i]}'
+    results.index = df.index
+    return results
+
+
 def main():
     # ---- resolve input / output paths ----
     argv = [a for a in sys.argv[1:]]
@@ -95,7 +148,7 @@ def main():
         # the flag is passed with nothing after it.
         if i + 1 >= len(argv):
             print("[error] --model-dir needs a directory, e.g. "
-                  "--model-dir triage_model")
+                  "--model-dir triage_model_embedding_english")
             sys.exit(1)
         model_dir = argv[i + 1]
         del argv[i:i + 2]
@@ -141,7 +194,7 @@ def main():
 
     # ---- predict ----
     print("Predicting triage levels...")
-    results, _ = predict_dataframe(art, df)
+    results = predict_translated_dataframe(art, df)
 
     # ---- save ----
     written = write_table(results, out_base)
@@ -161,6 +214,7 @@ def main():
         bar = "#" * n
         print(f"  Level {lvl} ({label_names[lvl]:<10}) : {n:>4}  {bar}")
     print(f"  {'TOTAL':<22} : {len(results):>4}")
+    print(f"  {'NOT SCORED':<22} : {results['Predicted_Triage_Level'].isna().sum():>4}")
 
     # ---- preview first rows ----
     print("\n" + "-" * 78)
@@ -174,8 +228,8 @@ def main():
 
     notes = results[results['Notes'].astype(str).str.len() > 0]
     if len(notes):
-        print(f"\n[note] {len(notes)} row(s) had missing/unknown values that were "
-              f"auto-filled. See the 'Notes' column in the output file.")
+        print(f"\n[note] {len(notes)} row(s) have input or translation notes. "
+              "See the 'Notes' column in the output file.")
 
     print("\nDone.")
 

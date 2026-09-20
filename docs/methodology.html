@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ML_Predictor — Methodology</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 20mm 20mm 20mm;
+  }
+
+  :root {
+    --ink:      #14181B;
+    --ink-2:    #3D474E;
+    --ink-3:    #6B767D;
+    --rule:     #C8D0D4;
+    --rule-2:   #E3E8EA;
+    --accent:   #8C2620;
+    --tint:     #F5F1F0;
+    --tint-2:   #F7F8F9;
+    --serif:    "Charter", "Bitstream Charter", "Sitka Text", Cambria, "Times New Roman", Georgia, serif;
+    --sans:     "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --mono:     "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  body {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 10.2pt;
+    line-height: 1.52;
+    color: var(--ink);
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+
+  /* ---------- title block ---------- */
+  .titleblock {
+    border-bottom: 1.6pt solid var(--ink);
+    padding-bottom: 12pt;
+    margin-bottom: 18pt;
+    text-align: left;
+  }
+  .kicker {
+    font-family: var(--sans);
+    font-size: 7.6pt;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 650;
+    margin-bottom: 9pt;
+  }
+  h1 {
+    font-size: 19pt;
+    line-height: 1.2;
+    margin: 0 0 8pt;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    font-size: 11pt;
+    color: var(--ink-2);
+    font-style: italic;
+    margin: 0 0 12pt;
+    line-height: 1.4;
+  }
+  .byline {
+    font-family: var(--sans);
+    font-size: 8.6pt;
+    color: var(--ink-3);
+    line-height: 1.6;
+  }
+
+  /* ---------- abstract ---------- */
+  .abstract {
+    background: var(--tint-2);
+    border-left: 2.5pt solid var(--accent);
+    padding: 11pt 14pt;
+    margin: 0 0 20pt;
+    font-size: 9.5pt;
+    line-height: 1.5;
+  }
+  .abstract .lbl {
+    font-family: var(--sans);
+    font-size: 7.4pt;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 650;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 5pt;
+  }
+  .abstract p { margin: 0 0 7pt; }
+  .abstract p:last-child { margin-bottom: 0; }
+
+  /* ---------- headings ---------- */
+  h2 {
+    font-family: var(--sans);
+    font-size: 12pt;
+    font-weight: 640;
+    margin: 20pt 0 8pt;
+    padding-bottom: 4pt;
+    border-bottom: 0.7pt solid var(--rule);
+    letter-spacing: -0.005em;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-family: var(--sans);
+    font-size: 10pt;
+    font-weight: 620;
+    margin: 14pt 0 5pt;
+    color: var(--ink);
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-family: var(--sans);
+    font-size: 9pt;
+    font-weight: 620;
+    margin: 11pt 0 4pt;
+    color: var(--ink-2);
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  p { margin: 0 0 8pt; orphans: 2; widows: 2; }
+
+  /* ---------- inline ---------- */
+  code, .m {
+    font-family: var(--mono);
+    font-size: 8.6pt;
+    background: var(--tint-2);
+    padding: 0.5pt 3pt;
+    border-radius: 2pt;
+    border: 0.4pt solid var(--rule-2);
+  }
+  strong { font-weight: 640; }
+  em { font-style: italic; }
+
+  /* ---------- figures ---------- */
+  figure {
+    margin: 14pt 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    text-align: center;
+  }
+  figure svg { max-width: 100%; height: auto; }
+  figcaption {
+    font-family: var(--sans);
+    font-size: 8.2pt;
+    line-height: 1.45;
+    color: var(--ink-2);
+    margin-top: 7pt;
+    text-align: left;
+  }
+  figcaption .fnum {
+    font-weight: 650;
+    color: var(--ink);
+  }
+
+  /* ---------- tables ---------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    font-size: 8.4pt;
+    margin: 6pt 0 4pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  caption {
+    font-family: var(--sans);
+    font-size: 8.2pt;
+    color: var(--ink-2);
+    text-align: left;
+    margin-bottom: 6pt;
+    line-height: 1.45;
+  }
+  caption .fnum { font-weight: 650; color: var(--ink); }
+  th {
+    text-align: left;
+    font-weight: 620;
+    padding: 5pt 7pt;
+    border-bottom: 1pt solid var(--ink);
+    border-top: 0.7pt solid var(--ink);
+    font-size: 8pt;
+  }
+  td {
+    padding: 4.5pt 7pt;
+    border-bottom: 0.4pt solid var(--rule-2);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: 0.7pt solid var(--ink); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .win { background: var(--tint); font-weight: 640; }
+
+  /* ---------- callouts ---------- */
+  .note {
+    border: 0.7pt solid var(--rule);
+    border-left: 2.5pt solid var(--ink-3);
+    background: var(--tint-2);
+    padding: 9pt 12pt;
+    margin: 11pt 0;
+    font-size: 9.2pt;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .note.warn {
+    border-left-color: var(--accent);
+    background: var(--tint);
+  }
+  .note .lbl {
+    font-family: var(--sans);
+    font-size: 7.4pt;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    font-weight: 650;
+    color: var(--ink-3);
+    display: block;
+    margin-bottom: 4pt;
+  }
+  .note.warn .lbl { color: var(--accent); }
+  .note p { margin: 0 0 6pt; }
+  .note p:last-child { margin-bottom: 0; }
+
+  /* ---------- lists ---------- */
+  ul, ol { margin: 0 0 8pt; padding-left: 16pt; }
+  li { margin-bottom: 3.5pt; }
+
+  /* ---------- pipeline text ---------- */
+  .pipe {
+    font-family: var(--mono);
+    font-size: 8.4pt;
+    background: var(--tint-2);
+    border: 0.5pt solid var(--rule-2);
+    padding: 8pt 10pt;
+    margin: 8pt 0;
+    text-align: center;
+    line-height: 1.7;
+    break-inside: avoid;
+  }
+
+  .pagebreak { break-before: page; page-break-before: always; }
+
+  /* ---------- footer rule ---------- */
+  .endnote {
+    margin-top: 22pt;
+    padding-top: 9pt;
+    border-top: 0.7pt solid var(--rule);
+    font-family: var(--sans);
+    font-size: 7.8pt;
+    color: var(--ink-3);
+    line-height: 1.5;
+    text-align: left;
+  }
+
+  /* svg text defaults */
+  svg text { font-family: "Inter", "Segoe UI", Arial, sans-serif; }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+  <div class="kicker">Chapter 3 · Methodology</div>
+  <h1>A Locally-Executed Triage Pipeline for<br>Roman Urdu Emergency Complaints</h1>
+  <p class="subtitle">Learned stop-word removal, offline neural translation, and a deterministic
+  anatomical safety gate for a four-level cardiac triage classifier</p>
+  <p class="byline">
+    ML_Predictor · Research prototype<br>
+    Model bundle <span class="m">triage_model_embedding_english/</span> · trained 9 September 2026
+  </p>
+</div>
+
+<div class="abstract">
+  <span class="lbl">Abstract</span>
+  <p>This chapter describes how the system was built and why each component
+  was chosen. The task is to take a patient complaint written in Roman Urdu —
+  Urdu typed in the Latin alphabet, as it is actually written on a phone in a
+  Pakistani emergency department — together with the patient's vital signs, and
+  return a triage level from 1 (most urgent) to 4 (least urgent).</p>
+
+  <p>Three design commitments shape everything that follows. First, every stage
+  of inference runs on the clinician's own machine; no complaint text leaves it.
+  Second, the stop-word list is <em>learned</em> from labelled data rather than
+  hand-written, because no published Roman Urdu stop-word list exists and an
+  ad-hoc one cannot be reproduced by anyone else. Third, the system is
+  permitted to refuse. When its internal checks fail it returns no triage level
+  at all, on the view that in this setting a withheld answer is safer than a
+  confident wrong one.</p>
+
+  <p>We report an ablation across two embedding configurations, the deployed
+  model's performance on 451 held-out cases, and — at some length — the
+  approaches we tried and abandoned, because several of those negative results
+  informed the final architecture. The embedding comparison is reported in §3.9.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>3.1 &nbsp;System overview</h2>
+
+<p>The system is a pipeline, not a single model. A complaint entered in Roman
+Urdu passes through six stages before a triage level is produced, and it can be
+stopped at three of them. Figure&nbsp;1 shows the whole path.</p>
+
+<p>It is worth being explicit about why a pipeline rather than an end-to-end
+model. An end-to-end classifier trained directly on Roman Urdu text would be
+simpler to describe and simpler to train. It would also be opaque at exactly
+the moment it matters: when a clinician asks why a complaint was rated
+Level&nbsp;1, "the network decided" is not a usable answer. Every stage in
+Figure&nbsp;1 produces an intermediate artefact a human can read — the English
+translation, the normalised token string, the list of removed stop words, the
+final feature vector — and the interface displays all of them. The cost is a
+longer pipeline with more places to fail. We considered that an acceptable
+trade for a system whose output a person has to be willing to act on.</p>
+
+<figure>
+<svg viewBox="0 0 680 392" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="End-to-end pipeline diagram">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#3D474E"/>
+    </marker>
+    <marker id="arR" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#8C2620"/>
+    </marker>
+  </defs>
+
+  <text x="4" y="20" font-size="8" font-weight="700" fill="#8C2620" letter-spacing="1.2">INPUT</text>
+  <text x="4" y="130" font-size="8" font-weight="700" fill="#8C2620" letter-spacing="1.2">TEXT PATH</text>
+  <text x="4" y="272" font-size="8" font-weight="700" fill="#8C2620" letter-spacing="1.2">ENCODE</text>
+  <text x="4" y="342" font-size="8" font-weight="700" fill="#8C2620" letter-spacing="1.2">OUTPUT</text>
+
+  <rect x="76" y="6" width="238" height="32" rx="3" fill="#F7F8F9" stroke="#C8D0D4" stroke-width="0.9"/>
+  <text x="195" y="20" font-size="9" font-weight="650" text-anchor="middle" fill="#14181B">Complaint (Roman Urdu)</text>
+  <text x="195" y="32" font-size="8" text-anchor="middle" fill="#6B767D" font-style="italic">"seena mein dard hai"</text>
+
+  <rect x="374" y="6" width="230" height="32" rx="3" fill="#F7F8F9" stroke="#C8D0D4" stroke-width="0.9"/>
+  <text x="489" y="20" font-size="9" font-weight="650" text-anchor="middle" fill="#14181B">Structured observations</text>
+  <text x="489" y="32" font-size="8" text-anchor="middle" fill="#6B767D">age · vitals · ECG · AVPU · arrival</text>
+
+  <line x1="195" y1="38" x2="195" y2="50" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
+  <line x1="489" y1="38" x2="489" y2="256" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
+
+  <rect x="76" y="52" width="238" height="38" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1.1"/>
+  <text x="86" y="65" font-size="7.5" font-weight="700" fill="#8C2620">1</text>
+  <text x="195" y="66" font-size="9" font-weight="650" text-anchor="middle" fill="#14181B">Normalise &amp; fuzzy-correct</text>
+  <text x="195" y="77" font-size="7.6" text-anchor="middle" fill="#6B767D">245-term dictionary · fuzzy cut-off 0.88</text>
+  <text x="195" y="86" font-size="7.4" text-anchor="middle" fill="#8C2620">operates on Roman Urdu, before translation</text>
+
+  <line x1="195" y1="90" x2="195" y2="102" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
+
+  <rect x="76" y="104" width="238" height="38" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1.1"/>
+  <text x="86" y="117" font-size="7.5" font-weight="700" fill="#8C2620">2</text>
+  <text x="195" y="118" font-size="9" font-weight="650" text-anchor="middle" fill="#14181B">Local neural translation</text>
+  <text x="195" y="129" font-size="7.6" text-anchor="middle" fill="#6B767D">Ollama · llama3.2 · temperature 0.0</text>
+  <text x="195" y="138" font-size="7.6" text-anchor="middle" fill="#6B767D">127.0.0.1:11434 — no network egress</text>
+
+  <line x1="195" y1="142" x2="195" y2="154" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
+
+  <rect x="76" y="156" width="238" height="38" rx="3" fill="#F5F1F0" stroke="#8C2620" stroke-width="1.2"/>
+  <text x="86" y="169" font-size="7.5" font-weight="700" fill="#8C2620">3</text>
+  <text x="195" y="170" font-size="9" font-weight="650" text-anchor="middle" fill="#8C2620">Anatomical safety gate</text>
+  <text x="195" y="181" font-size="7.6" text-anchor="middle" fill="#6B767D">deterministic assertion, not a score</text>
+  <text x="195" y="190" font-size="7.6" text-anchor="middle" fill="#6B767D">body part in → same body part out</text>
+
+  <path d="M314 175 L346 175 L346 214" fill="none" stroke="#8C2620" stroke-width="1.1"
+        stroke-dasharray="3.5 2.5" marker-end="url(#arR)"/>
+  <text x="351" y="180" font-size="7.6" font-weight="650" fill="#8C2620">fail</text>
+  <text x="351" y="190" font-size="7.4" fill="#8C2620">→ refuse, no</text>
+  <text x="351" y="200" font-size="7.4" fill="#8C2620">level issued</text>
+
+  <line x1="195" y1="194" x2="195" y2="206" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
+
+  <rect x="76" y="208" width="238" height="34" rx="3" fill="#F5F1F0" stroke="#8C2620" stroke-width="1.2"/>
+  <text x="86" y="221" font-size="7.5" font-weight="700" fill="#8C2620">4</text>
+  <text x="195" y="222" font-size="9" font-weight="650" text-anchor="middle" fill="#8C2620">Learned stop-word removal</text>
+  <text x="195" y="233" font-size="7.6" text-anchor="middle" fill="#6B767D">Contribution 1 · 68 tokens · §3.6</text>
+
+  <line x1="195" y1="242" x2="195" y2="254" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
+
+  <rect x="110" y="256" width="170" height="32" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1.1"/>
+  <text x="195" y="269" font-size="8.6" font-weight="650" text-anchor="middle" fill="#14181B">Sentence encoder</text>
+  <text x="195" y="280" font-size="7.6" text-anchor="middle" fill="#6B767D">384 dim · L2-normalised</text>
+
+  <rect x="404" y="256" width="170" height="32" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1.1"/>
+  <text x="489" y="269" font-size="8.6" font-weight="650" text-anchor="middle" fill="#14181B">Encode + scale</text>
+  <text x="489" y="280" font-size="7.6" text-anchor="middle" fill="#6B767D">26 dim</text>
+
+  <path d="M195 288 L195 302 L300 302" fill="none" stroke="#3D474E" stroke-width="1"/>
+  <path d="M489 288 L489 302 L380 302" fill="none" stroke="#3D474E" stroke-width="1"/>
+
+  <rect x="255" y="304" width="170" height="26" rx="3" fill="#14181B"/>
+  <text x="340" y="321" font-size="8.6" font-weight="650" text-anchor="middle" fill="#FFFFFF">FUSE → 410 features</text>
+
+  <line x1="340" y1="330" x2="340" y2="344" stroke="#3D474E" stroke-width="1" marker-end="url(#ar)"/>
+
+  <rect x="215" y="346" width="250" height="30" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1.3"/>
+  <text x="340" y="360" font-size="9" font-weight="650" text-anchor="middle" fill="#14181B">Logistic regression</text>
+  <text x="340" y="371" font-size="7.6" text-anchor="middle" fill="#6B767D">triage level 1–4 · class_weight balanced</text>
+
+  <path d="M465 361 L512 361" fill="none" stroke="#8C2620" stroke-width="1.1" stroke-dasharray="3.5 2.5" marker-end="url(#arR)"/>
+  <text x="517" y="358" font-size="7.4" fill="#8C2620">confidence capped at</text>
+  <text x="517" y="368" font-size="7.4" fill="#8C2620">0.50 if no text (§3.8.2)</text>
+</svg>
+<figcaption><span class="fnum">Figure 1.</span> The full inference path. Solid
+arrows carry data; dashed red arrows are refusal or suppression routes. One
+ordering detail is easy to get wrong: normalisation and fuzzy correction operate
+on the Roman&nbsp;Urdu text <em>before</em> translation, not on the English text
+afterwards. The structured observations bypass the text path entirely; a
+complaint that fails the safety gate stops the prediction outright rather than
+falling back to vitals alone, because a triage level derived from vitals with
+the complaint silently discarded would look identical to a normal
+prediction.</figcaption>
+</figure>
+
+<!-- ============================================================ -->
+<h2>3.2 &nbsp;Dataset</h2>
+
+<p>The model was trained on <span class="m">cardiac_english_2252.csv</span>:
+2,252 records, four triage classes, SHA-256
+<span class="m">42ab09e2…a728cb1c</span>. That hash is stamped into the model
+bundle at training time, so any deployed model can be traced back to the exact
+bytes it was trained on.</p>
+
+<h3>3.2.1 &nbsp;The data is synthetic</h3>
+
+<p>We state this plainly because it constrains every claim in the results
+section. The records were produced by <span class="m">generate_cardiac_dataset.py</span>
+with seed 20260816. They are not real patient records and must not be described
+as such in any publication or deployment.</p>
+
+<p>The generator does not sample features and then derive a label from them,
+which would make the label a deterministic function of the inputs and the
+learning problem trivial. It samples in the opposite direction: the triage
+level is drawn first from a fixed level mixture, and the complaint text, ECG
+status and vital signs are then drawn conditional on that level, with
+deliberate overlap between adjacent levels. A patient at Level&nbsp;2 and a
+patient at Level&nbsp;3 can present with the same complaint and similar vitals.
+No single feature determines the label, which is what makes the ceiling on
+accuracy meaningful rather than an artefact.</p>
+
+<p>The complaint phrasing is not invented from nothing either. The generator
+draws on a phrase bank derived from the cardiac subset of a 7,855-row corpus
+containing 887 distinct complaints over a 636-word vocabulary; the 22 genuine
+Level-4 complaints in that corpus seed the Level-4 branch. The surface
+language is therefore realistic even though the records are not.</p>
+
+<h3>3.2.2 &nbsp;Scope</h3>
+
+<p>The training data contains cardiac presentations only. Trauma, burns,
+neurological, obstetric and paediatric complaints are out of scope, and the
+model bundle carries this restriction as a machine-readable field so that
+downstream code can check it. This is a real limitation, not a formality: a
+model trained exclusively on chest pain and palpitations will still emit a
+confident triage level for a burn, and that number will be meaningless.</p>
+
+<table>
+  <caption><span class="fnum">Table 1.</span> Training corpus and split.</caption>
+  <thead>
+    <tr><th style="width:42%">Property</th><th>Value</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Source file</td><td><span class="m">cardiac_english_2252.csv</span></td></tr>
+    <tr><td>Records</td><td class="num">2,252</td></tr>
+    <tr><td>Triage classes</td><td>4 (1 = most urgent … 4 = least urgent)</td></tr>
+    <tr><td>Provenance</td><td>Synthetic — generator seed 20260816, 16 Aug 2026</td></tr>
+    <tr><td>Clinical scope</td><td>Cardiac complaints only</td></tr>
+    <tr><td>Train / test split</td><td>1,801 / 451 &nbsp;(80 / 20, stratified)</td></tr>
+    <tr><td>Random state</td><td class="num">42</td></tr>
+    <tr><td>Integrity</td><td>SHA-256 recorded in the model bundle</td></tr>
+  </tbody>
+</table>
+
+<h3>3.2.3 &nbsp;How the English text was obtained</h3>
+
+<p>The deployed pipeline translates Roman Urdu at inference time using a
+language model running locally. The <em>training</em> text was not produced
+that way: it was translated by <span class="m">gpt-4o-mini</span> through a
+hosted API. This asymmetry is discussed in §3.10 because it is a genuine
+threat to validity and we would rather raise it ourselves than have a reader
+find it in the manifest.</p>
+
+<div class="note warn">
+  <span class="lbl">Why 2,252 rows and not 10,000</span>
+  <p>The full corpus contains 10,000 records. Only 2,252 of them — 22.5% — were
+  translated before the translation API exhausted its credits. Rather than
+  train on a mixture of translated and untranslated text, we trained on the
+  translated subset alone. The consequence is that this model's accuracy is
+  <strong>not comparable</strong> to the earlier 10,000-row Roman&nbsp;Urdu
+  model, and the two should never be placed in the same table without this
+  caveat attached.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak">3.3 &nbsp;Text normalisation and fuzzy correction</h2>
+
+<p>Roman Urdu has no orthographic standard. The same word reaches the system
+spelled several ways depending on who typed it — <em>seena</em>, <em>sina</em>,
+<em>seenaa</em> for the chest; <em>dard</em>, <em>dárd</em>, <em>darrd</em> for
+pain. Before any statistical component sees the text, these variants have to be
+collapsed onto a single form, or the vocabulary fragments and every downstream
+count is computed over noise.</p>
+
+<p>Normalisation runs as an ordered sequence, and it is important to be precise
+about <em>where</em> in the pipeline it sits:</p>
+
+<div class="pipe">
+Roman Urdu in → clean → rule replace → fuzzy match → diacritize → <strong>translate</strong>
+</div>
+
+<p>This chain operates on the Roman Urdu complaint <strong>before</strong> it
+reaches the translator, not on the English text that comes out. Collapsing
+spelling variants is what allows the anatomical gate to compare source and
+translation against a single canonical dictionary entry, and it gives the
+language model a cleaner string to work from.</p>
+
+<div class="note">
+  <span class="lbl">The deployed English bundle sets skip_normalization</span>
+  <p>A consequence worth stating rather than leaving implicit. Because the
+  classifier was trained on English text, the bundle carries
+  <span class="m">skip_normalization: true</span>, and the Roman&nbsp;Urdu
+  normaliser is therefore <em>not</em> applied a second time to the English
+  translation when features are built. That is deliberate: pushing "chest pain"
+  back through a Roman&nbsp;Urdu dictionary yields "sēna dárd", which is
+  nothing like what the model was fitted on. Serving honours the same flag as
+  training, so the two agree.</p>
+  <p>The practical reading is that the dictionary and the fuzzy matcher are
+  <strong>translation-stage components</strong> in the deployed system. They
+  shape what the translator sees and what the safety gate can check. They do
+  not touch the feature vector directly.</p>
+</div>
+
+<p>The rule-replace step applies a curated dictionary of 245 terms, organised
+into five groups: 39 Roman Urdu anatomy terms, 21 symptom terms, 49 additional
+clinical terms, 36 explicitly non-cardiac terms used for scope detection, and
+100 English terms. Variants are mapped to a canonical form by grouping on their
+English gloss, so <em>seena</em>, <em>sina</em> and <em>seenaa</em> all resolve
+to one token.</p>
+
+<h3>3.3.1 &nbsp;Choosing the fuzzy threshold</h3>
+
+<p>A curated dictionary cannot anticipate every misspelling, so unmatched
+tokens are passed to an approximate string matcher. This step is the most
+dangerous one in the whole preprocessing chain, because a fuzzy matcher that
+is slightly too permissive does not fail loudly — it silently rewrites the
+patient's words into different words and everything downstream proceeds as
+though nothing happened.</p>
+
+<p>We set the similarity cut-off empirically rather than by intuition. At a
+cut-off of 0.80, a value that looks unremarkable, the matcher corrupted
+<strong>1,619 token occurrences</strong> across the corpus. Two failures
+dominated: the short token <em>sa</em> was rewritten to <em>sar</em> (head)
+729 times, and <em>peene</em> (to drink) was rewritten to <em>seene</em>
+(chest) 116 times. The second is the more alarming of the two — it moves a
+complaint from the digestive tract to the chest, which is precisely the axis
+this system is meant to be sensitive to.</p>
+
+<p>The deployed configuration raises the cut-off to <strong>0.88</strong>,
+refuses to fuzzy-match tokens shorter than four characters, and maintains an
+explicit blocklist of pairs that remain dangerously similar above the
+threshold. The first two constraints alone eliminate both failures above:
+<em>sa</em> is too short to be considered, and <em>peene</em>/<em>seene</em>
+falls below 0.88.</p>
+
+<figure>
+<svg viewBox="0 0 660 176" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fuzzy threshold comparison">
+  <text x="0" y="12" font-size="8.6" font-weight="700" fill="#14181B">Effect of the fuzzy-match cut-off on token corruption</text>
+
+  <!-- axis -->
+  <line x1="118" y1="132" x2="640" y2="132" stroke="#C8D0D4" stroke-width="0.8"/>
+
+  <!-- 0.80 bar -->
+  <text x="112" y="52" font-size="8.4" text-anchor="end" fill="#14181B" font-weight="650">cut-off 0.80</text>
+  <rect x="118" y="38" width="452" height="22" fill="#8C2620"/>
+  <text x="578" y="53" font-size="8.4" fill="#8C2620" font-weight="700">1,619 corrupted</text>
+  <text x="124" y="52" font-size="7.8" fill="#FFFFFF">sa → sar (729×) · peene → seene (116×) · + 774 others</text>
+
+  <!-- 0.88 bar -->
+  <text x="112" y="92" font-size="8.4" text-anchor="end" fill="#14181B" font-weight="650">cut-off 0.88</text>
+  <rect x="118" y="78" width="7" height="22" fill="#3D474E"/>
+  <text x="133" y="93" font-size="8.4" fill="#3D474E" font-weight="700">near-zero</text>
+  <text x="205" y="93" font-size="7.8" fill="#6B767D">+ min length 4 + explicit blocklist</text>
+
+  <!-- guard summary -->
+  <text x="118" y="122" font-size="7.8" fill="#6B767D">Guards, in order applied:</text>
+  <rect x="118" y="127" width="112" height="0" fill="none"/>
+  <rect x="240" y="112" width="128" height="15" rx="2" fill="#F7F8F9" stroke="#C8D0D4" stroke-width="0.6"/>
+  <text x="304" y="122" font-size="7.6" text-anchor="middle" fill="#14181B">length ≥ 4 chars</text>
+  <rect x="376" y="112" width="128" height="15" rx="2" fill="#F7F8F9" stroke="#C8D0D4" stroke-width="0.6"/>
+  <text x="440" y="122" font-size="7.6" text-anchor="middle" fill="#14181B">similarity ≥ 0.88</text>
+  <rect x="512" y="112" width="128" height="15" rx="2" fill="#F7F8F9" stroke="#C8D0D4" stroke-width="0.6"/>
+  <text x="576" y="122" font-size="7.6" text-anchor="middle" fill="#14181B">not in blocklist</text>
+
+  <text x="0" y="158" font-size="7.8" fill="#6B767D">A token must clear all three guards to be rewritten. Anything that fails is left exactly as the patient typed it —</text>
+  <text x="0" y="169" font-size="7.8" fill="#6B767D">an unrecognised token is a smaller problem than a confidently mis-corrected one.</text>
+</svg>
+<figcaption><span class="fnum">Figure 2.</span> Fuzzy matching is constrained by
+three independent guards rather than a single similarity threshold. The
+corruption counts at 0.80 were measured on the full corpus, not estimated.</figcaption>
+</figure>
+
+<!-- ============================================================ -->
+<h2>3.4 &nbsp;Translation into English</h2>
+
+<p>The classifier operates on English. Roman Urdu complaints are therefore
+translated first, by a language model running on the same machine through a
+local HTTP service bound to <span class="m">127.0.0.1:11434</span>. The default
+model is <span class="m">llama3.2</span>, sampled at temperature 0.0 so that the
+same complaint yields the same translation on every run — a property the
+regression tests depend on. Translation is the slowest stage in the pipeline at
+roughly eleven seconds per complaint, and it accounts for almost all of the
+end-to-end latency.</p>
+
+<h3>3.4.1 &nbsp;Refusals, and the prompt structure that resolved them</h3>
+
+<p>An unexpected obstacle: general-purpose instruction-tuned models frequently
+<em>refused</em> to translate cardiac complaints. Presented with a sentence
+describing chest pain, the model would decline and advise the user to seek
+medical attention. This is a reasonable safety behaviour in a consumer chat
+context and a fatal one in a translation component.</p>
+
+<p>Two changes fixed it. The complaint is wrapped in an explicit record
+delimiter, <span class="m">&lt;record&gt;…&lt;/record&gt;</span>, which frames
+the input as a data field to be transformed rather than a message to be
+answered. The conversation is then seeded with worked examples showing the
+model performing exactly this transformation on complaints that appear nowhere
+in the evaluation set — a sore throat and a swollen leg were chosen precisely
+because they are clinically unrelated to anything the system is tested on, so
+they cannot leak an answer.</p>
+
+<p>The system prompt itself is substantial and structured: it establishes the
+operating context, the model's role, an anatomical dictionary, a section
+mapping kinship terms to patients (in Urdu a complaint is often reported about
+<em>ammi</em>, one's mother, rather than in the first person), obstetric and
+emergency vocabulary, symptom mappings that resolve genuine ambiguities, and
+phonetic variation rules.</p>
+
+<div class="note">
+  <span class="lbl">An approach that failed</span>
+  <p>Our first attempt at handling untranslatable input was to instruct the
+  model to emit the token <span class="m">UNCLEAR</span> when it could not
+  produce a faithful translation. This backfired in two directions at once. The
+  retry logic overrode the marker, so it rarely survived; and where it did
+  survive the model had begun parroting the few-shot examples, returning "Leg
+  swelling" for unrelated inputs, while simultaneously refusing a perfectly
+  ordinary complaint of <em>bukhar</em> (fever).</p>
+  <p>We removed the instruction entirely. The lesson we took from it is that
+  asking a language model to police its own reliability puts the check inside
+  the component being checked. Every subsequent guard in this system is
+  deterministic code sitting <em>outside</em> the model, which is the subject
+  of the next section.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak">3.5 &nbsp;The anatomical safety gate</h2>
+
+<p>Translation can fail silently. The model returns fluent, plausible English
+that describes a different complaint from the one the patient reported — most
+consequentially, a complaint about a different part of the body. Since the
+triage level depends heavily on which body part is involved, an undetected
+substitution here corrupts the prediction while leaving every visible signal
+looking healthy.</p>
+
+<h3>3.5.1 &nbsp;Semantic similarity was measured, and rejected</h3>
+
+<p>The natural approach is to embed the source and the translation in a shared
+multilingual space and require their cosine similarity to exceed a threshold.
+We implemented this, and then measured whether the threshold could actually
+separate good translations from bad ones. It could not.</p>
+
+<p>A correct translation of a chest-pain complaint scored <strong>0.8054</strong>.
+The translation "My leg is broken" — wrong body part, wrong injury, wrong
+mechanism, wrong triage level — scored <strong>0.7922</strong> against the same
+source. The gap is 0.013. No threshold placed anywhere in that region separates
+the two classes, and one placed tightly enough to catch the failure rejects a
+large share of correct translations along with it.</p>
+
+<figure>
+<svg viewBox="0 0 660 148" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cosine similarity fails to separate">
+  <text x="0" y="12" font-size="8.6" font-weight="700" fill="#14181B">Why the similarity threshold was abandoned</text>
+
+  <!-- scale -->
+  <line x1="40" y1="76" x2="620" y2="76" stroke="#14181B" stroke-width="0.9"/>
+  <text x="40" y="94" font-size="7.6" text-anchor="middle" fill="#6B767D">0.70</text>
+  <text x="620" y="94" font-size="7.6" text-anchor="middle" fill="#6B767D">0.85</text>
+  <text x="330" y="94" font-size="7.6" text-anchor="middle" fill="#6B767D">cosine similarity to source</text>
+
+  <!-- ticks -->
+  <line x1="40" y1="76" x2="40" y2="81" stroke="#14181B" stroke-width="0.9"/>
+  <line x1="620" y1="76" x2="620" y2="81" stroke="#14181B" stroke-width="0.9"/>
+
+  <!-- 0.7922 wrong  -> x = 40 + (0.7922-0.70)/0.15*580 = 40 + 356.7 = 396.7 -->
+  <line x1="397" y1="76" x2="397" y2="48" stroke="#8C2620" stroke-width="1.2"/>
+  <circle cx="397" cy="48" r="4" fill="#8C2620"/>
+  <text x="397" y="40" font-size="8" text-anchor="middle" font-weight="700" fill="#8C2620">0.7922</text>
+  <text x="397" y="30" font-size="7.6" text-anchor="middle" fill="#8C2620">“My leg is broken”</text>
+  <text x="397" y="21" font-size="7.4" text-anchor="middle" fill="#8C2620">(completely wrong)</text>
+
+  <!-- 0.8054 correct -> 40 + (0.1054)/0.15*580 = 40 + 407.5 = 447.5 -->
+  <line x1="448" y1="76" x2="448" y2="112" stroke="#3D474E" stroke-width="1.2"/>
+  <circle cx="448" cy="112" r="4" fill="#3D474E"/>
+  <text x="448" y="126" font-size="8" text-anchor="middle" font-weight="700" fill="#3D474E">0.8054</text>
+  <text x="448" y="136" font-size="7.6" text-anchor="middle" fill="#3D474E">correct translation</text>
+
+  <!-- gap bracket -->
+  <path d="M397 66 L397 61 L448 61 L448 66" fill="none" stroke="#6B767D" stroke-width="0.8"/>
+  <text x="422" y="57" font-size="7.4" text-anchor="middle" fill="#6B767D">gap = 0.013</text>
+</svg>
+<figcaption><span class="fnum">Figure 3.</span> The two cases a similarity gate
+must separate, plotted on the same axis. A correct translation and a completely
+incorrect one are 0.013 apart. This measurement, not a design preference, is why
+the gate is deterministic.</figcaption>
+</figure>
+
+<h3>3.5.2 &nbsp;A deterministic assertion instead</h3>
+
+<p>The deployed gate makes no numerical judgement. It asserts a property:
+<strong>if the source complaint names a body part, the English translation must
+name the corresponding body part.</strong> The mapping between them comes from
+the curated anatomy dictionary, so both sides of the assertion are explicit and
+auditable. The gate runs in both directions — it also checks that the
+translation has not <em>introduced</em> anatomy absent from the source, which
+catches the model hallucinating a location.</p>
+
+<p>Matching is on word boundaries. This detail is not incidental. An earlier
+implementation used substring matching and failed in both directions
+simultaneously: it accepted "Patient feels warm" as a valid translation of a
+complaint about the arm (<em>baazu</em>), because "arm" occurs inside "warm";
+and it rejected the entirely correct "Feeling warm and feverish" for the same
+reason. A single regression test would have caught neither, because the bug
+produced a false accept and a false reject that looked like unrelated
+problems.</p>
+
+<p>When the assertion fails, the system produces no triage level. It reports
+which body part was expected, which was found, and that no prediction was
+made.</p>
+
+<!-- ============================================================ -->
+<h2>3.6 &nbsp;Contribution 1: learned stop-word removal</h2>
+
+<p>Roman Urdu has no published stop-word list. The obvious response — writing
+one by hand, listing <em>hai</em>, <em>hain</em>, <em>ke</em>, <em>aur</em> and
+so on — has two problems. It encodes the author's intuitions about a language
+in which those intuitions may be wrong, and it cannot be reproduced or
+challenged by anyone else. We therefore learn the list from labelled training
+complaints using two transparent statistics and three explicit cut-offs.</p>
+
+<h3>3.6.1 &nbsp;The decision rule</h3>
+
+<p>A token is classified as a stop word when all three conditions hold
+simultaneously:</p>
+
+<figure>
+<svg viewBox="0 0 660 214" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Stop-word decision rule">
+  <defs>
+    <marker id="ar2" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#3D474E"/>
+    </marker>
+    <marker id="ar2r" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#8C2620"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="8" width="104" height="40" rx="3" fill="#F7F8F9" stroke="#C8D0D4" stroke-width="0.8"/>
+  <text x="52" y="26" font-size="8.4" font-weight="650" text-anchor="middle" fill="#14181B">Candidate</text>
+  <text x="52" y="38" font-size="8.4" font-weight="650" text-anchor="middle" fill="#14181B">token</text>
+
+  <line x1="104" y1="28" x2="128" y2="28" stroke="#3D474E" stroke-width="1" marker-end="url(#ar2)"/>
+
+  <!-- gate 1 -->
+  <rect x="130" y="8" width="150" height="40" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1"/>
+  <text x="205" y="22" font-size="8.2" font-weight="650" text-anchor="middle" fill="#14181B">1 · Is it common?</text>
+  <text x="205" y="34" font-size="7.6" text-anchor="middle" fill="#6B767D">document frequency ≥ 0.02</text>
+  <text x="205" y="43" font-size="7.4" text-anchor="middle" fill="#6B767D">(75th percentile floor)</text>
+
+  <line x1="280" y1="28" x2="304" y2="28" stroke="#3D474E" stroke-width="1" marker-end="url(#ar2)"/>
+
+  <!-- gate 2 -->
+  <rect x="306" y="8" width="164" height="40" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1"/>
+  <text x="388" y="22" font-size="8.2" font-weight="650" text-anchor="middle" fill="#14181B">2 · Is it uninformative?</text>
+  <text x="388" y="34" font-size="7.6" text-anchor="middle" fill="#6B767D">normalised MI ≤ 0.01</text>
+  <text x="388" y="43" font-size="7.4" text-anchor="middle" fill="#6B767D">I(present ; triage) / H(triage)</text>
+
+  <line x1="470" y1="28" x2="494" y2="28" stroke="#3D474E" stroke-width="1" marker-end="url(#ar2)"/>
+
+  <!-- gate 3 -->
+  <rect x="496" y="8" width="164" height="40" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1"/>
+  <text x="578" y="22" font-size="8.2" font-weight="650" text-anchor="middle" fill="#14181B">3 · Weak effect size?</text>
+  <text x="578" y="34" font-size="7.6" text-anchor="middle" fill="#6B767D">Cramér's V ≤ 0.12</text>
+  <text x="578" y="43" font-size="7.4" text-anchor="middle" fill="#6B767D">on the 2 × K table</text>
+
+  <!-- down to clinical guard -->
+  <path d="M578 48 L578 66 L330 66 L330 84" fill="none" stroke="#3D474E" stroke-width="1" marker-end="url(#ar2)"/>
+  <text x="470" y="62" font-size="7.6" fill="#3D474E">all three hold</text>
+
+  <!-- clinical guard -->
+  <rect x="196" y="86" width="268" height="40" rx="3" fill="#F5F1F0" stroke="#8C2620" stroke-width="1.2"/>
+  <text x="330" y="100" font-size="8.4" font-weight="650" text-anchor="middle" fill="#8C2620">CLINICAL SAFETY GUARD</text>
+  <text x="330" y="112" font-size="7.6" text-anchor="middle" fill="#6B767D">Is the token in the 245-term clinical vocabulary?</text>
+  <text x="330" y="121" font-size="7.4" text-anchor="middle" fill="#6B767D">If yes → protected, and the override is logged</text>
+
+  <!-- outcomes -->
+  <path d="M196 106 L120 106 L120 140" fill="none" stroke="#8C2620" stroke-width="1.1" stroke-dasharray="3.5 2.5" marker-end="url(#ar2r)"/>
+  <rect x="34" y="142" width="172" height="32" rx="3" fill="#FFFFFF" stroke="#8C2620" stroke-width="1"/>
+  <text x="120" y="156" font-size="8.2" font-weight="650" text-anchor="middle" fill="#8C2620">KEPT — protected</text>
+  <text x="120" y="167" font-size="7.4" text-anchor="middle" fill="#6B767D">recorded in protected_from_removal</text>
+
+  <path d="M330 126 L330 140" fill="none" stroke="#3D474E" stroke-width="1" marker-end="url(#ar2)"/>
+  <rect x="244" y="142" width="172" height="32" rx="3" fill="#14181B"/>
+  <text x="330" y="156" font-size="8.2" font-weight="650" text-anchor="middle" fill="#FFFFFF">REMOVED — stop word</text>
+  <text x="330" y="167" font-size="7.4" text-anchor="middle" fill="#C8D0D4">68 tokens in the deployed list</text>
+
+  <path d="M464 106 L540 106 L540 140" fill="none" stroke="#3D474E" stroke-width="1" marker-end="url(#ar2)"/>
+  <rect x="454" y="142" width="172" height="32" rx="3" fill="#FFFFFF" stroke="#C8D0D4" stroke-width="1"/>
+  <text x="540" y="156" font-size="8.2" font-weight="650" text-anchor="middle" fill="#14181B">KEPT — informative</text>
+  <text x="540" y="167" font-size="7.4" text-anchor="middle" fill="#6B767D">any one gate failing is sufficient</text>
+
+  <text x="0" y="198" font-size="7.6" fill="#6B767D">Corpus: 2,252 documents · 625 unique tokens · 113 reached testing (the rest fell below the frequency floor) · 68 removed.</text>
+  <text x="0" y="209" font-size="7.6" fill="#6B767D">χ² and its p-value are computed and recorded per token for transparency, but take no part in the decision — see §3.6.2.</text>
+</svg>
+<figcaption><span class="fnum">Figure 4.</span> The stop-word decision rule.
+Three statistical gates in conjunction, followed by a clinical override that can
+only ever <em>keep</em> a token, never remove one.</figcaption>
+</figure>
+
+<h3>3.6.2 &nbsp;Why effect size rather than significance</h3>
+
+<p>The rule originally used a chi-square test with the conventional
+α&nbsp;=&nbsp;0.05. It did not survive contact with a larger corpus, and the
+reason is a standard property of significance testing that is easy to forget in
+applied work: <strong>p-values shrink as sample size grows.</strong> On a corpus
+of a few hundred documents the test behaved sensibly. On several thousand, it
+began flagging associations of negligible magnitude as statistically
+significant, and the significance requirement then <em>vetoed</em> the removal
+of genuine filler — <em>hai</em> and <em>mein</em> among them — because their
+vanishingly small association with the label was nonetheless detectable at that
+sample size.</p>
+
+<p>We replaced the p-value with Cramér's V, the chi-square-based effect size of
+the same contingency table. V measures the strength of an association rather
+than our confidence that it is non-zero, and it does not drift with corpus
+size. The learned list is consequently stable when the dataset grows, which is
+the property we actually needed. The chi-square statistic and its p-value are
+still computed and written to the report for every token, so a reader can
+inspect them; they simply do not participate in the decision.</p>
+
+<h3>3.6.3 &nbsp;The clinical safety guard</h3>
+
+<p>A purely statistical rule has one failure mode that is unacceptable in this
+domain. On an imbalanced corpus, a genuine symptom word can look uninformative
+simply because it occurs at every triage level — <em>dard</em> (pain) is
+present in Level&nbsp;1 and Level&nbsp;4 complaints alike, so knowing that it
+appears tells you comparatively little about the level. The statistics would
+therefore delete the word "pain" from a triage system.</p>
+
+<p>Tokens in the 245-term clinical vocabulary are exempt from removal.
+Critically, every protected token that the statistics <em>would</em> have
+removed is recorded in the output under
+<span class="m">protected_from_removal</span>. The guard is visible rather than
+hidden, and it can be disabled for ablation. Note that the guard is asymmetric
+by construction: it can only prevent a removal, never cause one, so it cannot
+introduce a failure of its own.</p>
+
+<h3>3.6.4 &nbsp;Avoiding label leakage</h3>
+
+<p>The learner consumes the triage labels. Learning the list on all 2,252
+records and then evaluating on a held-out split would leak test labels into
+preprocessing and inflate the reported result. The training script therefore
+learns stop words <strong>on the training split alone</strong> for every
+evaluation figure in this chapter, and re-learns them on the full dataset only
+afterwards, when producing the shipped artifact. Both lists are written out so
+the difference between them can be inspected.</p>
+
+<h3>3.6.5 &nbsp;Where the removal applies</h3>
+
+<p>The sentence encoder is the only text feature component. Learned stop-word removal applies to its English input before embedding.</p>
+
+<p>Stop-word removal affected <strong>2,208 of 2,252 complaints</strong> —
+nearly the whole corpus — so this is not a marginal transformation applied to a
+handful of records.</p>
+
+<table>
+  <caption><span class="fnum">Table 2.</span> Learned stop-word configuration and outcome.</caption>
+  <thead>
+    <tr><th style="width:46%">Parameter</th><th>Value</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Minimum document frequency</td><td class="num">0.02</td></tr>
+    <tr><td>Document-frequency percentile</td><td class="num">75th</td></tr>
+    <tr><td>Normalised mutual information threshold</td><td class="num">≤ 0.01</td></tr>
+    <tr><td>Cramér's V threshold</td><td class="num">≤ 0.12</td></tr>
+    <tr><td>α (recorded, not used in the decision)</td><td class="num">0.05</td></tr>
+    <tr><td>Clinical terms protected</td><td>Yes (245-term vocabulary)</td></tr>
+    <tr><td>Documents in corpus</td><td class="num">2,252</td></tr>
+    <tr><td>Unique tokens</td><td class="num">625</td></tr>
+    <tr><td>Tokens reaching the statistical test</td><td class="num">113</td></tr>
+    <tr><td><strong>Stop words learned</strong></td><td class="num"><strong>68</strong></td></tr>
+  </tbody>
+</table>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak">3.7 &nbsp;Feature representation and fusion</h2>
+
+<p>The classifier receives a single 410-dimensional vector assembled from two
+blocks: 26 structured features and a 384-dimensional sentence embedding.</p>
+
+<figure>
+<svg viewBox="0 0 660 186" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Feature fusion diagram">
+  <defs>
+    <marker id="ar5" markerWidth="9" markerHeight="9" refX="7.5" refY="3.2" orient="auto">
+      <path d="M0,0 L7.5,3.2 L0,6.4 z" fill="#3D474E"/>
+    </marker>
+  </defs>
+  <text x="0" y="12" font-size="8.6" font-weight="700" fill="#14181B">Feature assembly · two blocks, scaled, then concatenated</text>
+
+  <rect x="0" y="26" width="200" height="76" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1"/>
+  <text x="100" y="43" font-size="8.6" font-weight="650" text-anchor="middle" fill="#14181B">Structured</text>
+  <text x="100" y="58" font-size="15" font-weight="700" text-anchor="middle" fill="#8C2620">26</text>
+  <text x="100" y="72" font-size="7.4" text-anchor="middle" fill="#6B767D">6 numeric: age, HR, systolic,</text>
+  <text x="100" y="81" font-size="7.4" text-anchor="middle" fill="#6B767D">diastolic, temperature, SpO₂</text>
+  <text x="100" y="93" font-size="7.4" text-anchor="middle" fill="#6B767D">20 one-hot: gender 2, arrival 3,</text>
+  <text x="100" y="99" font-size="0.1" fill="#FFFFFF">.</text>
+
+  <rect x="216" y="26" width="200" height="76" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1"/>
+  <text x="316" y="43" font-size="8.6" font-weight="650" text-anchor="middle" fill="#14181B">Sentence embedding</text>
+  <text x="316" y="58" font-size="15" font-weight="700" text-anchor="middle" fill="#8C2620">384</text>
+  <text x="316" y="72" font-size="7.4" text-anchor="middle" fill="#6B767D">paraphrase-multilingual-</text>
+  <text x="316" y="81" font-size="7.4" text-anchor="middle" fill="#6B767D">MiniLM-L12-v2</text>
+  <text x="316" y="93" font-size="7.4" text-anchor="middle" fill="#8C2620">stop words removed first</text>
+
+  <text x="100" y="99" font-size="7.4" text-anchor="middle" fill="#6B767D">AVPU 3, ECG 12</text>
+
+  <path d="M100 102 L100 116" fill="none" stroke="#3D474E" stroke-width="1"/>
+  <path d="M316 102 L316 116" fill="none" stroke="#3D474E" stroke-width="1"/>
+
+  <rect x="0" y="118" width="416" height="26" rx="3" fill="#14181B"/>
+  <text x="208" y="135" font-size="9" font-weight="650" text-anchor="middle" fill="#FFFFFF">26 + 384 = 410-dimensional feature vector</text>
+
+  <path d="M416 131 L446 131" fill="none" stroke="#3D474E" stroke-width="1" marker-end="url(#ar5)"/>
+  <rect x="448" y="118" width="212" height="26" rx="3" fill="#FFFFFF" stroke="#14181B" stroke-width="1.2"/>
+  <text x="554" y="135" font-size="8.6" font-weight="650" text-anchor="middle" fill="#14181B">Logistic regression → level 1–4</text>
+
+  <text x="0" y="164" font-size="7.6" fill="#6B767D">The embedding model is multilingual and CPU-resident: no GPU is required at training or inference. Its 384 dimensions are a</text>
+  <text x="0" y="175" font-size="7.6" fill="#6B767D">property of the published checkpoint, not a tuned hyper-parameter. With one text block there is no cross-block scale competition.</text>
+</svg>
+<figcaption><span class="fnum">Figure 5.</span> Feature assembly: 26 structured features followed by 384 embedding dimensions, giving 410 classifier inputs.</figcaption>
+</figure>
+
+<p>One further implementation note worth recording, because it cost real
+debugging time. Two different sentence encoders appear in this project, and
+both emit 384-dimensional vectors. Mixing them therefore produces no shape error, no
+exception, and no warning — only quietly degraded predictions. The encoder
+identity is now written into the model manifest and checked at load time,
+because dimensional compatibility turned out to be an unreliable proxy for
+actual compatibility.</p>
+
+<!-- ============================================================ -->
+<h2>3.8 &nbsp;Classifier and training protocol</h2>
+
+<p>The classifier is multinomial logistic regression. This is a deliberate
+choice rather than a default. The feature vector already contains a
+384-dimensional neural sentence representation, so the model's capacity to
+represent language does not depend on the classifier being deep; and a linear
+model over named features permits the per-feature attribution the interface
+displays. In a decision-support tool a clinician may override, a coefficient
+that can be read is worth more than a marginal accuracy gain that cannot.</p>
+
+<p>The classifier is fitted with the <span class="m">lbfgs</span> solver,
+<span class="m">max_iter=1200</span>, default L2 regularisation at
+<span class="m">C=1.0</span>, and — importantly —
+<span class="m">class_weight="balanced"</span>. The class weighting is not
+incidental. The corpus is markedly imbalanced: Level&nbsp;4 accounts for 20 of
+451 test records against Level&nbsp;2's 177. Without reweighting, a classifier
+minimising overall error has little incentive to predict Level&nbsp;4 at all.
+The balanced weighting is what keeps the smallest class represented in the
+model's output, and it is part of why the Level-4 errors that remain are
+escalations to Level&nbsp;3 rather than the class being ignored outright.</p>
+
+<p>Data is split 80/20, <strong>stratified by triage level</strong>, with
+<span class="m">random_state=42</span> — giving 1,801 training and 451 test
+records. Stratification matters here for the same reason the class weighting
+does: on an unstratified split, 20 Level-4 records could distribute unevenly
+enough to leave the test set with almost none. Every figure reported in §3.10
+comes from that held-out set.</p>
+
+<h3>3.8.1 &nbsp;Metrics, and why accuracy alone is inadequate</h3>
+
+<p>Accuracy treats every error identically, and in triage the errors are not
+identical. We therefore report two directional error rates alongside it:</p>
+
+<ul>
+  <li><strong>Under-triage</strong> — the model predicts a <em>less</em> urgent
+  level than the true one. A Level-1 patient is called Level&nbsp;3 and waits.
+  This is the dangerous direction.</li>
+  <li><strong>Over-triage</strong> — the model predicts a <em>more</em> urgent
+  level than the true one. A Level-3 patient is seen immediately. This consumes
+  resources but does not endanger the patient in front of you.</li>
+</ul>
+
+<p>The two are not weighted into a single score, because doing so would require
+committing to an exchange rate between a delayed cardiac patient and a wasted
+resuscitation bay, and that is a clinical and institutional judgement rather
+than an engineering one. Both numbers are reported and left separate.</p>
+
+<h3>3.8.2 &nbsp;Confidence is capped when the complaint carries no text</h3>
+
+<p>The classifier will produce a triage level even when the complaint field is
+empty or nothing survives cleaning. In that situation the text blocks
+contribute nothing meaningful, the prediction rests on vitals alone, and — left
+untreated — the system reports it with the same confidence as any other. A
+blank complaint column in a batch file therefore used to yield a confident
+discharge-tier answer.</p>
+
+<p>When no tokens survive cleaning, reported confidence is capped at
+<strong>0.50</strong> and an explicit warning is attached stating that the level
+came from vitals alone. The cap applies only on that path; ordinary
+predictions are reported uncapped.</p>
+
+<p>We chose to flag and cap rather than to fall back to a vitals-only model,
+and the reasoning is worth recording. There is no vitals-only classifier in the
+bundle, and producing one would mean either training a second model or feeding
+the deployed one a zeroed text block. A zeroed block is an input the model
+never encountered in training, so it would answer just as confidently from a
+basis it does not have — trading a visible failure for an invisible one. The
+cap returns what the model actually said, declines to dress it up, and makes
+the reason impossible to miss.</p>
+
+<p>This guard is deliberately narrow, and it is important not to overstate it.
+It detects the <em>absence</em> of tokens, not the absence of meaning. Gibberish
+such as "asdkfj qwoeiru" survives cleaning as ordinary tokens and still
+produces a fully confident answer. That is a known limitation rather than an
+oversight; no token count can detect it, and we note it again in §3.10.1.</p>
+
+<!-- ============================================================ -->
+<h2 class="pagebreak">3.9 &nbsp;Embedding ablation study</h2>
+<p>Two embedding configurations are retained from the recorded experiment.
+B embeds raw English text. C removes learned stop words from English before
+embedding. Both concatenate the same structured features and use Logistic
+Regression on the same split of 1,801 training and 451 test records.</p>
+<table><caption>Table 3. Recorded embedding comparison.</caption>
+<thead><tr><th>Configuration</th><th>Accuracy</th><th>Under-triage</th><th>Over-triage</th><th>Features</th></tr></thead>
+<tbody><tr><td>B: raw embeddings</td><td>80.71%</td><td>13.30%</td><td>5.99%</td><td>410</td></tr>
+<tr><td>C: preprocessed embeddings (deployed)</td><td>80.49%</td><td>12.64%</td><td>6.87%</td><td>410</td></tr></tbody></table>
+<p>Preprocessing reduced recorded under-triage by 0.66 percentage points and
+reduced accuracy by 0.22 points. These results do not establish an accuracy
+improvement or statistical significance. The existing C model weights are
+retained; removing obsolete project components did not rerun this experiment.</p>
+
+<h2>3.10 &nbsp;Results and limitations</h2>
+
+<p>The deployed model achieves <strong>80.49% accuracy</strong> on 451 held-out
+records, with <strong>12.64% under-triage</strong> and <strong>6.87%
+over-triage</strong>. Macro-averaged F1 is 76.5%. The gap between macro-F1 and
+accuracy remains, and is still attributable to Level&nbsp;4, but it has narrowed
+substantially — see Table&nbsp;4.</p>
+
+<figure>
+<svg viewBox="0 0 660 262" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Confusion matrix">
+  <text x="0" y="12" font-size="8.6" font-weight="700" fill="#14181B">Confusion matrix · 451 held-out records · deployed configuration C</text>
+  <text x="0" y="24" font-size="7.6" fill="#6B767D">Rows = true level, columns = predicted level. Diagonal is correct. Above the diagonal is under-triage; below it is over-triage.</text>
+
+  <text x="290" y="46" font-size="7.8" font-weight="650" text-anchor="middle" fill="#6B767D">PREDICTED</text>
+  <text x="230" y="60" font-size="8" font-weight="650" text-anchor="middle" fill="#14181B">L1</text>
+  <text x="292" y="60" font-size="8" font-weight="650" text-anchor="middle" fill="#14181B">L2</text>
+  <text x="354" y="60" font-size="8" font-weight="650" text-anchor="middle" fill="#14181B">L3</text>
+  <text x="416" y="60" font-size="8" font-weight="650" text-anchor="middle" fill="#14181B">L4</text>
+  <text x="470" y="60" font-size="7.6" font-weight="650" text-anchor="middle" fill="#6B767D">support</text>
+  <text x="536" y="60" font-size="7.6" font-weight="650" text-anchor="middle" fill="#6B767D">recall</text>
+
+  <text x="176" y="100" font-size="7.8" font-weight="650" text-anchor="middle" fill="#6B767D" transform="rotate(-90 176 100)">TRUE</text>
+
+  <text x="194" y="82" font-size="8" font-weight="650" text-anchor="end" fill="#14181B">L1</text>
+  <rect x="200" y="68" width="60" height="24" fill="#14181B"/><text x="230" y="84" font-size="8.6" font-weight="700" text-anchor="middle" fill="#FFFFFF">115</text>
+  <rect x="262" y="68" width="60" height="24" fill="#EFE3E2"/><text x="292" y="84" font-size="8.4" text-anchor="middle" fill="#8C2620">18</text>
+  <rect x="324" y="68" width="60" height="24" fill="#FCFAFA"/><text x="354" y="84" font-size="8.4" text-anchor="middle" fill="#8C2620">1</text>
+  <rect x="386" y="68" width="60" height="24" fill="#FBEDEC" stroke="#8C2620" stroke-width="1.4"/><text x="416" y="84" font-size="8.4" font-weight="700" text-anchor="middle" fill="#8C2620">1</text>
+  <text x="470" y="84" font-size="8" text-anchor="middle" fill="#6B767D">135</text>
+  <text x="536" y="84" font-size="8" text-anchor="middle" fill="#14181B">85.2%</text>
+
+  <text x="194" y="110" font-size="8" font-weight="650" text-anchor="end" fill="#14181B">L2</text>
+  <rect x="200" y="96" width="60" height="24" fill="#EDEFF0"/><text x="230" y="112" font-size="8.4" text-anchor="middle" fill="#3D474E">7</text>
+  <rect x="262" y="96" width="60" height="24" fill="#14181B"/><text x="292" y="112" font-size="8.6" font-weight="700" text-anchor="middle" fill="#FFFFFF">147</text>
+  <rect x="324" y="96" width="60" height="24" fill="#E8DAD9"/><text x="354" y="112" font-size="8.4" text-anchor="middle" fill="#8C2620">22</text>
+  <rect x="386" y="96" width="60" height="24" fill="#FCFAFA"/><text x="416" y="112" font-size="8.4" text-anchor="middle" fill="#8C2620">1</text>
+  <text x="470" y="112" font-size="8" text-anchor="middle" fill="#6B767D">177</text>
+  <text x="536" y="112" font-size="8" text-anchor="middle" fill="#14181B">83.1%</text>
+
+  <text x="194" y="138" font-size="8" font-weight="650" text-anchor="end" fill="#14181B">L3</text>
+  <rect x="200" y="124" width="60" height="24" fill="#FFFFFF" stroke="#E3E8EA" stroke-width="0.5"/><text x="230" y="140" font-size="8.4" text-anchor="middle" fill="#C8D0D4">0</text>
+  <rect x="262" y="124" width="60" height="24" fill="#E3E6E8"/><text x="292" y="140" font-size="8.4" text-anchor="middle" fill="#3D474E">20</text>
+  <rect x="324" y="124" width="60" height="24" fill="#14181B"/><text x="354" y="140" font-size="8.6" font-weight="700" text-anchor="middle" fill="#FFFFFF">85</text>
+  <rect x="386" y="124" width="60" height="24" fill="#EBDCDB"/><text x="416" y="140" font-size="8.4" text-anchor="middle" fill="#8C2620">14</text>
+  <text x="470" y="140" font-size="8" text-anchor="middle" fill="#6B767D">119</text>
+  <text x="536" y="140" font-size="8" text-anchor="middle" fill="#14181B">71.4%</text>
+
+  <text x="194" y="166" font-size="8" font-weight="650" text-anchor="end" fill="#14181B">L4</text>
+  <rect x="200" y="152" width="60" height="24" fill="#FFFFFF" stroke="#E3E8EA" stroke-width="0.5"/><text x="230" y="168" font-size="8.4" text-anchor="middle" fill="#C8D0D4">0</text>
+  <rect x="262" y="152" width="60" height="24" fill="#FFFFFF" stroke="#E3E8EA" stroke-width="0.5"/><text x="292" y="168" font-size="8.4" text-anchor="middle" fill="#C8D0D4">0</text>
+  <rect x="324" y="152" width="60" height="24" fill="#F0F2F3"/><text x="354" y="168" font-size="8.4" text-anchor="middle" fill="#3D474E">4</text>
+  <rect x="386" y="152" width="60" height="24" fill="#14181B"/><text x="416" y="168" font-size="8.6" font-weight="700" text-anchor="middle" fill="#FFFFFF">16</text>
+  <text x="470" y="168" font-size="8" text-anchor="middle" fill="#6B767D">20</text>
+  <text x="536" y="168" font-size="8" font-weight="700" text-anchor="middle" fill="#14181B">80.0%</text>
+
+  <rect x="200" y="190" width="14" height="10" fill="#14181B"/>
+  <text x="220" y="199" font-size="7.6" fill="#6B767D">correct — 363</text>
+  <rect x="292" y="190" width="14" height="10" fill="#E8DAD9"/>
+  <text x="312" y="199" font-size="7.6" fill="#8C2620">under-triage — 57 cases (12.64%)</text>
+  <rect x="470" y="190" width="14" height="10" fill="#E3E6E8"/>
+  <text x="490" y="199" font-size="7.6" fill="#3D474E">over-triage — 31 (6.87%)</text>
+
+  <text x="0" y="222" font-size="7.6" fill="#6B767D">The lower-left corner is still empty: no Level-3 or Level-4 patient was called Level 1, and no Level-4 patient was called Level 2. All 31</text>
+  <text x="0" y="233" font-size="7.6" fill="#6B767D">over-triage errors remain exactly one level. Under-triage: 54 by one level, 2 by two, 1 by three.</text>
+  <text x="0" y="245" font-size="7.6" fill="#8C2620">The outlined cell — one Level-1 patient classified Level 4 — is the single worst error that this confusion</text>
+  <text x="0" y="256" font-size="7.6" fill="#8C2620">matrix can express. The recorded model still makes this error.</text>
+</svg>
+<figcaption><span class="fnum">Figure 6.</span> Confusion matrix for the
+deployed configuration on the held-out test set. Over-triage is uniformly one
+level; under-triage is not, and still includes one case spanning three
+levels.</figcaption>
+</figure>
+
+<table>
+  <caption><span class="fnum">Table 4.</span> Per-class performance. Level&nbsp;4
+  is reported despite its small support precisely because omitting it would
+  overstate the system.</caption>
+  <thead>
+    <tr>
+      <th>Triage level</th>
+      <th class="num">Support</th>
+      <th class="num">Precision</th>
+      <th class="num">Recall</th>
+      <th class="num">F1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Level 1 — most urgent</td><td class="num">135</td><td class="num">94.3%</td><td class="num">85.2%</td><td class="num">89.5%</td></tr>
+    <tr><td>Level 2</td><td class="num">177</td><td class="num">79.5%</td><td class="num">83.1%</td><td class="num">81.2%</td></tr>
+    <tr><td>Level 3</td><td class="num">119</td><td class="num">75.9%</td><td class="num">71.4%</td><td class="num">73.6%</td></tr>
+    <tr><td>Level 4 — least urgent</td><td class="num">20</td><td class="num">50.0%</td><td class="num">80.0%</td><td class="num">61.5%</td></tr>
+    <tr><td><strong>Macro average</strong></td><td class="num">451</td><td class="num">74.9%</td><td class="num">79.9%</td><td class="num">76.5%</td></tr>
+  </tbody>
+</table>
+
+<p>Level&nbsp;1 — the class where a mistake is most costly — is the strongest
+at 89.5% F1, with 94.3% precision. Level&nbsp;4 remains the weakest at 61.5%,
+but its recall of 80.0% means the model now identifies 16 of 20 genuine
+Level-4 patients rather than 9. Its precision of 50.0% is the trade: the model
+reaches Level&nbsp;4 more readily and is wrong half the time it does so, which
+in this direction means a low-urgency patient occasionally displacing another
+low-urgency patient. On a support of 20 the class is still too small to
+characterise confidently, and claims about Level-4 performance should be
+treated as indicative.</p>
+
+<p>The two error directions behave differently, and the difference favours the
+system. Over-triage is uniformly mild: all 31 cases are wrong by exactly one
+level, so no patient was ever escalated more than one tier beyond their true
+urgency. Under-triage is less well behaved — 54 cases miss by one level, 2 by
+two, and one by three. That last case is a Level-1 patient classified
+Level&nbsp;4, and it deserves to be named rather than absorbed into an
+aggregate: it is a maximally urgent patient assigned to the least urgent queue,
+the worst single error this matrix is capable of expressing. This error remains in the recorded confusion matrix. One case
+in 451 is a rate of 0.22%, but the appropriate response to it is not a
+percentage.</p>
+
+<h3>3.10.1 &nbsp;Limitations</h3>
+
+<h4>Under-triage exceeds the intended safety band</h4>
+<p>At 12.64%, under-triage exceeds the project's intended &lt;10% band. The model remains a research prototype and these synthetic-data results do not establish clinical safety. Comparisons across different datasets cannot isolate the effect of training-set size.</p>
+
+<h4>Training and serving translate differently</h4>
+<p>Training text was translated by <span class="m">gpt-4o-mini</span> via a
+hosted API; serving translates locally with <span class="m">llama3.2</span>.
+The model has therefore learned the vocabulary and phrasing habits of one
+translator and is served text from another. Any systematic divergence between
+them is a distribution shift the reported test accuracy does not capture,
+because the test set was translated by the same model as the training set. This
+is, in our assessment, the most serious unquantified risk in the system, and
+measuring it requires a parallel corpus translated both ways — work we have not
+done.</p>
+
+<h4>Synthetic data</h4>
+<p>Every number in this chapter is measured on synthetic records. They tell you
+the pipeline learns the structure the generator encoded. They do not tell you
+how the system performs on real patients, and no claim in that direction is
+made.</p>
+
+<h4>Narrow clinical scope</h4>
+<p>Cardiac presentations only. The system will return a triage level for a burn
+or a fracture, and that number carries no evidential weight.</p>
+
+<h4>Meaningless input is not detected</h4>
+<p>The no-text guard described in §3.8.2 catches an empty complaint, but
+nothing catches a complaint that is present and meaningless. A string of
+keyboard noise survives cleaning as valid tokens, passes the anatomical gate
+(which only constrains complaints that name a body part), and receives a normal
+triage level at full confidence. Detecting this reliably would require a
+language-model judgement about whether a complaint is a complaint, which is
+precisely the kind of self-assessment §3.4 gives our reasons for distrusting.
+It remains open.</p>
+
+<h4>Small and imbalanced test set</h4>
+<p>451 records, with Level&nbsp;4 represented by 20. Confidence intervals on
+the per-class figures are wide and we have not computed them; the per-class
+table should be read as indicative.</p>
+
+<div class="note warn">
+  <span class="lbl">Intended use</span>
+  <p>This is a research prototype. It has not been clinically validated, it is
+  not a medical device, and no output should be acted upon without a
+  qualified clinician. The system's ability to refuse — described in §3.4 and
+  §3.5 — exists because a decision-support tool that never declines to answer
+  invites exactly the over-reliance this disclaimer is meant to prevent.</p>
+</div>
+
+<!-- ============================================================ -->
+<h2>3.11 &nbsp;Reproducibility</h2>
+
+<p>Several measures are in place so that the results above can be reproduced
+and so that a deployed model can be traced to what produced it.</p>
+
+<p><strong>Data provenance is carried inside the artifact.</strong> The training
+file's SHA-256, row count, class count, generator name, generator version and
+seed are all written into the model bundle at training time, together with the
+synthetic-data disclosure. A bundle cannot become separated from the statement
+of what it was trained on.</p>
+
+<p><strong>Dependencies are pinned, for two different reasons.</strong>
+<span class="m">scikit-learn</span> is pinned at 1.9.0 because the model bundle
+is a pickle: loading it under a different version emits a version-inconsistency
+warning and can silently alter predictions. That pin is load-bearing, and the
+correct response to a version change is retraining, not suppressing the
+warning. <span class="m">sentence-transformers</span> is pinned at 6.0.1 for a
+weaker reason — the encoder is constructed from source each run rather than
+unpickled — but an unpinned upgrade of that package is what broke this
+environment during development, taking its own dependencies with it. Those
+transitive dependencies are now named explicitly in the requirements file,
+because a requirements file that does not name a dependency cannot restore it.</p>
+
+<p><strong>Randomness is fixed.</strong> The split seed is 42, the dataset
+generator seed is 20260816, and translation runs at temperature 0.0 so the same
+complaint produces the same English on every run.</p>
+
+<p><strong>The system is tested, not merely described.</strong> Two automated
+batteries ship with the project: one exercises the translation path, the safety
+gate, the dictionary and the normalisation chain; the other constructs the real
+interface and drives every tab. Both must pass on a new installation, and
+"correctly installed" is defined as both passing rather than as the application
+starting.</p>
+
+<p><strong>Evaluation caveat: structured preprocessing is fitted before the split, and the saved full-data stop-word list differs from the training-only list used for the recorded evaluation. Every stage is inspectable at run time.</strong> The interface
+exposes the raw input, the normalised input, the translation, the token string
+after stop-word removal, the encoder identity, the embedding dimension and the
+model bundle in use — and exports all of them to CSV. A disputed prediction can
+be traced through the pipeline without re-running anything.</p>
+
+<div class="endnote">
+  <strong>Artifact.</strong> Deployed bundle
+  <span class="m">triage_model_embedding_english/</span>, trained 9 September
+  2026 by <span class="m">train_embedding_pipeline.py --deploy C</span>.
+  Configuration C (embeddings + preprocessing), 410 features, two blocks.
+  Dataset <span class="m">cardiac_english_2252.csv</span>, SHA-256
+  <span class="m">42ab09e252db94b8f7b0dea38fae47556f8d38c380fdc43fdbb37f2ea728cb1c</span>.
+  Full metrics in <span class="m">triage_metrics.json</span>; configuration and
+  provenance in <span class="m">model_manifest.json</span>; the learned
+  stop-word list, its per-token statistics and the protected-token log in
+  <span class="m">learned_stopwords.json</span>.
+  <br><br>
+  <strong>Synthetic data notice.</strong> All records used in this work were
+  machine-generated. They are not real patient data and must not be described
+  as such.
+</div>
+
+</body>
+</html>
