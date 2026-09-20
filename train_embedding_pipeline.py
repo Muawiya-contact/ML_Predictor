@@ -103,6 +103,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from stopwords import learn_stopwords, save_stopwords, summarize
 from triage_pipeline import (
+    EMBEDDING_MODEL_NAME,
     NUMERICAL_FEATURES,
     build_attention_weights,
     encode_categoricals,
@@ -173,7 +174,9 @@ RESULTS_FILE = project_path("embedding_pipeline_results.csv")
 # embedding model. This is the safe default already used by
 # Chosen for being multilingual, small, CPU-friendly and 384 dims.
 # The whiteboard's "364" was a placeholder; this model outputs 384.
-DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+# Imported from triage_pipeline so training always embeds with the same
+# SBERT checkpoint the deployed bundle records in its manifest.
+DEFAULT_MODEL = EMBEDDING_MODEL_NAME
 
 RANDOM_STATE = 42
 TEST_SIZE = 0.2

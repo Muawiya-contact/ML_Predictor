@@ -84,7 +84,8 @@ if _HERE not in sys.path:
 import numpy as np
 import pandas as pd
 
-from triage_pipeline import (make_console_safe,
+from triage_pipeline import (EMBEDDING_MODEL_NAME,
+                             make_console_safe,
                              preprocess_corpus_for_embedding, project_path,
                              resolve_project_file)
 
@@ -100,8 +101,10 @@ PAIRS_CSV = project_path("embedding_evaluation_pairs.csv")
 NEIGHBOURS_CSV = project_path("embedding_evaluation_neighbours.csv")
 
 # Same default as the training pipeline, so the study evaluates the model
-# the system actually uses. TODO(Sir): standardize (ARCHITECTURE.md s6 Q1).
-DEFAULT_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+# the system actually uses. Imported from triage_pipeline, which is where
+# the deployed SBERT checkpoint lives, so this can never drift from it.
+# TODO(Sir): standardize (ARCHITECTURE.md s6 Q1).
+DEFAULT_MODEL = EMBEDDING_MODEL_NAME
 DEFAULT_THRESHOLD = 0.5      # Sir's "correctly seen as similar" cut-off
 
 

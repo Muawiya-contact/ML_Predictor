@@ -95,7 +95,7 @@ def main():
 
     tp.make_console_safe()
     stops = load_stopwords()
-    model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    model_name = tp.EMBEDDING_MODEL_NAME
     enc = tp.load_sentence_transformer(model_name)
 
     def normalize(text):
