@@ -1,7 +1,7 @@
 # Second-Half Evaluation Report
 Clinical-concept extraction of 20 Roman Urdu chief complaints through the offline Qwen2.5 pipeline, scored against gold English references.
 - Generation model: `qwen2.5:latest` (local Ollama, temperature 0.0)
-- Generated: 2026-09-20 22:14:00
+- Generated: 2026-09-20 22:26:00
 - Scoring: symmetrical stop-word removal, underscore/slash token splitting, semantic-equivalence matching (e.g. tachycardia↔palpitations, vertigo↔dizziness), bag overlap.
 - Per item: `P = N_match / N_gen`, `R = N_match / N_ref`, `F1 = 2PR/(P+R)`.
 
@@ -48,3 +48,9 @@ Clinical-concept extraction of 20 Roman Urdu chief complaints through the offlin
 | Precision | 3 complaints | 0.5333 +/- 0.4110 |
 | Recall | 3 complaints | 0.4048 +/- 0.2993 |
 | F1 | 3 complaints | 0.4596 +/- 0.3456 |
+
+## Key Observations
+- F1 across the 20 complaints: min 0.000 (item 7), max 0.833 (item 1), median 0.545.
+- Weakest items are 7, 18, 15, 9; their generated concepts recover the fewest gold tokens.
+- Food-related subset (items 1, 2, 7): F1 0.460 +/- 0.346.
+- Recall is systematically lower than precision: the model names each finding once, while gold references use fuller clinical phrasing (e.g. 'heart is beating very fast' vs 'palpitations').
