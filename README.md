@@ -164,6 +164,13 @@ See [DATASET_PROVENANCE.md](DATASET_PROVENANCE.md) for synthetic-data generation
 [FEATURES.md](FEATURES.md) for workflow details and
 [SUBMISSION_SUMMARY.md](SUBMISSION_SUMMARY.md) for the article configuration.
 
+## Article classifier and PCA experiments
+
+See [experiments/README.md](experiments/README.md) for the separate 768-D
+Sentence-BERT versus PCA-64 comparison with Logistic Regression, Random Forest
+and Histogram Gradient Boosting. Metrics, LaTeX tables and figures are saved
+under `output/results/`. These runs do not replace the deployed MiniLM bundle.
+
 ## Authors
 
 - Muhammad Wasiq Hussain Siddiqui

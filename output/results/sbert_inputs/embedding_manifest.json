@@ -1,0 +1,14 @@
+{
+  "model": "sentence-transformers/all-mpnet-base-v2",
+  "revision": "e8c3b32edf5434bc2275fc9bab85f82640a19130",
+  "dimensions": 768,
+  "normalized": true,
+  "source": "cardiac_english_2252.csv",
+  "source_sha256": "42ab09e252db94b8f7b0dea38fae47556f8d38c380fdc43fdbb37f2ea728cb1c",
+  "text_column": "English_Translation",
+  "rows": 2252,
+  "unique_texts": 2220,
+  "pooling": "checkpoint-defined mean pooling",
+  "max_sequence_length": 384,
+  "provenance": "Existing synthetic cardiac dataset; historical English translations; no new translation or fine-tuning."
+}
