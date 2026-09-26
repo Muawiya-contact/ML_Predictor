@@ -61,3 +61,7 @@ Do not run training against the committed report directory. A fresh experiment h
 # With prepared data and embeddings, also run the actual split/PCA checks:
 .venv-study/bin/python experiments/triage_study/validate_protocol.py
 ```
+
+## Eight-page summary
+
+`reports/triage_10000/Triage_Classifier_Concise_Report.pdf` is the compact report, retaining all ten final comparisons and confusion matrices, per-class scores, all five-fold refinement rows, diagnostics and historical comparison scores. Full screening configurations remain in the aggregate result files. Rebuild with `python experiments/triage_study/build_short_report.py`; the generated file is written to `output/pdf/`.
