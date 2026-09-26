@@ -65,3 +65,9 @@ Do not run training against the committed report directory. A fresh experiment h
 ## Eight-page summary
 
 `reports/triage_10000/Triage_Classifier_Concise_Report.pdf` is the compact report, retaining all ten final comparisons and confusion matrices, per-class scores, all five-fold refinement rows, diagnostics and historical comparison scores. Full screening configurations remain in the aggregate result files. Rebuild with `python experiments/triage_study/build_short_report.py`; the generated file is written to `output/pdf/`.
+
+## Cache integrity and existing runs
+
+New runs store encoder settings and the embedding array SHA-256, then freeze the prepared CSVs, split manifest and all embedding artifacts in `study_inputs.json` before training. Every matrix/CV cache read, leaderboard export and final evaluation checks this identity. Changing an encoder revision, pooling, token limit, array contents, records or splits requires a **fresh output directory**; mismatches fail without overwriting prior results.
+
+Existing runs made before these checks lack the required fingerprints. Keep their original artifacts for reference and use a new output directory to train with this version. Do not manually add a manifest to old results. The committed historical metrics and PDFs are unchanged and can still be read or rebuilt without retraining.
