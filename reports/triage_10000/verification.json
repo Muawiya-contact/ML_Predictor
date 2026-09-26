@@ -1,0 +1,14 @@
+{
+  "status": "complete",
+  "pdf_pages": 47,
+  "pdf_sha256": "37f87a3e8987116f35d20e0fafb1688af25c3810a03fadfe17083f8aae63ffd8",
+  "screened_configurations": 136,
+  "five_fold_configurations": 22,
+  "checks": [
+    "All final metrics recomputed from all 10 prediction files",
+    "Selected component reloaded and reproduced saved probabilities",
+    "All 47 rendered pages inspected; first page rechecked after outcome clarification",
+    "No test-based reselection"
+  ],
+  "completed_at": "2026-09-26T09:46:18.377461+05:00"
+}

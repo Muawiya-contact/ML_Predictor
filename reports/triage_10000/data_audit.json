@@ -1,0 +1,62 @@
+{
+  "input_file": "cardiac_multilingual_10000_filled.csv",
+  "input_sha256": "f9fc4398820661b6005e66c7efd65fd5753c9c92f0ef98a2c37ee87785a27ec2",
+  "raw_shape": [
+    10000,
+    19
+  ],
+  "retained_columns": [
+    "Age",
+    "Gender",
+    "Mode_of_Arrival",
+    "chief_complaint",
+    "Clinical_Concept",
+    "Heart_Rate",
+    "Systolic_BP",
+    "Diastolic_BP",
+    "ECG_Status",
+    "Temperature",
+    "SpO2",
+    "AVPU",
+    "Labels"
+  ],
+  "excluded_columns": [
+    "Category",
+    "fuzzy_glossary",
+    "min_confidence",
+    "unresolved_tokens",
+    "seconds",
+    "examples_used"
+  ],
+  "removed_duplicate_source_rows": [],
+  "invalid_arrival_values_set_missing": [
+    {
+      "source_row": 21,
+      "Mode_of_Arrival": "roman_urdu_reference"
+    }
+  ],
+  "rows": 10000,
+  "groups": 6573,
+  "largest_group": 30,
+  "class_counts": {
+    "1": 3389,
+    "2": 4716,
+    "3": 1895
+  },
+  "development_rows": 8001,
+  "test_rows": 1999,
+  "development_class_counts": {
+    "1": 2712,
+    "2": 3773,
+    "3": 1516
+  },
+  "test_class_counts": {
+    "1": 677,
+    "2": 943,
+    "3": 379
+  },
+  "shared_groups": 0,
+  "target": "Labels",
+  "provenance": "User confirmed that Labels were assigned by an AI model; no clinician validation was provided.",
+  "label_source": "AI model (user-confirmed)"
+}

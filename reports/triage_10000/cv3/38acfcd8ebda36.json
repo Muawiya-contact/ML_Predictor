@@ -1,0 +1,80 @@
+{
+  "id": "38acfcd8ebda36",
+  "config": {
+    "classifier": "rf",
+    "features": {
+      "view": "structured",
+      "derived": false
+    },
+    "params": {
+      "n_estimators": 300,
+      "min_samples_leaf": 3,
+      "max_features": 0.7,
+      "balance": true
+    }
+  },
+  "folds": 3,
+  "mean": {
+    "accuracy": 0.9911267630724975,
+    "precision_macro": 0.9866779042809432,
+    "recall_macro": 0.9930494627993407,
+    "macro_f1": 0.9897408618679028,
+    "qwk": 0.9913044694467065,
+    "mae": 0.008873236927502477,
+    "under_triage_rate": 0.008623221222409433,
+    "over_triage_rate": 0.00025001570509304447
+  },
+  "std": {
+    "accuracy": 0.0015373005564918232,
+    "precision_macro": 0.0024902489125277305,
+    "recall_macro": 0.000966848493343153,
+    "macro_f1": 0.0017841269651302572,
+    "qwk": 0.0014874767050352443,
+    "mae": 0.001537300556491809,
+    "under_triage_rate": 0.0017011378877322737,
+    "over_triage_rate": 0.0001767878843900445
+  },
+  "per_fold": [
+    {
+      "accuracy": 0.9891304347826086,
+      "precision_macro": 0.9835604895406623,
+      "recall_macro": 0.9917970417059433,
+      "macro_f1": 0.9874822947528497,
+      "qwk": 0.9893730407179062,
+      "mae": 0.010869565217391304,
+      "under_triage_rate": 0.010869565217391304,
+      "over_triage_rate": 0.0
+    },
+    {
+      "accuracy": 0.9928705440900563,
+      "precision_macro": 0.989655520905521,
+      "recall_macro": 0.9941508312852868,
+      "macro_f1": 0.9918442190785264,
+      "qwk": 0.9929920340180107,
+      "mae": 0.007129455909943715,
+      "under_triage_rate": 0.00675422138836773,
+      "over_triage_rate": 0.000375234521575985
+    },
+    {
+      "accuracy": 0.9913793103448276,
+      "precision_macro": 0.9868177023966461,
+      "recall_macro": 0.9932005154067919,
+      "macro_f1": 0.9898960717723323,
+      "qwk": 0.9915483336042025,
+      "mae": 0.008620689655172414,
+      "under_triage_rate": 0.008245877061469266,
+      "over_triage_rate": 0.0003748125937031484
+    }
+  ],
+  "seconds": 5.259204578000208,
+  "pooled_oof": {
+    "accuracy": 0.9911261092363455,
+    "precision_macro": 0.9866546754200493,
+    "recall_macro": 0.9930495394624211,
+    "macro_f1": 0.9897358055727361,
+    "qwk": 0.9913005880511574,
+    "mae": 0.008873890763654543,
+    "under_triage_rate": 0.00862392200974878,
+    "over_triage_rate": 0.00024996875390576176
+  }
+}

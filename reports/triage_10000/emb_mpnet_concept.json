@@ -1,0 +1,16 @@
+{
+  "name": "mpnet_concept",
+  "text_column": "Clinical_Concept",
+  "model_path": "output/results/.hf_cache/hub/models--sentence-transformers--all-mpnet-base-v2/snapshots/e8c3b32edf5434bc2275fc9bab85f82640a19130",
+  "revision": "e8c3b32edf5434bc2275fc9bab85f82640a19130",
+  "pooling": "sentence_transformer",
+  "max_token_length": 128,
+  "normalized": true,
+  "text_sha256": "3df3a196344e2edcfec480c66da35d310874e931b4f74386e92f2486a64a7567",
+  "shape": [
+    10000,
+    768
+  ],
+  "unique_texts": 6703,
+  "seconds": 278.96289288400294
+}
