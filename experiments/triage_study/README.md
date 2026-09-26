@@ -71,3 +71,19 @@ Do not run training against the committed report directory. A fresh experiment h
 New runs store encoder settings and the embedding array SHA-256, then freeze the prepared CSVs, split manifest and all embedding artifacts in `study_inputs.json` before training. Every matrix/CV cache read, leaderboard export and final evaluation checks this identity. Changing an encoder revision, pooling, token limit, array contents, records or splits requires a **fresh output directory**; mismatches fail without overwriting prior results.
 
 Existing runs made before these checks lack the required fingerprints. Keep their original artifacts for reference and use a new output directory to train with this version. Do not manually add a manifest to old results. The committed historical metrics and PDFs are unchanged and can still be read or rebuilt without retraining.
+
+## Complete fixed 768-D versus PCA-64 comparison
+
+The seven-page `reports/triage_fixed_full_pca/SapBERT_Full768_PCA64_Comparison.pdf` follows the requested reference layout. It contains **all twelve** SapBERT configurations: three classifiers, two representations, and text-only/combined inputs. Separate article-ready tables, paired charts and all twelve confusion matrices are in `figures/`. Full-precision metrics and a frozen configuration plan accompany the PDF. Earlier reports above describe the broader tuning study; their scores are not substituted into this comparison.
+
+This is a descriptive follow-up on the same 1,999 test rows, not another independent validation cohort. The encoder is frozen SapBERT CLS, normalized, 768 dimensions, maximum 64 tokens; PCA retains 91.31% of development variance. Patient preprocessing adds 22 dimensions. No classifier is selected using these test scores. All configurations use the same settings within each classifier. Labels cover levels 1–3 only.
+
+After preparing the dataset and SapBERT embeddings as above, use a fresh destination:
+
+```bash
+python experiments/triage_study/compare_full_pca.py --source output/results/triage_study_run --output output/results/triage_fixed_full_pca --encoder sapbert_concept
+python experiments/triage_study/verify_fixed_comparison.py --results output/results/triage_fixed_full_pca
+python experiments/triage_study/build_fixed_comparison_pdf.py --results output/results/triage_fixed_full_pca --output output/pdf/SapBERT_Full768_PCA64_Comparison.pdf
+```
+
+The PDF can also be rebuilt without training by passing `--results reports/triage_fixed_full_pca` to the builder. Prediction-level verification requires the private local run; raw records and row-level predictions are deliberately excluded from Git. Recorded verification recomputed accuracy, macro precision/recall/F1 and every confusion matrix for all twelve cases and checked matching test rows and feature counts.

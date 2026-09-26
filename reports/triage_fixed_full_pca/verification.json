@@ -1,0 +1,8 @@
+{
+  "all_twelve_comparisons_present": true,
+  "identical_1999_test_rows": true,
+  "all_reported_metrics_recomputed": true,
+  "all_confusion_matrices_recomputed": true,
+  "feature_dimensions_verified": true,
+  "no_test_based_selection": true
+}
