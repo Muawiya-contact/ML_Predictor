@@ -1,0 +1,23 @@
+{
+  "members": [
+    "ebf1fb91109f52"
+  ],
+  "weights": [
+    1.0
+  ],
+  "class_probability_multipliers": [
+    0.8,
+    1.0,
+    0.8
+  ],
+  "oof_metrics": {
+    "accuracy": 0.9930008748906387,
+    "precision_macro": 0.9922618512219866,
+    "recall_macro": 0.9917441480326424,
+    "macro_f1": 0.9920007565586991,
+    "qwk": 0.9930773864442379,
+    "mae": 0.00699912510936133,
+    "under_triage_rate": 0.004124484439445069,
+    "over_triage_rate": 0.0028746406699162604
+  }
+}
