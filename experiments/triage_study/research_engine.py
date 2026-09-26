@@ -31,6 +31,7 @@ from sklearn.metrics import (
 )
 from sklearn.utils.class_weight import compute_sample_weight
 from study_paths import OUTPUT as HERE
+from cache_integrity import verify_study
 
 NUM = [
     "Age",
@@ -204,6 +205,7 @@ def fit_model(c, X, y):
 
 
 def matrices(df, tr, va, features):
+    verify_study(HERE)
     key = ident(
         {
             "features": features,
@@ -228,6 +230,7 @@ def matrices(df, tr, va, features):
 
 
 def evaluate_cv(config, folds=3):
+    verify_study(HERE)
     tag = ident(config)
     dest = HERE / f"cv{folds}"
     dest.mkdir(exist_ok=True)
@@ -381,6 +384,7 @@ def candidates(stage):
 
 
 def export_board(folds):
+    verify_study(HERE)
     results = [json.loads(p.read_text()) for p in (HERE / f"cv{folds}").glob("*.json")]
     if results:
         pd.DataFrame(
@@ -460,6 +464,7 @@ def refine():
 
 def finalize():
     """Freeze a selection using OOF predictions before reading test outcomes."""
+    verify_study(HERE)
     if (HERE / "final_results.json").exists():
         print("Final test already evaluated; refusing repeated selection.")
         return

@@ -11,6 +11,7 @@ import argparse, hashlib, json, time
 import numpy as np
 import pandas as pd
 from study_paths import OUTPUT as HERE, MODEL_CACHE
+from cache_integrity import file_sha256
 
 MODELS = {
     "sapbert_concept": (
@@ -48,12 +49,31 @@ def main(name):
     ).hexdigest()
     outfile = HERE / f"emb_{name}.npy"
     meta = HERE / f"emb_{name}.json"
-    if (
-        outfile.exists()
-        and meta.exists()
-        and json.loads(meta.read_text())["text_sha256"] == fingerprint
-    ):
-        print(name, "already complete")
+    expected = {
+        "name": name,
+        "text_column": col,
+        "revision": revision,
+        "pooling": pooling,
+        "max_token_length": maxlen,
+        "normalized": True,
+        "text_sha256": fingerprint,
+        "shape": [len(texts), 384 if name == "minilm_complaint" else 768],
+    }
+    if outfile.exists() or meta.exists():
+        try:
+            saved = json.loads(meta.read_text())
+            array = np.load(outfile, mmap_mode="r", allow_pickle=False)
+            matches = all(saved.get(k) == v for k, v in expected.items())
+            matches = matches and list(array.shape) == expected["shape"]
+            matches = matches and saved.get("array_sha256") == file_sha256(outfile)
+        except (OSError, ValueError, KeyError):
+            matches = False
+        if not matches:
+            raise ValueError(
+                "Embedding cache does not match the requested encoder or is incomplete. "
+                "Use a fresh TRIAGE_STUDY_OUTPUT directory; existing results were not changed."
+            )
+        print(name, "already complete (encoder and array verified)")
         return
     import torch
 
@@ -129,6 +149,7 @@ def main(name):
                 "normalized": True,
                 "text_sha256": fingerprint,
                 "shape": list(full.shape),
+                "array_sha256": file_sha256(outfile),
                 "unique_texts": n,
                 "seconds": time.monotonic() - start,
             },
