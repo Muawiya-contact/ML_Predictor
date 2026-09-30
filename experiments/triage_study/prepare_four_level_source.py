@@ -29,7 +29,7 @@ def prepare(source, output, reference=None):
     if target.isna().any() or set(target.unique()) != set(LABELS):
         raise ValueError('Expected all four labels, numbered 0 through 3.')
     names = frame.Triage_Label.astype('string').str.strip().str.casefold()
-    if not names.eq(target.map(LABELS).str.casefold()).all():
+    if not names.eq(target.map(LABELS).str.casefold()).fillna(False).all():
         raise ValueError('Triage_Level and Triage_Label disagree.')
     absent = frame.Clinical_Concept.isna() | frame.Clinical_Concept.astype(str).str.strip().eq('')
     count = int(absent.sum())

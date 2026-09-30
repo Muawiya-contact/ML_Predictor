@@ -40,6 +40,19 @@ def scores(y, pred):
             'emergency_recall': report['0']['recall']}
 
 
+def verify_embeddings(meta, array, fingerprint, rows):
+    expected = {'name': 'sapbert_concept', 'text_column': 'Clinical_Concept',
+                'revision': '090663c3ae57bf35ffe4d0d468a2a88d03051a4d',
+                'pooling': 'cls', 'max_token_length': 64, 'normalized': True,
+                'text_sha256': fingerprint, 'shape': [rows, 768]}
+    if any(meta.get(key) != value for key, value in expected.items()):
+        raise ValueError('Embedding text order or encoder settings changed; generate fresh embeddings.')
+    if meta.get('array_sha256') != file_sha256(array):
+        raise ValueError('Embedding array checksum does not match its recorded identity.')
+    if np.load(array, mmap_mode='r', allow_pickle=False).shape != (rows, 768):
+        raise ValueError('Embedding rows/dimensions do not match the new dataset.')
+
+
 def run(source, output, embedding_source=None, model_path=None):
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -73,13 +86,8 @@ def run(source, output, embedding_source=None, model_path=None):
         (output / 'emb_sapbert_concept.json').write_text(json.dumps(meta, indent=2))
         embedding_source = output
     meta = json.loads((embedding_source / 'emb_sapbert_concept.json').read_text())
-    if fingerprint != meta['text_sha256'] or meta['revision'] != '090663c3ae57bf35ffe4d0d468a2a88d03051a4d':
-        raise ValueError('Concept text or checkpoint changed; generate fresh SapBERT embeddings for this output.')
     array = embedding_source / 'emb_sapbert_concept.npy'
-    if meta.get('array_sha256') != file_sha256(array):
-        raise ValueError('Embedding array checksum does not match its recorded identity.')
-    if np.load(array, mmap_mode='r', allow_pickle=False).shape != (len(df), 768):
-        raise ValueError('Embedding rows/dimensions do not match the new dataset.')
+    verify_embeddings(meta, array, fingerprint, len(df))
     if array.resolve() != (output / array.name).resolve():
         shutil.copy2(array, output / array.name)
     meta['array_sha256'] = file_sha256(output / array.name)

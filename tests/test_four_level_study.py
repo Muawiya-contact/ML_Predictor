@@ -13,7 +13,8 @@ STUDY = Path(__file__).resolve().parents[1] / 'experiments/triage_study'
 sys.path.insert(0, str(STUDY))
 import prepare_data
 from prepare_four_level_source import prepare, INPUTS, LABELS
-from four_level_study import scores
+from four_level_study import scores, verify_embeddings
+from cache_integrity import file_sha256
 
 
 class FourLevelTests(unittest.TestCase):
@@ -43,6 +44,17 @@ class FourLevelTests(unittest.TestCase):
             self.assertEqual(actual.Clinical_Concept.iloc[0], 'concept 0')
             np.testing.assert_array_equal(actual.Triage_Level, frame.Triage_Level)
             self.assertEqual(set(actual), set(INPUTS + ['Clinical_Concept', 'Triage_Level']))
+
+    def test_missing_label_name_is_rejected(self):
+        frame = self.frame()
+        frame.loc[0, 'Triage_Label'] = None
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            source = root / 'source.xlsx'
+            source.write_bytes(b'test')
+            with patch('prepare_four_level_source.pd.read_excel', return_value=frame):
+                with self.assertRaisesRegex(ValueError, 'Triage_Label disagree'):
+                    prepare(source, root / 'prepared')
 
     def test_mismatched_reference_refuses_recovery(self):
         frame = self.frame()
@@ -80,6 +92,20 @@ class FourLevelTests(unittest.TestCase):
             audit = json.loads((output / 'data_audit.json').read_text())
             self.assertNotIn('Triage_Level', audit['excluded_columns'])
             self.assertEqual(audit['labels'], [0,1,2,3])
+
+    def test_cache_rejects_changed_pooling_or_token_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            array = Path(tmp) / 'vectors.npy'
+            np.save(array, np.zeros((2,768), dtype=np.float32))
+            metadata = {'name': 'sapbert_concept', 'text_column': 'Clinical_Concept',
+                        'revision': '090663c3ae57bf35ffe4d0d468a2a88d03051a4d',
+                        'pooling': 'cls', 'max_token_length': 64, 'normalized': True,
+                        'text_sha256': 'test', 'shape': [2,768], 'array_sha256': file_sha256(array)}
+            verify_embeddings(metadata, array, 'test', 2)
+            for key, value in [('pooling','mean'), ('max_token_length',128), ('normalized',False)]:
+                with self.subTest(key=key):
+                    with self.assertRaisesRegex(ValueError, 'encoder settings changed'):
+                        verify_embeddings(dict(metadata, **{key:value}), array, 'test', 2)
 
     def test_emergency_recall_and_undertriage_use_zero_as_emergency(self):
         result = scores(np.array([0,0,1,2,3]), np.array([0,1,1,1,3]))
