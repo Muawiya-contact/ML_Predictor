@@ -1,0 +1,83 @@
+{
+  "id": "0f3df5b67e1cf0",
+  "config": {
+    "classifier": "hgb",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_concept",
+      "pca": 64,
+      "derived": true
+    },
+    "params": {
+      "max_iter": 250,
+      "max_leaf_nodes": 15,
+      "l2_regularization": 1,
+      "learning_rate": 0.1,
+      "balance": true
+    }
+  },
+  "folds": 3,
+  "mean": {
+    "accuracy": 0.9926262947325587,
+    "precision_macro": 0.9921150556792622,
+    "recall_macro": 0.9911517589047163,
+    "macro_f1": 0.991623650078762,
+    "qwk": 0.9927034898485622,
+    "mae": 0.007373705267441326,
+    "under_triage_rate": 0.003624313546791332,
+    "over_triage_rate": 0.0037493917206499936
+  },
+  "std": {
+    "accuracy": 0.0011565635437304476,
+    "precision_macro": 0.0010148934850419764,
+    "recall_macro": 0.002068838343572894,
+    "macro_f1": 0.0014368424066841569,
+    "qwk": 0.0011539450139251334,
+    "mae": 0.0011565635437304422,
+    "under_triage_rate": 0.0008826472364713633,
+    "over_triage_rate": 0.001703643234180613
+  },
+  "per_fold": [
+    {
+      "accuracy": 0.9932533733133433,
+      "precision_macro": 0.9920161337808397,
+      "recall_macro": 0.9931365583907286,
+      "macro_f1": 0.9925696069970181,
+      "qwk": 0.9933423167140789,
+      "mae": 0.006746626686656672,
+      "under_triage_rate": 0.004872563718140929,
+      "over_triage_rate": 0.0018740629685157421
+    },
+    {
+      "accuracy": 0.9936210131332083,
+      "precision_macro": 0.9934045464758885,
+      "recall_macro": 0.9920209623385446,
+      "macro_f1": 0.9927081209074347,
+      "qwk": 0.993684579710557,
+      "mae": 0.006378986866791745,
+      "under_triage_rate": 0.00300187617260788,
+      "over_triage_rate": 0.003377110694183865
+    },
+    {
+      "accuracy": 0.9910044977511244,
+      "precision_macro": 0.9909244867810583,
+      "recall_macro": 0.9882977559848757,
+      "macro_f1": 0.989593222331833,
+      "qwk": 0.9910835731210502,
+      "mae": 0.008995502248875561,
+      "under_triage_rate": 0.0029985007496251873,
+      "over_triage_rate": 0.005997001499250375
+    }
+  ],
+  "seconds": 62.674038420002034,
+  "pooled_oof": {
+    "accuracy": 0.99262592175978,
+    "precision_macro": 0.9921068946382373,
+    "recall_macro": 0.9911536444138184,
+    "macro_f1": 0.9916279943151123,
+    "qwk": 0.992704468160305,
+    "mae": 0.0073740782402199724,
+    "under_triage_rate": 0.0036245469316335457,
+    "over_triage_rate": 0.0037495313085864268
+  }
+}

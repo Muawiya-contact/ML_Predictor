@@ -1,0 +1,34 @@
+{
+  "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12081756/",
+  "doi": "10.1038/s41598-025-99874-0",
+  "title": "Artificial intelligence for severity triage based on conversations in an emergency department in Korea",
+  "authors": "Seo et al.",
+  "year": 2025,
+  "table": "Table 2",
+  "rows": [
+    {
+      "model": "TF-IDF + Logistic Regression",
+      "accuracy": 0.75,
+      "recall": 0.988,
+      "f1": 0.544
+    },
+    {
+      "model": "TF-IDF + Random Forest",
+      "accuracy": 0.751,
+      "recall": 0.964,
+      "f1": 0.582
+    },
+    {
+      "model": "BiLSTM",
+      "accuracy": 0.746,
+      "recall": 0.846,
+      "f1": 0.67
+    },
+    {
+      "model": "CNN",
+      "accuracy": 0.723,
+      "recall": 0.787,
+      "f1": 0.667
+    }
+  ]
+}

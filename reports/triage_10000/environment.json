@@ -1,0 +1,13 @@
+{
+  "python": "3.14.7 (main, Aug 10 2026, 00:00:00) [GCC 16.1.1 20260515 (Red Hat 16.1.1-2)]",
+  "packages": {
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "scikit-learn": "1.9.0",
+    "torch": "2.14.0+cpu",
+    "transformers": "5.16.1",
+    "sentence-transformers": "6.0.1",
+    "reportlab": "5.0.1"
+  },
+  "source_classifier_sha256": "5d3b9b5948d988533ab37d4d91d40b3303403aa9f47a467d2e0a021e9a9008ab"
+}

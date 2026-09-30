@@ -1,0 +1,11 @@
+ECG_Status,1,2,3
+Abnormal,451,628,380
+Anterior MI,492,0,0
+Arrhythmia,0,601,0
+Atrial fibrillation,0,634,0
+Inferior MI,458,0,0
+Normal,0,0,362
+ST depression,0,609,0
+ST elevation,1311,0,0
+Sinus tachycardia,0,660,407
+T wave inversion,0,641,367

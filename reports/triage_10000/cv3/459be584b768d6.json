@@ -1,0 +1,81 @@
+{
+  "id": "459be584b768d6",
+  "config": {
+    "classifier": "rf",
+    "features": {
+      "view": "text",
+      "encoder": "sapbert_concept",
+      "pca": 64
+    },
+    "params": {
+      "n_estimators": 300,
+      "min_samples_leaf": 3,
+      "max_features": 0.7,
+      "balance": true
+    }
+  },
+  "folds": 3,
+  "mean": {
+    "accuracy": 0.588049924381149,
+    "precision_macro": 0.620255122015451,
+    "recall_macro": 0.5644835397968223,
+    "macro_f1": 0.5828676656661081,
+    "qwk": 0.42436833541497965,
+    "mae": 0.44894761812339606,
+    "under_triage_rate": 0.2048496858512582,
+    "over_triage_rate": 0.20710038976759274
+  },
+  "std": {
+    "accuracy": 0.0029946412282528165,
+    "precision_macro": 0.00732856743417127,
+    "recall_macro": 0.004897546254482218,
+    "macro_f1": 0.004824724600240478,
+    "qwk": 0.015706744339335794,
+    "mae": 0.007060692963001743,
+    "under_triage_rate": 0.010572498513445005,
+    "over_triage_rate": 0.01127739382061127
+  },
+  "per_fold": [
+    {
+      "accuracy": 0.5895802098950524,
+      "precision_macro": 0.6294801244983727,
+      "recall_macro": 0.5650869657529459,
+      "macro_f1": 0.5863539556716394,
+      "qwk": 0.43961222741115247,
+      "mae": 0.4434032983508246,
+      "under_triage_rate": 0.19152923538230884,
+      "over_triage_rate": 0.21889055472263869
+    },
+    {
+      "accuracy": 0.5838649155722326,
+      "precision_macro": 0.6115516126038247,
+      "recall_macro": 0.5582063898632904,
+      "macro_f1": 0.5760450238673747,
+      "qwk": 0.4027545866660448,
+      "mae": 0.45891181988742963,
+      "under_triage_rate": 0.20562851782363978,
+      "over_triage_rate": 0.2105065666041276
+    },
+    {
+      "accuracy": 0.5907046476761619,
+      "precision_macro": 0.6197336289441553,
+      "recall_macro": 0.5701572637742304,
+      "macro_f1": 0.5862040174593105,
+      "qwk": 0.43073819216774156,
+      "mae": 0.444527736131934,
+      "under_triage_rate": 0.21739130434782608,
+      "over_triage_rate": 0.191904047976012
+    }
+  ],
+  "seconds": 80.37816223499976,
+  "pooled_oof": {
+    "accuracy": 0.5880514935633046,
+    "precision_macro": 0.6200766184239014,
+    "recall_macro": 0.5644763635443867,
+    "macro_f1": 0.583063202219519,
+    "qwk": 0.42433626556352244,
+    "mae": 0.44894388201474816,
+    "under_triage_rate": 0.20484939382577178,
+    "over_triage_rate": 0.20709911261092365
+  }
+}

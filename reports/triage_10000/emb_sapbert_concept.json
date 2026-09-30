@@ -1,0 +1,16 @@
+{
+  "name": "sapbert_concept",
+  "text_column": "Clinical_Concept",
+  "model_path": "output/results/.hf_cache/hub/models--cambridgeltl--SapBERT-from-PubMedBERT-fulltext/snapshots/090663c3ae57bf35ffe4d0d468a2a88d03051a4d",
+  "revision": "090663c3ae57bf35ffe4d0d468a2a88d03051a4d",
+  "pooling": "cls",
+  "max_token_length": 64,
+  "normalized": true,
+  "text_sha256": "3df3a196344e2edcfec480c66da35d310874e931b4f74386e92f2486a64a7567",
+  "shape": [
+    10000,
+    768
+  ],
+  "unique_texts": 6703,
+  "seconds": 235.41446631399958
+}

@@ -1,0 +1,16 @@
+{
+  "name": "minilm_complaint",
+  "text_column": "chief_complaint",
+  "model_path": "HF_CACHE/models--sentence-transformers--paraphrase-multilingual-MiniLM-L12-v2/snapshots/e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+  "revision": "e8f8c211226b894fcb81acc59f3b34ba3efd5f42",
+  "pooling": "sentence_transformer",
+  "max_token_length": 128,
+  "normalized": true,
+  "text_sha256": "e7adb9fd7ac8eb79ddb55103af6800d952e081baf7fa6030a580056e1c7a976c",
+  "shape": [
+    10000,
+    384
+  ],
+  "unique_texts": 10000,
+  "seconds": 150.51678836000065
+}

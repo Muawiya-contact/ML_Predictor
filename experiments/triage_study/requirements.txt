@@ -1,0 +1,12 @@
+# Isolated research environment; do not change the application environment.
+numpy==2.5.2
+pandas==3.0.5
+scipy==1.18.1
+scikit-learn==1.9.0
+sentence-transformers==6.0.1
+transformers==5.16.1
+reportlab==5.0.1
+matplotlib
+pypdf
+joblib
+# Install the CPU PyTorch build separately as described in README.md.
