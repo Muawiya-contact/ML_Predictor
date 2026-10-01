@@ -1,0 +1,20 @@
+{
+  "candidate": "lr_quad128_c100",
+  "config": {
+    "classifier": "logreg",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_concept",
+      "solver": "full",
+      "pca": 128,
+      "polynomial": true
+    },
+    "params": {
+      "C": 100,
+      "balance": true
+    }
+  },
+  "baseline": "lr_pca64_c10_balanced1",
+  "rule": "Highest mean development macro F1 subject to emergency recall no more than 1 percentage point below incumbent; accuracy breaks ties.",
+  "cv_gain": 0.005907077206291911
+}

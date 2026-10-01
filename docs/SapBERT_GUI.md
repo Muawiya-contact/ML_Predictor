@@ -6,8 +6,8 @@ classifier selected by five-fold grouped development cross-validation. All live
 levels use the workbook mapping: **0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent**.
 
 SapBERT uses CLS pooling, L2-normalized 768-dimensional vectors and a 64-token
-limit. The fitted PCA projects these to 64 dimensions; 22 structured features
-are concatenated. No stop words are removed for this bundle. Similarity and
+limit. The fitted PCA projects these to 128 dimensions; 50 structured features
+are concatenated (35 numeric linear/quadratic terms and 15 categorical indicators). No stop words are removed for this bundle. Similarity and
 cluster panels use the full 768-dimensional vectors before PCA.
 
 The six tabs share the active encoder and manifest. Results reads the selected
@@ -58,8 +58,11 @@ rejects the previous three-class bundle. Use only trusted pickle artifacts.
 To export a completed study to a new empty directory without retraining:
 
 ```bash
-python experiments/triage_study/export_four_level_bundle.py \
-  --source output/results/triage_four_level --output /tmp/four_level_bundle
+python experiments/triage_study/export_improved_bundle.py \
+  --source output/results/triage_four_level_round3 \
+  --original output/results/triage_four_level \
+  --incumbent output/results/four_level_incumbent_bundle \
+  --output /tmp/four_level_bundle
 ```
 
 The exporter reproduces every held-out prediction before writing the bundle.

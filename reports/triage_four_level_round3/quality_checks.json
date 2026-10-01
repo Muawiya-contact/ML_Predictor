@@ -1,0 +1,18 @@
+{
+  "unit_tests": 31,
+  "unit_test_status": "passed",
+  "cv_fits": 245,
+  "gui_audit": "passed",
+  "gui_scope": "Controlled decisions exercise all four rendering branches; actual classifier parity is independently verified.",
+  "gui_checks": [
+    "four-class results matrix",
+    "four levels and probability bars",
+    "explained missing-complaint placeholder",
+    "stale-input rejection",
+    "four-level batch display"
+  ],
+  "pdf_pages": 8,
+  "pdf_visual_review": "All eight rendered pages inspected; no clipping or overlap. Final clarification on page one reviewed separately.",
+  "live_translation_tested": false,
+  "live_translation_note": "No new live Ollama translation test; classifier evaluation uses supplied/recovered clinical concepts."
+}

@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "cv_fits": 245,
+  "family_comparison_verified": true,
+  "baseline_reproduced": true,
+  "source_hashes_verified": true,
+  "holdout_previously_exposed": true,
+  "development_oof_paired_group_bootstrap": {
+    "iterations": 1000,
+    "seed": 2026,
+    "macro_f1_gain": 0.0059487974779620645,
+    "ci95": [
+      0.0003564777002735581,
+      0.011347989815101874
+    ],
+    "interpretation": "Conditional on selected OOF predictions; does not account for model-selection optimism."
+  }
+}

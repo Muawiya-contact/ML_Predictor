@@ -49,11 +49,11 @@ See [the current GUI guide](docs/SapBERT_GUI.md).
 3. Reject failed/refused translations and anatomical mismatches.
 4. Encode unfiltered English with frozen SapBERT CLS: 768 dimensions, 64-token
    limit, L2 normalization. This bundle does not remove stop words.
-5. Apply the saved development-fitted PCA to obtain 64 text features.
-6. Add 22 structured features: six numeric measurements and ordinal AVPU, with
-   training-median imputation/scaling; Gender, arrival mode and ECG use fitted
-   categorical imputation and one-hot encoding.
-7. Classify the combined 86 features using the model named in
+5. Apply the saved development-fitted PCA to obtain 128 text features.
+6. Add 50 structured features: the seven numeric inputs (including ordinal AVPU)
+   expand to 35 linear/quadratic terms before scaling, with 15 fitted categorical
+   indicators for gender, arrival mode and ECG. Imputation is fitted on training rows.
+7. Classify the combined 178 features using the model named in
    `triage_model_sapbert/model_manifest.json`, selected by development CV.
 
 GUI, `run_inference.py` and `predict_batch.py` use that same bundle. Missing or
@@ -86,8 +86,9 @@ rows have blank scores. The current bundle's `Predicted_Triage_Level` is 0–3.
 
 ## Current study and report
 
-See [the four-level protocol](experiments/triage_study/FOUR_LEVEL.md) for complete
-commands, preprocessing, selection rules and reproducibility controls.
+See [the improvement protocol](experiments/triage_study/IMPROVEMENT.md) for the
+current search and export workflow, and [the initial protocol](experiments/triage_study/FOUR_LEVEL.md)
+for source preparation and baseline comparisons.
 
 The workbook has 10,000 rows. Its 4,290 missing concepts were recovered only after
 matching all complaint/patient inputs and existing concepts to the previous
@@ -95,18 +96,30 @@ supplied file; new targets were preserved. Target names and processing metadata
 are excluded from model inputs. Repeated complaint/concept groups cannot cross
 holdout or CV boundaries. Patient preprocessing and PCA are fitted within folds.
 
-The report compares Logistic Regression, Hist Gradient Boosting and Random
-Forest under all 12 conditions: text/fused inputs × full 768-D/PCA-64. A separate
-10-configuration, five-fold development search selects the application model by
-macro F1, with emergency recall and under-triage tie breakers. The selected model
-is evaluated on the holdout and is not subsequently refitted on those rows.
+The initial report retains all 12 fixed comparisons: three classifiers across
+text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 49
+configurations across five grouped folds (245 fits), including PCA-128/256 and
+quadratic patient-feature controls. Selection uses mean macro F1 with emergency
+recall no more than one percentage point below the incumbent; accuracy breaks ties.
+The selected model is balanced Logistic Regression (C=100), PCA-128 plus 50
+patient features, including quadratic numeric terms. SapBERT remains frozen.
 
-The [report directory](reports/triage_four_level/) contains the PDF, all figures,
-comparison tables and verified aggregate results. The source workbook and
-individual records remain local. The provider described labeling as “by using
-all”; exact methods and independent per-record review are not documented. The
-report evaluates supplied/recovered concepts, while the GUI embeds live Ollama
-translations. These are distinct evaluation scopes.
+On the previously examined 1,999-row test set, accuracy changes from 85.19% to
+86.29%, and macro F1 from 85.80% to 86.80%. Compared with the prior tuning
+round, accuracy rises from 85.99% and macro F1 from 86.58%. Emergency recall
+decreases from 92.16% to 91.42%; under-triage rises from 6.70% to 6.80% versus
+that prior round (initially 7.60%). The gain does not improve every measure.
+These are retrospective comparisons. The conditional development paired-bootstrap F1 gain
+interval is +0.04 to +1.13 percentage points versus the initial model. It does
+not account for repeated model selection; fresh independent data is needed.
+
+The [current report directory](reports/triage_four_level_round3/) contains the
+eight-page PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
+remains available. Follow [the improvement workflow](experiments/triage_study/IMPROVEMENT.md)
+after reproducing the initial study to recreate the active model.
+The provider has no label-assignment rules available; labels remain unchanged.
+Source records and individual error-review lists remain local. Saved metrics
+use supplied/recovered concepts, not live Ollama translations.
 
 ## Verification and historical tools
 

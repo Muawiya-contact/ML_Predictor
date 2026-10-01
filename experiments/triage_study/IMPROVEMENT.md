@@ -89,3 +89,22 @@ relaxed with each round. The previous winner remains eligible. All 49 settings
 are retained in the comparison even when refinement fails to improve scores.
 The previously examined test set remains retrospective. Repeated development
 search is not a substitute for fresh independent validation.
+
+After joint selection, report the highest-CV-F1 fused configuration within each
+of the three families, then independently check all reported metrics:
+
+```bash
+.venv/bin/python experiments/triage_study/compare_tuned_families.py \
+  --source output/results/triage_four_level_round3 \
+  --original output/results/triage_four_level
+.venv/bin/python experiments/triage_study/verify_improvement.py \
+  --source output/results/triage_four_level_round3 \
+  --original output/results/triage_four_level
+```
+
+Family comparisons are descriptive and do not override constrained deployment
+selection. Use the verified round-three source with `export_improved_bundle.py`,
+`verify_improved_serving.py` and `build_improvement_pdf.py` to produce the current
+bundle and report. Retain an archived initial bundle as the export's `--incumbent`.
+The PDF builder's `--original` argument is `reports/triage_four_level` because it
+also needs the verified literature-source metadata stored there.

@@ -4,7 +4,7 @@
 
 Roman Urdu complaint → fuzzy normalization → local Ollama translation → refusal
 filter and deterministic anatomical gate → SapBERT CLS (768-D, L2-normalized)
-→ fitted PCA (64-D) → concatenate 22 patient features → CV-selected classifier
+→ fitted PCA (128-D) → concatenate 50 patient features (including quadratic numeric terms) → CV-selected classifier
 → level 0 Emergency, 1 Urgent, 2 Standard or 3 Non-urgent.
 
 The current bundle is `triage_model_sapbert/`. `model_manifest.json` identifies
@@ -32,6 +32,11 @@ fitted model. No model is refitted or substituted during inference.
   `export_four_level_bundle.py`: source recovery, independent result verification
   and export with full holdout-prediction parity.
 
+- `improve_four_level.py`, `improvement_interactions.py` and `finalize_improvement.py`:
+  the 49-candidate development search and joint selection.
+- `verify_improvement.py`, `export_improved_bundle.py`, `verify_improved_serving.py`:
+  independent metric verification and full live-adapter prediction parity.
+
 ## Data and inference contracts
 
 Training consumes Clinical_Concept plus six numeric patient measurements,
@@ -45,7 +50,7 @@ shows 50% with no level and an explicit placeholder explanation. Translation or
 anatomical failures withhold a score. Classifier probabilities are not clinical
 certainty. Raw source records are local; published results contain aggregates.
 
-See [the current protocol](experiments/triage_study/FOUR_LEVEL.md),
-[GUI guide](docs/SapBERT_GUI.md) and [report directory](reports/triage_four_level/).
+See [the current protocol](experiments/triage_study/IMPROVEMENT.md),
+[GUI guide](docs/SapBERT_GUI.md) and [report directory](reports/triage_four_level_round3/).
 Historical MiniLM/three-level/professor experiments use different feature spaces
 and labels; their scores are not the current application's scores.

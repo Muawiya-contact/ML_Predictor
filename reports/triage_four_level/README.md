@@ -1,4 +1,8 @@
-# Four-level SapBERT comparison
+# Four-level SapBERT comparison (initial round)
+
+This is the initial four-level comparison. The application now uses the
+[improved model and report](../triage_four_level_round3/). The matching
+initial bundle remains in Git history at commit 5284db0.
 
 The eight-page PDF includes both six-row baseline tables, full-768/PCA-64
 accuracy and precision plots, twelve four-class confusion matrices, the
@@ -8,8 +12,8 @@ held-out class scores and matrix. All 29 figures/tables are exported as PNGs.
 The selected fused PCA-64 Logistic Regression (C=10, balanced training weights)
 scored 85.19% accuracy, 85.71% macro precision, 85.90% macro recall and 85.80%
 macro F1 on 1,999 held-out records. Emergency recall was 92.16%; under-triage
-was 7.60%. Selection used development CV only. The matching application bundle
-is `triage_model_sapbert/` with labels 0, 1, 2 and 3.
+was 7.60%. Selection used development CV only. The original bundle used labels 0, 1, 2 and 3; the current application directory
+has since been updated to the improved model.
 
 See [the complete protocol](../../experiments/triage_study/FOUR_LEVEL.md).
 Raw source records, individual predictions and embeddings remain local.
