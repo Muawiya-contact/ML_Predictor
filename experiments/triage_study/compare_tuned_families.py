@@ -12,6 +12,7 @@ from pathlib import Path
 import pandas as pd
 import research_engine as engine
 from cache_integrity import file_sha256
+from finalize_detail_comparison import fit_candidate
 from four_level_study import scores
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -38,9 +39,8 @@ def run(source, original):
     results = []
     for choice in choices:
         cfg = choice['config']
-        features = engine.Features(**cfg['features']).fit(dev)
-        model = engine.fit_model(cfg, features.transform(dev), dev.Labels.to_numpy())
-        pred = model.predict_proba(features.transform(test)).argmax(1)
+        model, features, _, probabilities = fit_candidate(cfg, dev, test)
+        pred = probabilities.argmax(1)
         result = dict(**choice, metrics=scores(test.Labels.to_numpy(), pred),
                       report=classification_report(test.Labels, pred, labels=[0,1,2,3], output_dict=True, zero_division=0),
                       confusion=confusion_matrix(test.Labels, pred, labels=[0,1,2,3]).tolist())

@@ -12,6 +12,7 @@ import research_engine as engine
 from improve_four_level import rank
 from four_level_study import scores
 from cache_integrity import file_sha256
+from finalize_detail_comparison import fit_candidate
 
 def finalize(main, extra, original, output):
     output.mkdir(parents=True, exist_ok=True)
@@ -19,6 +20,10 @@ def finalize(main, extra, original, output):
         raise ValueError('Use a fresh final destination')
     protocol = json.loads((main / 'protocol.json').read_text())
     additional = json.loads((extra / 'protocol.json').read_text())
+    if any(c.get('text_details') for c in additional['candidates'].values()):
+        checked = json.loads((extra / 'verification.json').read_text())
+        if checked.get('status') != 'passed':
+            raise ValueError('Verify detail refinement before joint selection')
     if protocol['source_data_sha256'] != additional['source_data_sha256'] or file_sha256(original / 'dataset_with_splits.csv') != protocol['source_data_sha256']:
         raise ValueError('Source identity mismatch')
     if file_sha256(original / 'emb_sapbert_concept.npy') != protocol['embedding_sha256']:
@@ -63,10 +68,10 @@ def finalize(main, extra, original, output):
     shutil.copy2(main / 'input_audit.json', output / 'input_audit.json')
     engine.HERE = original.resolve()
     config = selection['config']
-    transform = engine.Features(**config['features']).fit(dev)
-    model = engine.fit_model(config, transform.transform(dev), dev.Labels.to_numpy())
-    pred = model.predict_proba(transform.transform(test)).argmax(1)
-    result = dict(candidate=chosen.candidate, feature_count=int(model.n_features_in_), pca_retained_variance=float(transform.pca_.explained_variance_ratio_.sum()) if transform.pca_ is not None else None, metrics=scores(test.Labels.to_numpy(), pred), report=classification_report(test.Labels, pred, labels=[0, 1, 2, 3], output_dict=True, zero_division=0), confusion=confusion_matrix(test.Labels, pred, labels=[0, 1, 2, 3]).tolist())
+    model, transform, detail_scaler, probabilities = fit_candidate(config, dev, test)
+    pred = probabilities.argmax(1)
+    np.save(output / 'selected_probabilities.npy', probabilities)
+    result = dict(candidate=chosen.candidate, config=config, feature_count=int(model.n_features_in_), pca_retained_variance=float(transform.pca_.explained_variance_ratio_.sum()) if transform.pca_ is not None else None, metrics=scores(test.Labels.to_numpy(), pred), report=classification_report(test.Labels, pred, labels=[0, 1, 2, 3], output_dict=True, zero_division=0), confusion=confusion_matrix(test.Labels, pred, labels=[0, 1, 2, 3]).tolist())
     old_results = json.loads((main / 'retrospective_results.json').read_text())
     previous_result = next(r for r in old_results if r['candidate'] == previous['candidate'])
     (output / 'previous_round_result.json').write_text(json.dumps(previous_result, indent=2))
@@ -78,6 +83,10 @@ def finalize(main, extra, original, output):
     dest.mkdir()
     for name, value in [('model', model), ('structured', transform.structured_), ('pca', transform.pca_)]:
         joblib.dump(value, dest / (name + '.pkl'))
+    if detail_scaler is not None:
+        joblib.dump(detail_scaler, dest / 'detail_scaler.pkl')
+    assert file_sha256(original / 'dataset_with_splits.csv') == protocol['source_data_sha256']
+    assert file_sha256(original / 'emb_sapbert_concept.npy') == protocol['embedding_sha256']
     print('COMPLETE joint comparison', flush=True)
 if __name__ == '__main__':
     p = argparse.ArgumentParser()

@@ -62,8 +62,19 @@ def evaluate_fold(source, fold, configs):
         a, b = (transform.transform(df.iloc[train]), transform.transform(df.iloc[valid]))
         for name in names:
             start = time.monotonic()
-            model = engine.fit_model(configs[name], a, y[train])
-            p = model.predict_proba(b)
+            x, xv = a, b
+            details = configs[name].get('text_details')
+            if details:
+                from sklearn.preprocessing import StandardScaler
+                from src.complaint_details import detail_matrix, VERSION, FEATURE_NAMES
+                if details['version'] != VERSION or details['feature_names'] != FEATURE_NAMES:
+                    raise ValueError('Text detail definition mismatch')
+                column = 'chief_complaint' if details['source'] == 'complaint_details' else 'Clinical_Concept'
+                scaler = StandardScaler().fit(detail_matrix(df.iloc[train][column].fillna('').tolist()))
+                x = np.hstack([a, scaler.transform(detail_matrix(df.iloc[train][column].fillna('').tolist()))])
+                xv = np.hstack([b, scaler.transform(detail_matrix(df.iloc[valid][column].fillna('').tolist()))])
+            model = engine.fit_model(configs[name], x, y[train])
+            p = model.predict_proba(xv)
             np.testing.assert_array_equal(model.classes_, [0, 1, 2, 3])
             predictions[name] = p
             row = dict(candidate=name, fold=fold + 1, seconds=time.monotonic() - start, **scores(y[valid], p.argmax(1)))
