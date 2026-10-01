@@ -2,7 +2,9 @@
 
 Run `./run_gui.sh` (or `./run_local.sh` to check/start Ollama). GUI, batch CLI and
 `run_inference.py` default to `triage_model_sapbert/`. Its manifest identifies the
-classifier selected by five-fold grouped development cross-validation. All live
+classifier selected by five-fold grouped development cross-validation: balanced
+Logistic Regression C=10. The four fitted preprocessing/model artifacts remain
+synchronized through manifest checksums. All live
 levels use the workbook mapping: **0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent**.
 
 SapBERT uses CLS pooling, L2-normalized 768-dimensional vectors and a 64-token
@@ -60,9 +62,9 @@ To export a completed study to a new empty directory without retraining:
 
 ```bash
 python experiments/triage_study/export_improved_bundle.py \
-  --source output/results/triage_four_level_round4 \
+  --source output/results/triage_four_level_round5 \
   --original output/results/triage_four_level \
-  --incumbent output/results/four_level_incumbent_bundle \
+  --incumbent output/results/four_level_round4_bundle \
   --output /tmp/four_level_bundle
 ```
 

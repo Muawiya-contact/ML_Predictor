@@ -69,7 +69,7 @@
       "polynomial": true
     },
     "params": {
-      "C": 100,
+      "C": 10,
       "balance": true
     },
     "text_details": {
@@ -99,7 +99,7 @@
     }
   },
   "selection": {
-    "candidate": "logreg__complaint_details",
+    "candidate": "lr_detail128_c10",
     "config": {
       "classifier": "logreg",
       "features": {
@@ -110,7 +110,7 @@
         "polynomial": true
       },
       "params": {
-        "C": 100,
+        "C": 10,
         "balance": true
       },
       "text_details": {
@@ -141,18 +141,18 @@
     },
     "baseline": "lr_pca64_c10_balanced1",
     "rule": "Highest mean development macro F1 subject to emergency recall no more than 1 percentage point below incumbent; accuracy breaks ties.",
-    "cv_gain": 0.03400831684679495
+    "cv_gain": 0.03665207667391257
   },
   "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
   "artifact_sha256": {
-    "model.pkl": "3fff5d3e5e7a6f92cdd4ad86c0e9584e2e1162cd36756d1ba3abcbae7deb0330",
-    "structured.pkl": "45aebe4952b8185a2f2225fbc49d8c5e7c89621b7a6bfe3e0111c4c0227b88e8",
+    "model.pkl": "790f4713c2e8df086ed840ecfc4fd6f4c20165cf84a529f5f7591c3896999a4a",
+    "structured.pkl": "3a29ac5cbf323d26e1b3b89d0a4017dc345d579e9a2e073d8baad81bcdf0cf8e",
     "pca.pkl": "602b69eb2f9238580b56890eb4d1730bb8b1731b8f81d75d70ea7b89409d781f",
     "detail_scaler.pkl": "aeaf71c287b238347009aa88f7cd5063f4c19809f990c6288bb19e7adf442439"
   },
   "improvement_verification": {
     "status": "passed",
-    "cv_fits": 275,
+    "cv_fits": 340,
     "family_comparison_verified": true,
     "baseline_reproduced": true,
     "source_hashes_verified": true,
@@ -160,12 +160,26 @@
     "development_oof_paired_group_bootstrap": {
       "iterations": 1000,
       "seed": 2026,
-      "macro_f1_gain": 0.034026224520567805,
+      "macro_f1_gain": 0.0366720680478162,
       "ci95": [
-        0.02668246211567265,
-        0.04105434693874997
+        0.029721001061637643,
+        0.04330616935983296
       ],
       "interpretation": "Conditional on selected OOF predictions; does not account for model-selection optimism."
+    },
+    "selected_probability_diagnostics": {
+      "development": {
+        "mcc": 0.8560726361857474,
+        "log_loss": 0.24585874420101314,
+        "multiclass_brier": 0.1522935346865638,
+        "ece_10_bins": 0.011969785073657488
+      },
+      "retrospective_test": {
+        "mcc": 0.8562674962047979,
+        "log_loss": 0.24187865298351047,
+        "multiclass_brier": 0.14967780574292885,
+        "ece_10_bins": 0.009418089968214513
+      }
     }
   },
   "text_details": {

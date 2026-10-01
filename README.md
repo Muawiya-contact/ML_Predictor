@@ -99,20 +99,23 @@ are excluded from model inputs. Repeated complaint/concept groups cannot cross
 holdout or CV boundaries. Patient preprocessing and PCA are fitted within folds.
 
 The initial report retains all 12 fixed comparisons: three classifiers across
-text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 55
-configurations across five grouped folds (275 fits), including PCA-128/256 and
+text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 68
+configurations across five grouped folds (340 fits), including PCA-128/256 and
 quadratic patient-feature controls. Selection uses mean macro F1 with emergency
-recall no more than one percentage point below the incumbent; accuracy breaks ties.
-The selected model is balanced Logistic Regression (C=100), PCA-128 plus 50
+recall no more than one percentage point below the original baseline; accuracy breaks ties.
+The selected model is balanced Logistic Regression (C=10), PCA-128 plus 50
 patient features, including quadratic numeric terms, and 19 original-complaint
 detail features. SapBERT remains frozen.
 
-On the previously examined 1,999-row test set, the latest improvement raises
-accuracy from 86.29% to 88.99% and macro F1 from 86.80% to 89.43%. Macro precision
-is 89.37%, macro recall 89.50%, and emergency recall increases from 91.42% to
-93.87%. Under-triage decreases from 6.80% to 4.65%. These are retrospective
-comparisons, not untouched confirmation. Five-fold development macro F1 rises
-from 86.57% to 89.38%; repeated selection still requires new independent data.
+On the previously examined 1,999-row test set, the latest refinement changes
+accuracy from 88.99% to 89.29% and macro F1 from 89.43% to 89.73%. Macro precision
+is 89.67%, macro recall 89.81%, and emergency recall increases from 93.87% to
+95.10%. Under-triage remains 4.65%. These are retrospective comparisons, not
+untouched confirmation. Five-fold development macro F1 changes from 89.38% to
+89.65%. The paired development F1 gain interval is -0.08 to +0.64 percentage
+points and includes zero; a reliable incremental gain is not established.
+The initial four-level baseline remains in the comparison (85.19% accuracy,
+85.80% macro F1). Repeated selection still requires independent confirmation.
 
 The [development audit](reports/triage_learning_detail_audit/) contains nested
 learning curves and the complaint-detail comparison. It flags 567 explicit
@@ -120,9 +123,10 @@ duration disagreements for review. No labels are automatically changed.
 More unique, consistently labelled data may help; these curves do not predict
 an accuracy at 20,000 rows.
 
-The [current report directory](reports/triage_four_level_round4/) contains the
-nine-page final PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
+The [current report directory](reports/triage_four_level_round5/) contains the
+single final PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
 remains available. Follow [the improvement workflow](experiments/triage_study/IMPROVEMENT.md)
+and [the current-data investigation](experiments/triage_study/INVESTIGATION.md)
 after reproducing the initial study to recreate the active model.
 The provider has no label-assignment rules available; labels remain unchanged.
 Source records and individual error-review lists remain local. Saved metrics
@@ -168,4 +172,4 @@ _Department of Biomedical Engineering - May 2026_
 > not a certified medical device. It must not be used as the sole basis for
 > clinical decisions. Always involve a qualified clinician.
 
-The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round4/SapBERT_Final_Report.pdf), including the audit and recommendations.
+The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round5/SapBERT_Final_Report.pdf), including the audit and recommendations.
