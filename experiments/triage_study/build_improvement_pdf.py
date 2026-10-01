@@ -14,7 +14,7 @@ import reportlab
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-def build(source, original, output):
+def build(source, original, output, audit=None):
     if json.loads((source / 'verification.json').read_text())['status'] != 'passed':
         raise ValueError('Verify the comparison before generating the report')
     selection = json.loads((source / 'selection.json').read_text())
@@ -215,6 +215,35 @@ def build(source, original, output):
     p('The larger search can overfit development cross-validation. The old test set is already exposed, so its scores must not be presented as untouched confirmation. A new independently labelled dataset is needed for confirmation. Supplied/recovered concepts bypass live translation during this evaluation. The provider could not supply label-assignment rules; independent per-record review is not documented. These are research comparisons, not clinical validation.')
     p('Files', 'Heading2')
     p('protocol.json freezes candidates and source identities; cross_validation.csv contains every fit; cv_summary.csv reports every candidate; selection.json records the decision; retrospective_results.json contains class scores and matrices. Source data, embeddings and per-record error files remain local.')
+    if audit is not None:
+        audit_check = json.loads((audit / 'verification.json').read_text())
+        if audit_check['status'] != 'passed':
+            raise ValueError('Verify the development audit first')
+        detail = json.loads((audit / 'input_error_audit.json').read_text())
+        learning = pd.read_csv(audit / 'summary.csv')
+        page('Complaint Audit, Learning Curves and Next Steps')
+        p(f"The development audit flags {detail['explicit_duration_disagreements']} explicit duration disagreements between original complaints and supplied concepts, {detail['explicit_duration_missing_from_concept']} durations not recovered from concepts and {detail['family_word_missing_from_concept']} family-word omissions. These lexical flags require review; they do not establish incorrect clinical labels. Labels remain unchanged.")
+        fig, axes = plt.subplots(1, 3, figsize=(12, 3.5), sharey=True)
+        names = {'logreg': 'Logistic Regression', 'hgb': 'HistGradientBoosting', 'rf': 'Random Forest'}
+        for ax, (family, name) in zip(axes, names.items()):
+            rows = learning[learning.classifier.eq(family) & learning.variant.eq('baseline')].sort_values('fraction')
+            ax.plot(rows.train_rows, 100 * rows.train_f1, 'o-', label='Training', color='#2874ad')
+            ax.errorbar(rows.train_rows, 100 * rows.macro_f1, yerr=100 * rows.f1_std, fmt='o-', label='Validation', color='#d49b00', capsize=3)
+            ax.set_title(name, fontsize=10); ax.set_xlabel('Training rows per fold'); ax.set_ylim(65, 101); ax.grid(alpha=.2)
+        axes[0].set_ylabel('Macro F1 (%)'); axes[-1].legend(fontsize=8)
+        fig.tight_layout(); path = figures / 'learning_curves.png'; fig.savefig(path, dpi=200); plt.close(fig)
+        pic(path, height=145)
+        p('Nested whole-group subsets use 25%, 50%, 75% and 100% of each training fold with unchanged validation rows. Error bars show fold standard deviation. Preprocessing is fitted inside each subset. The audit contains 90 fits, including reproduced baselines; no score at 20,000 rows is extrapolated.')
+        rows = [['Full-size development condition', 'Accuracy', 'Macro F1', 'Emergency recall']]
+        variants = {'baseline': 'Prior features', 'concept_details': 'English details', 'complaint_details': 'Original details'}
+        for family, name in names.items():
+            for variant, label in variants.items():
+                r = learning[learning.classifier.eq(family) & learning.variant.eq(variant) & learning.fraction.eq(1)].iloc[0]
+                rows.append([name + ' / ' + label, pct(r.accuracy), pct(r.macro_f1), pct(r.emergency_recall)])
+        table(rows, [250, 75, 75, 95], 7.2, 3)
+        p('Recommended next step', 'Heading2')
+        p('Review the local error queue and duration mismatches, agree a consistent four-level rubric with qualified reviewers, and collect distinct new examples. More rows may help, but duplicated templates or unclear labels will not reliably solve the remaining Urgent/Standard errors. Reserve new independently reviewed records for confirmation before further selection.')
+        p('The GUI retains the original complaint for the 19 detail features and uses checked English for SapBERT. Similarity and cluster views use full 768-D vectors; stop-word removal is inactive. The report measures supplied concepts plus original details, not end-to-end live translation accuracy.')
     output.parent.mkdir(parents=True, exist_ok=True)
 
     def footer(canvas, doc):
@@ -227,5 +256,6 @@ if __name__ == '__main__':
     p.add_argument('--source', type=Path, required=True)
     p.add_argument('--original', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
+    p.add_argument('--audit', type=Path)
     a = p.parse_args()
-    build(a.source, a.original, a.output)
+    build(a.source, a.original, a.output, a.audit)

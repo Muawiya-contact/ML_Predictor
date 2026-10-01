@@ -121,7 +121,7 @@ More unique, consistently labelled data may help; these curves do not predict
 an accuracy at 20,000 rows.
 
 The [current report directory](reports/triage_four_level_round4/) contains the
-eight-page PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
+nine-page final PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
 remains available. Follow [the improvement workflow](experiments/triage_study/IMPROVEMENT.md)
 after reproducing the initial study to recreate the active model.
 The provider has no label-assignment rules available; labels remain unchanged.
@@ -167,3 +167,5 @@ _Department of Biomedical Engineering - May 2026_
 > **Disclaimer:** This is a research / educational decision-support prototype,
 > not a certified medical device. It must not be used as the sole basis for
 > clinical decisions. Always involve a qualified clinician.
+
+The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round4/SapBERT_Final_Report.pdf), including the audit and recommendations.

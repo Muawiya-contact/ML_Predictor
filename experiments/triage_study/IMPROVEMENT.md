@@ -161,3 +161,22 @@ The review queue, group membership lists and all individual predictions remain
 local. Learning curves describe the observed sample sizes; they do not promise
 an accuracy at 20,000 records. Fresh independently reviewed data is required to
 confirm generalization after repeated development searches.
+
+
+## Single final report
+
+The separate comparison and learning-audit PDFs are superseded by one report:
+
+```bash
+python experiments/triage_study/build_improvement_pdf.py \
+  --source output/results/triage_four_level_round4 \
+  --original reports/triage_four_level \
+  --audit output/results/triage_learning_detail_audit \
+  --output output/pdf/SapBERT_Final_Report.pdf
+```
+
+This nine-page report includes the original comparison, latest scores and
+matrices, audit, learning curves and recommendations. All six GUI tabs display
+the same active model identity and dimensions; Results uses the bundle's saved
+retrospective scores. Standalone figures are under the report's figures folder;
+original baseline plots remain under reports/triage_four_level/figures.

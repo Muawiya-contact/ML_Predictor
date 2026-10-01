@@ -15,7 +15,7 @@ validation. Labels and encoder were not changed. Saved English concepts feed
 SapBERT; original complaints provide detail features. Live translation accuracy
 was not evaluated.
 
-The eight-page PDF retains all twelve baseline full-768/PCA-64 comparisons,
+The nine-page final PDF retains all twelve baseline full-768/PCA-64 comparisons,
 tuned-family scores, confusion matrices, class reports and literature context.
 All 275 fits and reported scores were independently checked. The exported
 adapter reproduces all 1,999 saved predictions and probabilities. Thirteen
@@ -26,3 +26,5 @@ and visually inspected.
 See ../triage_learning_detail_audit/ for the separate development-only audit,
 learning curves and feature comparison. Individual records remain local.
 Reproduction commands are in ../../experiments/triage_study/IMPROVEMENT.md.
+
+Use [SapBERT_Final_Report.pdf](SapBERT_Final_Report.pdf) as the single current report. Page 9 includes the audit, learning curves and next steps. Earlier split PDFs are superseded.
