@@ -47,6 +47,11 @@ LABELS = [1, 2, 3]
 
 
 class Features(BaseEstimator, TransformerMixin):
+    """Fold-fitted numeric/categorical preprocessing and optional frozen text PCA.
+
+    Optional quadratic numeric terms live inside the saved numeric pipeline,
+    so application inference can reuse them without reconstructing features.
+    """
     def __init__(
         self,
         view="structured",
