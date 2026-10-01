@@ -22,7 +22,8 @@ Optional local speech reads the translated complaint.
 
 Inspect normalized input, local English translation, gate outcome and the
 active encoder. SapBERT creates 768-D normalized CLS vectors; the classifier
-uses fitted PCA-128 plus 50 patient features (including quadratic numeric terms). Similarity views use full vectors.
+uses fitted PCA-128 plus 50 patient features (including quadratic numeric terms)
+and 19 explicit original-complaint details, for 197 classifier inputs. Similarity views use full vectors.
 
 ## Stop Words
 
@@ -49,4 +50,4 @@ geometry in the full 768-dimensional space. These are representation diagnostics
 not classifier accuracy or clinical validation.
 
 See [the GUI guide](docs/SapBERT_GUI.md) and
-[the current comparison report](reports/triage_four_level_round3/).
+[the current comparison report](reports/triage_four_level_round4/).

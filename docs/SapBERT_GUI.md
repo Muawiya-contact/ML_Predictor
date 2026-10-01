@@ -7,7 +7,8 @@ levels use the workbook mapping: **0 Emergency, 1 Urgent, 2 Standard, 3 Non-urge
 
 SapBERT uses CLS pooling, L2-normalized 768-dimensional vectors and a 64-token
 limit. The fitted PCA projects these to 128 dimensions; 50 structured features
-are concatenated (35 numeric linear/quadratic terms and 15 categorical indicators). No stop words are removed for this bundle. Similarity and
+are concatenated (35 numeric linear/quadratic terms and 15 categorical indicators),
+plus 19 explicit details from the original complaint, for 197 total inputs. No stop words are removed for this bundle. Similarity and
 cluster panels use the full 768-dimensional vectors before PCA.
 
 The six tabs share the active encoder and manifest. Results reads the selected
@@ -52,17 +53,21 @@ python run_inference.py --check
 ```
 
 `TRIAGE_MODEL_DIR` explicitly selects a compatible bundle. The current SapBERT
-loader verifies all three fitted artifacts against manifest checksums and
+loader verifies all four fitted artifacts against manifest checksums and
 rejects the previous three-class bundle. Use only trusted pickle artifacts.
 
 To export a completed study to a new empty directory without retraining:
 
 ```bash
 python experiments/triage_study/export_improved_bundle.py \
-  --source output/results/triage_four_level_round3 \
+  --source output/results/triage_four_level_round4 \
   --original output/results/triage_four_level \
   --incumbent output/results/four_level_incumbent_bundle \
   --output /tmp/four_level_bundle
 ```
 
 The exporter reproduces every held-out prediction before writing the bundle.
+
+Direct `predict_one` callers must pass `raw_complaint`; direct dataframe callers
+must preserve `Raw_Complaint`. GUI and translated batch/CLI wrappers supply it
+automatically. Translated English is not substituted for original detail inputs.

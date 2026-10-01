@@ -4,7 +4,7 @@
 
 Roman Urdu complaint → fuzzy normalization → local Ollama translation → refusal
 filter and deterministic anatomical gate → SapBERT CLS (768-D, L2-normalized)
-→ fitted PCA (128-D) → concatenate 50 patient features (including quadratic numeric terms) → CV-selected classifier
+→ fitted PCA (128-D) → concatenate 50 patient features (including quadratic numeric terms) → append 19 original-complaint details → CV-selected classifier
 → level 0 Emergency, 1 Urgent, 2 Standard or 3 Non-urgent.
 
 The current bundle is `triage_model_sapbert/`. `model_manifest.json` identifies
@@ -51,6 +51,6 @@ anatomical failures withhold a score. Classifier probabilities are not clinical
 certainty. Raw source records are local; published results contain aggregates.
 
 See [the current protocol](experiments/triage_study/IMPROVEMENT.md),
-[GUI guide](docs/SapBERT_GUI.md) and [report directory](reports/triage_four_level_round3/).
+[GUI guide](docs/SapBERT_GUI.md) and [report directory](reports/triage_four_level_round4/).
 Historical MiniLM/three-level/professor experiments use different feature spaces
 and labels; their scores are not the current application's scores.

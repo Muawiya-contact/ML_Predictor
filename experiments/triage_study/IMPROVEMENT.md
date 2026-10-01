@@ -108,3 +108,56 @@ selection. Use the verified round-three source with `export_improved_bundle.py`,
 bundle and report. Retain an archived initial bundle as the export's `--incumbent`.
 The PDF builder's `--original` argument is `reports/triage_four_level` because it
 also needs the verified literature-source metadata stored there.
+
+
+## Original complaint details and learning curves
+
+The development-only audit checks missing/different duration mentions and other
+lexical signals without changing labels. It retains the three classifier
+families and fixed SapBERT embeddings. Nineteen explicit bilingual indicators
+are scaled inside each training fold, then appended to the existing features.
+They represent mentions, not adjudicated clinical findings. Original complaint
+text must be retained separately from the English text used by SapBERT.
+
+```bash
+python experiments/triage_study/learning_and_detail_audit.py \
+  --source output/results/triage_four_level \
+  --incumbent output/results/triage_four_level_round3 \
+  --output output/results/triage_learning_detail_audit
+python experiments/triage_study/verify_learning_audit.py \
+  --source output/results/triage_learning_detail_audit \
+  --original output/results/triage_four_level \
+  --incumbent output/results/triage_four_level_round3
+python experiments/triage_study/finalize_detail_comparison.py \
+  --source output/results/triage_learning_detail_audit \
+  --original output/results/triage_four_level \
+  --incumbent output/results/triage_four_level_round3 \
+  --output output/results/triage_four_level_round4
+python experiments/triage_study/verify_improvement.py \
+  --source output/results/triage_four_level_round4 \
+  --original output/results/triage_four_level
+```
+
+The audit runs 90 fits: 60 nested whole-group learning-curve fits and 30
+full-size detail-feature fits. The original full-size baselines are reproduced
+and checked. Combined with earlier rounds, six new settings make 55 settings
+and 275 full-size fold fits. The original emergency-recall threshold remains
+unchanged. Selection precedes all retrospective test evaluation.
+
+Use round four with the existing export, serving-verification and full-report
+commands above. The export includes a fourth fitted artifact, detail_scaler.pkl,
+and verifies saved probabilities as well as predicted classes. GUI/CLI wrappers
+retain Raw_Complaint; direct prediction callers must supply it for this bundle.
+The clinical labels, encoder and original split remain unchanged.
+
+```bash
+python experiments/triage_study/build_learning_pdf.py \
+  --source output/results/triage_learning_detail_audit \
+  --comparison output/results/triage_four_level_round4 \
+  --output output/pdf/SapBERT_Data_Quality_and_Learning_Curves.pdf
+```
+
+The review queue, group membership lists and all individual predictions remain
+local. Learning curves describe the observed sample sizes; they do not promise
+an accuracy at 20,000 records. Fresh independently reviewed data is required to
+confirm generalization after repeated development searches.

@@ -53,7 +53,9 @@ See [the current GUI guide](docs/SapBERT_GUI.md).
 6. Add 50 structured features: the seven numeric inputs (including ordinal AVPU)
    expand to 35 linear/quadratic terms before scaling, with 15 fitted categorical
    indicators for gender, arrival mode and ECG. Imputation is fitted on training rows.
-7. Classify the combined 178 features using the model named in
+7. Append 19 explicit details extracted from the original complaint, preserving
+   duration and other mentions alongside the English SapBERT representation.
+8. Classify the combined 197 features using the model named in
    `triage_model_sapbert/model_manifest.json`, selected by development CV.
 
 GUI, `run_inference.py` and `predict_batch.py` use that same bundle. Missing or
@@ -97,23 +99,28 @@ are excluded from model inputs. Repeated complaint/concept groups cannot cross
 holdout or CV boundaries. Patient preprocessing and PCA are fitted within folds.
 
 The initial report retains all 12 fixed comparisons: three classifiers across
-text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 49
-configurations across five grouped folds (245 fits), including PCA-128/256 and
+text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 55
+configurations across five grouped folds (275 fits), including PCA-128/256 and
 quadratic patient-feature controls. Selection uses mean macro F1 with emergency
 recall no more than one percentage point below the incumbent; accuracy breaks ties.
 The selected model is balanced Logistic Regression (C=100), PCA-128 plus 50
-patient features, including quadratic numeric terms. SapBERT remains frozen.
+patient features, including quadratic numeric terms, and 19 original-complaint
+detail features. SapBERT remains frozen.
 
-On the previously examined 1,999-row test set, accuracy changes from 85.19% to
-86.29%, and macro F1 from 85.80% to 86.80%. Compared with the prior tuning
-round, accuracy rises from 85.99% and macro F1 from 86.58%. Emergency recall
-decreases from 92.16% to 91.42%; under-triage rises from 6.70% to 6.80% versus
-that prior round (initially 7.60%). The gain does not improve every measure.
-These are retrospective comparisons. The conditional development paired-bootstrap F1 gain
-interval is +0.04 to +1.13 percentage points versus the initial model. It does
-not account for repeated model selection; fresh independent data is needed.
+On the previously examined 1,999-row test set, the latest improvement raises
+accuracy from 86.29% to 88.99% and macro F1 from 86.80% to 89.43%. Macro precision
+is 89.37%, macro recall 89.50%, and emergency recall increases from 91.42% to
+93.87%. Under-triage decreases from 6.80% to 4.65%. These are retrospective
+comparisons, not untouched confirmation. Five-fold development macro F1 rises
+from 86.57% to 89.38%; repeated selection still requires new independent data.
 
-The [current report directory](reports/triage_four_level_round3/) contains the
+The [development audit](reports/triage_learning_detail_audit/) contains nested
+learning curves and the complaint-detail comparison. It flags 567 explicit
+duration disagreements for review. No labels are automatically changed.
+More unique, consistently labelled data may help; these curves do not predict
+an accuracy at 20,000 rows.
+
+The [current report directory](reports/triage_four_level_round4/) contains the
 eight-page PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
 remains available. Follow [the improvement workflow](experiments/triage_study/IMPROVEMENT.md)
 after reproducing the initial study to recreate the active model.
