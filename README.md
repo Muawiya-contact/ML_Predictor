@@ -121,6 +121,10 @@ The provider has no label-assignment rules available; labels remain unchanged.
 Source records and individual error-review lists remain local. Saved metrics
 use supplied/recovered concepts, not live Ollama translations.
 
+The [label-task audit](reports/label_transition_audit/) explains why the older
+three-level 99% scores are not directly comparable. Paired diagnostic fits hold
+rows, embeddings and classifier settings fixed while changing only target labels.
+
 ## Verification and historical tools
 
 ```bash
