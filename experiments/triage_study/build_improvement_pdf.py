@@ -71,6 +71,14 @@ def build(source, original, output):
         for i in range(4):
             for j in range(4):
                 ax.text(j, i, str(cm[i][j]), ha='center', va='center', fontsize=12, color='white' if cm[i][j] > np.max(cm) / 2 else 'black')
+    for result in families:
+        fig, ax = plt.subplots(figsize=(5, 4.5))
+        matrix(ax, result['confusion'], 'Tuned ' + result['config']['classifier'])
+        fig.tight_layout()
+        fig.savefig(figures / ('tuned_' + result['config']['classifier'] + '_confusion.png'), dpi=190)
+        plt.close(fig)
+    if families:
+        pd.DataFrame([dict(candidate=r['candidate'], classifier=r['config']['classifier'], **r['metrics']) for r in families]).to_csv(source / 'family_metrics.csv', index=False)
     page('Four-Level SapBERT: Improvement Study')
     p('Revised comparison | Levels 0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent', 'Heading2')
     p('This improvement study uses the same 10,000 supplied records, frozen SapBERT embeddings and original grouped partitions. It expands the search to PCA-64, PCA-128 and PCA-256, stronger/weaker regularization, class balancing, PCA whitening and structured-only controls. No labels are changed.')
@@ -81,11 +89,11 @@ def build(source, original, output):
         p('Patient preprocessing includes quadratic numeric terms; the classifier family and frozen SapBERT encoder are unchanged.')
     p(f"Selected total input size: {winner.get('feature_count', 'see manifest')} features. PCA retained variance: {(pct(winner['pca_retained_variance']) + '%' if winner.get('pca_retained_variance') is not None else 'not applicable')}.")
     table([['Retrospective metric (%)', 'Initial', 'Prior round', 'Selected']] + [[label, pct(baseline['metrics'][key]), pct(previous['metrics'][key]), pct(winner['metrics'][key])] for key, label in [('accuracy', 'Accuracy'), ('precision_macro', 'Macro precision'), ('recall_macro', 'Macro recall'), ('macro_f1', 'Macro F1'), ('emergency_recall', 'Emergency recall'), ('under_triage_rate', 'Under-triage')]], [225, 90, 90, 90])
-    p(f"Selected quadratic weighted kappa: {winner['metrics']['qwk']:.4f}; mean absolute level error: {winner['metrics']['mae']:.4f}; over-triage: {pct(winner['metrics']['over_triage_rate'])}% (previous {pct(baseline['metrics']['over_triage_rate'])}%).")
-    p(f"Mean development CV macro F1 change: {selection['cv_gain'] * 100:+.2f} percentage points. Selection uses all five development folds and an emergency-recall constraint; the test results above do not select the winner.")
+    p(f"Selected quadratic weighted kappa: {winner['metrics']['qwk']:.4f}; mean absolute level error: {winner['metrics']['mae']:.4f}; over-triage: {pct(winner['metrics']['over_triage_rate'])}% (initial {pct(baseline['metrics']['over_triage_rate'])}%).")
+    p(f"Mean development CV macro F1 change versus initial: {selection['cv_gain'] * 100:+.2f} percentage points. Selection uses all five development folds and an emergency-recall constraint; the test results above do not select the winner.")
     uncertainty=json.loads((source/'verification.json').read_text())['development_oof_paired_group_bootstrap']
     lo,hi=uncertainty['ci95']
-    p(f"Paired development bootstrap: F1 gain 95% interval {100*lo:+.2f} to {100*hi:+.2f} percentage points. {'It includes zero; the gain is not yet statistically established.' if lo <= 0 <= hi else 'This conditional interval excludes zero.'} This diagnostic excludes model-selection uncertainty.")
+    p(f"Paired development bootstrap versus initial: F1 gain 95% interval {100*lo:+.2f} to {100*hi:+.2f} percentage points. {'It includes zero; the gain is not yet statistically established.' if lo <= 0 <= hi else 'This conditional interval excludes zero.'} This diagnostic excludes model-selection uncertainty.")
     p('<b>Evaluation scope:</b> These 1,999 test rows were already examined in the previous study. The new scores are retrospective comparisons, not a fresh independent estimate. New labelled records are needed to confirm generalization. Saved concepts are evaluated here; live translation accuracy is not measured.')
     p('Trade-offs remain visible: compare emergency recall and under-triage as well as aggregate scores. SapBERT is not fine-tuned; these gains do not establish clinical validity.')
     fig, ax = plt.subplots(figsize=(9, 4))
