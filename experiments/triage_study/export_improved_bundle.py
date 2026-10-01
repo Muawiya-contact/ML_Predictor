@@ -15,6 +15,11 @@ def export(source, original, incumbent, output):
     verification = json.loads((source / 'verification.json').read_text())
     if verification['status'] != 'passed':
         raise ValueError('Independent verification required')
+    protocol = json.loads((source / 'protocol.json').read_text())
+    for filename, key in [('dataset_with_splits.csv', 'source_data_sha256'),
+                          ('emb_sapbert_concept.npy', 'embedding_sha256')]:
+        if file_sha256(original / filename) != protocol[key]:
+            raise ValueError(f'Export source changed after verification: {filename}')
     config = selection['config']
     if config['features']['view'] != 'fused':
         raise ValueError('Structured-only winner is a research control; cannot silently replace SapBERT deployment.')
@@ -46,6 +51,7 @@ def export(source, original, incumbent, output):
         np.testing.assert_allclose(model.predict_proba(X), np.load(source / 'selected_probabilities.npy'), atol=1e-12)
     expected = pd.read_csv(source / (selection['candidate'] + '_retrospective_predictions.csv'))
     np.testing.assert_array_equal(test.row_id, expected.row_id)
+    np.testing.assert_array_equal(test.Labels, expected.reference)
     np.testing.assert_array_equal(predictions, expected.predicted)
     names = {'logreg': 'Logistic Regression', 'hgb': 'Hist Gradient Boosting', 'rf': 'Random Forest'}
     pc = config['features']['pca']
