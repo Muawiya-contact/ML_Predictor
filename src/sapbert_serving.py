@@ -70,6 +70,9 @@ def prepare(frame):
 
 
 def load_bundle(model_dir, manifest):
+    import sklearn
+    if manifest.get('sklearn_version') != sklearn.__version__:
+        raise ValueError('SapBERT bundle requires scikit-learn ' + str(manifest.get('sklearn_version')))
     path = Path(model_dir)
     for name in ('model.pkl', 'structured.pkl', 'pca.pkl'):
         expected = manifest.get('artifact_sha256', {}).get(name)

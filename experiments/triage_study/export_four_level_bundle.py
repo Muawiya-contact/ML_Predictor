@@ -7,6 +7,7 @@ from pathlib import Path
 import joblib
 import numpy as np
 import pandas as pd
+import sklearn
 from sklearn.metrics import confusion_matrix
 from cache_integrity import file_sha256
 from prepare_four_level_source import PROVENANCE
@@ -15,6 +16,9 @@ NAMES = {'logreg': 'Logistic Regression', 'hgb': 'Hist Gradient Boosting', 'rf':
 
 
 def main(source, output):
+    environment = json.loads((source / 'environment.json').read_text())
+    if environment['packages']['scikit-learn'] != sklearn.__version__:
+        raise ValueError('Export requires the scikit-learn version used for training.')
     selected = json.loads((source / 'selected_results.json').read_text())
     plan = json.loads((source / 'comparison_plan.json').read_text())
     selection = json.loads((source / 'selection.json').read_text())
@@ -49,6 +53,7 @@ def main(source, output):
         pass
     manifest = {
         'backend': 'sapbert_pca',
+        'sklearn_version': sklearn.__version__,
         'method': 'SapBERT + PCA-64 + ' + NAMES[selected['config']['classifier']],
         'labels': [0, 1, 2, 3], 'label_names': plan['label_names'],
         'text_representation': 'embeddings_raw',

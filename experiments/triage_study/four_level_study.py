@@ -13,6 +13,8 @@ import json
 import shutil
 import time
 import sys
+import platform
+from importlib.metadata import version
 from pathlib import Path
 import joblib
 import numpy as np
@@ -62,6 +64,12 @@ def run(source, output, embedding_source=None, model_path=None):
     prepare_data.main(source, target_column='Triage_Level', labels=LABELS,
                       provenance=PROVENANCE)
     df = pd.read_csv(output / 'dataset_with_splits.csv')
+    environment = {'python': platform.python_version(),
+                   'packages': {name: version(name) for name in
+                                ['numpy', 'pandas', 'scikit-learn', 'scipy', 'joblib',
+                                 'torch', 'transformers', 'reportlab', 'matplotlib', 'openpyxl']},
+                   'random_seed': 42, 'model_selection': 'development CV only'}
+    (output / 'environment.json').write_text(json.dumps(environment, indent=2))
     texts = df.Clinical_Concept.fillna('').astype(str).tolist()
     fingerprint = hashlib.sha256(json.dumps(texts, ensure_ascii=False).encode()).hexdigest()
     if embedding_source is None:
