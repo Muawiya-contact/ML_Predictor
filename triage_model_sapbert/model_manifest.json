@@ -1,0 +1,94 @@
+{
+  "backend": "sapbert_pca",
+  "sklearn_version": "1.9.0",
+  "method": "SapBERT + PCA-64 + Logistic Regression",
+  "labels": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "label_names": [
+    "Emergency",
+    "Urgent",
+    "Standard",
+    "Non-urgent"
+  ],
+  "text_representation": "embeddings_raw",
+  "embedding_model": "cambridgeltl/SapBERT-from-PubMedBERT-fulltext",
+  "embedding_dim": 768,
+  "projected_embedding_dim": 64,
+  "feature_blocks": [
+    {
+      "name": "structured",
+      "dim": 22
+    },
+    {
+      "name": "embedding",
+      "dim": 64,
+      "rescaled": false
+    }
+  ],
+  "encoder_settings": {
+    "revision": "090663c3ae57bf35ffe4d0d468a2a88d03051a4d",
+    "pooling": "cls",
+    "max_token_length": 64,
+    "normalized": true,
+    "local_path": "output/results/.hf_cache/hub/models--cambridgeltl--SapBERT-from-PubMedBERT-fulltext/snapshots/090663c3ae57bf35ffe4d0d468a2a88d03051a4d"
+  },
+  "text_pipeline": "English -> SapBERT CLS (768) -> fitted PCA (64)",
+  "text_column": "Clinical_Concept",
+  "experiment": true,
+  "dataset": {
+    "file": "cardiac_multilingual_10000_4level_triage.xlsx",
+    "sha256": "a2c59f71dada03fdf24a733821adfaeac90e107be3af1e22b779d7674ffc59c3",
+    "rows": 10000,
+    "training_rows": 8001,
+    "test_rows": 1999,
+    "n_classes": 4,
+    "recovered_concepts": 4290,
+    "provenance": {
+      "label_method": "Provider described label assignment as \"by using all\"; the exact process and independent per-record review are not documented."
+    }
+  },
+  "scope": {
+    "clinical_scope": "CARDIAC COMPLAINTS; LEVELS 0-3"
+  },
+  "evaluation_note": "Saved metrics evaluate supplied clinical concepts, not live Ollama translations. These are research results, not clinical validation.",
+  "source_config": {
+    "classifier": "logreg",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_concept",
+      "pca": 64,
+      "solver": "full"
+    },
+    "params": {
+      "C": 10,
+      "balance": true
+    }
+  },
+  "selection": {
+    "candidate": "logreg_c10",
+    "config": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      }
+    },
+    "rule": "Highest five-fold mean macro F1; ties use emergency recall then lower under-triage; holdout unused for selection"
+  },
+  "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "artifact_sha256": {
+    "model.pkl": "62eae2167a41a9c352ac699a5cb23478d11062ce32727e711166c1b2e0843be9",
+    "structured.pkl": "bc25c24442d7f993a08ecf4c431209f2324b1117e66a094d3cacc42dc8a58b4f",
+    "pca.pkl": "36ea0e6598b34d096b6c470de9b766b9addaef0ee77018806e0b96e533e2ef8a"
+  }
+}
