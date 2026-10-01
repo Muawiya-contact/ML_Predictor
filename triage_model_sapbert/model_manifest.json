@@ -1,7 +1,7 @@
 {
   "backend": "sapbert_pca",
   "sklearn_version": "1.9.0",
-  "method": "SapBERT + PCA-128 + Logistic Regression + quadratic patient features",
+  "method": "SapBERT + PCA-128 + Logistic Regression + quadratic patient features + complaint details",
   "labels": [
     0,
     1,
@@ -27,6 +27,10 @@
       "name": "embedding",
       "dim": 128,
       "rescaled": false
+    },
+    {
+      "name": "text_details",
+      "dim": 19
     }
   ],
   "encoder_settings": {
@@ -54,7 +58,7 @@
   "scope": {
     "clinical_scope": "CARDIAC COMPLAINTS; LEVELS 0-3"
   },
-  "evaluation_note": "Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations.",
+  "evaluation_note": "Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations. Explicit detail features use original complaints.",
   "source_config": {
     "classifier": "logreg",
     "features": {
@@ -67,10 +71,35 @@
     "params": {
       "C": 100,
       "balance": true
+    },
+    "text_details": {
+      "source": "complaint_details",
+      "version": 1,
+      "feature_names": [
+        "mild_word",
+        "strong_word",
+        "sudden_word",
+        "exertion_word",
+        "radiation_phrase",
+        "breathing_phrase",
+        "fainting_word",
+        "sweating_word",
+        "nausea_word",
+        "family_word",
+        "history_word",
+        "hypertension_word",
+        "diabetes_word",
+        "negation_word",
+        "night_word",
+        "morning_word",
+        "duration_known",
+        "log_duration_minutes",
+        "duration_ambiguous"
+      ]
     }
   },
   "selection": {
-    "candidate": "lr_quad128_c100",
+    "candidate": "logreg__complaint_details",
     "config": {
       "classifier": "logreg",
       "features": {
@@ -83,21 +112,47 @@
       "params": {
         "C": 100,
         "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
       }
     },
     "baseline": "lr_pca64_c10_balanced1",
     "rule": "Highest mean development macro F1 subject to emergency recall no more than 1 percentage point below incumbent; accuracy breaks ties.",
-    "cv_gain": 0.005907077206291911
+    "cv_gain": 0.03400831684679495
   },
   "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
   "artifact_sha256": {
-    "model.pkl": "dda953bc806b1b09d3f2e70ece1f1ac81e39b8ec9ca69cf604d7f9caccfa094f",
-    "structured.pkl": "3a29ac5cbf323d26e1b3b89d0a4017dc345d579e9a2e073d8baad81bcdf0cf8e",
-    "pca.pkl": "602b69eb2f9238580b56890eb4d1730bb8b1731b8f81d75d70ea7b89409d781f"
+    "model.pkl": "3fff5d3e5e7a6f92cdd4ad86c0e9584e2e1162cd36756d1ba3abcbae7deb0330",
+    "structured.pkl": "45aebe4952b8185a2f2225fbc49d8c5e7c89621b7a6bfe3e0111c4c0227b88e8",
+    "pca.pkl": "602b69eb2f9238580b56890eb4d1730bb8b1731b8f81d75d70ea7b89409d781f",
+    "detail_scaler.pkl": "aeaf71c287b238347009aa88f7cd5063f4c19809f990c6288bb19e7adf442439"
   },
   "improvement_verification": {
     "status": "passed",
-    "cv_fits": 245,
+    "cv_fits": 275,
     "family_comparison_verified": true,
     "baseline_reproduced": true,
     "source_hashes_verified": true,
@@ -105,12 +160,37 @@
     "development_oof_paired_group_bootstrap": {
       "iterations": 1000,
       "seed": 2026,
-      "macro_f1_gain": 0.0059487974779620645,
+      "macro_f1_gain": 0.034026224520567805,
       "ci95": [
-        0.0003564777002735581,
-        0.011347989815101874
+        0.02668246211567265,
+        0.04105434693874997
       ],
       "interpretation": "Conditional on selected OOF predictions; does not account for model-selection optimism."
     }
+  },
+  "text_details": {
+    "source": "complaint_details",
+    "version": 1,
+    "feature_names": [
+      "mild_word",
+      "strong_word",
+      "sudden_word",
+      "exertion_word",
+      "radiation_phrase",
+      "breathing_phrase",
+      "fainting_word",
+      "sweating_word",
+      "nausea_word",
+      "family_word",
+      "history_word",
+      "hypertension_word",
+      "diabetes_word",
+      "negation_word",
+      "night_word",
+      "morning_word",
+      "duration_known",
+      "log_duration_minutes",
+      "duration_ambiguous"
+    ]
   }
 }
