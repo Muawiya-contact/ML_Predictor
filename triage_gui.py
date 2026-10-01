@@ -1583,7 +1583,7 @@ class TriageGUI(tk.Tk):
         if self.active_manifest().get("backend") == "sapbert_pca":
             panel("4  SapBERT + PCA", en,
                   "English text -> normalized SapBERT CLS (768 dimensions) -> "
-                  "fitted PCA (64 dimensions). No stop-word removal. Patient "
+                  f"fitted PCA ({self.active_manifest()['projected_embedding_dim']} dimensions). No stop-word removal. Patient "
                   "features are added before the selected classifier.", ("encoded", True))
             return
         man = self.active_manifest() or {}

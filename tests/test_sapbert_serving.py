@@ -35,6 +35,15 @@ class ServingTests(unittest.TestCase):
                                   'artifact_sha256': {'model.pkl': 'wrong'}})
         load.assert_not_called()
 
+    def test_pca_manifest_dimension_mismatch_is_rejected(self):
+        import json
+        from triage_pipeline import resolve_model_dir
+        directory, _ = resolve_model_dir()
+        manifest = json.loads((Path(directory) / 'model_manifest.json').read_text())
+        manifest['projected_embedding_dim'] = 128 if manifest['projected_embedding_dim'] == 64 else 64
+        with self.assertRaisesRegex(ValueError, 'PCA dimensions'):
+            load_bundle(directory, manifest)
+
     def test_gui_missing_complaint_does_not_start_prediction(self):
         from triage_gui import TriageGUI
         for value in ('', ' ', 'X', 'n/a'):

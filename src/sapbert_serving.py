@@ -88,8 +88,10 @@ def load_bundle(model_dir, manifest):
         raise ValueError('SapBERT classifier dimensions do not match its manifest')
     if list(art['model'].classes_) != [0, 1, 2, 3] or manifest.get('labels') != [0, 1, 2, 3]:
         raise ValueError('SapBERT serving bundle must have classes 0, 1, 2 and 3')
-    if art['pca'].n_features_in_ != 768 or art['pca'].n_components_ != 64:
-        raise ValueError('SapBERT serving bundle requires fitted 768-to-64 PCA')
+    projected = manifest.get('projected_embedding_dim')
+    if (projected not in (64, 128, 256) or art['pca'].n_features_in_ != 768
+            or art['pca'].n_components_ != projected):
+        raise ValueError('SapBERT PCA dimensions do not match the evaluated manifest')
     cats = art['structured'].named_transformers_['cat'].named_steps['encoder'].categories_
     for key, values in zip(['le_gender', 'le_mode', 'le_ecg'], cats):
         art[key] = SimpleNamespace(classes_=values)
