@@ -87,6 +87,8 @@ def build(source, original, output):
     p('Training settings: C=' + str(selection['config']['params'].get('C', 'see protocol')) + '; balanced class weights.' if selection['config']['params'].get('balance') else 'Training settings are listed in the protocol.')
     if selection['config']['features'].get('polynomial'):
         p('Patient preprocessing includes quadratic numeric terms; the classifier family and frozen SapBERT encoder are unchanged.')
+    if selection['config'].get('text_details'):
+        p('An additional 19 explicit detail features preserve severity, onset, duration and other mentions from the original complaint alongside the SapBERT concept embedding.')
     p(f"Selected total input size: {winner.get('feature_count', 'see manifest')} features. PCA retained variance: {(pct(winner['pca_retained_variance']) + '%' if winner.get('pca_retained_variance') is not None else 'not applicable')}.")
     table([['Retrospective metric (%)', 'Initial', 'Prior round', 'Selected']] + [[label, pct(baseline['metrics'][key]), pct(previous['metrics'][key]), pct(winner['metrics'][key])] for key, label in [('accuracy', 'Accuracy'), ('precision_macro', 'Macro precision'), ('recall_macro', 'Macro recall'), ('macro_f1', 'Macro F1'), ('emergency_recall', 'Emergency recall'), ('under_triage_rate', 'Under-triage')]], [225, 90, 90, 90])
     p(f"Selected quadratic weighted kappa: {winner['metrics']['qwk']:.4f}; mean absolute level error: {winner['metrics']['mae']:.4f}; over-triage: {pct(winner['metrics']['over_triage_rate'])}% (initial {pct(baseline['metrics']['over_triage_rate'])}%).")
@@ -109,7 +111,7 @@ def build(source, original, output):
     plt.close(fig)
     page('Complete Development Cross-Validation')
     p(f'All {len(cv)} configurations; {len(cv) * 5} fits across five grouped folds. F1, accuracy and emergency recall are percentages. SD is the fold-to-fold F1 standard deviation in percentage points. The incumbent is lr_pca64_c10_balanced1.')
-    table([['Configuration', 'F1', 'SD', 'Accuracy', 'Emergency recall']] + [[r.candidate, pct(r.macro_f1), pct(r.f1_std), pct(r.accuracy), pct(r.emergency_recall)] for r in cv.itertuples()], [215, 60, 50, 70, 100], 6.8 if len(cv) > 40 else 7.1, 1.2 if len(cv) > 40 else 2)
+    table([['Configuration', 'F1', 'SD', 'Accuracy', 'Emergency recall']] + [[r.candidate, pct(r.macro_f1), pct(r.f1_std), pct(r.accuracy), pct(r.emergency_recall)] for r in cv.itertuples()], [215, 60, 50, 70, 100], 6.8 if len(cv) > 40 else 7.1, 0.7 if len(cv) > 50 else (1.2 if len(cv) > 40 else 2))
     p('Selection: highest mean macro F1 among candidates whose mean emergency recall is within one percentage point of the incumbent; accuracy resolves ties. A higher F1 does not qualify a candidate whose emergency recall falls below the threshold. This is not a clinical safety guarantee.')
     page('Original 768-D versus PCA-64 Baselines')
     p('All original fixed comparisons are retained below. They use the same 1,999 previously examined test rows. Values are percentages; precision, recall and F1 are macro-averaged. These baseline runs are from the first round and are not new experiments.')
@@ -205,6 +207,8 @@ def build(source, original, output):
     p('SapBERT-from-PubMedBERT-fulltext uses frozen 768-D CLS embeddings, L2 normalization, a 64-token limit and the original pinned revision. Logistic Regression varies C=10, 100 and 1000 with and without balancing, plus whitened PCA with C=0.1. Six additional LR configurations use quadratic numeric terms, with C=1/10/100 and optional balancing. HGB tests 7/15 leaves with regularization; Random Forest tests structured and fused inputs. Every candidate is evaluated on all five folds.')
     if len(cv) > 35:
         p('The refinement adds 14 configurations: balanced LR C=30/300 at PCA-64/128; quadratic LR C=100/300 at PCA-128/256; HGB with 7/31 leaves and 800/400 iterations; and RF with 500 trees, square-root feature sampling and leaf sizes 1/3. Classifier families remain unchanged.')
+    if selection['config'].get('text_details'):
+        p('Six additional settings compare 19 explicit details extracted from English concepts or original complaints, using each family’s prior best setting. The separate learning-curve audit uses nested whole-group subsets; labels remain unchanged.')
     p('Selection and deployment', 'Heading2')
     p('The incumbent is included in the same search. Selection is recorded before the retrospective test evaluation. The exported model must reproduce saved predictions through the shared GUI/CLI preprocessing. Model artefacts and the incumbent are retained separately. Quadratic terms, if selected, are applied by the fitted numeric preprocessing pipeline. No label correction or encoder fine-tuning is claimed.')
     p('Research interpretation', 'Heading2')
