@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "heldout_predictions": 1999,
+  "live_embedding_checks": 13,
+  "probability_columns": [
+    "P_L0",
+    "P_L1",
+    "P_L2",
+    "P_L3"
+  ],
+  "live_single_prediction": "passed"
+}

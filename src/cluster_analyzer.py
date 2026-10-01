@@ -61,7 +61,7 @@ def analyze_sentence_cluster(sentences_list: Sequence[str],
                              translate: bool = True,
                              match_threshold: float = MATCH_THRESHOLD,
                              reference: Optional[str] = None,
-                             progress=None) -> dict:
+                             progress=None, embedder=None) -> dict:
     """Embed a cluster and describe how it hangs together.
 
     `progress(i, n, text)` is called per sentence so a GUI can show
@@ -70,6 +70,7 @@ def analyze_sentence_cluster(sentences_list: Sequence[str],
     Never raises. A sentence that fails to embed is recorded in `failed`
     and excluded from the matrix, so one bad row cannot destroy the run.
     """
+    embedder = embedder or preprocess_and_embed
     sentences = [str(s) for s in sentences_list if str(s).strip()]
     result = {
         "n_input": len(sentences_list),
@@ -95,7 +96,7 @@ def analyze_sentence_cluster(sentences_list: Sequence[str],
             except Exception:
                 pass
         try:
-            step = preprocess_and_embed(text, translate=translate)
+            step = embedder(text, translate=translate)
         except Exception as e:
             result["failed"].append({"index": i, "text": text,
                                      "error": f"{type(e).__name__}: {e}"})
@@ -115,7 +116,7 @@ def analyze_sentence_cluster(sentences_list: Sequence[str],
             "normalized": step["normalized"],
             "l2_norm": step["l2_norm"],
             "translated_ok": step["translated_ok"],
-            "shape": (EMBEDDING_DIM,),
+            "shape": tuple(np.asarray(step["embedding"]).shape),
         })
 
     if not rows:
@@ -167,7 +168,7 @@ def analyze_sentence_cluster(sentences_list: Sequence[str],
 
     if reference:
         try:
-            ref = preprocess_and_embed(reference, translate=False)
+            ref = embedder(reference, translate=False)
             if ref.get("embedding") is not None:
                 sims = M @ ref["embedding"]
                 result["reference"] = {

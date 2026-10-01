@@ -850,7 +850,7 @@ REQUIRED_INPUT_COLUMNS = [
 # ============================================================
 
 MANIFEST_FILE = 'model_manifest.json'
-EMBEDDING_MODEL_DIR = 'triage_model_embedding_english'
+EMBEDDING_MODEL_DIR = 'triage_model_sapbert'
 REPRESENTATION_BLOCKS = {
     'embeddings_raw': ('embedding',),
     'embeddings_preprocessed': ('embedding',),
@@ -882,31 +882,16 @@ def describe_model(model_dir=EMBEDDING_MODEL_DIR):
         'model_dir': model_dir,
         'method': manifest.get('method') or rep,
         'text_representation': rep,
-        'basis': 'sentence-transformer embeddings',
+        'basis': 'SapBERT CLS embeddings with PCA' if manifest.get('backend') == 'sapbert_pca' else 'sentence-transformer embeddings',
         'uses_embeddings': True,
         'embedding_model': manifest['embedding_model'],
         'embedding_dim': manifest.get('embedding_dim'),
     }
 
 
-#: Canonical sentence-transformer (SBERT) checkpoint and the dimension of
-#: its output vectors.
-#:
-#: Every module that generates or evaluates embeddings for the deployed
-#: bundle - training, evaluation, pair checks, offline preprocessing -
-#: imports these names instead of typing the model id again, so the live
-#: inference path (which reads `embedding_model` from the bundle manifest)
-#: and the offline tooling can never drift apart.
-#:
-#: The name contains "MiniLM", but this is NOT a generic MiniLM word-vector
-#: loader: paraphrase-multilingual-MiniLM-L12-v2 is a fully-trained
-#: Sentence-BERT model (the multilingual member of the SBERT family),
-#: loaded through SentenceTransformer exactly like any other SBERT
-#: checkpoint, and the deployed classifiers were fitted on its
-#: L2-normalised 384-dimensional vectors. Do not substitute an English-only
-#: SBERT model (e.g. bert-base-nli-mean-tokens) here - it would emit 768
-#: dimensions in a different language space and silently break the
-#: committed, evaluated bundle.
+# Legacy SBERT checkpoint for the historical MiniLM training/evaluation tools.
+# The active SapBERT inference path reads its checkpoint and dimensions from
+# the selected bundle manifest; these vector spaces are not interchangeable.
 EMBEDDING_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 EMBEDDING_VECTOR_DIM = 384
 
@@ -929,6 +914,9 @@ def load_artifacts(model_dir=EMBEDDING_MODEL_DIR):
     def p(name):
         return os.path.join(model_dir, name)
     manifest = read_manifest(model_dir)
+    if manifest.get('backend') == 'sapbert_pca':
+        from src.sapbert_serving import load_bundle
+        return load_bundle(model_dir, manifest)
     artifacts = {
         'model': joblib.load(p('model.pkl')),
         'scaler': joblib.load(p('scaler.pkl')),
@@ -977,6 +965,10 @@ def get_text_encoder(art):
     """Return the sentence-transformer for this bundle, loading it once."""
     if art.get('encoder') is not None:
         return art['encoder']
+    if art['manifest'].get('backend') == 'sapbert_pca':
+        from src.sapbert_serving import SapBERTEncoder
+        art['encoder'] = SapBERTEncoder(art['manifest'])
+        return art['encoder']
     name = art['manifest'].get('embedding_model')
     if not name:
         raise RuntimeError(
@@ -998,6 +990,9 @@ def get_text_encoder(art):
 def build_text_features(art, raw_texts, batch_size=32):
     """Encode complaints with exactly the bundle's training preprocessing."""
     raw_texts = ['unknown' if t is None else str(t) for t in raw_texts]
+    if art['manifest'].get('backend') == 'sapbert_pca':
+        vectors = get_text_encoder(art).encode(raw_texts, batch_size=batch_size)
+        return art['pca'].transform(vectors.astype(np.float64))
     if art['text_representation'] == 'embeddings_raw':
         texts = raw_texts
     elif art['manifest'].get('skip_normalization'):
@@ -1214,6 +1209,18 @@ def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
     user-facing should pass one - the confidence cap alone does not
     explain WHY a number is low.
     """
+    if art['manifest'].get('backend') == 'sapbert_pca':
+        import pandas as pd
+        from src.sapbert_serving import predict_frame
+        frame = pd.DataFrame([dict(zip(
+            ['Complaint_Text', 'Age', 'Heart_Rate', 'Systolic_BP', 'Diastolic_BP',
+             'Temperature', 'SpO2', 'Gender', 'Mode_of_Arrival', 'AVPU', 'ECG_Status'],
+            [complaint, age, heart_rate, systolic_bp, diastolic_bp, temperature,
+             spo2, gender, mode_of_arrival, avpu, ecg_status]))])
+        result, notes, probabilities, confidences = predict_frame(art, frame)
+        if warnings is not None:
+            warnings.extend(notes[0])
+        return int(result.Predicted_Level_0to3.iloc[0]), confidences[0], probabilities[0]
     text_feat = build_text_features(art, [complaint])
 
     import pandas as pd
@@ -1272,6 +1279,10 @@ def predict_dataframe(art, df):
     """
     import pandas as pd
 
+    if art['manifest'].get('backend') == 'sapbert_pca':
+        from src.sapbert_serving import predict_frame
+        out, notes, _, _ = predict_frame(art, df)
+        return out, ['; '.join(n) for n in notes]
     df = df.copy()
 
     # --- ensure all required columns exist ---
