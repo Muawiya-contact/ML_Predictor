@@ -61,3 +61,31 @@ from export and requires live-serving prediction parity.
 replace labels with predictions. No exact development input combinations had
 conflicting labels; this does not establish label correctness. Individual
 records, predictions, embeddings and error-review CSVs remain local.
+
+## Refinement within the same three classifier families
+
+`improvement_refinement.py` predeclares 14 additional configurations (70 fits):
+balanced LR C=30/300 at PCA-64/128; quadratic LR C=100/300 at PCA-128/256;
+HGB PCA-64 with 7/31 leaves and 800/400 iterations; RF PCA-64/128 with 500
+trees, square-root feature subsampling and minimum leaf size 1/3. No new
+classifier family, encoder, source labels or partition is introduced.
+
+```bash
+.venv/bin/python experiments/triage_study/improvement_refinement.py \
+  --original output/results/triage_four_level \
+  --output output/results/triage_four_level_refinement
+.venv/bin/python experiments/triage_study/finalize_improvement.py \
+  --main output/results/triage_four_level_round2 \
+  --extra output/results/triage_four_level_refinement \
+  --original output/results/triage_four_level \
+  --output output/results/triage_four_level_round3
+.venv/bin/python experiments/triage_study/verify_improvement.py \
+  --source output/results/triage_four_level_round3 \
+  --original output/results/triage_four_level
+```
+
+The joint ranking keeps the **original** emergency-recall threshold; it is not
+relaxed with each round. The previous winner remains eligible. All 49 settings
+are retained in the comparison even when refinement fails to improve scores.
+The previously examined test set remains retrospective. Repeated development
+search is not a substitute for fresh independent validation.

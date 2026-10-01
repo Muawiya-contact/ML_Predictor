@@ -41,3 +41,14 @@ class ImprovementTests(unittest.TestCase):
         shifted=frame.copy();shifted['Age']=999
         features.transform(shifted)
         np.testing.assert_array_equal(before,features.structured_.named_transformers_['num'].named_steps['scaler'].mean_)
+
+    def test_refinement_preserves_classifier_scope_and_serving_features(self):
+        from improvement_refinement import configs
+        planned = configs()
+        self.assertEqual(len(planned), 14)
+        self.assertEqual({c['classifier'] for c in planned.values()}, {'logreg', 'rf', 'hgb'})
+        for config in planned.values():
+            self.assertEqual(config['features']['encoder'], 'sapbert_concept')
+            self.assertEqual(config['features']['view'], 'fused')
+            self.assertNotIn('text_weight', config['features'])
+            self.assertFalse(config['features'].get('derived', False))
