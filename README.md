@@ -173,3 +173,5 @@ _Department of Biomedical Engineering - May 2026_
 > clinical decisions. Always involve a qualified clinician.
 
 The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round5/SapBERT_Final_Report.pdf), including the audit and recommendations.
+
+The [previous-versus-latest comparison](reports/triage_historical_comparison/) explains the changed labels, matrix counts and score differences in a separate companion PDF.

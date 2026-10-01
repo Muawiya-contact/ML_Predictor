@@ -29,3 +29,5 @@ See [the investigation](../triage_error_investigation/) and
 Individual records, OOF arrays and review queues remain local.
 
 Validation: 42 targeted unit tests and the real six-tab GUI audit passed.
+
+The [previous-versus-latest comparison](../triage_historical_comparison/) explains the changed labels, matrix counts and score differences in a separate companion PDF.
