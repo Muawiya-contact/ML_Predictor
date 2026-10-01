@@ -2043,31 +2043,7 @@ class TriageGUI(tk.Tk):
                 texts.append(en)
                 gate_status.append("PASS" if ok else "BLOCKED")
                 gate_detail.append("" if ok else "; ".join(why)[:120])
-        # `len(df) and` matters: a header-only sheet has 0 rows and 0
-        # failures, and 0 == 0 fired this guard, so exporting the template
-        # and uploading it unedited raised "None of the 0 rows could be
-        # translated ... the usual causes are Ollama not running" against
-        # a perfectly healthy service. predict_dataframe has a 0-row path
-        # built for exactly that upload; this made it unreachable.
-        if len(df) and failures == len(df):
-            # Nothing survived. This IS fatal - there is no table to show.
-            raise RuntimeError(
-                f"None of the {len(df)} rows could be translated. Check "
-                f"the console: the usual causes are Ollama not running "
-                f"(start it with 'ollama serve') or the model refusing, "
-                f"which the guardrail logs.")
-
-        # A partial failure is NOT fatal any more. It used to abort the
-        # whole run, on the reasoning that mixing translated and
-        # untranslated rows would put two pipelines in one table. The
-        # reasoning was right; the remedy was too blunt. One "n/a"
-        # complaint - which a real spreadsheet always has - destroyed the
-        # other 499 rows, and the operator was shown nothing at all.
-        #
-        # Now every row carries its own verdict and untranslated rows are
-        # scored by nobody, so the two pipelines still never mix: a row
-        # either has an English translation and a triage level, or it has
-        # neither and says why.
+        # Keep refused rows in the export, but never pass them to inference.
         self._batch_failures = failures
 
         df = df.copy()
@@ -2082,7 +2058,19 @@ class TriageGUI(tk.Tk):
         pr = getattr(self, "_batch_progress", {})
         pr["done"] = pr.get("total", 0)
         pr["text"] = "scoring"
-        results, _ = predict_dataframe(self.active_artifacts(), df)
+        import pandas as _pd
+        accepted = [i for i, status in enumerate(gate_status) if status == 'PASS']
+        results = df.copy()
+        for col in ('Predicted_Level_0to3', 'Predicted_Triage_Level',
+                    'Predicted_Label', 'Confidence', 'P_L0', 'P_L1', 'P_L2', 'P_L3', 'Notes'):
+            results[col] = _pd.Series(index=results.index, dtype=object)
+        if accepted:
+            scored, _ = predict_dataframe(self.active_artifacts(), df.iloc[accepted])
+            for col in scored.columns:
+                if col not in results:
+                    results[col] = _pd.Series(index=results.index, dtype=object)
+                results.loc[results.index[accepted], col] = scored[col].to_numpy()
+        results['Complaint_Text'] = originals
         pr["finished"] = True
 
         if gate_status:
@@ -2101,6 +2089,7 @@ class TriageGUI(tk.Tk):
             results["Translation_English"] = blanked
             results["Gate_Status"] = gate_status
             results["Gate_Detail"] = gate_detail
+            results.loc[results.index[[i for i, g in enumerate(gate_status) if g != "PASS"]], "Text_Encoded"] = None
             # A blocked row must not carry a triage level. Scoring it anyway
             # and hoping the operator reads a status column is how a stomach
             # complaint gets actioned as cardiac; the single-patient path
