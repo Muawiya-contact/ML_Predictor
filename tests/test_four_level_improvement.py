@@ -23,3 +23,21 @@ class ImprovementTests(unittest.TestCase):
         self.assertEqual(configs['lr_pca64_c10_balanced1']['params'],{'C':10,'balance':True})
         self.assertTrue({64,128,256} <= {c['features']['pca'] for c in configs.values()})
         self.assertTrue(all(c['features']['view'] in ('fused','structured') for c in configs.values()))
+
+    def test_quadratic_patient_preprocessing_matches_serving(self):
+        import numpy as np
+        import research_engine as engine
+        from src.sapbert_serving import prepare
+        frame=pd.DataFrame({
+            **{name:[30.,40.,50.] for name in engine.NUM[:6]},
+            'AVPU':['A','V','U'], 'Gender':['Male']*3,
+            'Mode_of_Arrival':['Walk-in']*3,'ECG_Status':['Normal']*3})
+        features=engine.Features(view='structured',polynomial=True).fit(frame)
+        expected=features.transform(frame)
+        actual=features.structured_.transform(prepare(frame))
+        np.testing.assert_allclose(actual,expected)
+        self.assertEqual(expected.shape,(3,38))  # 35 numeric terms + 3 categories.
+        before=features.structured_.named_transformers_['num'].named_steps['scaler'].mean_.copy()
+        shifted=frame.copy();shifted['Age']=999
+        features.transform(shifted)
+        np.testing.assert_array_equal(before,features.structured_.named_transformers_['num'].named_steps['scaler'].mean_)

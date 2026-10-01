@@ -16,7 +16,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, PolynomialFeatures
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
@@ -57,6 +57,7 @@ class Features(BaseEstimator, TransformerMixin):
         whiten=False,
         solver="randomized",
         exclude_cat=(),
+        polynomial=False,
     ):
         self.view = view
         self.encoder = encoder
@@ -66,6 +67,7 @@ class Features(BaseEstimator, TransformerMixin):
         self.whiten = whiten
         self.solver = solver
         self.exclude_cat = exclude_cat
+        self.polynomial = polynomial
 
     def prepare(self, X):
         X = X.copy()
@@ -118,6 +120,7 @@ class Features(BaseEstimator, TransformerMixin):
                         Pipeline(
                             [
                                 ("imputer", SimpleImputer(strategy="median")),
+                                ("polynomial", PolynomialFeatures(degree=2, include_bias=False) if self.polynomial else "passthrough"),
                                 ("scaler", StandardScaler()),
                             ]
                         ),
