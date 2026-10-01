@@ -1,4 +1,4 @@
-"""Eight-page second-round report with all original baseline comparisons."""
+"""Single verified report with original comparisons and optional follow-up audits."""
 import argparse, json
 from pathlib import Path
 import numpy as np
@@ -14,7 +14,7 @@ import reportlab
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
-def build(source, original, output, audit=None):
+def build(source, original, output, audit=None, investigation=None):
     if json.loads((source / 'verification.json').read_text())['status'] != 'passed':
         raise ValueError('Verify the comparison before generating the report')
     selection = json.loads((source / 'selection.json').read_text())
@@ -92,6 +92,10 @@ def build(source, original, output, audit=None):
     p(f"Selected total input size: {winner.get('feature_count', 'see manifest')} features. PCA retained variance: {(pct(winner['pca_retained_variance']) + '%' if winner.get('pca_retained_variance') is not None else 'not applicable')}.")
     table([['Retrospective metric (%)', 'Initial', 'Prior round', 'Selected']] + [[label, pct(baseline['metrics'][key]), pct(previous['metrics'][key]), pct(winner['metrics'][key])] for key, label in [('accuracy', 'Accuracy'), ('precision_macro', 'Macro precision'), ('recall_macro', 'Macro recall'), ('macro_f1', 'Macro F1'), ('emergency_recall', 'Emergency recall'), ('under_triage_rate', 'Under-triage')]], [225, 90, 90, 90])
     p(f"Selected quadratic weighted kappa: {winner['metrics']['qwk']:.4f}; mean absolute level error: {winner['metrics']['mae']:.4f}; over-triage: {pct(winner['metrics']['over_triage_rate'])}% (initial {pct(baseline['metrics']['over_triage_rate'])}%).")
+    probability_diagnostics = json.loads((source / 'verification.json').read_text()).get('selected_probability_diagnostics', {})
+    if probability_diagnostics:
+        d = probability_diagnostics['retrospective_test']
+        p(f"Selected retrospective MCC: {d['mcc']:.4f}; log loss: {d['log_loss']:.4f}; multiclass Brier score: {d['multiclass_brier']:.4f}.")
     p(f"Mean development CV macro F1 change versus initial: {selection['cv_gain'] * 100:+.2f} percentage points. Selection uses all five development folds and an emergency-recall constraint; the test results above do not select the winner.")
     uncertainty=json.loads((source/'verification.json').read_text())['development_oof_paired_group_bootstrap']
     lo,hi=uncertainty['ci95']
@@ -100,7 +104,7 @@ def build(source, original, output, audit=None):
     p('Trade-offs remain visible: compare emergency recall and under-triage as well as aggregate scores. SapBERT is not fine-tuned; these gains do not establish clinical validity.')
     fig, ax = plt.subplots(figsize=(9, 4))
     keys = ['accuracy', 'precision_macro', 'recall_macro', 'macro_f1', 'emergency_recall']
-    for offset, result, label, color in [(-0.18, baseline, 'Previous', '#2874ad'), (0.18, winner, 'Selected', '#efa928')]:
+    for offset, result, label, color in [(-0.18, baseline, 'Initial baseline', '#2874ad'), (0.18, winner, 'Selected', '#efa928')]:
         ax.bar(np.arange(len(keys)) + offset, [result['metrics'][k] * 100 for k in keys], 0.36, label=label, color=color)
     ax.set_xticks(range(len(keys)), ['Accuracy', 'Macro precision', 'Macro recall', 'Macro F1', 'Emergency recall'])
     ax.set_ylim(0, 100)
@@ -110,9 +114,13 @@ def build(source, original, output, audit=None):
     fig.savefig(figures / 'previous_selected_metrics.png', dpi=190)
     plt.close(fig)
     page('Complete Development Cross-Validation')
-    p(f'All {len(cv)} configurations; {len(cv) * 5} fits across five grouped folds. F1, accuracy and emergency recall are percentages. SD is the fold-to-fold F1 standard deviation in percentage points. The incumbent is lr_pca64_c10_balanced1.')
-    table([['Configuration', 'F1', 'SD', 'Accuracy', 'Emergency recall']] + [[r.candidate, pct(r.macro_f1), pct(r.f1_std), pct(r.accuracy), pct(r.emergency_recall)] for r in cv.itertuples()], [215, 60, 50, 70, 100], 6.8 if len(cv) > 40 else 7.1, 0.7 if len(cv) > 50 else (1.2 if len(cv) > 40 else 2))
-    p('Selection: highest mean macro F1 among candidates whose mean emergency recall is within one percentage point of the incumbent; accuracy resolves ties. A higher F1 does not qualify a candidate whose emergency recall falls below the threshold. This is not a clinical safety guarantee.')
+    p(f'All {len(cv)} configurations; {len(cv) * 5} fits across five grouped folds. F1, accuracy and emergency recall are percentages. SD is the fold-to-fold F1 standard deviation in percentage points. The original reference is lr_pca64_c10_balanced1.')
+    chunks = [cv] if len(cv) <= 60 else [cv.iloc[:35], cv.iloc[35:]]
+    for index, chunk in enumerate(chunks):
+        if index:
+            page('Development Cross-Validation: Continued')
+        table([['Configuration', 'F1', 'SD', 'Accuracy', 'Emergency recall']] + [[r.candidate, pct(r.macro_f1), pct(r.f1_std), pct(r.accuracy), pct(r.emergency_recall)] for r in chunk.itertuples()], [215, 60, 50, 70, 100], 6.8 if len(cv) > 40 else 7.1, 0.7 if len(chunk) > 50 else (1.2 if len(chunk) > 40 else 2))
+    p('Selection: highest mean macro F1 among candidates whose mean emergency recall is within one percentage point of the original reference; accuracy resolves ties. A higher F1 does not qualify a candidate whose emergency recall falls below the threshold. This is not a clinical safety guarantee.')
     page('Original 768-D versus PCA-64 Baselines')
     p('All original fixed comparisons are retained below. They use the same 1,999 previously examined test rows. Values are percentages; precision, recall and F1 are macro-averaged. These baseline runs are from the first round and are not new experiments.')
     for view, label in [('text', 'Text only'), ('fused', 'Text plus patient features')]:
@@ -244,6 +252,35 @@ def build(source, original, output, audit=None):
         p('Recommended next step', 'Heading2')
         p('Review the local error queue and duration mismatches, agree a consistent four-level rubric with qualified reviewers, and collect distinct new examples. More rows may help, but duplicated templates or unclear labels will not reliably solve the remaining Urgent/Standard errors. Reserve new independently reviewed records for confirmation before further selection.')
         p('The GUI retains the original complaint for the 19 detail features and uses checked English for SapBERT. Similarity and cluster views use full 768-D vectors; stop-word removal is inactive. The report measures supplied concepts plus original details, not end-to-end live translation accuracy.')
+    if investigation is not None:
+        diag=json.loads((investigation/'diagnostics.json').read_text())
+        page('Further Four-Level Error Investigation')
+        p('This diagnostic uses only the 8,001 development records and the pre-refinement model. Supplied labels 0, 1, 2 and 3 remain unchanged. It is a diagnostic of model errors, not an independent assessment of clinical label correctness.')
+        pic(investigation/'figures/current_error_confidence.png',height=160)
+        table([['Pre-refinement development diagnostic','Value'],
+               ['Out-of-fold errors',str(diag['errors'])],
+               ['Errors between neighbouring levels',str(diag['adjacent_errors'])],
+               ['Urgent / Standard confusions',str(diag['urgent_standard_errors'])],
+               ['Errors with confidence at least 90%',str(diag['high_confidence_errors_90'])],
+               ['All three classifiers agree on the wrong level',str(diag.get('all_three_agree_on_wrong_level','not measured'))],
+               ['Matthews correlation coefficient',f"{diag['multiclass_mcc']:.4f}"],
+               ['Multiclass log loss',f"{diag['multiclass_log_loss']:.4f}"],
+               ['Multiclass Brier score',f"{diag['multiclass_brier']:.4f}"],
+               ['Confidence calibration gap (10 bins)',f"{diag['confidence_ece_10_bins']:.4f}"]], [365,130],8,3)
+        p('Higher MCC is better; lower log loss, Brier score and calibration gap are better. Confidence bins compare the mean maximum predicted probability with observed accuracy. These conditional development diagnostics do not measure end-to-end translation accuracy.')
+        p('The follow-up freezes 13 settings before evaluation: LR regularization and balancing at PCA-128, PCA-64/256 alternatives, HGB leaf/regularization settings and RF feature sampling. All retain the 19 original-complaint details. Every setting uses five grouped folds; the original emergency-recall selection constraint remains fixed.')
+        if probability_diagnostics:
+            d = probability_diagnostics['development']
+            p(f"Selected development diagnostics: MCC {d['mcc']:.4f}; log loss {d['log_loss']:.4f}; Brier score {d['multiclass_brier']:.4f}; calibration gap {d['ece_10_bins']:.4f}.")
+        p('The older three-level scores concern a different labelling task. No labels are replaced, no difficult records are dropped and no test-based selection is used.')
+        refinement_file=investigation/'refinement_verification.json'
+        if refinement_file.exists():
+            refinement=json.loads(refinement_file.read_text())
+            interval=refinement.get('paired_bootstrap_vs_incumbent')
+            if interval:
+                lower,upper=interval['ci95']
+                p(f"Latest refinement versus the immediately prior model: pooled development F1 gain {100*interval['pooled_macro_f1_gain']:+.2f} percentage points; conditional paired group interval {100*lower:+.2f} to {100*upper:+.2f}. {'The interval includes zero, so a reliable gain is not established.' if lower <= 0 <= upper else 'The conditional interval excludes zero.'} Repeated-selection uncertainty is not included.")
+
     output.parent.mkdir(parents=True, exist_ok=True)
 
     def footer(canvas, doc):
@@ -257,5 +294,6 @@ if __name__ == '__main__':
     p.add_argument('--original', type=Path, required=True)
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--audit', type=Path)
+    p.add_argument('--investigation', type=Path)
     a = p.parse_args()
-    build(a.source, a.original, a.output, a.audit)
+    build(a.source, a.original, a.output, a.audit, a.investigation)

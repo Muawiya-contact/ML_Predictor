@@ -1,3 +1,5 @@
+> Historical round-four results. The [current report](../triage_four_level_round5/) supersedes this model.
+
 # Four-level SapBERT: original complaint details
 
 Current model: balanced Logistic Regression C=100, frozen SapBERT PCA-128,

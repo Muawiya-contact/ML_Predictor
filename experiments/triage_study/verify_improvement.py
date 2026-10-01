@@ -3,7 +3,7 @@ import argparse, json
 from pathlib import Path
 import numpy as np
 import pandas as pd
-from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, classification_report, matthews_corrcoef, log_loss
 from four_level_study import scores
 from improve_four_level import rank
 from cache_integrity import file_sha256
@@ -89,6 +89,27 @@ def verify(source, original):
         ids = np.concatenate([rows[i] for i in rng.integers(0, len(rows), len(rows))])
         gains.append(f1_score(y[ids], a[ids], average='macro') - f1_score(y[ids], b[ids], average='macro'))
     output = dict(status='passed', cv_fits=len(cv), family_comparison_verified=family_path.exists(), baseline_reproduced=True, source_hashes_verified=True, holdout_previously_exposed=True, development_oof_paired_group_bootstrap=dict(iterations=1000, seed=2026, macro_f1_gain=float(f1_score(y, a, average='macro') - f1_score(y, b, average='macro')), ci95=np.quantile(gains, [0.025, 0.975]).tolist(), interpretation='Conditional on selected OOF predictions; does not account for model-selection optimism.'))
+    probability_file = source / 'selected_probabilities.npy'
+    if probability_file.exists():
+        diagnostics = {}
+        for partition, labels, probabilities in [('development', y, z['selected']),
+                                                ('retrospective_test', test.Labels.to_numpy(), np.load(probability_file))]:
+            assert probabilities.shape == (len(labels), 4)
+            assert np.isfinite(probabilities).all() and (probabilities >= 0).all()
+            np.testing.assert_allclose(probabilities.sum(1), 1, atol=1e-10)
+            predicted = probabilities.argmax(1)
+            if partition == 'retrospective_test':
+                saved = pd.read_csv(source / (selection['candidate'] + '_retrospective_predictions.csv'))
+                np.testing.assert_array_equal(predicted, saved.predicted)
+            confidence = probabilities.max(1)
+            bins = np.minimum((confidence * 10).astype(int), 9)
+            ece = sum(np.mean(bins == k) * abs(np.mean(predicted[bins == k] == labels[bins == k]) - np.mean(confidence[bins == k]))
+                      for k in range(10) if (bins == k).any())
+            diagnostics[partition] = dict(mcc=float(matthews_corrcoef(labels, predicted)),
+                                          log_loss=float(log_loss(labels, probabilities, labels=[0, 1, 2, 3])),
+                                          multiclass_brier=float(np.mean(np.sum((probabilities - np.eye(4)[labels]) ** 2, axis=1))),
+                                          ece_10_bins=float(ece))
+        output['selected_probability_diagnostics'] = diagnostics
     (source / 'verification.json').write_text(json.dumps(output, indent=2))
     print(json.dumps(output, indent=2))
 if __name__ == '__main__':

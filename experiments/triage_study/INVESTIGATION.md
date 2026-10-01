@@ -61,3 +61,40 @@ OOF arrays and records remain local. Publish only aggregate diagnostics and scor
 The final PDF builder accepts `--investigation output/results/triage_error_investigation`
 in addition to `--audit output/results/triage_learning_detail_audit`, so the
 investigation remains in the single final report rather than a second PDF.
+
+After verification, export and check the shared application adapter before
+replacing the active bundle:
+
+```bash
+python experiments/triage_study/export_improved_bundle.py \
+  --source output/results/triage_four_level_round5 \
+  --original output/results/triage_four_level \
+  --incumbent output/results/four_level_round4_bundle \
+  --output output/results/four_level_round5_bundle
+python experiments/triage_study/verify_improved_serving.py \
+  --source output/results/triage_four_level_round5 \
+  --original output/results/triage_four_level \
+  --bundle output/results/four_level_round5_bundle
+```
+
+Preserve the previous bundle locally. Copy the verified artifacts and metrics
+into `triage_model_sapbert/`, with `model_manifest.json` copied last, and restart
+the GUI. The shared adapter reads the manifest; do not hard-code new scores or
+class mappings into individual tabs.
+
+Copy the refinement's `verification.json` into the investigation directory as
+`refinement_verification.json`, then regenerate the single report:
+
+```bash
+python experiments/triage_study/build_improvement_pdf.py \
+  --source output/results/triage_four_level_round5 \
+  --original reports/triage_four_level \
+  --audit output/results/triage_learning_detail_audit \
+  --investigation output/results/triage_error_investigation \
+  --output output/pdf/SapBERT_Final_Report.pdf
+```
+
+Render and inspect every page before publication. The final comparison includes
+all original 768-D/PCA-64 baselines, each tuned classifier, the full development
+search and both audits. Probability diagnostics are recomputed from saved
+probabilities; lower log loss and Brier score indicate better probability quality.
