@@ -24,7 +24,8 @@ def export(source,original,incumbent,output):
     predictions=model.predict(transform.transform(test));expected=pd.read_csv(source/(selection['candidate']+'_retrospective_predictions.csv'))
     np.testing.assert_array_equal(test.row_id,expected.row_id);np.testing.assert_array_equal(predictions,expected.predicted)
     names={'logreg':'Logistic Regression','hgb':'Hist Gradient Boosting','rf':'Random Forest'};pc=config['features']['pca']
-    manifest.update(method=f'SapBERT + PCA-{pc} + '+names[config['classifier']],projected_embedding_dim=pc,
+    description = (' + quadratic patient features' if config['features'].get('polynomial') else '')
+    manifest.update(method=f'SapBERT + PCA-{pc} + '+names[config['classifier']]+description,projected_embedding_dim=pc,
         feature_blocks=[dict(name='structured',dim=int(model.n_features_in_-pc)),dict(name='embedding',dim=pc,rescaled=False)],
         text_pipeline=f'English -> SapBERT CLS (768) -> fitted PCA ({pc})',source_config=config,selection=selection,
         evaluation_note='Second-round retrospective comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations.',

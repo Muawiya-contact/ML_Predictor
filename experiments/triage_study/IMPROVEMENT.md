@@ -1,21 +1,23 @@
 # Four-level improvement round
 
 This round preserves all source labels, SapBERT settings and original group
-partitions. It searches 29 predeclared configurations over the five development
-folds (145 fits). A maximum of three separate fold processes run concurrently;
+partitions. It searches 29 initial configurations and six separately predeclared quadratic
+interaction configurations over the same five development folds (175 fits total). A maximum of three separate fold processes run concurrently;
 preprocessing is fitted independently inside each fold.
 
 Candidates include Logistic Regression with C=10/100/1000, balanced/unbalanced
 training and PCA-64/128/256; whitened PCA with C=0.1; regularized HGB with 7/15
 leaves; and Random Forest. Structured-only models are controls. SapBERT remains
-frozen. No new features, labels or clinical facts are invented.
+frozen. Quadratic numeric terms are fitted inside each fold; no new labels or clinical
+facts are invented. The provider has no label-assignment rules available.
 
 Selection uses highest mean development macro F1 subject to emergency recall
 being within one percentage point of the incumbent. Accuracy breaks ties. This
 is an experimental selection criterion, not a clinical safety guarantee. The
 incumbent is reproduced on the same folds. All candidates are reported.
 
-The old test set was already examined. New results on it are **retrospective**,
+The supplemental search is defined before inspecting the new retrospective
+results. The joint choice uses only development CV. The old test set was already examined. New results on it are **retrospective**,
 not an untouched validation claim. Selection is frozen before these scores are
 computed. Fresh, independently labelled records are needed for confirmation.
 The OOF paired group bootstrap is conditional on the selected predictions; it
@@ -27,16 +29,24 @@ Run from the repository root with the pinned project environment:
 .venv/bin/python experiments/triage_study/improve_four_level.py \
   --source output/results/triage_four_level \
   --output output/results/triage_four_level_improved_parallel
+.venv/bin/python experiments/triage_study/improvement_interactions.py \
+  --original output/results/triage_four_level \
+  --output output/results/triage_four_level_interactions
+.venv/bin/python experiments/triage_study/finalize_improvement.py \
+  --main output/results/triage_four_level_improved_parallel \
+  --extra output/results/triage_four_level_interactions \
+  --original output/results/triage_four_level \
+  --output output/results/triage_four_level_round2
 .venv/bin/python experiments/triage_study/verify_improvement.py \
-  --source output/results/triage_four_level_improved_parallel \
+  --source output/results/triage_four_level_round2 \
   --original output/results/triage_four_level
 .venv/bin/python experiments/triage_study/export_improved_bundle.py \
-  --source output/results/triage_four_level_improved_parallel \
+  --source output/results/triage_four_level_round2 \
   --original output/results/triage_four_level \
   --incumbent triage_model_sapbert \
-  --output output/results/triage_four_level_improved_parallel/exported_bundle
+  --output output/results/triage_four_level_round2/exported_bundle
 .venv/bin/python experiments/triage_study/build_improvement_pdf.py \
-  --source output/results/triage_four_level_improved_parallel \
+  --source output/results/triage_four_level_round2 \
   --original output/results/triage_four_level \
   --output output/pdf/SapBERT_Four_Level_Improved_Comparison.pdf
 ```

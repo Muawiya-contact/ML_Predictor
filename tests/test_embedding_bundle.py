@@ -24,8 +24,10 @@ class EmbeddingBundleTests(unittest.TestCase):
         self.assertEqual(Path(model_dir).name, 'triage_model_sapbert')
         self.assertEqual(art['blocks'], ('embedding',))
         projected = art['manifest']['projected_embedding_dim']
-        self.assertEqual(art['model'].n_features_in_, 22 + projected)
-        self.assertEqual([b['dim'] for b in art['manifest']['feature_blocks']], [22, projected])
+        structured = len(art['structured'].get_feature_names_out())
+        self.assertIn(structured, (22, 50))
+        self.assertEqual(art['model'].n_features_in_, structured + projected)
+        self.assertEqual([b['dim'] for b in art['manifest']['feature_blocks']], [structured, projected])
         self.assertEqual(art['pca'].n_components_, projected)
 
     def test_missing_bundle_fails_without_substitution(self):
