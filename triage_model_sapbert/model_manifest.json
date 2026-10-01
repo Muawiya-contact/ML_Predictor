@@ -1,7 +1,7 @@
 {
   "backend": "sapbert_pca",
   "sklearn_version": "1.9.0",
-  "method": "SapBERT + PCA-64 + Logistic Regression",
+  "method": "SapBERT + PCA-128 + Logistic Regression + quadratic patient features",
   "labels": [
     0,
     1,
@@ -17,15 +17,15 @@
   "text_representation": "embeddings_raw",
   "embedding_model": "cambridgeltl/SapBERT-from-PubMedBERT-fulltext",
   "embedding_dim": 768,
-  "projected_embedding_dim": 64,
+  "projected_embedding_dim": 128,
   "feature_blocks": [
     {
       "name": "structured",
-      "dim": 22
+      "dim": 50
     },
     {
       "name": "embedding",
-      "dim": 64,
+      "dim": 128,
       "rescaled": false
     }
   ],
@@ -36,7 +36,7 @@
     "normalized": true,
     "local_path": "output/results/.hf_cache/hub/models--cambridgeltl--SapBERT-from-PubMedBERT-fulltext/snapshots/090663c3ae57bf35ffe4d0d468a2a88d03051a4d"
   },
-  "text_pipeline": "English -> SapBERT CLS (768) -> fitted PCA (64)",
+  "text_pipeline": "English -> SapBERT CLS (768) -> fitted PCA (128)",
   "text_column": "Clinical_Concept",
   "experiment": true,
   "dataset": {
@@ -54,41 +54,63 @@
   "scope": {
     "clinical_scope": "CARDIAC COMPLAINTS; LEVELS 0-3"
   },
-  "evaluation_note": "Saved metrics evaluate supplied clinical concepts, not live Ollama translations. These are research results, not clinical validation.",
+  "evaluation_note": "Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations.",
   "source_config": {
     "classifier": "logreg",
     "features": {
       "view": "fused",
       "encoder": "sapbert_concept",
-      "pca": 64,
-      "solver": "full"
+      "solver": "full",
+      "pca": 128,
+      "polynomial": true
     },
     "params": {
-      "C": 10,
+      "C": 100,
       "balance": true
     }
   },
   "selection": {
-    "candidate": "logreg_c10",
+    "candidate": "lr_quad128_c100",
     "config": {
       "classifier": "logreg",
       "features": {
         "view": "fused",
         "encoder": "sapbert_concept",
-        "pca": 64,
-        "solver": "full"
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
       },
       "params": {
-        "C": 10,
+        "C": 100,
         "balance": true
       }
     },
-    "rule": "Highest five-fold mean macro F1; ties use emergency recall then lower under-triage; holdout unused for selection"
+    "baseline": "lr_pca64_c10_balanced1",
+    "rule": "Highest mean development macro F1 subject to emergency recall no more than 1 percentage point below incumbent; accuracy breaks ties.",
+    "cv_gain": 0.005907077206291911
   },
   "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
   "artifact_sha256": {
-    "model.pkl": "62eae2167a41a9c352ac699a5cb23478d11062ce32727e711166c1b2e0843be9",
-    "structured.pkl": "bc25c24442d7f993a08ecf4c431209f2324b1117e66a094d3cacc42dc8a58b4f",
-    "pca.pkl": "36ea0e6598b34d096b6c470de9b766b9addaef0ee77018806e0b96e533e2ef8a"
+    "model.pkl": "dda953bc806b1b09d3f2e70ece1f1ac81e39b8ec9ca69cf604d7f9caccfa094f",
+    "structured.pkl": "3a29ac5cbf323d26e1b3b89d0a4017dc345d579e9a2e073d8baad81bcdf0cf8e",
+    "pca.pkl": "602b69eb2f9238580b56890eb4d1730bb8b1731b8f81d75d70ea7b89409d781f"
+  },
+  "improvement_verification": {
+    "status": "passed",
+    "cv_fits": 245,
+    "family_comparison_verified": true,
+    "baseline_reproduced": true,
+    "source_hashes_verified": true,
+    "holdout_previously_exposed": true,
+    "development_oof_paired_group_bootstrap": {
+      "iterations": 1000,
+      "seed": 2026,
+      "macro_f1_gain": 0.0059487974779620645,
+      "ci95": [
+        0.0003564777002735581,
+        0.011347989815101874
+      ],
+      "interpretation": "Conditional on selected OOF predictions; does not account for model-selection optimism."
+    }
   }
 }
