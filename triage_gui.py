@@ -1350,7 +1350,7 @@ class TriageGUI(tk.Tk):
                 numbers["Diastolic_BP"], numbers["Temperature"], numbers["SpO2"],
                 categories["Gender"], categories["Mode_of_Arrival"],
                 categories["AVPU"], categories["ECG_Status"],
-                warnings=input_warnings)
+                warnings=input_warnings, raw_complaint=original_text)
         except Exception:
             messagebox.showerror("Prediction failed", traceback.format_exc())
             return
@@ -1388,6 +1388,10 @@ class TriageGUI(tk.Tk):
         self.stages.insert("end", "4. " + self.model_info["method"] + "\n", "h")
         self.stages.insert("end", "   English encoded directly - the learned\n"
                                   "   stop-word list does not apply to this bundle\n")
+        detail_settings = self.active_manifest().get('text_details')
+        if detail_settings:
+            source_name = 'original complaint' if detail_settings['source'] == 'complaint_details' else 'English text'
+            self.stages.insert('end', f'   Additional duration and wording details come from the {source_name}.\n')
         # Input-quality warnings. These lived only in the branch below,
         # which is now unreachable; a capped confidence with no stated
         # reason reads as a weak case rather than a bad input.
@@ -2129,6 +2133,7 @@ class TriageGUI(tk.Tk):
         # the operator typed, and that is the column a reviewer always
         # wants back first.
         originals = list(df["Complaint_Text"].fillna("").astype(str))
+        df['Raw_Complaint'] = originals
         df["Complaint_Text"] = texts
         pr = getattr(self, "_batch_progress", {})
         pr["done"] = pr.get("total", 0)

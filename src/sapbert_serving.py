@@ -74,7 +74,15 @@ def load_bundle(model_dir, manifest):
     if manifest.get('sklearn_version') != sklearn.__version__:
         raise ValueError('SapBERT bundle requires scikit-learn ' + str(manifest.get('sklearn_version')))
     path = Path(model_dir)
-    for name in ('model.pkl', 'structured.pkl', 'pca.pkl'):
+    files = ['model.pkl', 'structured.pkl', 'pca.pkl']
+    details = manifest.get('text_details')
+    if details:
+        from src.complaint_details import VERSION, FEATURE_NAMES
+        if (details.get('version') != VERSION or details.get('feature_names') != FEATURE_NAMES
+                or details.get('source') not in ('concept_details', 'complaint_details')):
+            raise ValueError('Text-detail definition does not match the evaluated manifest')
+        files.append('detail_scaler.pkl')
+    for name in files:
         expected = manifest.get('artifact_sha256', {}).get(name)
         if expected is None or hashlib.sha256((path / name).read_bytes()).hexdigest() != expected:
             raise ValueError(f'SapBERT artifact does not match its evaluated manifest: {name}')
@@ -84,6 +92,10 @@ def load_bundle(model_dir, manifest):
            'manifest': manifest, 'model_dir': str(path),
            'text_representation': 'embeddings_raw', 'blocks': ('embedding',),
            'encoder': None, 'stopwords': set()}
+    if details:
+        art['detail_scaler'] = joblib.load(path / 'detail_scaler.pkl')
+        if art['detail_scaler'].n_features_in_ != len(FEATURE_NAMES):
+            raise ValueError('Text-detail scaler dimensions do not match the manifest')
     if art['model'].n_features_in_ != sum(b['dim'] for b in manifest['feature_blocks']):
         raise ValueError('SapBERT classifier dimensions do not match its manifest')
     if list(art['model'].classes_) != [0, 1, 2, 3] or manifest.get('labels') != [0, 1, 2, 3]:
@@ -122,7 +134,15 @@ def predict_frame(art, frame):
     texts = frame.Complaint_Text.fillna('').astype(str).tolist()
     if len(frame):
         structured = art['structured'].transform(prepared)
-        X = np.hstack([structured, build_text_features(art, texts)])
+        blocks = [structured, build_text_features(art, texts)]
+        details = art.get('manifest', {}).get('text_details')
+        if details:
+            from src.complaint_details import detail_matrix
+            column = 'Raw_Complaint' if details['source'] == 'complaint_details' else 'Complaint_Text'
+            if column not in frame or frame[column].isna().any():
+                raise ValueError(f'{column} is required by this evaluated text-detail model; do not substitute translated text for the original complaint.')
+            blocks.append(art['detail_scaler'].transform(detail_matrix(frame[column].astype(str).tolist())))
+        X = np.hstack(blocks)
         probabilities = art['model'].predict_proba(X)
     else:
         probabilities = np.empty((0, 4))

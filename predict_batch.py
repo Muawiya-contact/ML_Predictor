@@ -114,6 +114,7 @@ def predict_translated_dataframe(art, df, model=None):
             statuses.append('NOT TRANSLATED')
             details.append(str(exc))
     work['Complaint_Text'] = translations
+    work['Raw_Complaint'] = originals
     scored, _ = predict_dataframe(art, work.loc[accepted])
     results = work.copy()
     # A previously exported result sheet may be uploaded again. Never retain

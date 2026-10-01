@@ -26,8 +26,9 @@ class EmbeddingBundleTests(unittest.TestCase):
         projected = art['manifest']['projected_embedding_dim']
         structured = len(art['structured'].get_feature_names_out())
         self.assertIn(structured, (22, 50))
-        self.assertEqual(art['model'].n_features_in_, structured + projected)
-        self.assertEqual([b['dim'] for b in art['manifest']['feature_blocks']], [structured, projected])
+        details = len(art['manifest'].get('text_details', {}).get('feature_names', []))
+        self.assertEqual(art['model'].n_features_in_, structured + projected + details)
+        self.assertEqual([b['dim'] for b in art['manifest']['feature_blocks']], [structured, projected] + ([details] if details else []))
         self.assertEqual(art['pca'].n_components_, projected)
 
     def test_missing_bundle_fails_without_substitution(self):
@@ -47,11 +48,13 @@ class EmbeddingBundleTests(unittest.TestCase):
         art = load_artifacts()
         frame = pd.DataFrame({
             'Complaint_Text': ['seena mein dard', 'pait mein dard', 'n/a'],
+            'Raw_Complaint': ['stale exported value'] * 3,
             'Predicted_Triage_Level': [1, 1, 1],
             'Confidence': [0.99, 0.99, 0.99],
         }, index=[7, 7, 9])
         calls = []
         def score(_art, rows):
+            self.assertEqual(rows.Raw_Complaint.tolist(), ['seena mein dard'])
             calls.extend(rows['Complaint_Text'].tolist())
             result = rows.copy()
             result['Predicted_Triage_Level'] = 2

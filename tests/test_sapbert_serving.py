@@ -96,6 +96,22 @@ class ServingTests(unittest.TestCase):
         self.assertEqual(len(out),0)
         encode.assert_not_called()
 
+    @patch('triage_pipeline.build_text_features', side_effect=lambda a, t: np.zeros((len(t),64)))
+    def test_detail_model_uses_original_complaint_and_refuses_missing_raw(self, encode):
+        from src.complaint_details import detail_matrix
+        from sklearn.preprocessing import StandardScaler
+        art = self.artifacts()
+        art['manifest'] = {'text_details': {'source': 'complaint_details'}}
+        scaler = StandardScaler().fit(detail_matrix(['aadhay ghante se', 'for an hour']))
+        art['detail_scaler'] = scaler
+        captured = []
+        art['model'] = SimpleNamespace(classes_=np.arange(4), predict_proba=lambda x: (captured.append(x) or np.tile([.1,.2,.3,.4], (len(x),1))))
+        frame = pd.DataFrame({'Complaint_Text':['pain for an hour'], 'Raw_Complaint':['seena dard aadhay ghante se']})
+        predict_frame(art, frame)
+        np.testing.assert_allclose(captured[0][:,-19:], scaler.transform(detail_matrix(frame.Raw_Complaint)))
+        with self.assertRaisesRegex(ValueError, 'Raw_Complaint is required'):
+            predict_frame(art, frame.drop(columns='Raw_Complaint'))
+
 
 if __name__ == '__main__':
     unittest.main()

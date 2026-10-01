@@ -867,7 +867,12 @@ def read_manifest(model_dir):
     if not manifest.get('embedding_model'):
         raise ValueError(f"{path}: embedding_model is required")
     blocks = manifest.get('feature_blocks', [])
-    if [b.get('name') for b in blocks] != ['structured', 'embedding']:
+    expected_blocks = ['structured', 'embedding']
+    if manifest.get('text_details'):
+        if manifest.get('backend') != 'sapbert_pca':
+            raise ValueError(f"{path}: text details require the SapBERT backend")
+        expected_blocks.append('text_details')
+    if [b.get('name') for b in blocks] != expected_blocks:
         raise ValueError(f"{path}: expected structured and embedding feature blocks")
     if blocks[1].get('rescaled', False):
         raise ValueError(f"{path}: expected unscaled sentence embeddings")
@@ -1200,8 +1205,11 @@ def encode_categoricals(art, codes):
 
 def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
                 temperature, spo2, gender, mode_of_arrival, avpu, ecg_status,
-                warnings=None):
+                warnings=None, raw_complaint=None):
     """Predict triage for a single patient. Returns (level, confidence, proba).
+
+    For a complaint-detail bundle, pass the original input as raw_complaint.
+    The complaint argument remains the checked English text for SapBERT.
 
     Pass a list as `warnings` to receive input-quality notes (unknown
     category fallbacks, missing complaint text). The parameter is optional
@@ -1217,6 +1225,8 @@ def predict_one(art, complaint, age, heart_rate, systolic_bp, diastolic_bp,
              'Temperature', 'SpO2', 'Gender', 'Mode_of_Arrival', 'AVPU', 'ECG_Status'],
             [complaint, age, heart_rate, systolic_bp, diastolic_bp, temperature,
              spo2, gender, mode_of_arrival, avpu, ecg_status]))])
+        if raw_complaint is not None:
+            frame['Raw_Complaint'] = raw_complaint
         result, notes, probabilities, confidences = predict_frame(art, frame)
         if warnings is not None:
             warnings.extend(notes[0])
