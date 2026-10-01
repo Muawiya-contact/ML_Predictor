@@ -535,7 +535,7 @@ class TriageGUI(tk.Tk):
                  bg=ACCENT, fg="white",
                  font=("Segoe UI Semibold", 15)).pack(side="left", padx=(14, 0))
         self.header_note = tk.Label(
-            bar, text="English via local Ollama  |  offline  |  CPU only  |  research prototype",
+            bar, text="English via local Ollama  |  offline  |  CPU only",
             bg=ACCENT, fg="#cfe0f2", font=("Segoe UI", 9))
         self.header_note.pack(side="right", padx=(0, 10))
 
@@ -647,7 +647,7 @@ class TriageGUI(tk.Tk):
             f"translation and scoring both run locally.")
         self._fill_dropdowns()
         self._populate_stopwords()
-        self._refresh_deployed_banners()
+        self._refresh_model_views()
         self.predict_btn.config(state="normal")
         self.batch_btn.config(state="normal")
 
@@ -869,57 +869,7 @@ class TriageGUI(tk.Tk):
 
         win.after(300, poll)
 
-    def _deployed_line(self):
-        """Four aligned lines: model, pipeline, data, status.
-
-        This was a twelve-line paragraph of asterisk-fenced banners, built up
-        by prepending one warning in front of another, plus a branch for a
-        mode that no longer exists. Everything in it was true and almost none
-        of it was read - a wall of shouting text is skipped exactly like no
-        text at all. The facts that must survive a glance are: which bundle
-        is scoring, that nothing leaves the machine, that the data is
-        synthetic, and that this is not a medical device. Those are the four
-        lines; nothing else earns a place here.
-        """
-        if not self.model_info:
-            return "model      loading..."
-
-        i = self.model_info
-        man = self.active_manifest()
-        ds = man.get("dataset", {})
-        prov = ds.get("provenance", {})
-
-        rows = ds.get("rows")
-        model_bits = [f"{rows:,} rows" if isinstance(rows, int) else None,
-                      i.get("method"), ENGLISH_MODEL_DIR + "/"]
-        if i.get("uses_embeddings"):
-            model_bits.insert(2, f"{i['embedding_model'].split('/')[-1]} "
-                                 f"({i['embedding_dim']}d)")
-        lines = ["model      " + "  ·  ".join(b for b in model_bits if b),
-                 "pipeline   Roman Urdu  ->  Ollama (local)  ->  anatomical "
-                 "gate  ->  classifier   ·   no network call"]
-
-        data_bits = [ds.get("file")]
-        if prov.get("synthetic") is True:
-            data_bits.append("SYNTHETIC - not real patient records")
-        elif prov.get("synthetic") == "unknown":
-            data_bits.append("provenance UNKNOWN")
-        if prov.get("label_method"):
-            data_bits.append(prov["label_method"])
-        scope = (man.get("scope") or {}).get("clinical_scope")
-        if scope:
-            data_bits.append(scope)
-        lines.append("data       " + "  ·  ".join(b for b in data_bits if b))
-
-        status = "research prototype - not a medical device"
-        if man.get("experiment"):
-            status = "CURRENT FOUR-LEVEL STUDY   ·   " + status
-        lines.append("status     " + status)
-        if man.get("evaluation_note"):
-            lines.append("evaluation " + man["evaluation_note"])
-        return "\n".join(lines)
-
-    def _refresh_deployed_banners(self):
+    def _refresh_model_views(self):
         """Fill in everything that depends on WHICH model finished loading."""
         # Redraw the classification report. It is built at startup so the
         # window paints immediately, but the model loads on a background
@@ -939,15 +889,6 @@ class TriageGUI(tk.Tk):
         for label in getattr(self, '_model_summary_labels', []):
             if label.winfo_exists():
                 label.configure(text=self._model_summary())
-        live = []
-        for label in getattr(self, "_deployed_labels", []):
-            if not label.winfo_exists():
-                continue
-            text = self._deployed_line()
-            label.configure(text=text)
-            live.append(label)
-        self._deployed_labels = live
-
     def _model_summary(self):
         man = self.active_manifest() or {}
         if not man:
@@ -962,24 +903,6 @@ class TriageGUI(tk.Tk):
         if not hasattr(self, '_model_summary_labels'):
             self._model_summary_labels = []
         self._model_summary_labels.append(label)
-
-    def _deployed_banner(self, parent, prefix=""):
-        """A prominent, always-visible statement of what is actually running."""
-        holder = tk.Frame(parent, bg="#eaf3ea", highlightbackground="#b7d7b7",
-                          highlightthickness=1)
-        inner = tk.Frame(holder, bg="#eaf3ea")
-        inner.pack(fill="x", padx=12, pady=9)
-        if prefix:
-            tk.Label(inner, text=prefix, bg="#eaf3ea", fg=MUTED,
-                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
-        label = tk.Label(inner, text=self._deployed_line(), bg="#eaf3ea",
-                         fg="#1e5c2e", font=("Segoe UI Semibold", 9),
-                         anchor="w", justify="left", wraplength=940)
-        label.pack(fill="x")
-        if not hasattr(self, "_deployed_labels"):
-            self._deployed_labels = []
-        self._deployed_labels.append(label)
-        return holder
 
     # =================================================================
     # TAB 1 - Triage a patient
@@ -1088,8 +1011,6 @@ class TriageGUI(tk.Tk):
         rpad.pack(fill="both", expand=True, padx=16, pady=14)
 
         heading(rpad, "Result").pack(fill="x")
-        self._deployed_banner(
-            rpad, "This tab's predictions come from:").pack(fill="x", pady=(6, 0))
 
         # No fixed height: at high DPI the two stacked labels are taller than
         # any hard-coded value, and the subtitle gets clipped.
@@ -1801,8 +1722,6 @@ class TriageGUI(tk.Tk):
                                            command=self._export_batch_csv)
         self.batch_export_btn.pack(side="left", padx=(8, 0))
 
-        self._deployed_banner(
-            pad, "Every row is triaged by:").pack(fill="x", pady=(10, 0))
 
         # Progress furniture. Hidden until a run starts: an idle progress bar
         # sitting at zero reads as a job that has stalled.
