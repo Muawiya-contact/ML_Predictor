@@ -38,6 +38,12 @@ def check():
         assert app.active_manifest()['labels'] == [0, 1, 2, 3]
         assert app.active_artifacts()['model'].classes_.tolist() == [0, 1, 2, 3]
         assert len(app.nb.tabs()) == 6
+        summaries = [label for label in app._model_summary_labels if label.winfo_exists()]
+        assert len(summaries) == 6
+        dimension = sum(b['dim'] for b in app.active_manifest()['feature_blocks'])
+        assert all(f'= {dimension} inputs' in label.cget('text') for label in summaries)
+        assert all('levels 0-3' in label.cget('text') for label in summaries)
+        print('PASS: all six tabs identify the active model and feature dimensions', flush=True)
         matrix_tree = app._results_confusion_tree
         assert len(matrix_tree.get_children()) == 4
         assert tuple(matrix_tree['columns']) == ('0', '1', '2', '3')

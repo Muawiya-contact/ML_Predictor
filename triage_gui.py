@@ -642,7 +642,8 @@ class TriageGUI(tk.Tk):
         rows_txt = f"{rows:,} rows" if isinstance(rows, int) else "unknown rows"
         self.status.set(
             f"Ready.  Serving: {ENGLISH_MODEL_DIR}/  ({rows_txt}, "
-            f"{self.model_info['method']})  |  {n_stops} learned stop words  |  "
+            f"{self.model_info['method']})  |  "
+            f"{'stop-word filtering inactive' if man.get('backend') == 'sapbert_pca' else str(n_stops) + ' learned stop words'}  |  "
             f"translation and scoring both run locally.")
         self._fill_dropdowns()
         self._populate_stopwords()
@@ -935,6 +936,9 @@ class TriageGUI(tk.Tk):
                 child.destroy()
             render(box)
 
+        for label in getattr(self, '_model_summary_labels', []):
+            if label.winfo_exists():
+                label.configure(text=self._model_summary())
         live = []
         for label in getattr(self, "_deployed_labels", []):
             if not label.winfo_exists():
@@ -943,6 +947,21 @@ class TriageGUI(tk.Tk):
             label.configure(text=text)
             live.append(label)
         self._deployed_labels = live
+
+    def _model_summary(self):
+        man = self.active_manifest() or {}
+        if not man:
+            return "Loading active model..."
+        blocks = man.get('feature_blocks', [])
+        dimensions = ' + '.join(f"{b['dim']} {b['name'].replace('_', ' ')}" for b in blocks)
+        return f"Active model: {man.get('method', '')} | {dimensions} = {sum(b['dim'] for b in blocks)} inputs | levels 0-3"
+
+    def _model_summary_strip(self, parent):
+        label = body(parent, self._model_summary(), fg=MUTED, size=9, wraplength=1000)
+        label.pack(fill='x', pady=(2, 8))
+        if not hasattr(self, '_model_summary_labels'):
+            self._model_summary_labels = []
+        self._model_summary_labels.append(label)
 
     def _deployed_banner(self, parent, prefix=""):
         """A prominent, always-visible statement of what is actually running."""
@@ -985,6 +1004,7 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=16, pady=14)
 
         heading(pad, "Patient details").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad, "Chief complaint in Roman Urdu or English.",
              fg=MUTED, size=9).pack(fill="x", pady=(2, 8))
 
@@ -1463,10 +1483,11 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Text pipeline explorer").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad,
              "Type any complaint and see it move through every stage. This is the same "
-             "code path training and prediction use, so what you see here is exactly what "
-             "the model receives.",
+             "live translation and encoding stages. The training study used supplied English "
+             "concepts; original complaint details are retained separately.",
              fg=MUTED, size=9, wraplength=980).pack(fill="x", pady=(2, 12))
 
         row = tk.Frame(pad, bg=CARD)
@@ -1588,7 +1609,9 @@ class TriageGUI(tk.Tk):
             panel("4  SapBERT + PCA", en,
                   "English text -> normalized SapBERT CLS (768 dimensions) -> "
                   f"fitted PCA ({self.active_manifest()['projected_embedding_dim']} dimensions). No stop-word removal. Patient "
-                  "features are added before the selected classifier.", ("encoded", True))
+                  "features are added before the selected classifier. " +
+                  (f"{len(self.active_manifest()['text_details']['feature_names'])} explicit detail features are extracted from the original complaint. " if self.active_manifest().get('text_details') else "") +
+                  "This explorer explains preprocessing; it does not assign a triage level.", ("encoding stage", True))
             return
         man = self.active_manifest() or {}
         enc = man.get("embedding_model") or "sentence-transformer"
@@ -1615,7 +1638,8 @@ class TriageGUI(tk.Tk):
         pad = tk.Frame(wrap, bg=CARD)
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
-        heading(pad, "Contribution 1  -  automatically learned stop words").pack(fill="x")
+        heading(pad, "Stop-word filtering for the active model").pack(fill="x")
+        self._model_summary_strip(pad)
         self.stop_summary = body(
             pad, "Loading...", fg=MUTED, size=9, wraplength=1000)
         self.stop_summary.pack(fill="x", pady=(2, 6))
@@ -1742,9 +1766,10 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="x", padx=18, pady=14)
 
         heading(pad, "Batch triage from a file").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad,
              "Pick an Excel (.xlsx) or CSV file of patients. Only Complaint_Text is "
-             "required; missing numbers fall back to the training average and unknown "
+             "required; missing numbers fall back to the training median and unknown "
              "categories fall back safely, with a note recorded per row. CSV files are "
              "read with encoding detection (utf-8, utf-8-sig, cp1252, latin-1), so a "
              "sheet exported from Excel on Windows loads instead of failing.",
@@ -2321,11 +2346,12 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Classification report  -  the deployed model").pack(fill="x")
+        self._model_summary_strip(pad)
         if self.active_manifest().get("evaluation_note"):
             body(pad, self.active_manifest()["evaluation_note"], fg=MUTED, size=9, wraplength=1000).pack(fill="x")
         body(pad,
              "Precision, recall and F1 per triage level, derived from the saved "
-             "confusion matrix of the held-out test patients. Precision = of the "
+             "confusion matrix of the previously examined test records. Precision = of the "
              "cases called this level, how many really were. Recall = of the cases "
              "that really were this level, how many were caught. F1 = their harmonic "
              "mean. Support = how many test patients truly had this level.",
@@ -2390,7 +2416,7 @@ class TriageGUI(tk.Tk):
                      f"patients moves several points on one prediction.")
         body(pad, note, fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(8, 0))
 
-        heading(pad, "Held-out confusion matrix").pack(fill="x", pady=(16, 4))
+        heading(pad, "Retrospective test confusion matrix").pack(fill="x", pady=(16, 4))
         body(pad, "Rows are reference levels; columns are predicted levels.",
              fg=MUTED, size=9).pack(fill="x", pady=(0, 6))
         columns = tuple(str(i) for i in range(len(cm)))
@@ -2450,11 +2476,12 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Try it  -  turn one complaint into numbers").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad,
              "Type any complaint in Roman Urdu or English. It goes through "
-             "the SAME steps as a real prediction - translate, clean, encode - "
+             "the same translation and embedding stages as prediction, then uses full vectors "
              "and is then compared against the ten reference complaints "
-             "below. Every value is shown, so you can follow the arithmetic "
+             "below. This view compares text embeddings, without patient or detail features. Every value is shown so you can follow the arithmetic "
              "rather than trust it.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 8))
 
