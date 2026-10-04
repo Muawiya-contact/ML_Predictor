@@ -23,7 +23,7 @@ class ExpandedClassifiers(unittest.TestCase):
         for family,params in [('catboost',dict(iterations=8,depth=3)),('xgboost',dict(n_estimators=8,max_depth=3)),('svc',dict(C=1))]:
             with self.subTest(family=family):
                 if family!='svc' and importlib.util.find_spec(family) is None:
-                    continue
+                    self.skipTest(f"Optional classifier dependency {family} is not installed")
                 cfg=engine.config(family,{},balance=True,**params)
                 model=engine.fit_model(cfg,x,y)
                 np.testing.assert_array_equal(model.classes_,[0,1,2,3])
