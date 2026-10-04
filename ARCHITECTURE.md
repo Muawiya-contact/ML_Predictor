@@ -3,8 +3,8 @@
 ## Serving path
 
 Roman Urdu complaint → fuzzy normalization → local Ollama translation → refusal
-filter and deterministic anatomical gate → SapBERT CLS (768-D, L2-normalized)
-→ fitted PCA (128-D) → concatenate 50 patient features (including quadratic numeric terms) → append 19 original-complaint details → CV-selected classifier
+filter and deterministic anatomical gate → English + [SEP] + original complaint → SapBERT CLS (768-D, 128-token limit, L2-normalized)
+→ fitted PCA (64-D) → concatenate 50 patient features (including quadratic numeric terms) → append 19 original-complaint details → CV-selected classifier
 → level 0 Emergency, 1 Urgent, 2 Standard or 3 Non-urgent.
 
 The current bundle is `triage_model_sapbert/`. `model_manifest.json` identifies
@@ -39,14 +39,18 @@ fitted model. No model is refitted or substituted during inference.
   to 68 settings and 340 full-size grouped-fold fits.
 - `expanded_classifiers.py`: eleven additional CatBoost, CPU XGBoost and RBF SVM
   settings; the combined comparison has 79 settings and 395 grouped-fold fits.
-  The prior Logistic Regression remains selected.
+  That historical expansion retained the prior Logistic Regression.
 - `embedding_diagnostics.py`: development-only descriptive geometry by triage label.
 - `verify_improvement.py`, `export_improved_bundle.py`, `verify_improved_serving.py`:
   independent metric verification and full live-adapter prediction parity.
 
+- `advanced_classifiers.py`, `paired_classifiers.py`, `probability_blends.py`: ordered/neural/nonlinear models, paired text and fixed-weight comparisons.
+- `finalize_advanced.py`: verifies all follow-up OOF probabilities and selects before retrospective evaluation.
+- `src/ordinal_classifier.py`, `src/soft_voting.py`: ordered and ensemble research candidates. The selected deployment remains paired-text Logistic Regression C=100.
+
 ## Data and inference contracts
 
-Training consumes Clinical_Concept plus six numeric patient measurements,
+Training consumes Clinical_Concept + [SEP] + the original complaint, plus six numeric patient measurements,
 ordinal AVPU, three categorical fields and 19 original-complaint details. Target names and processing metadata
 are excluded. Imputation, scaling, one-hot encoding and PCA are fitted only on
 training rows within each fold. Training text is supplied/recovered concepts;
@@ -58,6 +62,6 @@ anatomical failures withhold a score. Classifier probabilities are not clinical
 certainty. Raw source records are local; published results contain aggregates.
 
 See [the current protocol](experiments/triage_study/IMPROVEMENT.md),
-[GUI guide](docs/SapBERT_GUI.md) and [report directory](reports/triage_four_level_round6/).
+[GUI guide](docs/SapBERT_GUI.md) and [report directory](reports/triage_four_level_round7/).
 Historical MiniLM/three-level/professor experiments use different feature spaces
 and labels; their scores are not the current application's scores.

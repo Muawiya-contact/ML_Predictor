@@ -47,15 +47,15 @@ See [the current GUI guide](docs/SapBERT_GUI.md).
 1. Normalize Roman Urdu spelling with the fuzzy clinical dictionary.
 2. Translate to English through local Ollama, with temperature 0.0.
 3. Reject failed/refused translations and anatomical mismatches.
-4. Encode unfiltered English with frozen SapBERT CLS: 768 dimensions, 64-token
+4. Encode English + `[SEP]` + the original complaint with frozen SapBERT CLS: 768 dimensions, 128-token
    limit, L2 normalization. This bundle does not remove stop words.
-5. Apply the saved development-fitted PCA to obtain 128 text features.
+5. Apply the saved development-fitted PCA to obtain 64 text features.
 6. Add 50 structured features: the seven numeric inputs (including ordinal AVPU)
    expand to 35 linear/quadratic terms before scaling, with 15 fitted categorical
    indicators for gender, arrival mode and ECG. Imputation is fitted on training rows.
 7. Append 19 explicit details extracted from the original complaint, preserving
    duration and other mentions alongside the English SapBERT representation.
-8. Classify the combined 197 features using the model named in
+8. Classify the combined 133 features using the model named in
    `triage_model_sapbert/model_manifest.json`, selected by development CV.
 
 GUI, `run_inference.py` and `predict_batch.py` use that same bundle. Missing or
@@ -88,61 +88,56 @@ rows have blank scores. The current bundle's `Predicted_Triage_Level` is 0–3.
 
 ## Current study and report
 
-See [the improvement protocol](experiments/triage_study/IMPROVEMENT.md) for the
-current search and export workflow, and [the initial protocol](experiments/triage_study/FOUR_LEVEL.md)
-for source preparation and baseline comparisons.
+The current model is frozen SapBERT with paired text input, PCA-64, 50 patient
+features and 19 original-complaint details: 133 inputs to balanced Logistic
+Regression C=100. The encoder receives the supplied clinical concept plus
+`[SEP]` plus the original complaint during the study, with a 128-token limit.
+The GUI uses locally translated English plus the same original complaint.
 
-The workbook has 10,000 rows. Its 4,290 missing concepts were recovered only after
-matching all complaint/patient inputs and existing concepts to the previous
-supplied file; new targets were preserved. Target names and processing metadata
-are excluded from model inputs. Repeated complaint/concept groups cannot cross
-holdout or CV boundaries. Patient preprocessing and PCA are fitted within folds.
+All 10,000 supplied rows and labels 0/1/2/3 are unchanged. The original 8,001
+ development / 1,999 test partition and five grouped folds are retained.
+The initial concept recovery matched all complaint/patient fields before
+copying missing concepts. Target names and processing metadata are excluded.
+PCA, imputation and scaling fit within training folds.
 
-The initial report retains all 12 fixed comparisons: three classifiers across
-text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 79
-configurations across five grouped folds (395 fits), including PCA-128/256 and
-quadratic patient-feature controls. Selection uses mean macro F1 with emergency
-recall no more than one percentage point below the original baseline; accuracy breaks ties.
-The selected model is balanced Logistic Regression (C=10), PCA-128 plus 50
-patient features, including quadratic numeric terms, and 19 original-complaint
-detail features. SapBERT remains frozen.
+The [advanced comparison](experiments/triage_study/ADVANCED_SEARCH.md) tested
+ordered classifiers, cubic numeric features, neural classifier heads, paired
+complaint input and fixed probability combinations. Across all rounds there
+are 133 configurations: 109 trainable settings (545 grouped-fold fits) and
+24 blends (120 reused-probability evaluations). The new work adds 30 trainable
+settings and 24 blends to the previous comparison. SapBERT is not fine-tuned.
 
-Before the expanded-family comparison, the 13-setting refinement changed
-accuracy on the previously examined 1,999 test rows from 88.99% to 89.29% and macro F1 from 89.43% to 89.73%. Macro precision
-is 89.67%, macro recall 89.81%, and emergency recall increases from 93.87% to
-95.10%. Under-triage remains 4.65%. These are retrospective comparisons, not
-untouched confirmation. Five-fold development macro F1 changes from 89.38% to
-89.65%. The paired development F1 gain interval is -0.08 to +0.64 percentage
-points and includes zero; a reliable incremental gain is not established.
-The initial four-level baseline remains in the comparison (85.19% accuracy,
-85.80% macro F1). Repeated selection still requires independent confirmation.
+Selection uses mean development macro F1 with emergency recall no more than
+one percentage point below the original reference. The paired-text LR achieved
+90.49% development accuracy and 90.83% macro F1, ahead of the best probability
+ensemble. On the previously examined test records:
 
-The [development audit](reports/triage_learning_detail_audit/) contains nested
-learning curves and the complaint-detail comparison. It flags 567 explicit
-duration disagreements for review. No labels are automatically changed.
-More unique, consistently labelled data may help; these curves do not predict
-an accuracy at 20,000 rows.
+| Metric | Previous model | Selected paired-text model |
+| --- | ---: | ---: |
+| Accuracy | 89.29% | 90.60% |
+| Macro precision | 89.67% | 90.98% |
+| Macro recall | 89.81% | 91.00% |
+| Macro F1 | 89.73% | 90.99% |
+| Emergency recall | 95.10% | 94.36% |
+| Under-triage | 4.65% | 4.20% |
 
-The additional [classifier comparison](experiments/triage_study/EXPANDED_CLASSIFIERS.md)
-tested 11 CatBoost, CPU XGBoost and RBF SVM settings (55 new fits). Their best
-mean development macro F1 scores were 87.23%, 86.39% and 85.49%, respectively.
-The selected Logistic Regression remains at 89.65%; no new model replaces it.
-The target of 90% accuracy, macro precision, macro recall and macro F1 was not
-met across all four metrics. The report also includes a descriptive embedding
-geometry audit using 1,200 development groups.
+All four requested aggregate metrics exceed 90% in these comparisons.
+Individual class scores do not all exceed 90%. Emergency recall decreases
+slightly on the old test records, while aggregate accuracy/F1 improve. These
+are retrospective results, not untouched independent or clinical validation.
+The conditional paired development F1 gain interval versus the prior model is
++0.70 to +1.67 percentage points and excludes selection uncertainty.
 
-The [current report directory](reports/triage_four_level_round6/) contains the
-single final PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
-remains available. Follow [the improvement workflow](experiments/triage_study/IMPROVEMENT.md)
-and [the current-data investigation](experiments/triage_study/INVESTIGATION.md)
-after reproducing the initial study to recreate the active model.
-The provider has no label-assignment rules available; labels remain unchanged.
-Source records and individual error-review lists remain local. Saved metrics
-use supplied/recovered concepts, not live Ollama translations.
+Use the [current report directory](reports/triage_four_level_round7/) for the
+single final PDF, all settings, original full-768/PCA-64 baselines, nine pipeline
+representatives, matrices and audits. Source records, individual error queues
+and OOF arrays stay local. The provider has no label-assignment rules available;
+no labels were changed. Live translation accuracy is not measured here.
 
-The [label-task audit](reports/label_transition_audit/) explains why the older
-three-level 99% scores are not directly comparable. Paired diagnostic fits hold
-rows, embeddings and classifier settings fixed while changing only target labels.
+The [learning/detail audit](reports/triage_learning_detail_audit/) and
+[label-task audit](reports/label_transition_audit/) remain historical evidence.
+Older three-level scores concern a different target; they are not directly
+comparable to this four-level experiment.
 
 ## Verification and historical tools
 
@@ -180,6 +175,6 @@ _Department of Biomedical Engineering - May 2026_
 > not a certified medical device. It must not be used as the sole basis for
 > clinical decisions. Always involve a qualified clinician.
 
-The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round6/SapBERT_Final_Report.pdf), including the audit and recommendations.
+The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round7/SapBERT_Final_Report.pdf), including the audit and recommendations.
 
 The [previous-versus-latest comparison](reports/triage_historical_comparison/) explains the changed labels, matrix counts and score differences in a separate companion PDF.

@@ -1,6 +1,6 @@
-# Current four-level SapBERT comparison
+# Archived round-six SapBERT comparison
 
-Use [SapBERT_Final_Report.pdf](SapBERT_Final_Report.pdf) as the current report.
+This is a historical snapshot. Use the [round-seven report](../triage_four_level_round7/) for the current paired-text model. The scores and retained-model decision below describe round six.
 It retains the original full-768/PCA-64 comparisons, includes all six classifier
 families, all 79 development settings, confusion matrices, class scores, the
 learning/error audits and a new embedding-geometry diagnostic.
@@ -53,5 +53,4 @@ were rendered and visually inspected before publication.
 target assessment. Individual records, error queues and OOF arrays remain local.
 
 The [historical comparison](../triage_historical_comparison/) retains the older
-three-level versus round-five explanation. Its selected four-level model and
-headline scores are unchanged; it does not include these three new families.
+three-level versus round-five explanation. It describes round five; neither historical report includes the new round-seven paired-text model.

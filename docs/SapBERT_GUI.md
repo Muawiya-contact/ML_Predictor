@@ -3,14 +3,14 @@
 Run `./run_gui.sh` (or `./run_local.sh` to check/start Ollama). GUI, batch CLI and
 `run_inference.py` default to `triage_model_sapbert/`. Its manifest identifies the
 classifier selected by five-fold grouped development cross-validation: balanced
-Logistic Regression C=10. The four fitted preprocessing/model artifacts remain
+Logistic Regression C=100. The four fitted preprocessing/model artifacts remain
 synchronized through manifest checksums. All live
 levels use the workbook mapping: **0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent**.
 
-SapBERT uses CLS pooling, L2-normalized 768-dimensional vectors and a 64-token
-limit. The fitted PCA projects these to 128 dimensions; 50 structured features
+SapBERT uses CLS pooling, L2-normalized 768-dimensional vectors and a 128-token
+limit. The fitted PCA projects these to 64 dimensions; 50 structured features
 are concatenated (35 numeric linear/quadratic terms and 15 categorical indicators),
-plus 19 explicit details from the original complaint, for 197 total inputs. No stop words are removed for this bundle. Similarity and
+plus 19 explicit details from the original complaint, for 133 total inputs. No stop words are removed for this bundle. Similarity and
 cluster panels use the full 768-dimensional vectors before PCA.
 
 The six tabs share the active encoder and manifest. Results reads the selected
@@ -62,9 +62,9 @@ To export a completed study to a new empty directory without retraining:
 
 ```bash
 python experiments/triage_study/export_improved_bundle.py \
-  --source output/results/triage_four_level_round5 \
+  --source output/results/triage_four_level_round7 \
   --original output/results/triage_four_level \
-  --incumbent output/results/four_level_round4_bundle \
+  --incumbent output/results/four_level_before_round7 \
   --output /tmp/four_level_bundle
 ```
 
@@ -74,7 +74,8 @@ Direct `predict_one` callers must pass `raw_complaint`; direct dataframe callers
 must preserve `Raw_Complaint`. GUI and translated batch/CLI wrappers supply it
 automatically. Translated English is not substituted for original detail inputs.
 
-The [expanded classifier comparison](../reports/triage_four_level_round6/)
-retains this same verified model. CatBoost, XGBoost and SVM were tested as
-challengers; the GUI does not silently switch to a lower-scoring candidate.
-Their optional experiment packages are unnecessary for the retained LR bundle.
+The [current comparison](../reports/triage_four_level_round7/) selects paired-text
+Logistic Regression. The encoder input is checked English + [SEP] + the original
+complaint. This same input appears in the explorer, batch stage export and
+embedding views. The 90% aggregate results are retrospective; individual class
+scores do not all exceed 90%. Alternative ensembles remain comparison candidates.

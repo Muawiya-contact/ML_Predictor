@@ -9,7 +9,7 @@ scope. The class mapping is 0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent.
 Enter a Roman Urdu or English complaint and patient measurements: age, heart
 rate, systolic/diastolic blood pressure, temperature, oxygen saturation, gender,
 arrival mode, AVPU and ECG status. Local Ollama translates the complaint and a
-deterministic anatomical gate checks it. The selected fused PCA-128 classifier
+deterministic anatomical gate checks it. The selected fused PCA-64 classifier
 returns a level and four probability bars. The text panel explains each stage.
 
 Prediction runs asynchronously. Changes to any patient input clear a previous
@@ -22,8 +22,8 @@ Optional local speech reads the translated complaint.
 
 Inspect normalized input, local English translation, gate outcome and the
 active encoder. SapBERT creates 768-D normalized CLS vectors; the classifier
-uses fitted PCA-128 plus 50 patient features (including quadratic numeric terms)
-and 19 explicit original-complaint details, for 197 classifier inputs. Similarity views use full vectors.
+uses fitted PCA-64 plus 50 patient features (including quadratic numeric terms)
+and 19 explicit original-complaint details, for 133 classifier inputs. Similarity views use full vectors.
 
 ## Stop Words
 
@@ -50,4 +50,8 @@ geometry in the full 768-dimensional space. These are representation diagnostics
 not classifier accuracy or clinical validation.
 
 See [the GUI guide](docs/SapBERT_GUI.md) and
-[the current comparison report](reports/triage_four_level_round6/).
+[the current comparison report](reports/triage_four_level_round7/).
+
+The current encoder input combines checked English and the original complaint
+with [SEP], using a 128-token limit. Single prediction, batch stage exports and
+cluster views use the shared text-construction function.
