@@ -125,7 +125,7 @@ class Features(BaseEstimator, TransformerMixin):
                         Pipeline(
                             [
                                 ("imputer", SimpleImputer(strategy="median")),
-                                ("polynomial", PolynomialFeatures(degree=2, include_bias=False) if self.polynomial else "passthrough"),
+                                ("polynomial", PolynomialFeatures(degree=2 if self.polynomial is True else int(self.polynomial), include_bias=False) if self.polynomial else "passthrough"),
                                 ("scaler", StandardScaler()),
                             ]
                         ),
@@ -208,6 +208,12 @@ def model_for(c):
         from xgboost import XGBClassifier
         m = XGBClassifier(objective="multi:softprob", num_class=4, tree_method="hist",
                           device="cpu", random_state=42, n_jobs=2, **p)
+    elif c["classifier"] == "ordinal":
+        from src.ordinal_classifier import OrdinalLogisticClassifier
+        m = OrdinalLogisticClassifier(**p)
+    elif c["classifier"] == "mlp":
+        from sklearn.neural_network import MLPClassifier
+        m = MLPClassifier(random_state=42, max_iter=400, early_stopping=False, **p)
     elif c["classifier"] == "svc":
         from sklearn.svm import SVC
         m = SVC(probability=True, random_state=42, cache_size=512, **p)
