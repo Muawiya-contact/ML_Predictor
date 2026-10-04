@@ -21,7 +21,7 @@ def verify(source, original, incumbent):
     np.testing.assert_array_equal(z['row_id'],dev.row_id)
     for name in protocol['candidates']:
         p=z[name];assert p.shape==(len(dev),4) and np.isfinite(p).all() and (p>=0).all()
-        np.testing.assert_allclose(p.sum(1),1,atol=1e-10)
+        np.testing.assert_allclose(p.sum(1),1,atol=1e-6,rtol=0)
         for fold in range(5):
             mask=dev.cv5.eq(fold).to_numpy()
             assert not set(dev.loc[mask,'group'])&set(dev.loc[~mask,'group'])

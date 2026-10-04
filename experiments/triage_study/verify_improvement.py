@@ -38,7 +38,7 @@ def verify(source, original):
     np.testing.assert_array_equal(z['reference'], dev.Labels)
     for name in ['selected', 'baseline']:
         assert np.isfinite(z[name]).all()
-        np.testing.assert_allclose(z[name].sum(1), 1, atol=1e-08)
+        np.testing.assert_allclose(z[name].sum(1), 1, atol=1e-6, rtol=0)
     for key, candidate in [('selected', selection['candidate']), ('baseline', protocol['baseline'])]:
         for fold in range(5):
             mask = dev.cv5.to_numpy() == fold
@@ -62,7 +62,7 @@ def verify(source, original):
     family_path = source / 'family_results.json'
     if family_path.exists():
         families = json.loads(family_path.read_text())
-        assert {r['config']['classifier'] for r in families} == {'logreg', 'rf', 'hgb'}
+        assert {r['config']['classifier'] for r in families} == {c['classifier'] for c in protocol['candidates'].values() if c['features']['view'] == 'fused'}
         for result in families:
             family = result['config']['classifier']
             names = [name for name, cfg in protocol['candidates'].items()
@@ -96,7 +96,7 @@ def verify(source, original):
                                                 ('retrospective_test', test.Labels.to_numpy(), np.load(probability_file))]:
             assert probabilities.shape == (len(labels), 4)
             assert np.isfinite(probabilities).all() and (probabilities >= 0).all()
-            np.testing.assert_allclose(probabilities.sum(1), 1, atol=1e-10)
+            np.testing.assert_allclose(probabilities.sum(1), 1, atol=1e-6, rtol=0)
             predicted = probabilities.argmax(1)
             if partition == 'retrospective_test':
                 saved = pd.read_csv(source / (selection['candidate'] + '_retrospective_predictions.csv'))

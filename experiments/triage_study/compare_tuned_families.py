@@ -1,7 +1,7 @@
-"""Report each paper classifier's best fused development configuration.
+"""Report each compared classifier family's best fused development configuration.
 
 This descriptive comparison does not override the constrained deployment
-selection. Freeze all three choices before computing retrospective scores.
+selection. Freeze all family choices before computing retrospective scores.
 """
 import os
 for key in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
@@ -23,7 +23,7 @@ def run(source, original):
     assert file_sha256(original / 'emb_sapbert_concept.npy') == protocol['embedding_sha256']
     summary = pd.read_csv(source / 'cv_summary.csv')
     choices = []
-    for family in ('logreg', 'hgb', 'rf'):
+    for family in sorted({c['classifier'] for c in protocol['candidates'].values()}):
         names = [name for name, cfg in protocol['candidates'].items()
                  if cfg['classifier'] == family and cfg['features']['view'] == 'fused']
         best = summary[summary.candidate.isin(names)].sort_values(
