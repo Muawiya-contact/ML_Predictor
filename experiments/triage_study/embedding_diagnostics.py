@@ -23,14 +23,20 @@ def run(original, bundle, output):
                                  stratify=dev.Labels, random_state=20261004)
     sample = dev.iloc[indices]
     assert sample.partition.eq('development').all() and sample.group.is_unique
-    embedding = np.load(original / 'emb_sapbert_concept.npy', mmap_mode='r')
+    manifest = json.loads((bundle / 'model_manifest.json').read_text())
+    paired = manifest.get('text_input') == 'concept_and_complaint'
+    embedding_file = original / ('emb_sapbert_pair.npy' if paired else 'emb_sapbert_concept.npy')
+    embedding = np.load(embedding_file, mmap_mode='r')
     raw = embedding[sample.row_id]
     manifest = json.loads((bundle / 'model_manifest.json').read_text())
     if file_sha256(bundle / 'pca.pkl') != manifest['artifact_sha256']['pca.pkl']:
         raise ValueError('PCA artifact hash mismatch')
     pca = joblib.load(bundle / 'pca.pkl')
     if pca.n_components_ < 128:
-        raise ValueError('This diagnostic requires the evaluated PCA-128 or larger projection')
+        from sklearn.decomposition import PCA
+        projection = PCA(n_components=128,svd_solver='full').fit(np.asarray(embedding[df.loc[df.partition.eq('development'),'row_id']],dtype=np.float64))
+        np.testing.assert_allclose(projection.transform(raw)[:,:pca.n_components_],pca.transform(raw),atol=1e-7,rtol=1e-5)
+        pca = projection
     projected = pca.transform(raw)
     labels = sample.Labels.to_numpy()
     same = labels[:, None] == labels[None, :]
@@ -52,8 +58,9 @@ def run(original, bundle, output):
                   sample_class_counts=sample.Labels.value_counts().sort_index().to_dict(),
                   sample_seed=20261004, test_rows_used=False,
                   dataset_sha256=file_sha256(original / 'dataset_with_splits.csv'),
-                  embedding_sha256=file_sha256(original / 'emb_sapbert_concept.npy'),
+                  embedding_sha256=file_sha256(embedding_file),
                   pca_sha256=file_sha256(bundle / 'pca.pkl'),
+                  text_input=manifest.get('text_input','concept_only'),
                   interpretation='Descriptive triage-label geometry, not cross-validated prediction. PCA was fitted on all development rows. One row per sampled complaint group. Low separation does not establish a performance ceiling or incorrect labels.',
                   metrics=metrics)
     (output / 'diagnostics.json').write_text(json.dumps(result, indent=2))
@@ -64,7 +71,7 @@ def run(original, bundle, output):
                    alpha=.45, label=f'{level} {name}')
     ax.set_xlabel(f'PC1 ({100*pca.explained_variance_ratio_[0]:.1f}% variance)')
     ax.set_ylabel(f'PC2 ({100*pca.explained_variance_ratio_[1]:.1f}% variance)')
-    ax.set_title('SapBERT concepts coloured by supplied triage level\n1,200 development records; one per complaint group')
+    ax.set_title(('SapBERT paired text' if paired else 'SapBERT concepts') + ' coloured by supplied triage level\n1,200 development records; one per complaint group')
     ax.legend(fontsize=9)
     fig.tight_layout()
     fig.savefig(output / 'triage_embedding_projection.png', dpi=190)

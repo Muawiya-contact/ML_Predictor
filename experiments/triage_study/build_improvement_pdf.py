@@ -15,11 +15,12 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 NAMES = {'logreg': 'Logistic Regression', 'hgb': 'HistGradientBoosting', 'rf': 'Random Forest',
-         'catboost': 'CatBoost', 'xgboost': 'XGBoost', 'svc': 'RBF SVM'}
+         'catboost': 'CatBoost', 'xgboost': 'XGBoost', 'svc': 'RBF SVM', 'ordinal': 'Ordinal Logistic', 'mlp': 'Neural classifier', 'soft_vote': 'Probability ensemble'}
 
-def build(source, original, output, audit=None, investigation=None, expanded=None, geometry=None):
+def build(source, original, output, audit=None, investigation=None, expanded=None, geometry=None, followup=None):
     if json.loads((source / 'verification.json').read_text())['status'] != 'passed':
         raise ValueError('Verify the comparison before generating the report')
+    protocol = json.loads((source / 'protocol.json').read_text())
     selection = json.loads((source / 'selection.json').read_text())
     results = json.loads((source / 'retrospective_results.json').read_text())
     winner = next((r for r in results if r['candidate'] == selection['candidate']))
@@ -89,6 +90,11 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
     p(f"Selected: SapBERT + PCA-{selection['config']['features']['pca']} + {classifier_name}", 'Heading2')
     if expanded is not None and selection['candidate'] == previous['candidate']:
         p('The new CatBoost, XGBoost and SVM trials did not beat this configuration. The existing model is retained; the 90% target across all four aggregate metrics remains unmet.')
+    if selection['config']['features'].get('encoder') == 'sapbert_pair':
+        p('SapBERT now receives the supplied clinical concept plus the original complaint, separated by [SEP], with a 128-token limit. The live app uses locally translated English plus the original complaint.')
+    if selection['config'].get('components'):
+        parts = [f"{100*c['weight']:.0f}% {NAMES[c['config']['classifier']]}" for c in selection['config']['components']]
+        p('Fixed probability weights: ' + ', '.join(parts) + '. Each component is fitted on development rows only.')
     p('Training settings: C=' + str(selection['config']['params'].get('C', 'see protocol')) + '; balanced class weights.' if selection['config']['params'].get('balance') else 'Training settings are listed in the protocol.')
     if selection['config']['features'].get('polynomial'):
         p('Patient preprocessing includes quadratic numeric terms. SapBERT remains frozen.')
@@ -119,8 +125,9 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
     fig.savefig(figures / 'previous_selected_metrics.png', dpi=190)
     plt.close(fig)
     page('Complete Development Cross-Validation')
-    p(f'All {len(cv)} configurations; {len(cv) * 5} fits across five grouped folds. F1, accuracy and emergency recall are percentages. SD is the fold-to-fold F1 standard deviation in percentage points. The original reference is lr_pca64_c10_balanced1.')
-    chunks = [cv] if len(cv) <= 60 else [cv.iloc[:35], cv.iloc[35:]]
+    trainable = sum(c['classifier'] != 'soft_vote' for c in protocol['candidates'].values())
+    p(f'All {len(cv)} configurations; {trainable * 5} training fits and {(len(cv)-trainable)*5} reused-probability evaluations across five grouped folds. F1, accuracy and emergency recall are percentages. SD is the fold-to-fold F1 standard deviation in percentage points. The original reference is lr_pca64_c10_balanced1.')
+    chunks = [cv.iloc[i:i+45] for i in range(0, len(cv), 45)]
     for index, chunk in enumerate(chunks):
         if index:
             page('Development Cross-Validation: Continued')
@@ -163,7 +170,7 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
         for offset, key, label, color in [(-.18, 'accuracy', 'Accuracy', '#2874ad'), (.18, 'macro_f1', 'Macro F1', '#efa928')]:
             bars = ax.bar(np.arange(len(families)) + offset, [r['metrics'][key] * 100 for r in families], .36, label=label, color=color)
             ax.bar_label(bars, fmt='%.2f', fontsize=8)
-        ax.set_xticks(range(len(families)), [NAMES[r['config']['classifier']] for r in families], rotation=20 if len(families) > 3 else 0, ha='right' if len(families) > 3 else 'center')
+        ax.set_xticks(range(len(families)), [NAMES[r['config']['classifier']] for r in families], rotation=35 if len(families) > 3 else 0, ha='right' if len(families) > 3 else 'center')
         ax.set_ylim(0, 110)
         ax.set_ylabel('Score (%)')
         ax.legend(loc='lower right', fontsize=8)
@@ -174,7 +181,7 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
         pic(latest_plot, height=235 if len(families) > 3 else 115)
 
         table([['Classifier', 'Accuracy', 'Precision', 'Recall', 'F1']] + [[NAMES[r['config']['classifier']]] + [pct(r['metrics'][k]) for k in ['accuracy', 'precision_macro', 'recall_macro', 'macro_f1']] for r in families], [175, 80, 80, 80, 80], 8)
-        p('Each family uses its highest fused development CV F1 setting. These descriptive choices do not override the emergency-recall constraint for deployment. Scores are percentages; precision, recall and F1 are macro averages.')
+        p('The family representatives can use different text representations; this compares their selected pipelines, not a controlled classifier-only effect. Each family uses its highest fused development CV F1 setting. These descriptive choices do not override the emergency-recall constraint for deployment. Scores are percentages; precision, recall and F1 are macro averages.')
     p('Blue and yellow bars preserve the original comparison style. The selected improved result is shown separately on page 1 because it follows a larger development search.')
     for classifiers, title, filename in [(['logreg', 'hgb'], 'Baseline Confusion Matrices: LR and HGB', 'lr_hgb_matrices'), (['rf'], 'Baseline and Selected Confusion Matrices', 'rf_selected_matrices')]:
         page(title)
@@ -196,18 +203,21 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
         pic(path, height=600)
         p('Rows are reference labels; columns are predictions. Level order: 0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent. Baseline matrices are unchanged from round one.', 'BodyText')
     if len(families) > 3:
-        page('Tuned Classifier Confusion Matrices')
-        fig, axes = plt.subplots(3, 2, figsize=(9, 10.5))
-        for ax, result in zip(axes.flat, families):
-            matrix(ax, result['confusion'], NAMES[result['config']['classifier']])
-        for ax in list(axes.flat)[len(families):]:
-            ax.axis('off')
-        fig.tight_layout()
-        path = figures / 'expanded_family_matrices.png'
-        fig.savefig(path, dpi=190)
-        plt.close(fig)
-        pic(path, height=595)
-        p('All matrices contain the same 1,999 records. Rows are reference labels and columns are predictions, in level order 0, 1, 2, 3. Family representatives are selected by development scores.')
+        for start in range(0,len(families),6):
+            group=families[start:start+6]
+            page('Tuned Classifier Confusion Matrices' + (f' ({start//6+1})' if len(families)>6 else ''))
+            nrows=(len(group)+1)//2
+            fig, axes = plt.subplots(nrows, 2, figsize=(9, 3.5*nrows), squeeze=False)
+            for ax, result in zip(axes.flat, group):
+                matrix(ax, result['confusion'], NAMES[result['config']['classifier']])
+            for ax in list(axes.flat)[len(group):]:
+                ax.axis('off')
+            fig.tight_layout()
+            path = figures / f'expanded_family_matrices_{start//6+1}.png'
+            fig.savefig(path, dpi=190)
+            plt.close(fig)
+            pic(path, height=595 if nrows==3 else 450)
+            p('All matrices contain the same 1,999 records. Rows are reference labels and columns are predictions, in level order 0, 1, 2, 3. Family representatives are selected by development scores.')
     page('Class Results and Error Review')
     table([['Level', 'Precision (%)', 'Recall (%)', 'F1 (%)', 'Support']] + [[f'{i} ' + name] + [pct(winner['report'][str(i)][k]) for k in ['precision', 'recall', 'f1-score']] + [str(int(winner['report'][str(i)]['support']))] for i, name in enumerate(['Emergency', 'Urgent', 'Standard', 'Non-urgent'])], [140, 95, 90, 90, 80])
     oof = np.load(source / 'development_oof.npz')
@@ -232,7 +242,7 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
     p('Data and preprocessing', 'Heading2')
     p('The original 8,001 development / 1,999 test partition and five grouped folds are reused. Groups do not overlap across training and validation/test boundaries. Input and embedding hashes are checked before and after the run. Median imputation, categorical encoding, scaling and PCA are learned inside each development fold. No label-derived columns are model inputs.')
     p('Encoder and search', 'Heading2')
-    p('SapBERT-from-PubMedBERT-fulltext uses frozen 768-D CLS embeddings, L2 normalization, a 64-token limit and the original pinned revision. Logistic Regression varies C=10, 100 and 1000 with and without balancing, plus whitened PCA with C=0.1. Six additional LR configurations use quadratic numeric terms, with C=1/10/100 and optional balancing. HGB tests 7/15 leaves with regularization; Random Forest tests structured and fused inputs. Every candidate is evaluated on all five folds.')
+    p('SapBERT-from-PubMedBERT-fulltext uses frozen 768-D CLS embeddings, L2 normalization, the original pinned revision and a 64-token limit for the original concept-only experiments. The selected paired-text model uses a 128-token limit. Logistic Regression varies C=10, 100 and 1000 with and without balancing, plus whitened PCA with C=0.1. Six additional LR configurations use quadratic numeric terms, with C=1/10/100 and optional balancing. HGB tests 7/15 leaves with regularization; Random Forest tests structured and fused inputs. Every candidate is evaluated on all five folds.')
     if len(cv) > 35:
         p('The refinement adds 14 configurations: balanced LR C=30/300 at PCA-64/128; quadratic LR C=100/300 at PCA-128/256; HGB with 7/31 leaves and 800/400 iterations; and RF with 500 trees, square-root feature sampling and leaf sizes 1/3. These historical refinement settings retained the original three classifier families.')
     if selection['config'].get('text_details'):
@@ -273,7 +283,7 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
         table(rows, [250, 75, 75, 95], 7.2, 3)
         p('Recommended next step', 'Heading2')
         p('Review the local error queue and duration mismatches, agree a consistent four-level rubric with qualified reviewers, and collect distinct new examples. More rows may help, but duplicated templates or unclear labels will not reliably solve the remaining Urgent/Standard errors. Reserve new independently reviewed records for confirmation before further selection.')
-        p('The GUI retains the original complaint for the 19 detail features and uses checked English for SapBERT. Similarity and cluster views use full 768-D vectors; stop-word removal is inactive. The report measures supplied concepts plus original details, not end-to-end live translation accuracy.')
+        p('The GUI retains the original complaint for the 19 detail features and includes it alongside checked English when the paired-text encoder configuration is selected. Similarity and cluster views use full 768-D vectors; stop-word removal is inactive. The report measures supplied concepts plus original details, not end-to-end live translation accuracy.')
     if investigation is not None:
         diag=json.loads((investigation/'diagnostics.json').read_text())
         page('Further Four-Level Error Investigation')
@@ -303,6 +313,31 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
                 lower,upper=interval['ci95']
                 p(f"Historical 13-setting refinement versus its prior model: pooled development F1 gain {100*interval['pooled_macro_f1_gain']:+.2f} percentage points; conditional paired group interval {100*lower:+.2f} to {100*upper:+.2f}. {'The interval includes zero, so a reliable gain is not established.' if lower <= 0 <= upper else 'The conditional interval excludes zero.'} Repeated-selection uncertainty is not included.")
 
+    if followup is not None:
+        page('Further Methods and Final Selection')
+        p('The follow-up evaluates 24 trainable settings covering cubic patient features, cumulative ordinal logistic classifiers and supervised neural classifiers. Six further settings preserve the original complaint alongside the clinical concept in a frozen SapBERT input, using a 128-token limit. SapBERT itself is not fine-tuned.')
+        p('An initial fixed-weight comparison is followed by a declared weight refinement that includes the ordered classifier. Across both stages, 24 distinct blends reuse existing out-of-fold probabilities. These are probability evaluations, not additional component training runs. No fitted stacking model sees validation labels.')
+        groups=[('Cubic Logistic Regression',lambda n:n.startswith('lr_cubic')),('Ordered Logistic Regression',lambda n:n.startswith('ordinal_')),('Neural classifier',lambda n:n.startswith('mlp_')),('Concept + original complaint',lambda n:n.startswith('lr_pair')),('Fixed probability combinations',lambda n:n.startswith('blend_'))]
+        rows=[['Development condition','Accuracy','Precision','Recall','F1','ER recall']]
+        for label,match in groups:
+            subset=cv[cv.candidate.map(match)].sort_values(['macro_f1','accuracy','candidate'],ascending=[False,False,True])
+            if len(subset):
+                row=subset.iloc[0]
+                rows.append([label]+[pct(row[k]) for k in ['accuracy','precision','recall','macro_f1','emergency_recall']])
+        table(rows,[195,60,60,60,60,60],7.3,5)
+        p('Rows summarize the highest development F1 setting in each condition. The final deployment additionally applies the unchanged emergency-recall constraint. The complete table earlier in this report includes unsuccessful settings; per-setting precision and recall are also saved in cv_summary.csv.')
+        selected=cv[cv.candidate.eq(selection['candidate'])].iloc[0]
+        table([['Final model metric','Development CV (%)','Retrospective (%)']]+[[label,pct(selected[a]),pct(winner['metrics'][b])] for label,a,b in [('Accuracy','accuracy','accuracy'),('Macro precision','precision','precision_macro'),('Macro recall','recall','recall_macro'),('Macro F1','macro_f1','macro_f1'),('Emergency recall','emergency_recall','emergency_recall')]], [195,150,150],8)
+        p('The 90% objective concerns four aggregate metrics. Individual Urgent and Standard class scores remain below 90%; inspect the separate class table. The old test set remains previously exposed. These observations do not establish that future or independently labelled cases will exceed 90%.')
+        uncertainty_file = followup / 'triage_paired_classifiers' / 'verification.json'
+        if uncertainty_file.exists() and selection['config']['features'].get('encoder') == 'sapbert_pair':
+            checked = json.loads(uncertainty_file.read_text())
+            delta = checked.get('paired_bootstrap_vs_incumbent')
+            if delta:
+                lo,hi=delta['ci95']
+                p(f"Paired development F1 change versus the previous model: {100*delta['pooled_macro_f1_gain']:+.2f} percentage points; conditional group-bootstrap 95% interval {100*lo:+.2f} to {100*hi:+.2f}. This interval excludes model-selection uncertainty.")
+        p('The selected model preserves original complaint wording in its encoder input. The GUI, batch export and embedding views construct that same paired text. Probability combinations remain comparison candidates; their component mappings are checked before export. Every selected probability must match the live GUI/CLI adapter before promotion.')
+
     if geometry is not None:
         diag = json.loads((geometry / 'diagnostics.json').read_text())
         page('SapBERT Embedding Geometry')
@@ -310,7 +345,7 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
         pic(geometry / 'triage_embedding_projection.png', height=305)
         table([['Representation', 'Within-label', 'Between-label', 'Difference', 'Silhouette']] + [[r['representation']] + [f"{r[k]:.4f}" for k in ['within_label_cosine', 'between_label_cosine', 'separation', 'cosine_silhouette']] for r in diag['metrics']], [140, 90, 90, 80, 95], 8)
         p('Within-label and between-label values are mean pairwise cosine similarities. Their difference describes separation by the supplied triage labels. Silhouette near zero indicates overlapping labels in that representation. PCA centres the vectors, so absolute cosine values across raw and projected spaces are not directly interchangeable.')
-        p('The low triage-label separation helps explain why a different classifier alone may give limited gains on complaint concepts. SapBERT encodes medical meaning; similar medical complaints can receive different triage levels when patient measurements and symptom details differ. The deployed classifier uses those additional features.')
+        p('The triage-label overlap helps explain why changing only the classifier may give limited gains. SapBERT encodes medical meaning; similar medical complaints can receive different triage levels when patient measurements and symptom details differ. The deployed classifier uses those additional features.')
         p('The plot shows only two principal components. The diagnostic uses a fixed sample and a PCA fitted on all development rows; it is descriptive, not out-of-fold predictive performance or evidence of a maximum achievable accuracy. It does not establish that any supplied label is wrong.')
 
     if expanded is not None:
@@ -319,8 +354,8 @@ def build(source, original, output, audit=None, investigation=None, expanded=Non
             raise ValueError('Verify expanded classifiers before reporting')
         expanded_cv = pd.read_csv(expanded / 'cross_validation.csv')
         mean = expanded_cv.groupby('candidate').agg(accuracy=('accuracy', 'mean'), precision=('precision_macro', 'mean'), recall=('recall_macro', 'mean'), f1=('macro_f1', 'mean'), emergency=('emergency_recall', 'mean')).reset_index()
-        page('Additional Classifiers and the 90% Target')
-        p('Eleven new settings were declared before fitting and evaluated across the same five grouped development folds: 55 additional fits. CatBoost, XGBoost and RBF SVM were compared with the previous 68 configurations. Dataset, labels, encoder and test membership remain unchanged.')
+        page('Earlier Classifier Expansion and Current Target' if followup is not None else 'Additional Classifiers and the 90% Target')
+        p('This earlier stage tested eleven new settings declared before fitting and evaluated across the same five grouped development folds: 55 additional fits. CatBoost, XGBoost and RBF SVM were compared with the previous 68 configurations. Dataset, labels, encoder and test membership remain unchanged.')
         table([['New configuration', 'Accuracy', 'Precision', 'Recall', 'F1', 'ER recall']] + [[r.candidate] + [pct(v) for v in [r.accuracy, r.precision, r.recall, r.f1, r.emergency]] for r in mean.itertuples()], [180, 63, 63, 63, 63, 63], 7, 4)
         selected_cv = cv[cv.candidate.eq(selection['candidate'])].iloc[0]
         target_rows = [['Metric', 'CV mean (%)', 'Retrospective (%)', 'Target (%)']]
@@ -351,5 +386,6 @@ if __name__ == '__main__':
     p.add_argument('--investigation', type=Path)
     p.add_argument('--expanded', type=Path)
     p.add_argument('--geometry', type=Path)
+    p.add_argument('--followup', type=Path)
     a = p.parse_args()
-    build(a.source, a.original, a.output, a.audit, a.investigation, a.expanded, a.geometry)
+    build(a.source, a.original, a.output, a.audit, a.investigation, a.expanded, a.geometry, a.followup)
