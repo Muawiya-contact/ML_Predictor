@@ -30,6 +30,6 @@ Logistic Regression C=100 receives 133 inputs and predicts levels 0, 1, 2 and 3.
    checking, paired encoder input and the selected classifier. Saved concepts
    are used in the study; live translation accuracy is not measured here.
 
-Use the [current report](reports/triage_four_level_round7/) and active model
+Use the [selected-model report and workflow](reports/triage_selected_model/) and active model
 manifest. SapBERT itself was not fine-tuned. Literature tables use other tasks
 and provide context, not evidence of superiority over those published systems.

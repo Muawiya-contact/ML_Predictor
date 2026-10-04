@@ -128,9 +128,10 @@ are retrospective results, not untouched independent or clinical validation.
 The conditional paired development F1 gain interval versus the prior model is
 +0.70 to +1.67 percentage points and excludes selection uncertainty.
 
-Use the [current report directory](reports/triage_four_level_round7/) for the
-single final PDF, all settings, original full-768/PCA-64 baselines, nine pipeline
-representatives, matrices and audits. Source records, individual error queues
+Use the [selected-model paper package](reports/triage_selected_model/) for the
+current model report, general project workflow, and captioned figures. The
+[full search archive](reports/triage_four_level_round7/) retains all settings,
+original full-768/PCA-64 baselines, nine pipeline representatives and audits. Source records, individual error queues
 and OOF arrays stay local. The provider has no label-assignment rules available;
 no labels were changed. Live translation accuracy is not measured here.
 
@@ -175,6 +176,8 @@ _Department of Biomedical Engineering - May 2026_
 > not a certified medical device. It must not be used as the sole basis for
 > clinical decisions. Always involve a qualified clinician.
 
-The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round7/SapBERT_Final_Report.pdf), including the audit and recommendations.
+The general guide is [Roman Urdu Triage Project Workflow](reports/triage_selected_model/Roman_Urdu_Triage_Project_Workflow.pdf).
+The [selected-model report](reports/triage_selected_model/SapBERT_Final_Paper_Report.pdf) contains measured model results without historical classifier tables.
+The [complaint-mention diagnostic](reports/complaint_semantic_audit/) uses four fixed 100-record development samples; its rule-derived groups and similarity scores are not triage accuracy.
 
 The [previous-versus-latest comparison](reports/triage_historical_comparison/) explains the changed labels, matrix counts and score differences in a separate companion PDF.
