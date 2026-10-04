@@ -46,14 +46,15 @@ def export(source, original, incumbent, output):
         scaler = joblib.load(source / 'serving/detail_scaler.pkl')
         X = np.hstack([X, scaler.transform(detail_matrix(test[column].fillna('').tolist()))])
         artifacts.append('detail_scaler.pkl')
-    predictions = model.predict(X)
+    probabilities = model.predict_proba(X)
+    predictions = model.classes_[probabilities.argmax(axis=1)]
     if details or (source / 'selected_probabilities.npy').exists():
-        np.testing.assert_allclose(model.predict_proba(X), np.load(source / 'selected_probabilities.npy'), atol=1e-12)
+        np.testing.assert_allclose(probabilities, np.load(source / 'selected_probabilities.npy'), atol=1e-12)
     expected = pd.read_csv(source / (selection['candidate'] + '_retrospective_predictions.csv'))
     np.testing.assert_array_equal(test.row_id, expected.row_id)
     np.testing.assert_array_equal(test.Labels, expected.reference)
     np.testing.assert_array_equal(predictions, expected.predicted)
-    names = {'logreg': 'Logistic Regression', 'hgb': 'Hist Gradient Boosting', 'rf': 'Random Forest'}
+    names = {'logreg': 'Logistic Regression', 'hgb': 'Hist Gradient Boosting', 'rf': 'Random Forest', 'catboost': 'CatBoost', 'xgboost': 'XGBoost', 'svc': 'RBF SVM'}
     pc = config['features']['pca']
     description = ' + quadratic patient features' if config['features'].get('polynomial') else ''
     manifest.update(method=f'SapBERT + PCA-{pc} + ' + names[config['classifier']] + description, projected_embedding_dim=pc, feature_blocks=[dict(name='structured', dim=int(model.n_features_in_ - pc)), dict(name='embedding', dim=pc, rescaled=False)], text_pipeline=f'English -> SapBERT CLS (768) -> fitted PCA ({pc})', source_config=config, selection=selection, evaluation_note='Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations.', artifact_sha256={name: file_sha256(source / 'serving' / name) for name in artifacts}, improvement_verification=verification)
@@ -64,6 +65,12 @@ def export(source, original, incumbent, output):
         manifest['feature_blocks'].append(dict(name='text_details', dim=len(FEATURE_NAMES)))
         manifest['method'] += ' + complaint details'
         manifest['evaluation_note'] += ' Explicit detail features use ' + ('original complaints.' if details['source'] == 'complaint_details' else 'supplied English concepts.')
+    if config['classifier'] in ('catboost', 'xgboost'):
+        from importlib.metadata import version
+        package = 'catboost' if config['classifier'] == 'catboost' else 'xgboost-cpu'
+        manifest['classifier_runtime'] = dict(package=package, version=version(package))
+    else:
+        manifest.pop('classifier_runtime', None)
     output.mkdir(parents=True, exist_ok=True)
     if any(output.iterdir()):
         raise ValueError('Use an empty export destination')

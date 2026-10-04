@@ -73,6 +73,18 @@ def load_bundle(model_dir, manifest):
     import sklearn
     if manifest.get('sklearn_version') != sklearn.__version__:
         raise ValueError('SapBERT bundle requires scikit-learn ' + str(manifest.get('sklearn_version')))
+    runtime = manifest.get('classifier_runtime')
+    if runtime:
+        from importlib.metadata import version, PackageNotFoundError
+        package = runtime.get('package')
+        if package not in ('catboost', 'xgboost-cpu'):
+            raise ValueError('Unsupported classifier runtime in SapBERT manifest')
+        try:
+            installed = version(package)
+        except PackageNotFoundError:
+            installed = None
+        if installed != runtime.get('version') or installed is None:
+            raise ValueError(f"SapBERT bundle requires {package}=={runtime.get('version')}; installed: {installed}")
     path = Path(model_dir)
     files = ['model.pkl', 'structured.pkl', 'pca.pkl']
     details = manifest.get('text_details')

@@ -11,6 +11,21 @@ from src.sapbert_serving import prepare, predict_frame, load_bundle
 
 
 class ServingTests(unittest.TestCase):
+    @patch('src.sapbert_serving.joblib.load')
+    def test_classifier_runtime_checked_before_unpickling(self, load):
+        from importlib.metadata import PackageNotFoundError
+        manifest = {'sklearn_version': sklearn.__version__,
+                    'classifier_runtime': {'package': 'catboost', 'version': '1.2.10'}}
+        for result in ('different', PackageNotFoundError('catboost')):
+            with self.subTest(result=result), patch('importlib.metadata.version') as version:
+                if isinstance(result, Exception):
+                    version.side_effect = result
+                else:
+                    version.return_value = result
+                with self.assertRaisesRegex(ValueError, 'requires catboost==1.2.10'):
+                    load_bundle('unused', manifest)
+        load.assert_not_called()
+
     def artifacts(self):
         class Structured:
             named_transformers_ = {'cat': SimpleNamespace(named_steps={
