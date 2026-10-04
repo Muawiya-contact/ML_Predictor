@@ -1,0 +1,143 @@
+{
+  "candidates": {
+    "lr": {
+      "lr": 1.0
+    },
+    "lr_lr64_0.1": {
+      "lr": 0.9,
+      "lr64": 0.1
+    },
+    "lr_lr64_0.25": {
+      "lr": 0.75,
+      "lr64": 0.25
+    },
+    "lr_lr64_0.5": {
+      "lr": 0.5,
+      "lr64": 0.5
+    },
+    "lr_hgb_0.1": {
+      "lr": 0.9,
+      "hgb": 0.1
+    },
+    "lr_hgb_0.25": {
+      "lr": 0.75,
+      "hgb": 0.25
+    },
+    "lr_hgb_0.5": {
+      "lr": 0.5,
+      "hgb": 0.5
+    },
+    "lr_cat_0.1": {
+      "lr": 0.9,
+      "cat": 0.1
+    },
+    "lr_cat_0.25": {
+      "lr": 0.75,
+      "cat": 0.25
+    },
+    "lr_cat_0.5": {
+      "lr": 0.5,
+      "cat": 0.5
+    },
+    "lr_xgb_0.1": {
+      "lr": 0.9,
+      "xgb": 0.1
+    },
+    "lr_xgb_0.25": {
+      "lr": 0.75,
+      "xgb": 0.25
+    },
+    "lr_xgb_0.5": {
+      "lr": 0.5,
+      "xgb": 0.5
+    },
+    "lr_hgb_cat": {
+      "lr": 0.6,
+      "hgb": 0.2,
+      "cat": 0.2
+    },
+    "lr_hgb_0.35": {
+      "lr": 0.65,
+      "hgb": 0.35
+    },
+    "lr_hgb_0.4": {
+      "lr": 0.6,
+      "hgb": 0.4
+    },
+    "lr_hgb_0.45": {
+      "lr": 0.55,
+      "hgb": 0.45
+    },
+    "lr_hgb_0.55": {
+      "lr": 0.44999999999999996,
+      "hgb": 0.55
+    },
+    "lr_hgb_0.6": {
+      "lr": 0.4,
+      "hgb": 0.6
+    },
+    "lr_hgb_0.65": {
+      "lr": 0.35,
+      "hgb": 0.65
+    },
+    "lr_hgb_0.75": {
+      "lr": 0.25,
+      "hgb": 0.75
+    },
+    "lr_hgb_0.9": {
+      "lr": 0.09999999999999998,
+      "hgb": 0.9
+    },
+    "lr_hgb_ordinal_442": {
+      "lr": 0.4,
+      "hgb": 0.4,
+      "ordinal": 0.2
+    },
+    "lr_hgb_ordinal_252": {
+      "lr": 0.25,
+      "hgb": 0.5,
+      "ordinal": 0.25
+    },
+    "lr_hgb_ordinal_154": {
+      "lr": 0.1,
+      "hgb": 0.5,
+      "ordinal": 0.4
+    }
+  },
+  "sources": {
+    "lr": [
+      "triage_four_level_round6/development_oof.npz",
+      "selected"
+    ],
+    "lr64": [
+      "triage_detail_refinement/oof.npz",
+      "lr_detail64_c100"
+    ],
+    "hgb": [
+      "triage_learning_detail_audit/development_oof.npz",
+      "hgb__complaint_details"
+    ],
+    "cat": [
+      "triage_expanded_classifiers/oof.npz",
+      "cat_detail64_depth6"
+    ],
+    "xgb": [
+      "triage_expanded_classifiers/oof.npz",
+      "xgb_detail64_depth4"
+    ],
+    "ordinal": [
+      "triage_advanced_classifiers/oof.npz",
+      "ordinal_d2_p128_c10"
+    ]
+  },
+  "source_hashes": {
+    "lr": "3478895ccb1c974692d6d3400fe337d108fd7860aeee1e8e9f6e426af9042b81",
+    "lr64": "c278ed230daf2497d737017428f137b9646a70cf5c6654ac35c067cfadb8827a",
+    "hgb": "e9925cd17f49754e708f7c1747c0d84c6deefb5f25eec1158db5dc634c37c319",
+    "cat": "86e188f9dddcd6133f945f38efe9ae53c0660ba33b8fcb251f70efe0b7fa772b",
+    "xgb": "86e188f9dddcd6133f945f38efe9ae53c0660ba33b8fcb251f70efe0b7fa772b",
+    "ordinal": "0d3a99264c27649e812a5e9df6aa6ff01ced3386da0abafc3a7dedc15cd578b8"
+  },
+  "test_rows_used": false,
+  "weights_fitted": false
+}
