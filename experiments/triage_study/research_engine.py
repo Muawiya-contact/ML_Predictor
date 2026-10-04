@@ -200,6 +200,17 @@ def model_for(c):
         m = HistGradientBoostingClassifier(random_state=42, **p)
     elif c["classifier"] == "rf":
         m = RandomForestClassifier(n_jobs=2, random_state=42, **p)
+    elif c["classifier"] == "catboost":
+        from catboost import CatBoostClassifier
+        m = CatBoostClassifier(loss_function="MultiClass", random_seed=42,
+                               thread_count=2, verbose=False, allow_writing_files=False, **p)
+    elif c["classifier"] == "xgboost":
+        from xgboost import XGBClassifier
+        m = XGBClassifier(objective="multi:softprob", num_class=4, tree_method="hist",
+                          device="cpu", random_state=42, n_jobs=2, **p)
+    elif c["classifier"] == "svc":
+        from sklearn.svm import SVC
+        m = SVC(probability=True, random_state=42, cache_size=512, **p)
     else:
         raise ValueError(c["classifier"])
     return m, balance
