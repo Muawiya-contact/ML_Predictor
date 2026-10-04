@@ -1,7 +1,7 @@
 {
   "backend": "sapbert_pca",
   "sklearn_version": "1.9.0",
-  "method": "SapBERT + PCA-128 + Logistic Regression + quadratic patient features + complaint details",
+  "method": "SapBERT + PCA-64 + Logistic Regression + quadratic patient features + paired complaint text + complaint details",
   "labels": [
     0,
     1,
@@ -17,7 +17,7 @@
   "text_representation": "embeddings_raw",
   "embedding_model": "cambridgeltl/SapBERT-from-PubMedBERT-fulltext",
   "embedding_dim": 768,
-  "projected_embedding_dim": 128,
+  "projected_embedding_dim": 64,
   "feature_blocks": [
     {
       "name": "structured",
@@ -25,7 +25,7 @@
     },
     {
       "name": "embedding",
-      "dim": 128,
+      "dim": 64,
       "rescaled": false
     },
     {
@@ -36,11 +36,11 @@
   "encoder_settings": {
     "revision": "090663c3ae57bf35ffe4d0d468a2a88d03051a4d",
     "pooling": "cls",
-    "max_token_length": 64,
+    "max_token_length": 128,
     "normalized": true,
     "local_path": "output/results/.hf_cache/hub/models--cambridgeltl--SapBERT-from-PubMedBERT-fulltext/snapshots/090663c3ae57bf35ffe4d0d468a2a88d03051a4d"
   },
-  "text_pipeline": "English -> SapBERT CLS (768) -> fitted PCA (128)",
+  "text_pipeline": "English + [SEP] + original complaint -> SapBERT CLS (768, 128-token limit) -> fitted PCA (64)",
   "text_column": "Clinical_Concept",
   "experiment": true,
   "dataset": {
@@ -58,18 +58,18 @@
   "scope": {
     "clinical_scope": "CARDIAC COMPLAINTS; LEVELS 0-3"
   },
-  "evaluation_note": "Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations. Explicit detail features use original complaints.",
+  "evaluation_note": "Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations. SapBERT receives supplied concept + [SEP] + original complaint; live English is translated locally. Explicit detail features use original complaints.",
   "source_config": {
     "classifier": "logreg",
     "features": {
       "view": "fused",
-      "encoder": "sapbert_concept",
+      "encoder": "sapbert_pair",
       "solver": "full",
-      "pca": 128,
+      "pca": 64,
       "polynomial": true
     },
     "params": {
-      "C": 10,
+      "C": 100,
       "balance": true
     },
     "text_details": {
@@ -99,18 +99,18 @@
     }
   },
   "selection": {
-    "candidate": "lr_detail128_c10",
+    "candidate": "lr_pair64_c100",
     "config": {
       "classifier": "logreg",
       "features": {
         "view": "fused",
-        "encoder": "sapbert_concept",
+        "encoder": "sapbert_pair",
         "solver": "full",
-        "pca": 128,
+        "pca": 64,
         "polynomial": true
       },
       "params": {
-        "C": 10,
+        "C": 100,
         "balance": true
       },
       "text_details": {
@@ -140,19 +140,19 @@
       }
     },
     "baseline": "lr_pca64_c10_balanced1",
-    "rule": "Highest mean development macro F1 subject to emergency recall no more than 1 percentage point below incumbent; accuracy breaks ties.",
-    "cv_gain": 0.03665207667391257
+    "rule": "Highest mean development macro F1 subject to emergency recall no more than one percentage point below the original reference; accuracy then name break ties.",
+    "cv_gain": 0.04844085867778536
   },
   "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
   "artifact_sha256": {
-    "model.pkl": "790f4713c2e8df086ed840ecfc4fd6f4c20165cf84a529f5f7591c3896999a4a",
-    "structured.pkl": "3a29ac5cbf323d26e1b3b89d0a4017dc345d579e9a2e073d8baad81bcdf0cf8e",
-    "pca.pkl": "602b69eb2f9238580b56890eb4d1730bb8b1731b8f81d75d70ea7b89409d781f",
+    "model.pkl": "051c4381e7bcde1382c5d68563b28603e7d9c26eef5cf409181e2db48104b2ee",
+    "structured.pkl": "45aebe4952b8185a2f2225fbc49d8c5e7c89621b7a6bfe3e0111c4c0227b88e8",
+    "pca.pkl": "a9913a2087bee57a51784a139ecac40d8cbb2e3651d1e55ba3e9e5c4434b5aca",
     "detail_scaler.pkl": "aeaf71c287b238347009aa88f7cd5063f4c19809f990c6288bb19e7adf442439"
   },
   "improvement_verification": {
     "status": "passed",
-    "cv_fits": 340,
+    "cv_fits": 665,
     "family_comparison_verified": true,
     "baseline_reproduced": true,
     "source_hashes_verified": true,
@@ -160,28 +160,29 @@
     "development_oof_paired_group_bootstrap": {
       "iterations": 1000,
       "seed": 2026,
-      "macro_f1_gain": 0.0366720680478162,
+      "macro_f1_gain": 0.048426093406408466,
       "ci95": [
-        0.029721001061637643,
-        0.04330616935983296
+        0.04147556607722385,
+        0.055657646200562995
       ],
       "interpretation": "Conditional on selected OOF predictions; does not account for model-selection optimism."
     },
     "selected_probability_diagnostics": {
       "development": {
-        "mcc": 0.8560726361857474,
-        "log_loss": 0.24585874420101314,
-        "multiclass_brier": 0.1522935346865638,
-        "ece_10_bins": 0.011969785073657488
+        "mcc": 0.8723565613052917,
+        "log_loss": 0.22661511307304505,
+        "multiclass_brier": 0.13820269607063101,
+        "ece_10_bins": 0.021045073674551062
       },
       "retrospective_test": {
-        "mcc": 0.8562674962047979,
-        "log_loss": 0.24187865298351047,
-        "multiclass_brier": 0.14967780574292885,
-        "ece_10_bins": 0.009418089968214513
+        "mcc": 0.8736777796720813,
+        "log_loss": 0.21041920716424253,
+        "multiclass_brier": 0.1298466650741397,
+        "ece_10_bins": 0.0169765559054604
       }
     }
   },
+  "text_input": "concept_and_complaint",
   "text_details": {
     "source": "complaint_details",
     "version": 1,
