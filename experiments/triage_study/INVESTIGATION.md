@@ -98,3 +98,7 @@ Render and inspect every page before publication. The final comparison includes
 all original 768-D/PCA-64 baselines, each tuned classifier, the full development
 search and both audits. Probability diagnostics are recomputed from saved
 probabilities; lower log loss and Brier score indicate better probability quality.
+
+The later [expanded classifier comparison](EXPANDED_CLASSIFIERS.md) adds the
+user-authorized CatBoost, XGBoost and SVM families while preserving these labels
+and evaluation partitions. Its report includes the earlier investigation.
