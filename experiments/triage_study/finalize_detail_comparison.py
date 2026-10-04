@@ -22,6 +22,9 @@ import research_engine as engine
 
 
 def fit_candidate(config, dev, test):
+    if config["classifier"] == "soft_vote":
+        from fit_soft_vote import fit
+        return fit(config, dev, test)
     feature = engine.Features(**config['features']).fit(dev)
     a,b=feature.transform(dev),feature.transform(test)
     scaler=None
