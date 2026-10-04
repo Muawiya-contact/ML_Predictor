@@ -1,5 +1,7 @@
 # Current selected-model paper package
 
+The [combined method-update report](../triage_method_update/SapBERT_Method_Improvement_and_Semantic_Concepts.pdf) preserves the eight-page results report and adds symptom-based plots and the exact 83.64% / 82.44% to 90.60% comparison.
+
 - [General project workflow](Roman_Urdu_Triage_Project_Workflow.pdf): eight pages explaining input, translation, embeddings, PCA, classification, cross-validation, weighting and the interpretation of complaint plots. No conversation-specific headings.
 - [Selected-model results](SapBERT_Final_Paper_Report.pdf): eight pages with current metrics, class scores, confusion matrices, four triage-coloured embedding panels and repeated descriptive geometry. No historical baseline tables or alternative-classifier comparison.
 - [Figure captions and usage](figures/Figure_Captions_and_Usage.txt): descriptive filenames, six main figures in PNG/vector PDF, four individual embedding panels, an embedding-statistics table image and aggregate supporting data.
