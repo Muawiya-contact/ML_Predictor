@@ -1,0 +1,40 @@
+{
+  "sample_rows": 1200,
+  "sample_groups": 1200,
+  "sample_class_counts": {
+    "0": 240,
+    "1": 322,
+    "2": 345,
+    "3": 293
+  },
+  "sample_seed": 20261004,
+  "test_rows_used": false,
+  "dataset_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "embedding_sha256": "d770ff7cd9e259ce470fb5b7defe79b27e690df4f1e269fb5cc70f6cdf26efe4",
+  "pca_sha256": "a9913a2087bee57a51784a139ecac40d8cbb2e3651d1e55ba3e9e5c4434b5aca",
+  "text_input": "concept_and_complaint",
+  "interpretation": "Descriptive triage-label geometry, not cross-validated prediction. PCA was fitted on all development rows. One row per sampled complaint group. Low separation does not establish a performance ceiling or incorrect labels.",
+  "metrics": [
+    {
+      "representation": "SapBERT 768-D",
+      "within_label_cosine": 0.6366673707962036,
+      "between_label_cosine": 0.6323204636573792,
+      "separation": 0.004346907138824463,
+      "cosine_silhouette": -0.00976864155381918
+    },
+    {
+      "representation": "PCA-64",
+      "within_label_cosine": 0.016320847703652514,
+      "between_label_cosine": -0.0008244386623883482,
+      "separation": 0.017145286366040863,
+      "cosine_silhouette": -0.0003968233840495465
+    },
+    {
+      "representation": "PCA-128",
+      "within_label_cosine": 0.015687736580661384,
+      "between_label_cosine": -0.0008219370377883752,
+      "separation": 0.01650967361844976,
+      "cosine_silhouette": -0.0002668411708210137
+    }
+  ]
+}

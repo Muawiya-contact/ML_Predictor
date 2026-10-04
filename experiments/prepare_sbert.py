@@ -15,7 +15,7 @@ from sentence_transformers import SentenceTransformer
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--data', default='cardiac_english_2252.csv', type=Path)
+    parser.add_argument('--data', required=True, type=Path)
     parser.add_argument('--output', default='output/results/sbert_inputs', type=Path)
     parser.add_argument('--model', default='sentence-transformers/all-mpnet-base-v2')
     parser.add_argument('--revision', help='Pinned model commit; resolved and recorded if omitted')

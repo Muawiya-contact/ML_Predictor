@@ -1,0 +1,211 @@
+{
+  "backend": "sapbert_pca",
+  "sklearn_version": "1.9.0",
+  "method": "SapBERT + PCA-64 + Logistic Regression + quadratic patient features + paired complaint text + complaint details",
+  "labels": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "label_names": [
+    "Emergency",
+    "Urgent",
+    "Standard",
+    "Non-urgent"
+  ],
+  "text_representation": "embeddings_raw",
+  "embedding_model": "cambridgeltl/SapBERT-from-PubMedBERT-fulltext",
+  "embedding_dim": 768,
+  "projected_embedding_dim": 64,
+  "feature_blocks": [
+    {
+      "name": "structured",
+      "dim": 50
+    },
+    {
+      "name": "embedding",
+      "dim": 64,
+      "rescaled": false
+    },
+    {
+      "name": "text_details",
+      "dim": 19
+    }
+  ],
+  "encoder_settings": {
+    "revision": "090663c3ae57bf35ffe4d0d468a2a88d03051a4d",
+    "pooling": "cls",
+    "max_token_length": 128,
+    "normalized": true,
+    "local_path": "output/results/.hf_cache/hub/models--cambridgeltl--SapBERT-from-PubMedBERT-fulltext/snapshots/090663c3ae57bf35ffe4d0d468a2a88d03051a4d"
+  },
+  "text_pipeline": "English + [SEP] + original complaint -> SapBERT CLS (768, 128-token limit) -> fitted PCA (64)",
+  "text_column": "Clinical_Concept",
+  "experiment": true,
+  "dataset": {
+    "file": "cardiac_multilingual_10000_4level_triage.xlsx",
+    "sha256": "a2c59f71dada03fdf24a733821adfaeac90e107be3af1e22b779d7674ffc59c3",
+    "rows": 10000,
+    "training_rows": 8001,
+    "test_rows": 1999,
+    "n_classes": 4,
+    "recovered_concepts": 4290,
+    "provenance": {
+      "label_method": "Provider described label assignment as \"by using all\"; the exact process and independent per-record review are not documented."
+    }
+  },
+  "scope": {
+    "clinical_scope": "CARDIAC COMPLAINTS; LEVELS 0-3"
+  },
+  "evaluation_note": "Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations. SapBERT receives supplied concept + [SEP] + original complaint; live English is translated locally. Explicit detail features use original complaints.",
+  "source_config": {
+    "classifier": "logreg",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_pair",
+      "solver": "full",
+      "pca": 64,
+      "polynomial": true
+    },
+    "params": {
+      "C": 100,
+      "balance": true
+    },
+    "text_details": {
+      "source": "complaint_details",
+      "version": 1,
+      "feature_names": [
+        "mild_word",
+        "strong_word",
+        "sudden_word",
+        "exertion_word",
+        "radiation_phrase",
+        "breathing_phrase",
+        "fainting_word",
+        "sweating_word",
+        "nausea_word",
+        "family_word",
+        "history_word",
+        "hypertension_word",
+        "diabetes_word",
+        "negation_word",
+        "night_word",
+        "morning_word",
+        "duration_known",
+        "log_duration_minutes",
+        "duration_ambiguous"
+      ]
+    }
+  },
+  "selection": {
+    "candidate": "lr_pair64_c100",
+    "config": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "baseline": "lr_pca64_c10_balanced1",
+    "rule": "Highest mean development macro F1 subject to emergency recall no more than one percentage point below the original reference; accuracy then name break ties.",
+    "cv_gain": 0.04844085867778536
+  },
+  "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "artifact_sha256": {
+    "model.pkl": "051c4381e7bcde1382c5d68563b28603e7d9c26eef5cf409181e2db48104b2ee",
+    "structured.pkl": "45aebe4952b8185a2f2225fbc49d8c5e7c89621b7a6bfe3e0111c4c0227b88e8",
+    "pca.pkl": "a9913a2087bee57a51784a139ecac40d8cbb2e3651d1e55ba3e9e5c4434b5aca",
+    "detail_scaler.pkl": "aeaf71c287b238347009aa88f7cd5063f4c19809f990c6288bb19e7adf442439"
+  },
+  "improvement_verification": {
+    "status": "passed",
+    "cv_fits": 665,
+    "family_comparison_verified": true,
+    "baseline_reproduced": true,
+    "source_hashes_verified": true,
+    "holdout_previously_exposed": true,
+    "development_oof_paired_group_bootstrap": {
+      "iterations": 1000,
+      "seed": 2026,
+      "macro_f1_gain": 0.048426093406408466,
+      "ci95": [
+        0.04147556607722385,
+        0.055657646200562995
+      ],
+      "interpretation": "Conditional on selected OOF predictions; does not account for model-selection optimism."
+    },
+    "selected_probability_diagnostics": {
+      "development": {
+        "mcc": 0.8723565613052917,
+        "log_loss": 0.22661511307304505,
+        "multiclass_brier": 0.13820269607063101,
+        "ece_10_bins": 0.021045073674551062
+      },
+      "retrospective_test": {
+        "mcc": 0.8736777796720813,
+        "log_loss": 0.21041920716424253,
+        "multiclass_brier": 0.1298466650741397,
+        "ece_10_bins": 0.0169765559054604
+      }
+    }
+  },
+  "text_input": "concept_and_complaint",
+  "text_details": {
+    "source": "complaint_details",
+    "version": 1,
+    "feature_names": [
+      "mild_word",
+      "strong_word",
+      "sudden_word",
+      "exertion_word",
+      "radiation_phrase",
+      "breathing_phrase",
+      "fainting_word",
+      "sweating_word",
+      "nausea_word",
+      "family_word",
+      "history_word",
+      "hypertension_word",
+      "diabetes_word",
+      "negation_word",
+      "night_word",
+      "morning_word",
+      "duration_known",
+      "log_duration_minutes",
+      "duration_ambiguous"
+    ]
+  }
+}

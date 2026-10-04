@@ -1,0 +1,29 @@
+{
+  "title": "Artificial intelligence for severity triage based on conversations in an emergency department in Korea",
+  "doi": "10.1038/s41598-025-99874-0",
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12081756/",
+  "table": 2,
+  "scope": "Different binary KTAS task; contextual comparison only. Values retain the publication metric definitions.",
+  "models": {
+    "TF-IDF + LR": {
+      "accuracy": 0.75,
+      "recall": 0.988,
+      "f1": 0.544
+    },
+    "TF-IDF + RF": {
+      "accuracy": 0.751,
+      "recall": 0.964,
+      "f1": 0.582
+    },
+    "BiLSTM": {
+      "accuracy": 0.746,
+      "recall": 0.846,
+      "f1": 0.67
+    },
+    "CNN": {
+      "accuracy": 0.723,
+      "recall": 0.787,
+      "f1": 0.667
+    }
+  }
+}

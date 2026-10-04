@@ -1,0 +1,128 @@
+{
+  "development_rows": 8001,
+  "oof_errors": 1113,
+  "review_rows": 1782,
+  "explicit_duration_disagreements": 567,
+  "explicit_duration_missing_from_concept": 142,
+  "family_word_missing_from_concept": 48,
+  "lexical_screen": {
+    "mild_word": {
+      "complaint_mentions": 1002,
+      "concept_mentions": 843,
+      "complaint_only": 160
+    },
+    "strong_word": {
+      "complaint_mentions": 3230,
+      "concept_mentions": 2742,
+      "complaint_only": 743
+    },
+    "sudden_word": {
+      "complaint_mentions": 1509,
+      "concept_mentions": 1500,
+      "complaint_only": 26
+    },
+    "exertion_word": {
+      "complaint_mentions": 1147,
+      "concept_mentions": 1153,
+      "complaint_only": 38
+    },
+    "radiation_phrase": {
+      "complaint_mentions": 948,
+      "concept_mentions": 951,
+      "complaint_only": 2
+    },
+    "breathing_phrase": {
+      "complaint_mentions": 632,
+      "concept_mentions": 645,
+      "complaint_only": 8
+    },
+    "fainting_word": {
+      "complaint_mentions": 416,
+      "concept_mentions": 200,
+      "complaint_only": 217
+    },
+    "sweating_word": {
+      "complaint_mentions": 705,
+      "concept_mentions": 673,
+      "complaint_only": 36
+    },
+    "nausea_word": {
+      "complaint_mentions": 432,
+      "concept_mentions": 431,
+      "complaint_only": 4
+    },
+    "family_word": {
+      "complaint_mentions": 371,
+      "concept_mentions": 332,
+      "complaint_only": 48
+    },
+    "history_word": {
+      "complaint_mentions": 1045,
+      "concept_mentions": 2409,
+      "complaint_only": 43
+    },
+    "hypertension_word": {
+      "complaint_mentions": 384,
+      "concept_mentions": 385,
+      "complaint_only": 6
+    },
+    "diabetes_word": {
+      "complaint_mentions": 392,
+      "concept_mentions": 391,
+      "complaint_only": 2
+    },
+    "negation_word": {
+      "complaint_mentions": 141,
+      "concept_mentions": 34,
+      "complaint_only": 108
+    },
+    "night_word": {
+      "complaint_mentions": 610,
+      "concept_mentions": 604,
+      "complaint_only": 6
+    },
+    "morning_word": {
+      "complaint_mentions": 664,
+      "concept_mentions": 652,
+      "complaint_only": 13
+    },
+    "duration_known": {
+      "complaint_mentions": 2660,
+      "concept_mentions": 2525,
+      "complaint_only": 142
+    },
+    "duration_ambiguous": {
+      "complaint_mentions": 0,
+      "concept_mentions": 1,
+      "complaint_only": 0
+    }
+  },
+  "labels_modified": false,
+  "interpretation": "Lexical flags require human review; they do not establish clinical findings or incorrect labels. No new test-row inspection.",
+  "oof_confusion": [
+    [
+      1512,
+      120,
+      0,
+      0
+    ],
+    [
+      183,
+      1752,
+      234,
+      3
+    ],
+    [
+      0,
+      212,
+      1985,
+      203
+    ],
+    [
+      0,
+      0,
+      158,
+      1639
+    ]
+  ]
+}

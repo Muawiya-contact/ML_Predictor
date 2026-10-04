@@ -33,12 +33,12 @@ def normal(text):
     return " ".join(re.sub(r"[^\w\s]", " ", text).split())
 
 
-def main(source):
+def main(source, target_column="Labels", labels=(1, 2, 3), provenance="User confirmed that Labels were assigned by an AI model; no clinician validation was provided."):
     SOURCE = Path(source).resolve()
     digest = hashlib.sha256(SOURCE.read_bytes()).hexdigest()
     if (HERE / "data_audit.json").exists():
         audit = json.loads((HERE / "data_audit.json").read_text())
-        if audit["input_sha256"] != digest:
+        if audit["input_sha256"] != digest or audit.get("target", "Labels") != target_column or audit.get("labels", [1, 2, 3]) != list(labels):
             raise ValueError(
                 "Output belongs to another dataset; choose a fresh TRIAGE_STUDY_OUTPUT directory."
             )
@@ -51,7 +51,8 @@ def main(source):
     if any(HERE.iterdir()):
         raise ValueError("Preparation requires an empty output directory.")
     raw = pd.read_csv(SOURCE)
-    df = raw[COLS].copy()
+    renamed = raw.rename(columns={target_column: "Labels"})
+    df = renamed[COLS].copy()
     df["source_row"] = np.arange(len(df)) + 2
     for c in NUM:
         df[c] = pd.to_numeric(df[c], errors="coerce")
@@ -68,7 +69,7 @@ def main(source):
     issues = df.loc[invalid, ["source_row", "Mode_of_Arrival"]].to_dict("records")
     df.loc[invalid, "Mode_of_Arrival"] = pd.NA
     target = pd.to_numeric(df.Labels, errors="coerce")
-    if target.isna().any() or set(target.unique()) != {1, 2, 3}:
+    if target.isna().any() or set(target.unique()) != set(labels):
         raise ValueError("Unrecognized triage labels; manual review required")
     df.Labels = target.astype(int)
     dup = df.duplicated(subset=COLS, keep="first")
@@ -125,7 +126,7 @@ def main(source):
         "input_sha256": hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
         "raw_shape": list(raw.shape),
         "retained_columns": COLS,
-        "excluded_columns": [c for c in raw if c not in COLS],
+        "excluded_columns": [c for c in raw if c not in COLS and c != target_column],
         "removed_duplicate_source_rows": removed,
         "invalid_arrival_values_set_missing": issues,
         "rows": len(df),
@@ -140,8 +141,9 @@ def main(source):
         .to_dict(),
         "test_class_counts": df.iloc[test].Labels.value_counts().sort_index().to_dict(),
         "shared_groups": len(set(g[development]) & set(g[test])),
-        "target": "Labels",
-        "provenance": "User confirmed that Labels were assigned by an AI model; no clinician validation was provided.",
+        "target": target_column,
+        "labels": list(labels),
+        "provenance": provenance,
     }
     assert manifest["shared_groups"] == 0
     (HERE / "data_audit.json").write_text(json.dumps(manifest, indent=2))

@@ -1,0 +1,74 @@
+{
+  "input_file": "prepared_source.csv",
+  "input_sha256": "d198f66a01a6ba04985df6d3e0483045bdc7be5ea0ed386fbf3dc2fd7611c306",
+  "raw_shape": [
+    10000,
+    20
+  ],
+  "retained_columns": [
+    "Age",
+    "Gender",
+    "Mode_of_Arrival",
+    "chief_complaint",
+    "Clinical_Concept",
+    "Heart_Rate",
+    "Systolic_BP",
+    "Diastolic_BP",
+    "ECG_Status",
+    "Temperature",
+    "SpO2",
+    "AVPU",
+    "Labels"
+  ],
+  "excluded_columns": [
+    "Triage_Label",
+    "Category",
+    "fuzzy_glossary",
+    "min_confidence",
+    "unresolved_tokens",
+    "seconds",
+    "examples_used"
+  ],
+  "removed_duplicate_source_rows": [],
+  "invalid_arrival_values_set_missing": [
+    {
+      "source_row": 21,
+      "Mode_of_Arrival": "roman_urdu_reference"
+    }
+  ],
+  "rows": 10000,
+  "groups": 6573,
+  "largest_group": 30,
+  "class_counts": {
+    "0": 2040,
+    "1": 2714,
+    "2": 3000,
+    "3": 2246
+  },
+  "development_rows": 8001,
+  "test_rows": 1999,
+  "development_class_counts": {
+    "0": 1632,
+    "1": 2172,
+    "2": 2400,
+    "3": 1797
+  },
+  "test_class_counts": {
+    "0": 408,
+    "1": 542,
+    "2": 600,
+    "3": 449
+  },
+  "shared_groups": 0,
+  "target": "Triage_Level",
+  "labels": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "provenance": "Provider described label assignment as \"by using all\"; the exact process and independent per-record review are not documented.",
+  "target_rename": {
+    "Triage_Level": "Labels"
+  }
+}

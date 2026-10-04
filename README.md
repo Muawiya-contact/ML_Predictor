@@ -1,175 +1,162 @@
 # Roman Urdu Medical Triage in Pakistan
 
 An offline research prototype for cardiac complaints written in Roman Urdu.
-The application translates complaints locally, checks anatomical consistency,
-and combines sentence embeddings with structured patient features to predict
-triage levels 1 (Emergency) through 4 (Non-Urgent).
+The application translates complaints with local Ollama, verifies anatomical
+consistency and combines SapBERT embeddings with patient features to predict
+**0 Emergency, 1 Urgent, 2 Standard or 3 Non-urgent**.
 
-The training data is synthetic. This system has not been clinically validated
-and is not a medical device. Its classifier was trained on cardiac presentations;
-broader vocabulary support does not validate it for other specialties.
+The current model is selected using grouped cross-validation on the supplied
+four-level workbook. It has not been clinically validated. Dataset-label
+agreement is not a measure of clinical reliability or live translation accuracy.
 
-## Run the application
+## Run locally
 
-Python 3.10 or newer and tkinter are required. Install the pinned dependencies
-in a virtual environment:
+Use Python 3.10+ with tkinter. The saved classifier requires the pinned
+scikit-learn version. Install CPU PyTorch before the other dependencies:
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
+python -m pip install --index-url https://download.pytorch.org/whl/cpu torch
 python -m pip install -r requirements.txt
 python -c "import tkinter"
 ```
 
-On Windows activate with `.venv\Scripts\activate`. On Ubuntu install tkinter
-with `sudo apt install python3-tk`; on Fedora use `sudo dnf install python3-tkinter`.
-The saved classifier requires the pinned scikit-learn version.
+On Windows use `.venv\Scripts\activate`. Install `python3-tk` on Ubuntu or
+`python3-tkinter` on Fedora when tkinter is missing.
 
-Install Ollama, start its local service and obtain the translator once:
+Start Ollama in a separate terminal, download Qwen and the pinned SapBERT
+snapshot once, then launch the GUI:
 
 ```bash
 ollama serve
 ollama pull qwen2.5
+hf download cambridgeltl/SapBERT-from-PubMedBERT-fulltext \
+  --revision 090663c3ae57bf35ffe4d0d468a2a88d03051a4d
+python run_inference.py --check
 python triage_gui.py
 ```
 
-Run `ollama serve` in a separate terminal. If an accepted translator is already
-installed, the app can select it and reports its name. The sentence encoder
-downloads on first use and is then cached. Prediction runs locally once these
-models are present; there is no API key or cloud translation in the application.
-
-See [HOW_TO_RUN.md](HOW_TO_RUN.md) and [the operator manual](docs/ML_Predictor_Manual.pdf).
-`run_gui.sh` supports the original Linux Tk runtime layout; other installations
-can use `python triage_gui.py` directly.
+The app reads locally cached models; SapBERT inference never downloads or
+substitutes another encoder. `SAPBERT_MODEL_PATH` can point to the pinned local
+snapshot. `./run_gui.sh` also supports the original machine's private Tk runtime.
+See [the current GUI guide](docs/SapBERT_GUI.md).
 
 ## Prediction pipeline
 
 1. Normalize Roman Urdu spelling with the fuzzy clinical dictionary.
-2. Translate to English using local Ollama, temperature 0.0.
-3. Filter refusals and verify that named body parts survive translation.
-4. Remove the English bundle's learned stop words.
-5. Encode the English text with `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` — an SBERT (Sentence-BERT) checkpoint, the multilingual 384-dimensional variant.
-6. Concatenate the L2-normalized 384-dimensional embedding with 26 structured features.
-7. Predict with Logistic Regression (`class_weight="balanced"`, `max_iter=1200`).
+2. Translate to English through local Ollama, with temperature 0.0.
+3. Reject failed/refused translations and anatomical mismatches.
+4. Encode English + `[SEP]` + the original complaint with frozen SapBERT CLS: 768 dimensions, 128-token
+   limit, L2 normalization. This bundle does not remove stop words.
+5. Apply the saved development-fitted PCA to obtain 64 text features.
+6. Add 50 structured features: the seven numeric inputs (including ordinal AVPU)
+   expand to 35 linear/quadratic terms before scaling, with 15 fitted categorical
+   indicators for gender, arrival mode and ECG. Imputation is fitted on training rows.
+7. Append 19 explicit details extracted from the original complaint, preserving
+   duration and other mentions alongside the English SapBERT representation.
+8. Classify the combined 133 features using the model named in
+   `triage_model_sapbert/model_manifest.json`, selected by development CV.
 
-Structured features comprise six standardized numeric inputs (age, heart rate,
-systolic/diastolic pressure, temperature, SpO2) and one-hot encodings of gender,
-arrival mode, AVPU and ECG status. The resulting classifier input has 410 columns.
-Embeddings are not standardized again. Dictionary normalization remains a text
-cleaning tool and supplies protected clinical terms for stop-word learning.
-
-Missing/unreadable structured inputs are substituted with a warning. Translation
-failures and anatomical mismatches receive no score. The existing low-signal
-confidence cap remains in place. Confidence is a classifier probability, not a
-validated estimate of clinical reliability.
-
-## Desktop and batch workflows
+GUI, `run_inference.py` and `predict_batch.py` use that same bundle. Missing or
+incompatible artifacts fail clearly. `TRIAGE_MODEL_DIR` explicitly selects a
+compatible alternative; it never silently changes the active model.
 
 The six tabs are Triage a Patient, Pipeline Explorer, Stop Words, Batch File,
-Results and Cluster Analysis. They expose text stages, learned-word statistics,
-recorded evaluation results and complaint-cluster diagnostics.
+Results and Cluster Analysis. Results displays the active model's held-out
+four-class matrix and class metrics. Cluster diagnostics use full 768-D vectors.
+The Stop Words tab explains why filtering is inactive for this encoder.
+
+When no usable complaint is entered, the GUI shows **Confidence: 50%**, no triage
+level and an explanation that the value is a placeholder. It does not run the
+classifier. Editing patient details clears a previous result. Failed translation
+and anatomical checks also produce no level. Structured-value substitutions are
+reported, and model probabilities are not calibrated clinical certainty.
+
+## Command-line and batch use
 
 ```bash
-python predict_batch.py sample_100_patients.xlsx
+python run_inference.py "seena mein dard hai" --age 65 --heart-rate 118
+python run_inference.py --interactive
 python predict_batch.py patients.csv results.xlsx
 ```
 
-Batch input columns: `Complaint_Text`, `Age`, `Gender`, `Mode_of_Arrival`,
-`Heart_Rate`, `Systolic_BP`, `Diastolic_BP`, `Temperature`, `SpO2`, `AVPU`,
-`ECG_Status`. CSV and XLSX are supported. Output includes triage, confidence,
-notes, English translation and a per-row gate verdict. Failed rows have blank
-predictions. The CLI and GUI use `triage_model_embedding_english/`.
+Batch columns: `Complaint_Text`, `Age`, `Gender`, `Mode_of_Arrival`, `Heart_Rate`,
+`Systolic_BP`, `Diastolic_BP`, `Temperature`, `SpO2`, `AVPU`, `ECG_Status`.
+CSV/XLSX exports preserve raw text, translation, gate verdict and reasons. Failed
+rows have blank scores. The current bundle's `Predicted_Triage_Level` is 0–3.
 
-An explicit `--model-dir` or `TRIAGE_MODEL_DIR` selects another compatible
-embedding bundle for the batch CLI. A missing or incompatible bundle fails
-clearly instead of silently choosing another classifier.
+## Current study and report
 
-## Research configuration and recorded results
+The current model is frozen SapBERT with paired text input, PCA-64, 50 patient
+features and 19 original-complaint details: 133 inputs to balanced Logistic
+Regression C=100. The encoder receives the supplied clinical concept plus
+`[SEP]` plus the original complaint during the study, with a 128-token limit.
+The GUI uses locally translated English plus the same original complaint.
 
-The active bundle is configuration C, trained on 2,252 synthetic cardiac rows
-in `cardiac_english_2252.csv`. The recorded stratified 80/20 split has 1,801
-training rows and 451 test rows, seed 42.
+All 10,000 supplied rows and labels 0/1/2/3 are unchanged. The original 8,001
+ development / 1,999 test partition and five grouped folds are retained.
+The initial concept recovery matched all complaint/patient fields before
+copying missing concepts. Target names and processing metadata are excluded.
+PCA, imputation and scaling fit within training folds.
 
-| Configuration | Accuracy | Under-triage | Over-triage | Features |
-|---|---:|---:|---:|---:|
-| B: raw English embeddings | 80.71% | 13.30% | 5.99% | 410 |
-| C: preprocessed English embeddings (deployed) | 80.49% | 12.64% | 6.87% | 410 |
+The [advanced comparison](experiments/triage_study/ADVANCED_SEARCH.md) tested
+ordered classifiers, cubic numeric features, neural classifier heads, paired
+complaint input and fixed probability combinations. Across all rounds there
+are 133 configurations: 109 trainable settings (545 grouped-fold fits) and
+24 blends (120 reused-probability evaluations). The new work adds 30 trainable
+settings and 24 blends to the previous comparison. SapBERT is not fine-tuned.
 
-These are existing recorded results, not a new evaluation performed by the
-cleanup. Preprocessing reduced recorded under-triage by 0.66 percentage points
-and reduced accuracy by 0.22 points. They do not demonstrate an accuracy gain
-or clinical effectiveness. The source of truth is the bundle's
-`model_manifest.json` and `triage_metrics.json`.
+Selection uses mean development macro F1 with emergency recall no more than
+one percentage point below the original reference. The paired-text LR achieved
+90.49% development accuracy and 90.83% macro F1, ahead of the best probability
+ensemble. On the previously examined test records:
 
-The English training translations were prepared using gpt-4o-mini; live
-translation uses Ollama. The held-out classifier evaluation therefore does
-not validate the complete live translation workflow. The historical training
-script also fits structured preprocessing before splitting and saves a full-data
-stop-word list beside a classifier evaluated with training-only stop words.
-Report these limitations; do not describe the artifact as independently validated.
+| Metric | Previous model | Selected paired-text model |
+| --- | ---: | ---: |
+| Accuracy | 89.29% | 90.60% |
+| Macro precision | 89.67% | 90.98% |
+| Macro recall | 89.81% | 91.00% |
+| Macro F1 | 89.73% | 90.99% |
+| Emergency recall | 95.10% | 94.36% |
+| Under-triage | 4.65% | 4.20% |
 
-## Training and embedding studies
+All four requested aggregate metrics exceed 90% in these comparisons.
+Individual class scores do not all exceed 90%. Emergency recall decreases
+slightly on the old test records, while aggregate accuracy/F1 improve. These
+are retrospective results, not untouched independent or clinical validation.
+The conditional paired development F1 gain interval versus the prior model is
++0.70 to +1.67 percentage points and excludes selection uncertainty.
 
-Training is an explicit research operation; running the app does not require
-retraining. Preserve the evaluated bundle and use a separate output directory
-for a new experiment:
+Use the [current report directory](reports/triage_four_level_round7/) for the
+single final PDF, all settings, original full-768/PCA-64 baselines, nine pipeline
+representatives, matrices and audits. Source records, individual error queues
+and OOF arrays stay local. The provider has no label-assignment rules available;
+no labels were changed. Live translation accuracy is not measured here.
 
-```bash
-python train_embedding_pipeline.py --out-dir /tmp/triage_embedding_experiment
-```
+The [learning/detail audit](reports/triage_learning_detail_audit/) and
+[label-task audit](reports/label_transition_audit/) remain historical evidence.
+Older three-level scores concern a different target; they are not directly
+comparable to this four-level experiment.
 
-The default dataset/text column is the English subset; normalization is skipped
-for English and learned stop words are removed for C. `--deploy B` selects raw
-embeddings, `--deploy C` preprocessed embeddings (default), and `--deploy auto`
-selects within 0.5 points of minimum under-triage before breaking ties by accuracy.
-For a Roman Urdu experiment, explicitly pass `--data`, `--text-column Complaint_Text`,
-`--no-skip-normalization` and a separate `--out-dir`.
-
-`stopwords.py` learns frequent, weakly label-associated tokens using normalized
-mutual information and Cramer's V while protecting clinical vocabulary.
-`embedding_evaluation.py`, `check_embedding_pairs.py` and `src/cluster_analyzer.py`
-study complaint similarity and nearest-neighbour cluster agreement. These are
-representation diagnostics, not clinical classifier validation or text reconstruction.
-
-## Separate professor baseline
-
-`src/baseline.py` evaluates both `Triage_Level` and `Category` with stratified
-five-fold cross-validation on the separate 185-row professor dataset.
-`StaticEncoder` reads stored vectors and `DynamicEncoder` computes live vectors.
-The baseline uses `intfloat/multilingual-e5-small` with the `passage: ` prefix;
-these vectors cannot be exchanged with MiniLM vectors despite matching dimensions.
-Benchmarks include Logistic Regression, RandomForest and HistGradientBoosting.
-The saved `models_src/` classifiers are RandomForest models.
-
-`run_inference.py` is the separate text-only baseline CLI, not the GUI's fused
-cardiac classifier:
+## Verification and historical tools
 
 ```bash
-python run_inference.py --check
-python run_inference.py "seena mein dard hai"
-python -m src.baseline
-```
-
-## Validation and project files
-
-```bash
-python tests/audit_pipeline.py
-python tests/audit_gui.py
 python -m unittest discover -s tests -p 'test_*.py'
+python experiments/triage_study/verify_four_level_study.py output/results/triage_four_level
 ```
 
-The audits require Ollama; the GUI audit also requires a working display.
-See [DATASET_PROVENANCE.md](DATASET_PROVENANCE.md) for synthetic-data generation,
-[ARCHITECTURE.md](ARCHITECTURE.md) for module responsibilities,
-[FEATURES.md](FEATURES.md) for workflow details and
-[SUBMISSION_SUMMARY.md](SUBMISSION_SUMMARY.md) for the article configuration.
+The verifier recalculates every held-out metric and matrix, checks grouped
+boundaries and CV selection, and estimates group-bootstrap uncertainty. Exporting
+a bundle reproduces its entire held-out prediction vector before writing it.
 
-## Article classifier and PCA experiments
-
-See [experiments/README.md](experiments/README.md) for the separate 768-D
-Sentence-BERT versus PCA-64 comparison with Logistic Regression, Random Forest
-and Histogram Gradient Boosting. Metrics, LaTeX tables and figures are saved
-under `output/results/`. These runs do not replace the deployed MiniLM bundle.
+Older MiniLM training, three-level studies and the separate professor baseline
+remain historical research utilities, requiring their own explicitly supplied
+inputs. Their encoders, labels and scores must not be combined with this study.
+`src/baseline.py` and `src.offline_pipeline.run` are the separate professor
+baseline; the application CLI now uses the current SapBERT bundle instead.
+Historical PDFs and superseded working datasets are removed from current
+report/data locations; earlier versions remain in Git history.
 
 ## Authors
 
@@ -187,3 +174,7 @@ _Department of Biomedical Engineering - May 2026_
 > **Disclaimer:** This is a research / educational decision-support prototype,
 > not a certified medical device. It must not be used as the sole basis for
 > clinical decisions. Always involve a qualified clinician.
+
+The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round7/SapBERT_Final_Report.pdf), including the audit and recommendations.
+
+The [previous-versus-latest comparison](reports/triage_historical_comparison/) explains the changed labels, matrix counts and score differences in a separate companion PDF.

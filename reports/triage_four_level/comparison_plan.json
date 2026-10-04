@@ -1,0 +1,350 @@
+{
+  "purpose": "Fixed four-level comparison with development-only cross-validation",
+  "labels": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "label_names": [
+    "Emergency",
+    "Urgent",
+    "Standard",
+    "Non-urgent"
+  ],
+  "serving_id": "selected_fused_64",
+  "cv_candidates": {
+    "logreg_baseline": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      }
+    },
+    "hgb_baseline": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 300,
+        "learning_rate": 0.1
+      }
+    },
+    "rf_baseline": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 3,
+        "max_features": 0.7,
+        "balance": true
+      }
+    },
+    "logreg_regularized": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      }
+    },
+    "logreg_c10": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      }
+    },
+    "hgb_regularized": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 300,
+        "max_leaf_nodes": 15,
+        "l2_regularization": 1,
+        "learning_rate": 0.1,
+        "balance": true
+      }
+    },
+    "hgb_slow": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 500,
+        "max_leaf_nodes": 15,
+        "l2_regularization": 1,
+        "learning_rate": 0.05
+      }
+    },
+    "hgb_balanced": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 300,
+        "max_leaf_nodes": 31,
+        "l2_regularization": 10,
+        "learning_rate": 0.1,
+        "balance": true
+      }
+    },
+    "rf_fine": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 400,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "balance": false
+      }
+    },
+    "rf_balanced": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 400,
+        "min_samples_leaf": 2,
+        "max_features": 0.5,
+        "balance": true
+      }
+    }
+  },
+  "selection": "Highest five-fold mean macro F1; ties use emergency recall then lower under-triage; holdout unused for selection",
+  "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "embedding_sha256": "3f70bfdb7827a11817ac800e499f650ae7ca0345cf4f9ccb9a7a51f34b5192d7",
+  "encoder": {
+    "name": "sapbert_concept",
+    "text_column": "Clinical_Concept",
+    "model_path": "/home/muawiya/Desktop/ML_Predictor/output/results/.hf_cache/hub/models--cambridgeltl--SapBERT-from-PubMedBERT-fulltext/snapshots/090663c3ae57bf35ffe4d0d468a2a88d03051a4d",
+    "revision": "090663c3ae57bf35ffe4d0d468a2a88d03051a4d",
+    "pooling": "cls",
+    "max_token_length": 64,
+    "normalized": true,
+    "text_sha256": "3df3a196344e2edcfec480c66da35d310874e931b4f74386e92f2486a64a7567",
+    "shape": [
+      10000,
+      768
+    ],
+    "unique_texts": 6703,
+    "seconds": 235.41446631399958,
+    "array_sha256": "3f70bfdb7827a11817ac800e499f650ae7ca0345cf4f9ccb9a7a51f34b5192d7"
+  },
+  "development_rows": 8001,
+  "test_rows": 1999,
+  "configs": [
+    {
+      "classifier": "logreg",
+      "features": {
+        "view": "text",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      }
+    },
+    {
+      "classifier": "hgb",
+      "features": {
+        "view": "text",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 300,
+        "learning_rate": 0.1
+      }
+    },
+    {
+      "classifier": "rf",
+      "features": {
+        "view": "text",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 3,
+        "max_features": 0.7,
+        "balance": true
+      }
+    },
+    {
+      "classifier": "logreg",
+      "features": {
+        "view": "text",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      }
+    },
+    {
+      "classifier": "hgb",
+      "features": {
+        "view": "text",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 300,
+        "learning_rate": 0.1
+      }
+    },
+    {
+      "classifier": "rf",
+      "features": {
+        "view": "text",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 3,
+        "max_features": 0.7,
+        "balance": true
+      }
+    },
+    {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      }
+    },
+    {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 300,
+        "learning_rate": 0.1
+      }
+    },
+    {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 3,
+        "max_features": 0.7,
+        "balance": true
+      }
+    },
+    {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      }
+    },
+    {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 300,
+        "learning_rate": 0.1
+      }
+    },
+    {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 3,
+        "max_features": 0.7,
+        "balance": true
+      }
+    }
+  ]
+}

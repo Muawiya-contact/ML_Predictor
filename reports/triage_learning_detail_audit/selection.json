@@ -1,0 +1,24 @@
+{
+  "classifier": "logreg",
+  "variant": "complaint_details",
+  "config": {
+    "classifier": "logreg",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_concept",
+      "solver": "full",
+      "pca": 128,
+      "polynomial": true
+    },
+    "params": {
+      "C": 100,
+      "balance": true
+    }
+  },
+  "cv_macro_f1": 0.8938323929200342,
+  "incumbent_cv_macro_f1": 0.8657311532795312,
+  "cv_gain": 0.02810123964050304,
+  "minimum_emergency_recall": 0.9238173767846756,
+  "emergency_recall": 0.9362676122399204,
+  "uses_test_scores": false
+}

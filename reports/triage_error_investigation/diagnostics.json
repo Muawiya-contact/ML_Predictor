@@ -1,0 +1,139 @@
+{
+  "candidate": "logreg__complaint_details",
+  "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "oof_sha256": "0a88a310d8cd095d87fa6056e03c37419f984eb1a09fb4763f763c28b1540d70",
+  "development_rows": 8001,
+  "errors": 881,
+  "confusion_matrix": [
+    [
+      1528,
+      104,
+      0,
+      0
+    ],
+    [
+      138,
+      1848,
+      183,
+      3
+    ],
+    [
+      0,
+      171,
+      2080,
+      149
+    ],
+    [
+      0,
+      0,
+      133,
+      1664
+    ]
+  ],
+  "urgent_standard_errors": 354,
+  "adjacent_errors": 878,
+  "high_confidence_errors_90": 220,
+  "multiclass_mcc": 0.85217375643736,
+  "multiclass_log_loss": 0.2647907452136915,
+  "multiclass_brier": 0.15859559187707065,
+  "confidence_ece_10_bins": 0.03307296745405318,
+  "calibration_bins": [
+    {
+      "lower": 0.5,
+      "upper": 0.6,
+      "rows": 378,
+      "accuracy": 0.5555555555555556,
+      "mean_confidence": 0.5490933351723841
+    },
+    {
+      "lower": 0.6000000000000001,
+      "upper": 0.7000000000000001,
+      "rows": 414,
+      "accuracy": 0.5507246376811594,
+      "mean_confidence": 0.6506016049382565
+    },
+    {
+      "lower": 0.7000000000000001,
+      "upper": 0.8,
+      "rows": 475,
+      "accuracy": 0.6652631578947369,
+      "mean_confidence": 0.7517713261472454
+    },
+    {
+      "lower": 0.8,
+      "upper": 0.9,
+      "rows": 676,
+      "accuracy": 0.7810650887573964,
+      "mean_confidence": 0.8546614774108071
+    },
+    {
+      "lower": 0.9,
+      "upper": 1.0,
+      "rows": 6058,
+      "accuracy": 0.9636843842852426,
+      "mean_confidence": 0.9851407213933567
+    }
+  ],
+  "exact_complete_input_groups_with_conflicting_labels": 0,
+  "class_counts": {
+    "0": 1632,
+    "1": 2172,
+    "2": 2400,
+    "3": 1797
+  },
+  "missing_inputs": {
+    "Age": 0,
+    "Heart_Rate": 0,
+    "Systolic_BP": 0,
+    "Diastolic_BP": 0,
+    "Temperature": 0,
+    "SpO2": 0,
+    "Gender": 0,
+    "Mode_of_Arrival": 1,
+    "AVPU": 0,
+    "ECG_Status": 0,
+    "chief_complaint": 0
+  },
+  "labels_modified": false,
+  "test_rows_used": false,
+  "interpretation": "Pooled development OOF diagnostics conditional on prior selection. Confidence is uncalibrated. No clinical label correctness or achievable accuracy ceiling is inferred.",
+  "numeric_profile": {
+    "Age": {
+      "min": 30.0,
+      "median": 59.0,
+      "max": 88.0
+    },
+    "Heart_Rate": {
+      "min": 70.0,
+      "median": 113.0,
+      "max": 170.0
+    },
+    "Systolic_BP": {
+      "min": 110.0,
+      "median": 152.0,
+      "max": 195.0
+    },
+    "Diastolic_BP": {
+      "min": 70.0,
+      "median": 92.0,
+      "max": 110.0
+    },
+    "Temperature": {
+      "min": 36.3,
+      "median": 36.9,
+      "max": 37.4
+    },
+    "SpO2": {
+      "min": 84.0,
+      "median": 92.0,
+      "max": 98.0
+    }
+  },
+  "nonfinite_numeric_inputs": 0,
+  "diastolic_above_systolic_rows": 0,
+  "all_three_families_wrong": 345,
+  "all_three_agree_on_wrong_level": 345,
+  "peer_oof_sha256": "e9925cd17f49754e708f7c1747c0d84c6deefb5f25eec1158db5dc634c37c319",
+  "coefficient_interpretation": "Descriptive mean absolute LR coefficient times development feature standard deviation; correlated features and joint effects prevent a causal interpretation.",
+  "coefficient_model_sha256": "3fff5d3e5e7a6f92cdd4ad86c0e9584e2e1162cd36756d1ba3abcbae7deb0330"
+}

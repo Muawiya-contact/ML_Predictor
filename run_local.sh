@@ -89,13 +89,14 @@ fi
 # --- 4. Trained classifiers -------------------------------------------
 # These ship with the repository, so a miss here means an incomplete
 # copy - a ZIP made without them, usually - not a setup step forgotten.
-if [ ! -f "triage_model_embedding_english/model.pkl" ]; then
-    fail "triage_model_embedding_english/model.pkl is missing."
-    echo "        The trained model ships with the project; this copy is"
-    echo "        incomplete. Re-clone, or unzip the full archive."
+GUI_MODEL_DIR="${TRIAGE_MODEL_DIR:-triage_model_sapbert}"
+if [ ! -f "$GUI_MODEL_DIR/model.pkl" ]; then
+    fail "$GUI_MODEL_DIR/model.pkl is missing."
+    echo "        Restore or export the selected fitted model bundle. See"
+    echo "        docs/SapBERT_GUI.md for the local SapBERT export command."
     exit 1
 fi
-ok "model   triage_model_embedding_english/ present"
+ok "model   $GUI_MODEL_DIR/ present"
 
 # --- 5. tkinter -------------------------------------------------------
 # The single most common failure on a new machine, and on this one after
@@ -118,7 +119,7 @@ fi
 ok "tkinter available"
 
 echo "============================================================"
-echo "Starting the app. First prediction takes about 11 seconds -"
-echo "that is the local translation, not a hang."
+echo "Starting the app. A cold local translation may take several minutes."
+echo "The GUI remains responsive while the local translator works."
 echo
 exec .venv/bin/python triage_gui.py "$@"

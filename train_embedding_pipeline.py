@@ -42,7 +42,7 @@ from triage_pipeline import (
 warnings.filterwarnings("ignore")
 make_console_safe()
 
-DATA_FILE = "cardiac_english_2252.csv"
+# Historical MiniLM trainer; supply its original 1-based label schema explicitly.
 
 
 def _today():
@@ -202,7 +202,7 @@ def encode(model, texts, tag):
 def main():
     parser = argparse.ArgumentParser(
         description="Train the embedding -> fuse -> classify triage pipeline.")
-    parser.add_argument("--data", default=DATA_FILE)
+    parser.add_argument("--data", required=True, help="Historical 1-based CSV; use four_level_study.py for the current workbook")
     parser.add_argument("--text-column", default="English_Translation",
                         help="column holding the complaint text (the "
                              "translation experiment points this at "
@@ -237,6 +237,8 @@ def main():
     df["Complaint_Text"] = df["Complaint_Text"].fillna("").astype(str)
     print(f"[ok] Loaded {len(df)} patients from {data_path}")
 
+    if not set(df["Triage_Level"].dropna()).issubset({1, 2, 3, 4}):
+        raise ValueError("This historical trainer requires levels 1-4. Use four_level_study.py for levels 0-3.")
     y = df["Triage_Level"].values - 1          # dataset 1..4 -> classes 0..3
     raw_texts = df["Complaint_Text"].tolist()
 
