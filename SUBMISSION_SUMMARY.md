@@ -20,10 +20,11 @@ balanced Logistic Regression (C=10).
    patient features (35 numeric linear/quadratic terms and 15 categorical indicators),
    plus 19 explicit bilingual complaint-detail features, giving 197 inputs.
 6. Retain the original 12 comparisons across three classifiers, full/PCA-64
-   embeddings and text-only/fused inputs. Expand development selection to 68
+   embeddings and text-only/fused inputs. Expand development selection to 79
    configurations, including PCA-128/256, regularization, class balancing,
    whitening, structured-only controls, quadratic patient interactions and
-   original/concept detail-feature comparisons.
+   original/concept detail-feature comparisons. The final expansion adds
+   CatBoost, CPU XGBoost and RBF SVM; none displaces the selected Logistic Regression.
 7. Evaluate every candidate across five grouped folds. Select by mean macro F1
    while requiring emergency recall within one percentage point of the original baseline;
    accuracy breaks ties. This is an experimental criterion, not a clinical guarantee.
@@ -39,8 +40,12 @@ balanced Logistic Regression (C=10).
     anatomical checking and the selected classifier. Saved experimental metrics
     use supplied/recovered concepts and do not measure live translation accuracy.
 
-Use [the current report](reports/triage_four_level_round5/) and
+Use [the current report](reports/triage_four_level_round6/) and
 `triage_model_sapbert/triage_metrics.json`. Earlier three-level, MiniLM and initial
 four-level results remain distinct experiments. No clinician review or clinical
 validation is inferred. Literature values use another binary KTAS task and are
 context rather than a direct superiority benchmark.
+
+The expanded comparison did not reach 90% across all four aggregate metrics.
+The retained model has 89.29% retrospective accuracy and 89.73% macro F1.
+Additional classifiers alone did not improve on its development ranking.

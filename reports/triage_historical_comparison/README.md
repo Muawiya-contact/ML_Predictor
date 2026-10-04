@@ -1,7 +1,7 @@
 # Previous versus latest SapBERT comparison
 
 [Read the comparison PDF](SapBERT_Previous_vs_Latest_Comparison.pdf). This is an
-explanatory companion to the [current model report](../triage_four_level_round5/),
+explanatory companion to the [current model report](../triage_four_level_round6/),
 not a replacement model or a new training run.
 
 The 19-page comparison includes all 12 old and current fixed conditions, 24
@@ -29,3 +29,7 @@ Required local evidence directories: `output/results/triage_fixed_full_pca`,
 `output/results/triage_10000_research`, `output/results/triage_four_level`,
 `output/results/triage_four_level_round5`, and the learning/detail audit outputs.
 The script reads saved evidence; it does not retrain or change any labels.
+
+This companion is a historical round-five snapshot (68 settings). The later
+79-setting comparison retains the same deployed model and scores, but adds
+three classifier families; use the current report for their results.

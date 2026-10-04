@@ -1,4 +1,4 @@
-# Current four-level SapBERT comparison
+# Historical round-five four-level SapBERT comparison
 
 Selected model: frozen SapBERT PCA-128 + 50 patient features + 19 original-complaint
 features, balanced Logistic Regression C=10 (197 inputs). All 10,000 source rows,
@@ -17,8 +17,8 @@ validation. The three tuned-family results and all original full-768/PCA-64
 comparisons remain in the report. Saved concepts feed SapBERT; original complaints
 provide detail features. Live translation accuracy was not evaluated.
 
-Use [SapBERT_Final_Report.pdf](SapBERT_Final_Report.pdf) as the single current
-report. Its eleven pages include both audits, every development setting, original
+This round-five PDF is historical. Use the [current comparison](../triage_four_level_round6/)
+for the expanded six-family report. Its eleven pages include both audits, every development setting, original
 baselines, tuned classifiers, matrices, class scores and literature context.
 All pages were rendered and visually inspected. The shared application adapter
 reproduces all 1,999 predictions and probabilities; 13 live embeddings and a

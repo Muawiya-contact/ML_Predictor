@@ -73,3 +73,8 @@ The exporter reproduces every held-out prediction before writing the bundle.
 Direct `predict_one` callers must pass `raw_complaint`; direct dataframe callers
 must preserve `Raw_Complaint`. GUI and translated batch/CLI wrappers supply it
 automatically. Translated English is not substituted for original detail inputs.
+
+The [expanded classifier comparison](../reports/triage_four_level_round6/)
+retains this same verified model. CatBoost, XGBoost and SVM were tested as
+challengers; the GUI does not silently switch to a lower-scoring candidate.
+Their optional experiment packages are unnecessary for the retained LR bundle.

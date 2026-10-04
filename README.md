@@ -99,16 +99,16 @@ are excluded from model inputs. Repeated complaint/concept groups cannot cross
 holdout or CV boundaries. Patient preprocessing and PCA are fitted within folds.
 
 The initial report retains all 12 fixed comparisons: three classifiers across
-text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 68
-configurations across five grouped folds (340 fits), including PCA-128/256 and
+text/fused inputs and full 768-D/PCA-64 embeddings. The improvement rounds compare 79
+configurations across five grouped folds (395 fits), including PCA-128/256 and
 quadratic patient-feature controls. Selection uses mean macro F1 with emergency
 recall no more than one percentage point below the original baseline; accuracy breaks ties.
 The selected model is balanced Logistic Regression (C=10), PCA-128 plus 50
 patient features, including quadratic numeric terms, and 19 original-complaint
 detail features. SapBERT remains frozen.
 
-On the previously examined 1,999-row test set, the latest refinement changes
-accuracy from 88.99% to 89.29% and macro F1 from 89.43% to 89.73%. Macro precision
+Before the expanded-family comparison, the 13-setting refinement changed
+accuracy on the previously examined 1,999 test rows from 88.99% to 89.29% and macro F1 from 89.43% to 89.73%. Macro precision
 is 89.67%, macro recall 89.81%, and emergency recall increases from 93.87% to
 95.10%. Under-triage remains 4.65%. These are retrospective comparisons, not
 untouched confirmation. Five-fold development macro F1 changes from 89.38% to
@@ -123,7 +123,15 @@ duration disagreements for review. No labels are automatically changed.
 More unique, consistently labelled data may help; these curves do not predict
 an accuracy at 20,000 rows.
 
-The [current report directory](reports/triage_four_level_round5/) contains the
+The additional [classifier comparison](experiments/triage_study/EXPANDED_CLASSIFIERS.md)
+tested 11 CatBoost, CPU XGBoost and RBF SVM settings (55 new fits). Their best
+mean development macro F1 scores were 87.23%, 86.39% and 85.49%, respectively.
+The selected Logistic Regression remains at 89.65%; no new model replaces it.
+The target of 90% accuracy, macro precision, macro recall and macro F1 was not
+met across all four metrics. The report also includes a descriptive embedding
+geometry audit using 1,200 development groups.
+
+The [current report directory](reports/triage_four_level_round6/) contains the
 single final PDF, figures and all candidate results. The [initial comparison](reports/triage_four_level/)
 remains available. Follow [the improvement workflow](experiments/triage_study/IMPROVEMENT.md)
 and [the current-data investigation](experiments/triage_study/INVESTIGATION.md)
@@ -172,6 +180,6 @@ _Department of Biomedical Engineering - May 2026_
 > not a certified medical device. It must not be used as the sole basis for
 > clinical decisions. Always involve a qualified clinician.
 
-The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round5/SapBERT_Final_Report.pdf), including the audit and recommendations.
+The single current PDF is [SapBERT_Final_Report.pdf](reports/triage_four_level_round6/SapBERT_Final_Report.pdf), including the audit and recommendations.
 
 The [previous-versus-latest comparison](reports/triage_historical_comparison/) explains the changed labels, matrix counts and score differences in a separate companion PDF.
