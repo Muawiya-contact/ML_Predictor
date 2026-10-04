@@ -11,17 +11,19 @@ def verify(source, original, bundle):
     frame = pd.read_csv(original / 'dataset_with_splits.csv')
     test = frame[frame.partition.eq('test')].copy()
     reference = pd.read_csv(source / (selection['candidate'] + '_retrospective_predictions.csv'))
-    raw = np.load(original / 'emb_sapbert_concept.npy', mmap_mode='r')
+    paired = selection['config']['features'].get('encoder') == 'sapbert_pair'
+    raw = np.load(original / ('emb_sapbert_pair.npy' if paired else 'emb_sapbert_concept.npy'), mmap_mode='r')
+    encoded_texts = (frame.Clinical_Concept + ' [SEP] ' + frame.chief_complaint) if paired else frame.Clinical_Concept
     art = load_artifacts(str(bundle))
     encoder = get_text_encoder(art)
-    indices = frame.groupby('Labels').head(3).index.tolist() + [frame.Clinical_Concept.str.len().idxmax()]
-    live = encoder.encode(frame.loc[indices].Clinical_Concept.tolist())
+    indices = frame.groupby('Labels').head(3).index.tolist() + [encoded_texts.str.len().idxmax()]
+    live = encoder.encode(encoded_texts.loc[indices].tolist())
     np.testing.assert_allclose(live, raw[indices], atol=2e-06, rtol=2e-05)
 
     class Cached:
 
         def encode(self, texts, **kwargs):
-            assert texts == test.Clinical_Concept.tolist()
+            assert texts == encoded_texts.loc[test.index].tolist()
             return raw[test.row_id]
     art['encoder'] = Cached()
     test['Complaint_Text'] = test.Clinical_Concept

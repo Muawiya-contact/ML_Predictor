@@ -8,6 +8,7 @@ for key in ('OMP_NUM_THREADS', 'OPENBLAS_NUM_THREADS', 'MKL_NUM_THREADS'):
     os.environ.setdefault(key, '2')
 import argparse
 import json
+import shutil
 from pathlib import Path
 import pandas as pd
 import research_engine as engine
@@ -17,7 +18,7 @@ from four_level_study import scores
 from sklearn.metrics import classification_report, confusion_matrix
 
 
-def run(source, original):
+def run(source, original, reuse=None):
     protocol = json.loads((source / 'protocol.json').read_text())
     assert file_sha256(original / 'dataset_with_splits.csv') == protocol['source_data_sha256']
     assert file_sha256(original / 'emb_sapbert_concept.npy') == protocol['embedding_sha256']
@@ -37,8 +38,22 @@ def run(source, original):
     assert not set(dev.group) & set(test.group)
     engine.HERE = original.resolve()
     results = []
+    reusable = {}
+    if reuse is not None:
+        check = json.loads((reuse / 'verification.json').read_text())
+        old_protocol = json.loads((reuse / 'protocol.json').read_text())
+        if check['status'] != 'passed' or any(old_protocol[k] != protocol[k] for k in ('source_data_sha256','embedding_sha256')):
+            raise ValueError('Reusable comparison inputs are not verified and identical')
+        reusable = {r['candidate']: r for r in json.loads((reuse / 'family_results.json').read_text())}
     for choice in choices:
         cfg = choice['config']
+        prior = reusable.get(choice['candidate'])
+        if prior is not None and prior['config'] == cfg:
+            results.append(dict(prior, **choice))
+            filename = choice['candidate'] + '_family_predictions.csv'
+            shutil.copy2(reuse / filename, source / filename)
+            print('REUSED VERIFIED', choice['candidate'], flush=True)
+            continue
         model, features, _, probabilities = fit_candidate(cfg, dev, test)
         pred = probabilities.argmax(1)
         result = dict(**choice, metrics=scores(test.Labels.to_numpy(), pred),
@@ -55,5 +70,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source', type=Path, required=True)
     parser.add_argument('--original', type=Path, required=True)
+    parser.add_argument('--reuse', type=Path)
     args = parser.parse_args()
-    run(args.source, args.original)
+    run(args.source, args.original, args.reuse)

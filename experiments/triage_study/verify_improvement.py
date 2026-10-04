@@ -10,6 +10,9 @@ from cache_integrity import file_sha256
 
 def verify(source, original):
     protocol = json.loads((source / 'protocol.json').read_text())
+    if protocol.get('additional_embedding_sha256'):
+        if file_sha256(original / 'emb_sapbert_pair.npy') != protocol['additional_embedding_sha256']:
+            raise ValueError('Paired embedding identity changed')
     selection = json.loads((source / 'selection.json').read_text())
     assert file_sha256(original / 'dataset_with_splits.csv') == protocol['source_data_sha256']
     assert file_sha256(original / 'emb_sapbert_concept.npy') == protocol['embedding_sha256']
