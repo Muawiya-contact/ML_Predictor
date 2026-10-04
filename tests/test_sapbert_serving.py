@@ -26,6 +26,24 @@ class ServingTests(unittest.TestCase):
                     load_bundle('unused', manifest)
         load.assert_not_called()
 
+    @patch('triage_pipeline.build_text_features', side_effect=lambda a, t: np.zeros((len(t),64)))
+    def test_paired_input_preserves_original_complaint(self, encode):
+        from src.sapbert_serving import encoder_input
+        art=self.artifacts();art['manifest']={'text_input':'concept_and_complaint'}
+        frame=pd.DataFrame({'Complaint_Text':['Chest pain'],'Raw_Complaint':['seena mein dard kal raat se']})
+        predict_frame(art,frame)
+        expected='Chest pain [SEP] seena mein dard kal raat se'
+        self.assertEqual(encode.call_args.args[1],[expected])
+        self.assertEqual(encoder_input('Chest pain',frame.Raw_Complaint[0],art['manifest']),expected)
+        with self.assertRaisesRegex(ValueError,'Raw_Complaint'):
+            predict_frame(art,frame.drop(columns='Raw_Complaint'))
+
+    def test_batch_stage_export_matches_paired_encoder_input(self):
+        from triage_gui import TriageGUI
+        gui=SimpleNamespace(active_artifacts=lambda:{'manifest':{'text_input':'concept_and_complaint','text_representation':'embeddings_raw'}})
+        result=TriageGUI._stage_columns(gui,['seena mein dard'],['Chest pain'])
+        self.assertEqual(result['Text_Encoded'],['Chest pain [SEP] seena mein dard'])
+
     def artifacts(self):
         class Structured:
             named_transformers_ = {'cat': SimpleNamespace(named_steps={

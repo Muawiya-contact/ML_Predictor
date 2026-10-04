@@ -1327,8 +1327,8 @@ class TriageGUI(tk.Tk):
         self.stages.insert("end", "   passed - every body part named in the\n"
                                   "   complaint survives into the English\n")
         self.stages.insert("end", "4. " + self.model_info["method"] + "\n", "h")
-        self.stages.insert("end", "   English encoded directly - the learned\n"
-                                  "   stop-word list does not apply to this bundle\n")
+        paired = self.active_manifest().get('text_input') == 'concept_and_complaint'
+        self.stages.insert("end", "   " + ("English and the original complaint are encoded together." if paired else "English is encoded directly.") + "\n   No stop-word removal is applied.\n")
         detail_settings = self.active_manifest().get('text_details')
         if detail_settings:
             source_name = 'original complaint' if detail_settings['source'] == 'complaint_details' else 'English text'
@@ -1527,8 +1527,10 @@ class TriageGUI(tk.Tk):
 
         # 4. encoding
         if self.active_manifest().get("backend") == "sapbert_pca":
-            panel("4  SapBERT + PCA", en,
-                  "English text -> normalized SapBERT CLS (768 dimensions) -> "
+            from src.sapbert_serving import encoder_input
+            paired = self.active_manifest().get('text_input') == 'concept_and_complaint'
+            panel("4  SapBERT + PCA", encoder_input(en, raw, self.active_manifest()),
+                  ("English + original complaint -> " if paired else "English text -> ") + "normalized SapBERT CLS (768 dimensions) -> "
                   f"fitted PCA ({self.active_manifest()['projected_embedding_dim']} dimensions). No stop-word removal. Patient "
                   "features are added before the selected classifier. " +
                   (f"{len(self.active_manifest()['text_details']['feature_names'])} explicit detail features are extracted from the original complaint. " if self.active_manifest().get('text_details') else "") +
@@ -1974,7 +1976,8 @@ class TriageGUI(tk.Tk):
             # anyone to reason about it.
             source = en if en else raw
             if man.get("text_representation") == "embeddings_raw":
-                clean = str(source or "")
+                from src.sapbert_serving import encoder_input
+                clean = encoder_input(str(source or ""), str(raw or ""), man)
             elif skip_norm:
                 clean = remove_stopwords(str(source or ""), own_stops)
             else:
@@ -2500,7 +2503,7 @@ class TriageGUI(tk.Tk):
               step["translated"] or "(not translated - embedded as typed)",
               "Translated locally by Ollama; the active bundle controls encoding.")
         stage("3", "Cleaned for encoding", step["normalized"],
-              "The exact text handed to the active encoder; SapBERT preserves the complete English text.")
+              "The exact input to the active encoder, including original complaint text when enabled by the model; the saved token limit applies.")
 
         preview = ", ".join(f"{float(x):+.3f}" for x in vec[:8])
         stage("4", f"The vector  -  {len(vec)} numbers",

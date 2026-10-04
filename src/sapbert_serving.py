@@ -1,7 +1,7 @@
 """Live SapBERT inference using exported, fitted research preprocessing.
 
 No row-index lookup or refitting occurs at prediction time. The encoder uses
-exactly the study's CLS pooling, 64-token truncation and L2 normalization.
+the manifest's CLS pooling, token limit and L2 normalization.
 """
 import os
 import hashlib
@@ -58,6 +58,15 @@ class SapBERTEncoder:
         return np.vstack(pieces)
 
 
+def encoder_input(english, original, manifest):
+    """Construct exactly the text seen during this bundle's evaluation."""
+    if manifest.get('text_input') == 'concept_and_complaint':
+        if original is None:
+            raise ValueError('Original complaint is required for paired SapBERT input')
+        return str(english) + ' [SEP] ' + str(original)
+    return str(english)
+
+
 def prepare(frame):
     """Mirror the study's numeric conversion and ordinal AVPU mapping."""
     frame = frame.copy()
@@ -71,6 +80,8 @@ def prepare(frame):
 
 def load_bundle(model_dir, manifest):
     import sklearn
+    if manifest.get('text_input', 'concept_only') not in ('concept_only', 'concept_and_complaint'):
+        raise ValueError('Unsupported SapBERT text input contract')
     if manifest.get('sklearn_version') != sklearn.__version__:
         raise ValueError('SapBERT bundle requires scikit-learn ' + str(manifest.get('sklearn_version')))
     runtime = manifest.get('classifier_runtime')
@@ -146,7 +157,12 @@ def predict_frame(art, frame):
     texts = frame.Complaint_Text.fillna('').astype(str).tolist()
     if len(frame):
         structured = art['structured'].transform(prepared)
-        blocks = [structured, build_text_features(art, texts)]
+        encoded_texts = texts
+        if art.get('manifest', {}).get('text_input') == 'concept_and_complaint':
+            if 'Raw_Complaint' not in frame or frame.Raw_Complaint.isna().any():
+                raise ValueError('Raw_Complaint is required for paired SapBERT input')
+            encoded_texts = [encoder_input(english, raw, art['manifest']) for english, raw in zip(texts, frame.Raw_Complaint.astype(str))]
+        blocks = [structured, build_text_features(art, encoded_texts)]
         details = art.get('manifest', {}).get('text_details')
         if details:
             from src.complaint_details import detail_matrix
@@ -191,8 +207,9 @@ def embed_step(art, text, translate=True):
         passed, failures = verify_anatomical_integrity(normalized, english)
         if not passed:
             raise ValueError('Anatomical check failed: ' + '; '.join(failures))
-    vector = get_text_encoder(art).encode([english])[0]
-    return {'raw': text, 'translated': english, 'normalized': english,
+    encoded_text = encoder_input(english, text, art['manifest'])
+    vector = get_text_encoder(art).encode([encoded_text])[0]
+    return {'raw': text, 'translated': english, 'normalized': encoded_text,
             'embedding': vector, 'encoder': art['manifest']['embedding_model'],
             'l2_norm': float(np.linalg.norm(vector)), 'translated_ok': bool(translate),
             'error': None}
