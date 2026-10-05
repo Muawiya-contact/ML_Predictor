@@ -1,308 +1,57 @@
-# Features — What, How, and Why
+# Current application features
 
-A plain-English guide to everything this project does. No maths background
-needed. Each feature has three short parts:
+The desktop application contains six tabs and reads the current four-level
+SapBERT bundle. Its title/provenance panel identifies the model and evaluation
+scope. The class mapping is 0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent.
 
-1. **What it does** — the plain description
-2. **How it works** — the simple version
-3. **Why we added it** — the problem it solves
+## Triage a Patient
 
-> **The one-line summary.** A patient walks into an emergency department in
-> Pakistan and describes their problem in Roman Urdu ("seena mein dard" —
-> chest pain). This program reads that sentence, combines it with their vital
-> signs, and says how urgently they need to be seen. It runs on an ordinary
-> laptop with no internet.
+Enter a Roman Urdu or English complaint and patient measurements: age, heart
+rate, systolic/diastolic blood pressure, temperature, oxygen saturation, gender,
+arrival mode, AVPU and ECG status. Local Ollama translates the complaint and a
+deterministic anatomical gate checks it. The selected fused PCA-64 classifier
+returns a level and four probability bars. The text panel explains each stage.
 
----
+Prediction runs asynchronously. Changes to any patient input clear a previous
+result and invalidate outstanding work for old inputs. Missing/placeholder text
+shows 50% without a level; the explanation identifies this as a display
+placeholder rather than a prediction. Translation/gate failures are not scored.
+Optional local speech reads the translated complaint.
 
-## Table of Contents
+## Pipeline Explorer
 
-1. [Triage levels — what the answer means](#1-triage-levels--what-the-answer-means)
-2. [Batch prediction from a file](#2-batch-prediction-from-a-file)
-3. [Dictionary + fuzzy spelling matching](#3-dictionary--fuzzy-spelling-matching)
-4. [Automatic stop-word removal (Contribution 1)](#4-automatic-stop-word-removal-contribution-1)
-5. [Embeddings — letting AI read the sentence](#5-embeddings--letting-ai-read-the-sentence)
-6. [Embedding classifier](#6-embedding-classifier)
-7. [Embedding-evaluation study (Contribution 2)](#7-embedding-evaluation-study-contribution-2)
-8. [The desktop app (GUI)](#8-the-desktop-app-gui)
-9. [Two safety ideas used everywhere](#9-two-safety-ideas-used-everywhere)
+Inspect normalized input, local English translation, gate outcome and the
+active encoder. SapBERT creates 768-D normalized CLS vectors; the classifier
+uses fitted PCA-64 plus 50 patient features (including quadratic numeric terms)
+and 19 explicit original-complaint details, for 133 classifier inputs. Similarity views use full vectors.
 
----
+## Stop Words
 
-## 1. Triage levels — what the answer means
+Displays the active bundle's filtering information. The current SapBERT model
+uses unfiltered English, so its learned stop-word list is empty. Historical
+stop-word research does not alter the current classifier's inputs.
 
-The program sorts patients into four levels.
+## Batch File
 
-| Level | Name | Meaning |
-|---|---|---|
-| 1 | EMERGENCY | Needs attention right now. Life-threatening. |
-| 2 | URGENT | Should be seen within 15 minutes. |
-| 3 | STANDARD | Should be seen within 60 minutes. |
-| 4 | NON-URGENT | Can wait, or be sent elsewhere. |
+CSV/XLSX inputs are translated and gated per row. Exports include original text,
+translation, stage details, model identity, predicted level, probabilities and
+input-quality notes. Rejected rows have no level or confidence score.
 
-Two kinds of mistake matter, and they are **not** equally bad:
+## Results
 
-- **Under-triage** — the program says a patient is *less* urgent than they
-  really are. A very sick person gets sent to the back of the queue. **This is
-  the dangerous mistake.**
-- **Over-triage** — the program says a patient is *more* urgent than they
-  really are. Nobody is harmed, but staff time is wasted.
+Reads the active bundle's held-out confusion matrix and derives per-class
+precision, recall, F1 and support. Saved accuracy is for supplied/recovered
+clinical concepts, not an end-to-end test of live Ollama translation.
 
-Everything in this project treats under-triage as the more serious error.
+## Cluster Analysis
 
----
+Uses the same active SapBERT encoder to inspect complaint similarity and cluster
+geometry in the full 768-dimensional space. These are representation diagnostics,
+not classifier accuracy or clinical validation.
 
-## 2. Batch prediction from a file
+See [the GUI guide](docs/SapBERT_GUI.md) and
+[the current comparison report](reports/triage_four_level_round7/).
 
-**What it does.** Triages many patients at once — 100, 500, or more — from a
-single Excel or CSV file, instead of typing them in one at a time.
-
-**How it works.** You put one patient per row in a spreadsheet. The only column
-that must be filled in is `Complaint_Text`. The program reads every row, runs
-each patient through the same steps, and writes a new file with extra columns
-added: the predicted level, the label, how confident it is, and the probability
-of each of the four levels. If a number is missing it quietly fills in the
-average from the training data, and if a category value was never seen before
-it falls back to a safe known value. Either way you still get an answer, and
-the substitution is written into that row's `Notes` column so you can check it.
-
-**Why we added it.** A real emergency department does not have time to type
-patients in one by one. It also means the whole day's patients can be reviewed
-afterwards in Excel. Filling in missing values instead of crashing matters
-because real hospital data is always messy — one blank cell should not stop the
-other 99 patients from being triaged.
-
-**Try it:** `python predict_batch.py sample_100_patients.xlsx`, or use the
-**Batch File** tab in the app.
-
----
-
-## 3. Dictionary + fuzzy spelling matching
-
-**What it does.** Understands the same word even when it is spelled many
-different ways.
-
-**How it works.** Roman Urdu has no official spelling. *Fever* can be written
-`bukhar`, `bukhaar`, `bukhr`, `bkhar`, or `garmi`. The program fixes this in
-three passes:
-
-1. **Cleaning** — makes everything lowercase and removes punctuation.
-2. **Fuzzy matching** — compares each word against a list of known medical
-   words. If a word is at least 80% similar to a known one, it is swapped for
-   it. So `bukhr` becomes `bukhar`.
-3. **Diacritization** — every known spelling of a word is collapsed onto one
-   single canonical form. `dard`, `dardh`, `durd`, and `drd` all become `dárd`.
-
-After this, five different spellings of "pain" have become one word that the
-translator can read consistently.
-
-**Why we added it.** Without it, the model treats `dard` and `drd` as two
-completely unrelated words, so it learns almost nothing from either. This step
-is what makes Roman Urdu usable at all. It is kept even in the newest
-embedding-based version, because the AI model was trained mostly on English and
-proper Urdu script, so it does not handle Roman Urdu misspellings on its own.
-
-**See it happen:** the **Pipeline Explorer** tab shows a sentence moving through
-every one of these stages.
-
----
-
-## 4. Automatic stop-word removal (Contribution 1)
-
-**What it does.** Finds and removes the filler words that carry no medical
-meaning — and works out *which* words those are by itself, from the data.
-
-**How it works.** A word is removed only if **all three** of these are true:
-
-1. **It is common** — it turns up in a lot of complaints.
-2. **Its mutual information with the triage level is near zero** — knowing the
-   word is present barely narrows down how urgent the patient is.
-3. **A chi-square test cannot tell it apart from independent** — there is no
-   statistical evidence the word relates to the triage level at all.
-
-Points 2 and 3 measure similar things but do not always agree, and **both must
-pass**. That is not a formality: it is exactly what saves `hai` (see below).
-
-This means **"stop words removed" does not mean "all filler removed"**. On this
-dataset the learned list is ten words — `baad, bhi, jaisa, ki, lekin, nahi,
-saath, se, tak, tez` — and plenty of ordinary filler survives, on purpose.
-
-Every threshold and every number behind every decision is saved in
-`learned_stopwords.json`, so anyone can check the working by hand.
-
-**Why we added it.** There is no published stop-word list for Roman Urdu, and
-writing one by hand is guesswork — someone's opinion, not evidence. Learning it
-from the data makes it reproducible and defensible in a research paper.
-
-**Two results worth knowing:**
-
-- The obvious filler words (`hai`, `mein`, `aur`) were **not** removed. On this
-  dataset they genuinely do carry a signal, because how people phrase things
-  turns out to relate to how sick they are. An honest method keeps them. A
-  hand-written list would have thrown them away.
-
-  Worth knowing *which* test saved them, because it differs. `aur` fails both
-  tests — it plainly tracks urgency. `hai` is subtler: its mutual information
-  is 0.0062, *below* the 0.01 cut-off, so by that measure it looks like filler.
-  What keeps it is the chi-square test, p = 0.0007 — far too small to call it
-  independent of the triage level. The **Stop Words** tab names the deciding
-  test on every row rather than lumping all of them together as "carries
-  signal", which would contradict the mutual-information column sitting right
-  next to it.
-- The maths on its own wanted to delete real symptom words like `pain`,
-  `jalan` (burning) and `khoon` (blood), because they appear at every triage
-  level and so look "uninformative". Deleting a symptom from a triage system is
-  the one mistake worth engineering against, so a **clinical safety guard**
-  protects the medical vocabulary. Every word it rescues is listed in the file,
-  so the guard is visible rather than hidden.
-
-**See it:** the **Stop Words** tab shows the full table and why each word was
-kept or dropped.
-
----
-
-## 5. Embeddings — letting AI read the sentence
-
-**What it does.** Turns a whole complaint into a list of numbers that captures
-its *meaning*, so that sentences meaning the same thing end up close together.
-
-**How it works.** A small offline AI model reads the sentence and outputs 384
-numbers. Think of it as giving every sentence a position on a map. Sentences
-about chest pain should land near other chest-pain sentences, and far from
-sentences about a broken ankle. Nothing is looked up in a dictionary — the model
-works it out from the sentence itself.
-
-The model is downloaded once and then runs entirely on your laptop's CPU, with
-no internet and no graphics card.
-
-**Why we added it.** A hand-written dictionary can only ever recognise the
-spellings someone remembered to add. A patient who writes something new is
-invisible to it. Embeddings are meant to handle words the dictionary never saw.
-
-**Honest note.** These AI models are trained mostly on English and proper Urdu
-script (اردو). *Roman* Urdu is under-represented, so this works less well here
-than it would in English. That is exactly what Feature 7 measures, rather than
-assuming.
-
-**See it:** the **Pipeline Explorer** tab turns your own
-sentence into numbers in front of you.
-
----
-
-## 6. Embedding classifier
-
-The deployed English bundle uses configuration C: 384-dimensional SBERT
-(Sentence-BERT, multilingual MiniLM-L12-v2) embeddings plus 26 structured
-features, with Logistic Regression. The training
-script compares raw (B) and preprocessed (C) text on the same split; the default
-deployment is C. The bundle's manifest and metrics describe the active model.
-
-Both the GUI and batch CLI use `triage_model_embedding_english/`. Translation
-and anatomical checks precede scoring. Failure produces a reason and no score.
-See README.md for recorded results, experiment details and limitations.
-
-## 7. Embedding-evaluation study (Contribution 2)
-
-**What it does.** Measures how good the embedding model actually is at
-understanding Roman Urdu complaints. It does not change the triage prediction at
-all — it is a measurement.
-
-**How it works.** Three checks:
-
-1. **Do similar complaints land close together?** Ten groups of complaints were
-   sorted by meaning by hand (chest pain, fever, burns, and so on). Inside each
-   group, every complaint is compared with every other complaint, and we count
-   how many pairs score above 0.5 similarity.
-
-2. **Do different complaints stay apart?** High similarity inside a group proves
-   nothing on its own — a broken model that called *everything* similar would
-   score perfectly. So the average similarity *between* different groups is also
-   measured. The gap between the two is the real evidence.
-
-3. **The round-trip test.** For each complaint, find its single closest
-   neighbour out of all the others, then check whether that neighbour actually
-   means the same thing. The percentage that get it right is the
-   **embedding generator efficiency** — the headline number for the paper.
-
-**Why the round-trip test is done this way.** The original idea was "turn the
-text into numbers, then turn the numbers back into text and check it matches".
-That is not possible: this kind of embedding is one-way and lossy — the numbers
-simply do not contain enough to rebuild the sentence. The nearest-neighbour
-version measures the same underlying thing (does the vector faithfully represent
-the meaning?) and can actually be run.
-
-**Why we added it.** A reviewer said the project's contribution was too thin.
-This turns "we used AI embeddings" into a measured claim with numbers behind it.
-It also honestly exposes where the model is weak on Roman Urdu, which points at
-the next step (translating to Urdu script, or fine-tuning on our own data).
-
-**See it:** the **Results** tab both read the live
-numbers from `embedding_evaluation_results.csv`.
-
----
-
-## 8. The desktop app (GUI)
-
-**What it does.** Puts everything behind buttons, and — more importantly —
-*shows the working*, not just the answer.
-
-**How it works.** Six tabs:
-
-| Tab | What it gives you |
-|---|---|
-| **Triage a Patient** | Type one patient, get the level and confidence, plus what the text pipeline did to their complaint and which stage the live model was fed |
-| **Pipeline Explorer** | Type any sentence and watch every cleaning stage happen. Each stage is tagged *changed this text* or *ran — nothing to change here*, so a stage that had nothing to correct is never mistaken for a stage that did not run |
-| **Stop Words** | Every tested token as a table, with the specific criterion that decided it — removed, kept because chi-square says it tracks triage, kept because its mutual information is too high, or rescued by the clinical safety guard |
-| **Batch File** | Triage a whole spreadsheet, with a results table and level counts |
-| **Results** | The four-method comparison and the per-cluster embedding scores as charts, each row labelled with the pipeline that produced it |
-| **Cluster Analysis** | Pairwise similarity over a 10-complaint cluster, each sentence translated through Ollama before embedding so it measures the path that actually ships |
-
-> The model-score panel, the "45 pairs" explainer and the embedding demo were
-> removed in the Ollama migration. All three scored bundles the operator can no
-> longer reach, and accuracy figures shown beside a live triage level read as
-> describing it.
-
-**Which model is live is stated, never implied.** A green banner on the Triage,
-Batch and Results tabs names the deployed method, the text features
-it uses and the directory it came from. Score cards are marked **LIVE** or
-**not deployed**, and each carries a coloured "Numbers produced by:" line, so a
-baseline result can never be read as a deployed classifier result.
-
-It is built with `tkinter`, which ships with Python on Windows and macOS, so it
-needs **no extra installation** and stays fully offline. Some Linux
-distributions package it separately — `sudo dnf install python3-tkinter` on
-Fedora, `sudo apt install python3-tk` on Debian/Ubuntu.
-
-**Why we added it.** Two reasons. First, a doctor or a teammate should not need
-to use a terminal. Second, and more useful for the research: the tabs make the
-method *visible*. It is far easier to trust — or to challenge — a step you can
-watch happen to your own sentence than a paragraph describing it.
-
-Every number in the app is read from the result files on disk. If a file has not
-been generated yet, the app says which command to run. **It never shows an
-invented figure.**
-
-**Run it:** `python triage_gui.py`
-
----
-
-## 9. Two safety ideas used everywhere
-
-These come up in several features, so they are worth stating once.
-
-**Under-triage outranks accuracy.** When two options disagree — one more
-accurate, one safer — the safer one wins. A model that is half a percent more
-accurate but sends more critically ill people to the back of the queue is not
-the better model for an emergency department.
-
-**Never invent a number.** Every figure shown in the app or written in a results
-file comes from an actual run on actual data. Where something has not been
-measured yet, the program says so instead of filling the gap. Where a result is
-disappointing — and some of the Roman Urdu embedding results are — it is
-reported as it is, not tuned until it looks better.
-
----
-
-> **Reminder:** this is a research and educational prototype, not a certified
-> medical device. It must never be the only basis for a clinical decision.
-> Always involve a qualified clinician.
+The current encoder input combines checked English and the original complaint
+with [SEP], using a 128-token limit. Single prediction, batch stage exports and
+cluster views use the shared text-construction function.

@@ -21,10 +21,15 @@ class EmbeddingBundleTests(unittest.TestCase):
     def test_default_bundle_matches_classifier_dimensions(self):
         model_dir, _ = resolve_model_dir()
         art = load_artifacts(model_dir)
-        self.assertEqual(Path(model_dir).name, 'triage_model_embedding_english')
+        self.assertEqual(Path(model_dir).name, 'triage_model_sapbert')
         self.assertEqual(art['blocks'], ('embedding',))
-        self.assertEqual(art['model'].n_features_in_, 410)
-        self.assertEqual([b['dim'] for b in art['manifest']['feature_blocks']], [26, 384])
+        projected = art['manifest']['projected_embedding_dim']
+        structured = len(art['structured'].get_feature_names_out())
+        self.assertIn(structured, (22, 50))
+        details = len(art['manifest'].get('text_details', {}).get('feature_names', []))
+        self.assertEqual(art['model'].n_features_in_, structured + projected + details)
+        self.assertEqual([b['dim'] for b in art['manifest']['feature_blocks']], [structured, projected] + ([details] if details else []))
+        self.assertEqual(art['pca'].n_components_, projected)
 
     def test_missing_bundle_fails_without_substitution(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -43,11 +48,13 @@ class EmbeddingBundleTests(unittest.TestCase):
         art = load_artifacts()
         frame = pd.DataFrame({
             'Complaint_Text': ['seena mein dard', 'pait mein dard', 'n/a'],
+            'Raw_Complaint': ['stale exported value'] * 3,
             'Predicted_Triage_Level': [1, 1, 1],
             'Confidence': [0.99, 0.99, 0.99],
         }, index=[7, 7, 9])
         calls = []
         def score(_art, rows):
+            self.assertEqual(rows.Raw_Complaint.tolist(), ['seena mein dard'])
             calls.extend(rows['Complaint_Text'].tolist())
             result = rows.copy()
             result['Predicted_Triage_Level'] = 2
@@ -81,8 +88,15 @@ class EmbeddingBundleTests(unittest.TestCase):
             def encode(self, texts, **kwargs):
                 vectors = np.array([list(hashlib.sha256(t.encode()).digest()[:4]) for t in texts], dtype=float)
                 return vectors / np.linalg.norm(vectors, axis=1, keepdims=True)
-        source = Path(__file__).resolve().parents[1] / 'cardiac_english_2252.csv'
-        sample = pd.read_csv(source).groupby('Triage_Level').head(10)
+        # Small generated fixture keeps the historical trainer test independent
+        # of superseded research datasets.
+        sample = pd.DataFrame([{
+            'Age': 30 + i, 'Heart_Rate': 70 + i, 'Systolic_BP': 120,
+            'Diastolic_BP': 80, 'Temperature': 37., 'SpO2': 98,
+            'Gender': 'Male' if i % 2 else 'Female', 'Mode_of_Arrival': 'Walk-in',
+            'AVPU': 'A', 'ECG_Status': 'Normal', 'Triage_Level': level,
+            'English_Translation': f'chest pain case {i} group {level}'
+        } for level in [1,2,3,4] for i in range(12)])
         with tempfile.TemporaryDirectory() as directory:
             data = Path(directory, 'sample.csv')
             output = Path(directory, 'bundle')

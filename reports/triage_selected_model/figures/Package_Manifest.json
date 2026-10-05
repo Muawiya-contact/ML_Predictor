@@ -1,0 +1,27 @@
+{
+  "model": "lr_pair64_c100",
+  "source_results_sha256": "e7946d88ae130f8338376ab86176f1f8965583392e72686919f115c9fb9c21f0",
+  "files_sha256": {
+    "Figure_05_SapBERT_Triage_Embeddings_Four_Samples.png": "b1a08c5f58e2589bc6e42bbf47a2b9966f2e13733a6c5cf01a645e1f5a67b1d1",
+    "Figure_05_SapBERT_Triage_Embeddings_Four_Samples.pdf": "3f9b6e2463c13a67833b59473ea82e3b49aae6a60b9ef9c31df351028e3a250f",
+    "Figure_05_SapBERT_Triage_Embedding_Seed_42.png": "1ab8d723abb074d0518f76ebb64da3f8ffd89645810ce51199163032594452fb",
+    "Figure_05_SapBERT_Triage_Embedding_Seed_99.png": "f8fbcade4f871ec09741489ac70eba6c5a8d10d617998902f933e6ff6a9b8adc",
+    "Figure_05_SapBERT_Triage_Embedding_Seed_404.png": "27b5cdb88c80380ef51b9d7dfe5f803de33ed7d508c109d01759f7a505d7688c",
+    "Figure_05_SapBERT_Triage_Embedding_Seed_777.png": "53a355694a7e0c9b6a1f9fdd5a80025f2d03bdf79c8e2801e598e07922a9d331",
+    "Embedding_Geometry_20_Samples.csv": "3e196516ad3034a865ca280fc269a41fad56b6cd825c31d442fe3249990f7a39",
+    "Embedding_Geometry_Summary.json": "5997b86e1173e1a50e946d5e9a617850721ed8f89094f3ba16aa7695bcc8cb95",
+    "Embedding_Protocol.json": "0a7a142545a1b53538feca914eeba7169329a3aad47f69790ed231fdbd4ad469",
+    "Figure_01_Selected_Model_Accuracy_Precision_Recall_F1.png": "cf314135c05bfe2744fc583b01da1cfb476da8407d34cff1603e1de7c3ad0cd4",
+    "Figure_01_Selected_Model_Accuracy_Precision_Recall_F1.pdf": "773278e095da1cf2051f1a74789561e51c111e17fe1ece5c330fe14565703a98",
+    "Figure_02_Selected_Model_Five_Fold_Validation.png": "118d4f9d64d6f9651e6d650af67545890db4b7fb314cb7524a6867dadc5e230b",
+    "Figure_02_Selected_Model_Five_Fold_Validation.pdf": "84779ddfb562aaf483fcb27182799e6953575b96db75233a722ab3afbbd72360",
+    "Figure_03_Selected_Model_Confusion_Counts_and_Percentages.png": "c905a832ac0cafdd5ea81d8f3b88d5450eaa7559dae8bf8fdc5d27be0cf302da",
+    "Figure_03_Selected_Model_Confusion_Counts_and_Percentages.pdf": "57063ec9e1bcf4993617f871217cce69295e175599f65cee8ac524393e097d6a",
+    "Figure_04_Selected_Model_Per_Class_Precision_Recall_F1.png": "b33378f27d179f33475171cde699ec16bc132d252edcfa1f84b58f66f14eddbd",
+    "Figure_04_Selected_Model_Per_Class_Precision_Recall_F1.pdf": "13b30eba793be1b8e1144c184caa9de99b42f96cec48a0cc634ba05b48cd5ba4",
+    "Figure_06_Selected_Model_PCA_Explained_Variance.png": "9a73dba8b8fb069a6104613870caed913caec89199c5f960bec0faa4e67a3326",
+    "Figure_06_Selected_Model_PCA_Explained_Variance.pdf": "199bfdd12968e7a29645f6021b93b69483a974878dff57e582e860635408b6c2",
+    "Figure_Captions_and_Usage.txt": "a705fad273431057c06a202ff46fadd48f9306805fd1daf2a8124dedfbc73e46",
+    "Table_03_Current_Triage_Embedding_Geometry.png": "bcb3eb507d05248f72899240e843e52ffb1ec7093f7558511d67ceb306ee5971"
+  }
+}

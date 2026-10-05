@@ -1,0 +1,27 @@
+PAPER FIGURE CAPTIONS — CURRENT SELECTED MODEL
+
+Model: paired-text SapBERT + PCA-64 + balanced Logistic Regression (C=100).
+Dataset targets: 0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent.
+
+Figure 1. Accuracy and macro-averaged precision, recall and F1 for the selected pipeline: mean five-fold grouped cross-validation and retrospective evaluation on 1,999 previously examined test records. Scores are percentages.
+
+Figure 2. Accuracy, macro F1 and Emergency recall across the five grouped development validation folds for the selected configuration. The configuration was selected after a broader development search; these scores are not an independent confirmation estimate.
+
+Figure 3. Selected-model confusion matrices on 1,999 test records, displayed as counts (left) and percentages within each reference class (right). Rows are reference levels and columns are predicted levels, ordered 0–3.
+
+Figure 4. Precision, recall and F1 for each of the four supplied triage levels in the retrospective test evaluation. Aggregate scores above 90% do not imply that each class score exceeds 90%.
+
+Figure 5. Two-dimensional PCA projections of current paired-text SapBERT embeddings for four balanced development samples (seeds 42, 99, 404 and 777). Each sample includes 200 distinct complaint groups, with 50 records per triage level. All panels use the same fitted serving PCA and shared axes; colours represent triage levels, not complaint categories. Samples may overlap. These are repeated samples, not separate models or independent datasets.
+
+Figure 6. Cumulative embedding variance retained by the fitted serving PCA. Sixty-four components retain 92.10% of development embedding variance. Explained variance is not classification accuracy.
+
+Embedding statistics table. Mean (sample standard deviation) of within-label and between-label cosine distances, their difference and cosine silhouette across 20 reproducible balanced development samples. Each sample contains 200 distinct complaint groups. The accompanying CSV contains all 60 measurements (20 samples × 3 embedding spaces). Samples may overlap. No ANOSIM, permutation p-values or Cohen d are reported.
+
+USAGE NOTES
+Use the six numbered main figures with the captions above. Figure 5 also has four individual PNG panels if the journal requires separate panels. PNG images are 300 dpi; PDF versions are vector exports. The report itself is SapBERT_Final_Paper_Report.pdf.
+
+All plotted results come from saved measurements or fitted artifacts. No classifier was retrained while preparing this report. The embeddings are from the current dataset, which must not be described as independently verified clinical data. The original label-assignment rules and independent per-record review were not documented.
+
+The 90.60% accuracy and 90.99% macro F1 measure agreement with supplied labels on previously examined test records. They are retrospective; fresh independent validation is needed. The study uses supplied/recovered clinical concepts; live Ollama translation accuracy is not established by these scores.
+
+Only Logistic Regression is deployed. SapBERT weights remain frozen. Improved input representation and tuned preprocessing/classifier settings changed the complete pipeline; the classifier family did not change. Individual contributions of simultaneous changes have not been isolated experimentally.

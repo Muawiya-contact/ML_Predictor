@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "pages": 16,
+  "first_12_pages_preserved": true,
+  "new_pages_visually_checked": true,
+  "all_20_full_dimensional_samples_checked_with_scipy": true,
+  "model_hashes_unchanged": true,
+  "private_records_excluded": true
+}

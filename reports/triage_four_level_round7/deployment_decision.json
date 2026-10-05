@@ -1,0 +1,45 @@
+{
+  "action": "promote_verified_paired_text_bundle",
+  "selected": "lr_pair64_c100",
+  "joint_configurations": 133,
+  "trainable_configurations": 109,
+  "training_cv_fits": 545,
+  "blend_fold_evaluations": 120,
+  "all_aggregate_targets_met": true,
+  "every_class_target_met": false,
+  "metrics": {
+    "accuracy": {
+      "development_cv_mean": 0.9048874141161772,
+      "retrospective": 0.9059529764882441,
+      "target": 0.9,
+      "met_in_both": true
+    },
+    "precision_macro": {
+      "development_cv_mean": 0.907488769752078,
+      "retrospective": 0.9097783224096291,
+      "target": 0.9,
+      "met_in_both": true
+    },
+    "recall_macro": {
+      "development_cv_mean": 0.909697077880246,
+      "retrospective": 0.9100484977026503,
+      "target": 0.9,
+      "met_in_both": true
+    },
+    "macro_f1": {
+      "development_cv_mean": 0.9082649347510248,
+      "retrospective": 0.9098858465849731,
+      "target": 0.9,
+      "met_in_both": true
+    }
+  },
+  "artifact_sha256": {
+    "model.pkl": "051c4381e7bcde1382c5d68563b28603e7d9c26eef5cf409181e2db48104b2ee",
+    "structured.pkl": "45aebe4952b8185a2f2225fbc49d8c5e7c89621b7a6bfe3e0111c4c0227b88e8",
+    "pca.pkl": "a9913a2087bee57a51784a139ecac40d8cbb2e3651d1e55ba3e9e5c4434b5aca",
+    "detail_scaler.pkl": "aeaf71c287b238347009aa88f7cd5063f4c19809f990c6288bb19e7adf442439"
+  },
+  "feature_count": 133,
+  "text_input": "concept_and_complaint",
+  "evaluation_scope": "Retrospective on previously examined test records; not independent confirmation."
+}

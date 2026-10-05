@@ -1,3 +1,24 @@
+# Current four-level dataset
+
+The active source is `cardiac_multilingual_10000_4level_triage.xlsx` (10,000 rows),
+SHA-256 `a2c59f71dada03fdf24a733821adfaeac90e107be3af1e22b779d7674ffc59c3`.
+Its labels are 0 Emergency, 1 Urgent, 2 Standard, 3 Non-urgent. The provider
+answered “by using all” when asked how labels were assigned; the exact process
+and independent per-record review are not documented. This does not establish
+clinician validation or real-patient provenance.
+
+The workbook had 4,290 missing Clinical_Concept values. Only those input texts
+were recovered from the previous supplied CSV after exact row-wise matching of
+all eleven complaint/patient inputs and every populated concept. New targets
+were retained. Source files remain unchanged; trimmed training records and
+predictions stay local. See the [four-level protocol](experiments/triage_study/FOUR_LEVEL.md).
+
+The following material documents **historical datasets**, not the source of
+current four-level labels. Superseded working CSV copies are removed; their
+previous versions and generation history remain in Git.
+
+---
+
 # Dataset provenance and disclosure
 
 **Last updated: 2026-08-16**

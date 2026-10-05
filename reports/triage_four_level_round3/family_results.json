@@ -1,0 +1,292 @@
+[
+  {
+    "candidate": "lr_quad128_c100",
+    "config": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "cv_macro_f1": 0.8657311532795312,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection.",
+    "metrics": {
+      "accuracy": 0.8629314657328664,
+      "precision_macro": 0.8674560539213036,
+      "recall_macro": 0.8686710809250762,
+      "macro_f1": 0.8680357737526706,
+      "qwk": 0.9375478564646111,
+      "mae": 0.1375687843921961,
+      "under_triage_rate": 0.06803401700850426,
+      "over_triage_rate": 0.06903451725862932,
+      "emergency_recall": 0.9142156862745098
+    },
+    "report": {
+      "0": {
+        "precision": 0.9009661835748792,
+        "recall": 0.9142156862745098,
+        "f1-score": 0.9075425790754258,
+        "support": 408.0
+      },
+      "1": {
+        "precision": 0.8311444652908068,
+        "recall": 0.8173431734317343,
+        "f1-score": 0.8241860465116279,
+        "support": 542.0
+      },
+      "2": {
+        "precision": 0.8352745424292846,
+        "recall": 0.8366666666666667,
+        "f1-score": 0.835970024979184,
+        "support": 600.0
+      },
+      "3": {
+        "precision": 0.9024390243902439,
+        "recall": 0.9064587973273942,
+        "f1-score": 0.9044444444444445,
+        "support": 449.0
+      },
+      "accuracy": 0.8629314657328664,
+      "macro avg": {
+        "precision": 0.8674560539213036,
+        "recall": 0.8686710809250762,
+        "f1-score": 0.8680357737526706,
+        "support": 1999.0
+      },
+      "weighted avg": {
+        "precision": 0.8626484994972278,
+        "recall": 0.8629314657328664,
+        "f1-score": 0.8627632716433927,
+        "support": 1999.0
+      }
+    },
+    "confusion": [
+      [
+        373,
+        35,
+        0,
+        0
+      ],
+      [
+        41,
+        443,
+        57,
+        1
+      ],
+      [
+        0,
+        55,
+        502,
+        43
+      ],
+      [
+        0,
+        0,
+        42,
+        407
+      ]
+    ]
+  },
+  {
+    "candidate": "hgb_refine64_leaf7",
+    "config": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 10,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "cv_macro_f1": 0.8476254532903689,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection.",
+    "metrics": {
+      "accuracy": 0.8329164582291145,
+      "precision_macro": 0.8413276080513058,
+      "recall_macro": 0.8382461848347685,
+      "macro_f1": 0.8393689198985208,
+      "qwk": 0.9241417940123843,
+      "mae": 0.16708354177088544,
+      "under_triage_rate": 0.09004502251125562,
+      "over_triage_rate": 0.07703851925962982,
+      "emergency_recall": 0.8995098039215687
+    },
+    "report": {
+      "0": {
+        "precision": 0.8995098039215687,
+        "recall": 0.8995098039215687,
+        "f1-score": 0.8995098039215687,
+        "support": 408.0
+      },
+      "1": {
+        "precision": 0.825147347740668,
+        "recall": 0.7749077490774908,
+        "f1-score": 0.7992388201712655,
+        "support": 542.0
+      },
+      "2": {
+        "precision": 0.771875,
+        "recall": 0.8233333333333334,
+        "f1-score": 0.7967741935483871,
+        "support": 600.0
+      },
+      "3": {
+        "precision": 0.8687782805429864,
+        "recall": 0.8552338530066815,
+        "f1-score": 0.8619528619528619,
+        "support": 449.0
+      },
+      "accuracy": 0.8329164582291145,
+      "macro avg": {
+        "precision": 0.8413276080513058,
+        "recall": 0.8382461848347685,
+        "f1-score": 0.8393689198985208,
+        "support": 1999.0
+      },
+      "weighted avg": {
+        "precision": 0.834135222831037,
+        "recall": 0.8329164582291145,
+        "f1-score": 0.8330509212999966,
+        "support": 1999.0
+      }
+    },
+    "confusion": [
+      [
+        367,
+        41,
+        0,
+        0
+      ],
+      [
+        41,
+        420,
+        81,
+        0
+      ],
+      [
+        0,
+        48,
+        494,
+        58
+      ],
+      [
+        0,
+        0,
+        65,
+        384
+      ]
+    ]
+  },
+  {
+    "candidate": "rf_refine64_leaf1",
+    "config": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "balance": true
+      }
+    },
+    "cv_macro_f1": 0.7920530546486098,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection.",
+    "metrics": {
+      "accuracy": 0.7808904452226113,
+      "precision_macro": 0.7988456553404673,
+      "recall_macro": 0.7882628745208583,
+      "macro_f1": 0.782393938314912,
+      "qwk": 0.9028634557703342,
+      "mae": 0.2191095547773887,
+      "under_triage_rate": 0.10455227613806903,
+      "over_triage_rate": 0.11455727863931967,
+      "emergency_recall": 0.9338235294117647
+    },
+    "report": {
+      "0": {
+        "precision": 0.7791411042944786,
+        "recall": 0.9338235294117647,
+        "f1-score": 0.8494983277591973,
+        "support": 408.0
+      },
+      "1": {
+        "precision": 0.8622589531680441,
+        "recall": 0.577490774907749,
+        "f1-score": 0.6917127071823205,
+        "support": 542.0
+      },
+      "2": {
+        "precision": 0.7020408163265306,
+        "recall": 0.86,
+        "f1-score": 0.7730337078651686,
+        "support": 600.0
+      },
+      "3": {
+        "precision": 0.8519417475728155,
+        "recall": 0.7817371937639198,
+        "f1-score": 0.8153310104529616,
+        "support": 449.0
+      },
+      "accuracy": 0.7808904452226113,
+      "macro avg": {
+        "precision": 0.7988456553404673,
+        "recall": 0.7882628745208583,
+        "f1-score": 0.782393938314912,
+        "support": 1999.0
+      },
+      "weighted avg": {
+        "precision": 0.7948875725989692,
+        "recall": 0.7808904452226113,
+        "f1-score": 0.7760917726018265,
+        "support": 1999.0
+      }
+    },
+    "confusion": [
+      [
+        381,
+        27,
+        0,
+        0
+      ],
+      [
+        108,
+        313,
+        121,
+        0
+      ],
+      [
+        0,
+        23,
+        516,
+        61
+      ],
+      [
+        0,
+        0,
+        98,
+        351
+      ]
+    ]
+  }
+]

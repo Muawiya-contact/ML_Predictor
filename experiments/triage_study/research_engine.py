@@ -16,7 +16,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.preprocessing import StandardScaler, OneHotEncoder, PolynomialFeatures
 from sklearn.decomposition import PCA
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import HistGradientBoostingClassifier, RandomForestClassifier
@@ -47,6 +47,11 @@ LABELS = [1, 2, 3]
 
 
 class Features(BaseEstimator, TransformerMixin):
+    """Fold-fitted numeric/categorical preprocessing and optional frozen text PCA.
+
+    Optional quadratic numeric terms live inside the saved numeric pipeline,
+    so application inference can reuse them without reconstructing features.
+    """
     def __init__(
         self,
         view="structured",
@@ -57,6 +62,7 @@ class Features(BaseEstimator, TransformerMixin):
         whiten=False,
         solver="randomized",
         exclude_cat=(),
+        polynomial=False,
     ):
         self.view = view
         self.encoder = encoder
@@ -66,6 +72,7 @@ class Features(BaseEstimator, TransformerMixin):
         self.whiten = whiten
         self.solver = solver
         self.exclude_cat = exclude_cat
+        self.polynomial = polynomial
 
     def prepare(self, X):
         X = X.copy()
@@ -118,6 +125,7 @@ class Features(BaseEstimator, TransformerMixin):
                         Pipeline(
                             [
                                 ("imputer", SimpleImputer(strategy="median")),
+                                ("polynomial", PolynomialFeatures(degree=2 if self.polynomial is True else int(self.polynomial), include_bias=False) if self.polynomial else "passthrough"),
                                 ("scaler", StandardScaler()),
                             ]
                         ),
@@ -192,6 +200,23 @@ def model_for(c):
         m = HistGradientBoostingClassifier(random_state=42, **p)
     elif c["classifier"] == "rf":
         m = RandomForestClassifier(n_jobs=2, random_state=42, **p)
+    elif c["classifier"] == "catboost":
+        from catboost import CatBoostClassifier
+        m = CatBoostClassifier(loss_function="MultiClass", random_seed=42,
+                               thread_count=2, verbose=False, allow_writing_files=False, **p)
+    elif c["classifier"] == "xgboost":
+        from xgboost import XGBClassifier
+        m = XGBClassifier(objective="multi:softprob", num_class=4, tree_method="hist",
+                          device="cpu", random_state=42, n_jobs=2, **p)
+    elif c["classifier"] == "ordinal":
+        from src.ordinal_classifier import OrdinalLogisticClassifier
+        m = OrdinalLogisticClassifier(**p)
+    elif c["classifier"] == "mlp":
+        from sklearn.neural_network import MLPClassifier
+        m = MLPClassifier(random_state=42, max_iter=400, early_stopping=False, **p)
+    elif c["classifier"] == "svc":
+        from sklearn.svm import SVC
+        m = SVC(probability=True, random_state=42, cache_size=512, **p)
     else:
         raise ValueError(c["classifier"])
     return m, balance

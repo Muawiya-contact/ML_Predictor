@@ -1,0 +1,126 @@
+{
+  "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "embedding_sha256": "3f70bfdb7827a11817ac800e499f650ae7ca0345cf4f9ccb9a7a51f34b5192d7",
+  "candidates": {
+    "logreg": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "hgb": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 10,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "rf": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "balance": true
+      }
+    }
+  },
+  "fractions": [
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "folds": 5,
+  "expected_fits": 90,
+  "seed": 20261001,
+  "detail_version": 1,
+  "detail_feature_names": [
+    "mild_word",
+    "strong_word",
+    "sudden_word",
+    "exertion_word",
+    "radiation_phrase",
+    "breathing_phrase",
+    "fainting_word",
+    "sweating_word",
+    "nausea_word",
+    "family_word",
+    "history_word",
+    "hypertension_word",
+    "diabetes_word",
+    "negation_word",
+    "night_word",
+    "morning_word",
+    "duration_known",
+    "log_duration_minutes",
+    "duration_ambiguous"
+  ],
+  "detail_patterns": {
+    "mild_word": "\\b(?:mild|slight|mamuli|halka|halki|halkay)\\b",
+    "strong_word": "\\b(?:severe|intense|shadeed|tez|bohat|bahut)\\b",
+    "sudden_word": "\\b(?:sudden|suddenly|achanak)\\b",
+    "exertion_word": "\\b(?:exercise|exertion|exertional|climbing|stairs|seedhiyan|chalne)\\b",
+    "radiation_phrase": "\\b(?:radiat\\w*|tak ja|tak phel|tak phail)\\b",
+    "breathing_phrase": "\\b(?:breath\\w*|dyspn\\w*|saans|sans)\\b",
+    "fainting_word": "\\b(?:faint\\w*|syncope|behosh\\w*)\\b",
+    "sweating_word": "\\b(?:sweat\\w*|pasina|paseena)\\b",
+    "nausea_word": "\\b(?:nause\\w*|vomit\\w*|ulti)\\b",
+    "family_word": "\\b(?:family|familial|khandan\\w*)\\b",
+    "history_word": "\\b(?:history|known|purani|purana|pehle)\\b",
+    "hypertension_word": "\\b(?:hypertension|hypertensive)\\b",
+    "diabetes_word": "\\b(?:diabet\\w*|diabetes|sugar)\\b",
+    "negation_word": "\\b(?:no|not|without|denies|nahi|nahin)\\b",
+    "night_word": "\\b(?:night|raat|rat)\\b",
+    "morning_word": "\\b(?:morning|subah)\\b"
+  },
+  "incumbent": {
+    "candidate": "lr_quad128_c100",
+    "config": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "baseline": "lr_pca64_c10_balanced1",
+    "rule": "Highest mean development macro F1 subject to emergency recall no more than 1 percentage point below incumbent; accuracy breaks ties.",
+    "cv_gain": 0.005907077206291911
+  },
+  "labels_changed": false,
+  "encoder_finetuned": false,
+  "selection": "Require development mean macro F1 greater than incumbent and emergency recall >= original baseline minus 0.01; rank by macro F1 then accuracy. No test-based selection.",
+  "interpretation": "Learning curves condition on previously selected settings and fixed grouped folds; no numeric extrapolation to 20,000 rows."
+}

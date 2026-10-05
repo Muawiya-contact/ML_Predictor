@@ -1,0 +1,71 @@
+{
+  "status": "passed",
+  "runs": 4,
+  "records_per_run": 100,
+  "distinct_records_across_runs": 368,
+  "eligible_group_count": 1915,
+  "candidate_counts": {
+    "Arm mention": 560,
+    "Back mention": 360,
+    "Jaw mention": 206,
+    "Palpitations mention": 633,
+    "Shoulder mention": 156
+  },
+  "all_seeds_retained": true,
+  "diagnostic_explained_variance_ratio": [
+    0.1444519109189291,
+    0.09108274669787995
+  ],
+  "serving_first_two_variance": 0.17533358018447454,
+  "summary": {
+    "768-D paired SapBERT": {
+      "intra_cosine_distance": 0.25253787472702366,
+      "inter_cosine_distance": 0.4012157828929975,
+      "difference": 0.14867790816597382,
+      "mention_silhouette": 0.2456351495305955,
+      "urgency_silhouette": -0.038255710599440745,
+      "anosim_R": 0.7519535526315789,
+      "anosim_p_unadjusted": 0.002,
+      "nearest_mention_match": 0.9175,
+      "kmeans_ARI": 0.6887759881842793,
+      "anosim_p_holm": 0.032
+    },
+    "64-D serving PCA": {
+      "intra_cosine_distance": 0.617782768836995,
+      "inter_cosine_distance": 1.0165710072081768,
+      "difference": 0.39878823837118177,
+      "mention_silhouette": 0.2913448267919013,
+      "urgency_silhouette": -0.030571178239269678,
+      "anosim_R": 0.8273688157894736,
+      "anosim_p_unadjusted": 0.002,
+      "nearest_mention_match": 0.905,
+      "kmeans_ARI": 0.7349323331392698,
+      "anosim_p_holm": 0.032
+    },
+    "2-D serving PCA": {
+      "intra_cosine_distance": 0.5432252866064264,
+      "inter_cosine_distance": 0.9920648358195789,
+      "difference": 0.4488395492131525,
+      "mention_silhouette": -0.08866931042549014,
+      "urgency_silhouette": -0.1115093227362055,
+      "anosim_R": 0.35563381578947373,
+      "anosim_p_unadjusted": 0.002,
+      "nearest_mention_match": 0.3625,
+      "kmeans_ARI": 0.20960203417556167,
+      "anosim_p_holm": 0.032
+    },
+    "2-D diagnostic PCA": {
+      "intra_cosine_distance": 0.2687230627136543,
+      "inter_cosine_distance": 1.1329318670542923,
+      "difference": 0.864208804340638,
+      "mention_silhouette": 0.28890939146956596,
+      "urgency_silhouette": -0.11279410040209255,
+      "anosim_R": 0.6752031578947368,
+      "anosim_p_unadjusted": 0.002,
+      "nearest_mention_match": 0.6174999999999999,
+      "kmeans_ARI": 0.4829776237022763,
+      "anosim_p_holm": 0.032
+    }
+  },
+  "limitations": "Mention labels are derived from the same text encoded, so separation is descriptive lexical/semantic consistency, not an independent category benchmark or triage accuracy. Samples may overlap. Only development records used. Diagnostic PCA is not deployed."
+}

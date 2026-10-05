@@ -1,0 +1,61 @@
+{
+  "purpose": "Retrospective label-task diagnostic; no model promotion or label editing.",
+  "comparison": "Same current grouped split, PCA-64, patient preprocessing, SapBERT vectors and classifier settings; only target definitions differ.",
+  "source_hashes": {
+    "old": "3b03fc54fb60a7633cdd2cf4266e5507bf30f5284602a90858efe601c9d2c167",
+    "current": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a"
+  },
+  "embedding_sha256": "3f70bfdb7827a11817ac800e499f650ae7ca0345cf4f9ccb9a7a51f34b5192d7",
+  "input_rows_identical": 10000,
+  "changed_partition_membership": 3122,
+  "old_counts": {
+    "1": 3389,
+    "2": 4716,
+    "3": 1895
+  },
+  "new_counts": {
+    "0": 2040,
+    "1": 2714,
+    "2": 3000,
+    "3": 2246
+  },
+  "label_transition": {
+    "0": {
+      "1": 2040,
+      "2": 0,
+      "3": 0
+    },
+    "1": {
+      "1": 1349,
+      "2": 1365,
+      "3": 0
+    },
+    "2": {
+      "1": 0,
+      "2": 2773,
+      "3": 227
+    },
+    "3": {
+      "1": 0,
+      "2": 578,
+      "3": 1668
+    }
+  },
+  "classifier_parameters": {
+    "logreg": {
+      "C": 1,
+      "balance": true
+    },
+    "hgb": {
+      "max_iter": 300,
+      "learning_rate": 0.1
+    },
+    "rf": {
+      "n_estimators": 300,
+      "min_samples_leaf": 3,
+      "max_features": 0.7,
+      "balance": true
+    }
+  },
+  "labels_modified": false
+}
