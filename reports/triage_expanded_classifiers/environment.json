@@ -1,0 +1,14 @@
+{
+  "python": "3.14.7",
+  "packages": {
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "scikit-learn": "1.9.0",
+    "catboost": "1.2.10",
+    "xgboost-cpu": "3.4.1"
+  },
+  "workers": 2,
+  "threads_per_worker": 2,
+  "device": "cpu",
+  "recorded": "During the run; the candidate protocol was saved before fitting."
+}

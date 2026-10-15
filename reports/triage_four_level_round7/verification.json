@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "cv_fits": 665,
+  "family_comparison_verified": true,
+  "baseline_reproduced": true,
+  "source_hashes_verified": true,
+  "holdout_previously_exposed": true,
+  "development_oof_paired_group_bootstrap": {
+    "iterations": 1000,
+    "seed": 2026,
+    "macro_f1_gain": 0.048426093406408466,
+    "ci95": [
+      0.04147556607722385,
+      0.055657646200562995
+    ],
+    "interpretation": "Conditional on selected OOF predictions; does not account for model-selection optimism."
+  },
+  "selected_probability_diagnostics": {
+    "development": {
+      "mcc": 0.8723565613052917,
+      "log_loss": 0.22661511307304505,
+      "multiclass_brier": 0.13820269607063101,
+      "ece_10_bins": 0.021045073674551062
+    },
+    "retrospective_test": {
+      "mcc": 0.8736777796720813,
+      "log_loss": 0.21041920716424253,
+      "multiclass_brier": 0.1298466650741397,
+      "ece_10_bins": 0.0169765559054604
+    }
+  }
+}

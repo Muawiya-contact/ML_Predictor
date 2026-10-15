@@ -31,7 +31,7 @@
 # OUTPUT
 # ------
 #   * Saves <inputname>_predictions.xlsx  (and .csv) next to the input
-#   * Adds columns: Predicted_Triage_Level (1-4), Predicted_Label,
+#   * Adds columns: Predicted_Triage_Level (0-3 for the current SapBERT bundle), Predicted_Label,
 #     Confidence, P_L0..P_L3, Notes
 #   * Prints a summary table + triage-level counts to the terminal
 # ============================================================
@@ -83,17 +83,17 @@ def write_table(df, base_path_no_ext):
     return written
 
 
-def predict_translated_dataframe(art, df):
+def predict_translated_dataframe(art, df, model=None):
     """Translate and gate input rows before passing English to the classifier."""
     from src.offline_pipeline import (
         fuzzy_normalize_roman_urdu, ollama_models, select_translation_model,
         translate_roman_urdu, verify_anatomical_integrity,
     )
-    if art['manifest'].get('text_column') != 'English_Translation':
+    if art['manifest'].get('backend') != 'sapbert_pca' and art['manifest'].get('text_column') != 'English_Translation':
         return predict_dataframe(art, df)[0]
     work = df.copy().reset_index(drop=True)
     originals = work.get('Complaint_Text', pd.Series('', index=work.index)).fillna('').astype(str)
-    model = select_translation_model(ollama_models()) if len(work) else None
+    model = (model or select_translation_model(ollama_models())) if len(work) else None
     translations, statuses, details, accepted = [], [], [], []
     for i, text in enumerate(originals):
         try:
@@ -114,6 +114,7 @@ def predict_translated_dataframe(art, df):
             statuses.append('NOT TRANSLATED')
             details.append(str(exc))
     work['Complaint_Text'] = translations
+    work['Raw_Complaint'] = originals
     scored, _ = predict_dataframe(art, work.loc[accepted])
     results = work.copy()
     # A previously exported result sheet may be uploaded again. Never retain
@@ -207,9 +208,9 @@ def main():
     print("BATCH TRIAGE SUMMARY")
     print("=" * 78)
 
-    counts = results['Predicted_Triage_Level'].value_counts().sort_index()
-    label_names = {1: "EMERGENCY", 2: "URGENT", 3: "STANDARD", 4: "NON-URGENT"}
-    for lvl in [1, 2, 3, 4]:
+    counts = results['Predicted_Level_0to3'].value_counts().sort_index()
+    label_names = {0: "EMERGENCY", 1: "URGENT", 2: "STANDARD", 3: "NON-URGENT"}
+    for lvl in [0, 1, 2, 3]:
         n = int(counts.get(lvl, 0))
         bar = "#" * n
         print(f"  Level {lvl} ({label_names[lvl]:<10}) : {n:>4}  {bar}")

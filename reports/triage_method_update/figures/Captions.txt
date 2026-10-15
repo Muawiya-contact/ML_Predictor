@@ -1,0 +1,2 @@
+Symptom_Concepts_Four_Runs: Four fixed 100-complaint development samples coloured by rule-derived symptom mentions. Crosses are group centres. One label-blind diagnostic PCA fitted on 1,915 eligible development groups is reused. Current paired-text SapBERT embeddings; not the serving PCA and not triage accuracy. All seeds retained; between-run overlap allowed.
+Measured_Accuracy_Comparison: Complete measured configurations on the same previously examined 1,999-record four-level partition. Differences are not isolated causal effects of individual changes.

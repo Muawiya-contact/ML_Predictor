@@ -1,3 +1,12 @@
+# Current article experiment
+
+Use [triage_study/FOUR_LEVEL.md](triage_study/FOUR_LEVEL.md) for the current
+four-level SapBERT classifier comparison and application model. The MPNet study
+below is historical and uses a different encoder/dataset. Its old input file
+must now be supplied explicitly with `--data`.
+
+---
+
 # Article Sections 3.4–3.6
 
 This is a separate research experiment. It does not replace the deployed model.

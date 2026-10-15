@@ -1,0 +1,39 @@
+{
+  "seeds": [
+    42,
+    99,
+    404,
+    777
+  ],
+  "per_run": 100,
+  "per_mention_group": 20,
+  "replacement_within_run": false,
+  "overlap_between_runs_allowed": true,
+  "rule_patterns": {
+    "Arm mention": "\\barm\\b",
+    "Back mention": "\\bback\\b",
+    "Jaw mention": "\\bjaw\\b",
+    "Palpitations mention": "\\bpalpitations?\\b",
+    "Shoulder mention": "\\bshoulders?\\b"
+  },
+  "rule_source": "Clinical_Concept",
+  "category_status": "Automatically derived literal text mentions; not independently verified clinical categories or pain diagnoses.",
+  "excluded": "Rows matching zero or multiple listed mentions; duplicate complaint groups within pool.",
+  "candidate_counts": {
+    "Arm mention": 560,
+    "Back mention": 360,
+    "Jaw mention": 206,
+    "Palpitations mention": 633,
+    "Shoulder mention": 156
+  },
+  "plot_selection": "All four predeclared seeds retained regardless of geometry",
+  "projection_views": [
+    "Fitted serving PCA first two components",
+    "Label-blind diagnostic PCA fit once to all eligible development vectors"
+  ],
+  "trained_classifier_changed": false,
+  "dataset_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "embedding_sha256": "d770ff7cd9e259ce470fb5b7defe79b27e690df4f1e269fb5cc70f6cdf26efe4",
+  "serving_pca_sha256": "a9913a2087bee57a51784a139ecac40d8cbb2e3651d1e55ba3e9e5c4434b5aca",
+  "permutations": 499
+}

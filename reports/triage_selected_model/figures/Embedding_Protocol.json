@@ -1,0 +1,41 @@
+{
+  "figure_seeds": [
+    42,
+    99,
+    404,
+    777
+  ],
+  "summary_seeds": [
+    20261004,
+    20261005,
+    20261006,
+    20261007,
+    20261008,
+    20261009,
+    20261010,
+    20261011,
+    20261012,
+    20261013,
+    20261014,
+    20261015,
+    20261016,
+    20261017,
+    20261018,
+    20261019,
+    20261020,
+    20261021,
+    20261022,
+    20261023
+  ],
+  "rows_per_sample": 200,
+  "groups_per_sample": 200,
+  "rows_per_level": 50,
+  "pca_refitted": false,
+  "test_rows_used": false,
+  "labels": "supplied triage levels, not complaint categories",
+  "samples_may_overlap": true,
+  "dataset_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "embedding_sha256": "d770ff7cd9e259ce470fb5b7defe79b27e690df4f1e269fb5cc70f6cdf26efe4",
+  "pca_sha256": "a9913a2087bee57a51784a139ecac40d8cbb2e3651d1e55ba3e9e5c4434b5aca",
+  "interpretation": "20 reproducible resamples of one development dataset, not independent datasets or encoder training runs. No ANOSIM, permutation p-values or Cohen d claimed."
+}

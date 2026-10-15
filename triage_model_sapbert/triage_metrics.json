@@ -1,0 +1,86 @@
+{
+  "accuracy": 90.59529764882441,
+  "labels": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "confusion_matrix": [
+    [
+      385,
+      23,
+      0,
+      0
+    ],
+    [
+      27,
+      480,
+      35,
+      0
+    ],
+    [
+      0,
+      46,
+      528,
+      26
+    ],
+    [
+      0,
+      0,
+      31,
+      418
+    ]
+  ],
+  "metrics": {
+    "accuracy": 0.9059529764882441,
+    "precision_macro": 0.9097783224096291,
+    "recall_macro": 0.9100484977026503,
+    "macro_f1": 0.9098858465849731,
+    "qwk": 0.9574575602338922,
+    "mae": 0.09404702351175588,
+    "under_triage_rate": 0.04202101050525263,
+    "over_triage_rate": 0.05202601300650325,
+    "emergency_recall": 0.9436274509803921
+  },
+  "classification_report": {
+    "0": {
+      "precision": 0.9344660194174758,
+      "recall": 0.9436274509803921,
+      "f1-score": 0.9390243902439024,
+      "support": 408.0
+    },
+    "1": {
+      "precision": 0.8743169398907104,
+      "recall": 0.8856088560885609,
+      "f1-score": 0.8799266727772685,
+      "support": 542.0
+    },
+    "2": {
+      "precision": 0.8888888888888888,
+      "recall": 0.88,
+      "f1-score": 0.8844221105527639,
+      "support": 600.0
+    },
+    "3": {
+      "precision": 0.9414414414414415,
+      "recall": 0.9309576837416481,
+      "f1-score": 0.9361702127659575,
+      "support": 449.0
+    },
+    "accuracy": 0.9059529764882441,
+    "macro avg": {
+      "precision": 0.9097783224096291,
+      "recall": 0.9100484977026503,
+      "f1-score": 0.9098858465849731,
+      "support": 1999.0
+    },
+    "weighted avg": {
+      "precision": 0.9060442510673514,
+      "recall": 0.9059529764882441,
+      "f1-score": 0.9059709353318484,
+      "support": 1999.0
+    }
+  },
+  "evaluation_note": "Retrospective improvement comparison on previously examined test rows; new independent data is required. Scores use supplied concepts, not live Ollama translations. SapBERT receives supplied concept + [SEP] + original complaint; live English is translated locally. Explicit detail features use original complaints."
+}

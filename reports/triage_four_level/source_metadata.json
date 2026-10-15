@@ -1,0 +1,16 @@
+{
+  "file": "cardiac_multilingual_10000_4level_triage.xlsx",
+  "sha256": "a2c59f71dada03fdf24a733821adfaeac90e107be3af1e22b779d7674ffc59c3",
+  "labels": {
+    "0": "Emergency",
+    "1": "Urgent",
+    "2": "Standard",
+    "3": "Non-urgent"
+  },
+  "rows": 10000,
+  "recovered_concepts": 4290,
+  "recovery_reference": "cardiac_multilingual_10000_filled.csv",
+  "recovery_reference_sha256": "f9fc4398820661b6005e66c7efd65fd5753c9c92f0ef98a2c37ee87785a27ec2",
+  "recovery_rule": "All 11 complaint/patient inputs match in the same source row; existing concepts also match. Only missing Clinical_Concept values copied. New labels untouched.",
+  "label_provenance": "Provider described label assignment as \"by using all\"; the exact process and independent per-record review are not documented."
+}

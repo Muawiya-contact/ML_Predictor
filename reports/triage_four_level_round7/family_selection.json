@@ -1,0 +1,549 @@
+[
+  {
+    "candidate": "cat_detail64_depth6",
+    "config": {
+      "classifier": "catboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "iterations": 800,
+        "depth": 6,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 5,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.8723336639064222,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "hgb__complaint_details",
+    "config": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 10,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.8807110462649075,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "lr_pair64_c100",
+    "config": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.9082649347510248,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "mlp_p64_a0.1",
+    "config": {
+      "classifier": "mlp",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "hidden_layer_sizes": [
+          64
+        ],
+        "alpha": 0.1,
+        "learning_rate_init": 0.001,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.8821449158253334,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "ordinal_d2_p128_c10",
+    "config": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 2
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.8998317562763762,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "rf_detail64_fraction0.3",
+    "config": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": false
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 2,
+        "max_features": 0.3,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.8195978649605362,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "blend_lr_hgb_ordinal_154",
+    "config": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.1,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.5,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "ordinal_d2_p128_c10",
+          "weight": 0.4,
+          "config": {
+            "classifier": "ordinal",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": 2
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "cv_macro_f1": 0.9065531212225344,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "svc_detail128_c10",
+    "config": {
+      "classifier": "svc",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 10,
+        "gamma": "scale",
+        "kernel": "rbf",
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.8549056766581524,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  },
+  {
+    "candidate": "xgb_detail64_depth4",
+    "config": {
+      "classifier": "xgboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 600,
+        "max_depth": 4,
+        "learning_rate": 0.04,
+        "min_child_weight": 5,
+        "reg_lambda": 10,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cv_macro_f1": 0.8639198835332687,
+    "note": "Best fused CV F1 within this family; descriptive comparison, not deployment selection."
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "python": "3.14.7",
+  "packages": {
+    "numpy": "2.5.2",
+    "pandas": "3.0.5",
+    "scikit-learn": "1.9.0",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "torch": "2.14.0+cpu",
+    "transformers": "5.16.1",
+    "reportlab": "5.0.1",
+    "matplotlib": "3.11.2",
+    "openpyxl": "3.1.5"
+  },
+  "compute": "CPU; two training threads",
+  "model_selection": "development CV only",
+  "random_seed": 42
+}

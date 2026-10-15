@@ -1,0 +1,17 @@
+{
+  "candidate": "logreg_c10",
+  "config": {
+    "classifier": "logreg",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_concept",
+      "pca": 64,
+      "solver": "full"
+    },
+    "params": {
+      "C": 10,
+      "balance": true
+    }
+  },
+  "rule": "Highest five-fold mean macro F1; ties use emergency recall then lower under-triage; holdout unused for selection"
+}

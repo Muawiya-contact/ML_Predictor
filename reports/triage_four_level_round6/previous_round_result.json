@@ -1,0 +1,120 @@
+{
+  "candidate": "lr_detail128_c10",
+  "config": {
+    "classifier": "logreg",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_concept",
+      "solver": "full",
+      "pca": 128,
+      "polynomial": true
+    },
+    "params": {
+      "C": 10,
+      "balance": true
+    },
+    "text_details": {
+      "source": "complaint_details",
+      "version": 1,
+      "feature_names": [
+        "mild_word",
+        "strong_word",
+        "sudden_word",
+        "exertion_word",
+        "radiation_phrase",
+        "breathing_phrase",
+        "fainting_word",
+        "sweating_word",
+        "nausea_word",
+        "family_word",
+        "history_word",
+        "hypertension_word",
+        "diabetes_word",
+        "negation_word",
+        "night_word",
+        "morning_word",
+        "duration_known",
+        "log_duration_minutes",
+        "duration_ambiguous"
+      ]
+    }
+  },
+  "feature_count": 197,
+  "pca_retained_variance": 0.9551252184847273,
+  "metrics": {
+    "accuracy": 0.8929464732366184,
+    "precision_macro": 0.8967373144055746,
+    "recall_macro": 0.8981091090846713,
+    "macro_f1": 0.8973267270485366,
+    "qwk": 0.9504019675908696,
+    "mae": 0.10805402701350675,
+    "under_triage_rate": 0.04652326163081541,
+    "over_triage_rate": 0.060530265132566284,
+    "emergency_recall": 0.9509803921568627
+  },
+  "report": {
+    "0": {
+      "precision": 0.919431279620853,
+      "recall": 0.9509803921568627,
+      "f1-score": 0.9349397590361446,
+      "support": 408.0
+    },
+    "1": {
+      "precision": 0.8705440900562852,
+      "recall": 0.8560885608856088,
+      "f1-score": 0.8632558139534884,
+      "support": 542.0
+    },
+    "2": {
+      "precision": 0.867109634551495,
+      "recall": 0.87,
+      "f1-score": 0.8685524126455907,
+      "support": 600.0
+    },
+    "3": {
+      "precision": 0.9298642533936652,
+      "recall": 0.9153674832962138,
+      "f1-score": 0.9225589225589226,
+      "support": 449.0
+    },
+    "accuracy": 0.8929464732366184,
+    "macro avg": {
+      "precision": 0.8967373144055746,
+      "recall": 0.8981091090846713,
+      "f1-score": 0.8973267270485366,
+      "support": 1999.0
+    },
+    "weighted avg": {
+      "precision": 0.8928152523263969,
+      "recall": 0.8929464732366184,
+      "f1-score": 0.8927966366512498,
+      "support": 1999.0
+    }
+  },
+  "confusion": [
+    [
+      388,
+      20,
+      0,
+      0
+    ],
+    [
+      34,
+      464,
+      42,
+      2
+    ],
+    [
+      0,
+      49,
+      522,
+      29
+    ],
+    [
+      0,
+      0,
+      38,
+      411
+    ]
+  ]
+}

@@ -95,11 +95,11 @@ for i, label in enumerate(labels):
 try:
     n = len(app.stopword_report["stopwords"]) if app.stopword_report else 0
     rows = len(app.stop_tree.get_children())
-    rec("tab3  Stop Words shows the serving 68-token list",
-        n == 68 and rows > 0,
+    rec("tab3  Stop Words matches the serving bundle",
+        (n == 0 and rows == 0) if app.active_manifest().get("backend") == "sapbert_pca" else (n > 0 and rows > 0),
         f"report has {n} stopwords, table rendered {rows} rows")
 except Exception as e:
-    rec("tab3  Stop Words shows the serving 68-token list", False,
+    rec("tab3  Stop Words matches the serving bundle", False,
         f"{type(e).__name__}: {e}")
 
 # ---- Tab 1: drive a real prediction through the form --------------------
@@ -107,7 +107,12 @@ try:
     app.complaint.delete("1.0", "end")
     app.complaint.insert("1.0", "seena mein shadeed dard aur pasina aa raha hai")
     app._do_predict()
+    deadline = time.monotonic() + 920
+    while getattr(app, "_prediction_running", False) and time.monotonic() < deadline:
+        app.update()
+        time.sleep(0.05)
     app.update()
+    assert not getattr(app, "_prediction_running", False), "Prediction worker timed out"
     banner = app.level_text.cget("text")
     ok = "Level" in banner
     rec("tab1  Triage a Patient: full submit", ok,
@@ -116,27 +121,19 @@ except Exception as e:
     rec("tab1  Triage a Patient: full submit", False, f"{type(e).__name__}: {e}")
     traceback.print_exc()
 
-# ---- Tab 1: a junk complaint must be REFUSED, not scored ---------------
-# It used to be scored with confidence capped at 50%. It is now refused
-# outright before translation, which is stronger: a fragment produced no
-# triage level at all rather than a low-confidence one. The cap still
-# applies on the batch path, where rows are scored in bulk.
+# ---- Tab 1: a placeholder explains 50% without assigning a level -------
 try:
-    app.complaint.delete("1.0", "end")
-    app.complaint.insert("1.0", "n/a")
-    app._do_predict()
+    app._set_complaint("n/a")
     app.update()
-    status = app.status.get()
-    refused = "Refused" in status and "No prediction" in status
-    named = "not a complaint" in status.lower() or "no symptom" in status.lower()
-    # The dialog is now observable, so assert the operator was actually told
-    # - a status-bar line alone is easy to miss.
-    dialog = next((d for d in DIALOGS if d[1] == "Not a complaint"), None)
-    rec("tab1  junk complaint refused, and the reason is named",
-        refused and named and dialog is not None,
-        f"status={status[:70]!r}; dialog={'shown' if dialog else 'MISSING'}")
+    app._do_predict()
+    explanation = app.stages.get("1.0", "end")
+    ok = (app.level_text.cget("text") == "Confidence: 50%"
+          and app._last_proba is None
+          and "placeholder, not a model prediction" in explanation
+          and not getattr(app, "_prediction_running", False))
+    rec("tab1  missing complaint: explained placeholder and no level", ok, explanation[:100])
 except Exception as e:
-    rec("tab1  junk complaint refused, and the reason is named", False,
+    rec("tab1  missing complaint: explained placeholder and no level", False,
         f"{type(e).__name__}: {e}")
 
 # ---- Tab 2: Pipeline Explorer must render all five stages ---------------
@@ -220,12 +217,12 @@ try:
         # the unreadable vital must be reported, not silently mean-filled
         if not res["Notes"].fillna("").str.contains("Heart_Rate").any():
             problems.append("unreadable Heart_Rate not reported in Notes")
-        # the junk complaint must be capped
+        # Unusable batch complaints must not carry a score.
         junk = res[res["Complaint_Text"].fillna("").str.contains("n/a|unknown",
                                                                  case=False)]
         scored = junk["Confidence"].dropna()
-        if len(scored) and (scored > 0.5 + 1e-9).any():
-            problems.append(f"junk complaint scored {scored.max():.3f} > cap")
+        if len(scored):
+            problems.append("unusable batch complaint retained a confidence score")
     counts = res["Gate_Status"].value_counts().to_dict() if "Gate_Status" in res else {}
     rec("tab4  Batch File: end-to-end on the fixture", not problems,
         "; ".join(problems) or

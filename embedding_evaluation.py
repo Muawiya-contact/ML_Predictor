@@ -93,7 +93,7 @@ warnings.filterwarnings("ignore")
 make_console_safe()
 
 CLUSTERS_FILE = "evaluation_clusters.json"
-DATA_FILE = "triage_mixed_language_dataset.csv"
+# Historical representation study; its dataset must be supplied explicitly.
 # Outputs go beside the code, so the GUI's Results tabs find them however
 # this study was launched. Inputs are resolved the same way when read.
 SUMMARY_CSV = project_path("embedding_evaluation_results.csv")
@@ -199,7 +199,7 @@ def main():
     parser = argparse.ArgumentParser(
         description="Measure how faithfully the embedding model represents complaints.")
     parser.add_argument("--clusters", default=CLUSTERS_FILE)
-    parser.add_argument("--data", default=DATA_FILE)
+    parser.add_argument("--data", required=True)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD,
                         help="similarity cut-off for 'correctly seen as similar'")

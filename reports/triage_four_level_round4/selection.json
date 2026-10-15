@@ -1,0 +1,45 @@
+{
+  "candidate": "logreg__complaint_details",
+  "config": {
+    "classifier": "logreg",
+    "features": {
+      "view": "fused",
+      "encoder": "sapbert_concept",
+      "solver": "full",
+      "pca": 128,
+      "polynomial": true
+    },
+    "params": {
+      "C": 100,
+      "balance": true
+    },
+    "text_details": {
+      "source": "complaint_details",
+      "version": 1,
+      "feature_names": [
+        "mild_word",
+        "strong_word",
+        "sudden_word",
+        "exertion_word",
+        "radiation_phrase",
+        "breathing_phrase",
+        "fainting_word",
+        "sweating_word",
+        "nausea_word",
+        "family_word",
+        "history_word",
+        "hypertension_word",
+        "diabetes_word",
+        "negation_word",
+        "night_word",
+        "morning_word",
+        "duration_known",
+        "log_duration_minutes",
+        "duration_ambiguous"
+      ]
+    }
+  },
+  "baseline": "lr_pca64_c10_balanced1",
+  "rule": "Highest mean development macro F1 subject to emergency recall no more than 1 percentage point below incumbent; accuracy breaks ties.",
+  "cv_gain": 0.03400831684679495
+}

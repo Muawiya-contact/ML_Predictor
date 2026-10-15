@@ -39,8 +39,9 @@ RUN
 WHICH MODEL IS LIVE
 -----------------------------------------------------------------------
 The app translates complaints locally with Ollama, checks anatomical
-integrity, and scores them with triage_model_embedding_english/. The
-Results tab and status bar describe this same English-trained bundle.
+integrity, and scores them with triage_model_sapbert/ by default.
+TRIAGE_MODEL_DIR explicitly selects a different compatible bundle. The
+Results tab and status bar describe the selected bundle.
 Translation failures are reported without producing a prediction.
 =======================================================================
 """
@@ -48,6 +49,11 @@ Translation failures are reported without producing a prediction.
 import csv
 import json
 import os
+
+# Keep local CPU inference from oversubscribing the desktop.
+for _thread_setting in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS"):
+    os.environ.setdefault(_thread_setting, "2")
+
 import queue
 import sys
 import threading
@@ -89,9 +95,8 @@ LEVEL_BLURB = [
     "Can wait or be redirected",
 ]
 
-# The GUI serves the 2,252-row English bundle. The Roman Urdu and professor
-# baseline bundles belong to the separate CLI research workflows.
-ENGLISH_MODEL_DIR = "triage_model_embedding_english"
+# The GUI and command-line predictors use the evaluated four-level SapBERT bundle.
+ENGLISH_MODEL_DIR = os.environ.get("TRIAGE_MODEL_DIR", "triage_model_sapbert")
 
 
 # ---------------------------------------------------------------------
@@ -230,7 +235,7 @@ GLOSSARY = {
     "under_triage": (
         "UNDER-TRIAGE\n\n"
         "The share of patients rated LESS urgent than they really are.\n\n"
-        "This is the dangerous error: a Level 1 patient sent to the Level 3 "
+        "This is the dangerous error: a Level 0 patient sent to the Level 2 "
         "queue waits while their condition worsens. It is reported "
         "separately from accuracy precisely because accuracy hides it."
     ),
@@ -530,7 +535,7 @@ class TriageGUI(tk.Tk):
                  bg=ACCENT, fg="white",
                  font=("Segoe UI Semibold", 15)).pack(side="left", padx=(14, 0))
         self.header_note = tk.Label(
-            bar, text="English via local Ollama  |  offline  |  CPU only  |  research prototype",
+            bar, text="English via local Ollama  |  offline  |  CPU only",
             bg=ACCENT, fg="#cfe0f2", font=("Segoe UI", 9))
         self.header_note.pack(side="right", padx=(0, 10))
 
@@ -590,6 +595,10 @@ class TriageGUI(tk.Tk):
                     self.status.set(f"Error in {name}")
                     if name == "_batch_worker":
                         self._end_batch_ui()
+                    if name == "_prediction_worker":
+                        self._prediction_running = False
+                        self.predict_btn.config(state="normal")
+                        self.batch_btn.config(state="normal")
                     # Re-enable any button the failed job had disabled, so a
                     # single failure does not leave the tab permanently dead.
                     messagebox.showerror("Error", payload)
@@ -633,11 +642,12 @@ class TriageGUI(tk.Tk):
         rows_txt = f"{rows:,} rows" if isinstance(rows, int) else "unknown rows"
         self.status.set(
             f"Ready.  Serving: {ENGLISH_MODEL_DIR}/  ({rows_txt}, "
-            f"{self.model_info['method']})  |  {n_stops} learned stop words  |  "
+            f"{self.model_info['method']})  |  "
+            f"{'stop-word filtering inactive' if man.get('backend') == 'sapbert_pca' else str(n_stops) + ' learned stop words'}  |  "
             f"translation and scoring both run locally.")
         self._fill_dropdowns()
         self._populate_stopwords()
-        self._refresh_deployed_banners()
+        self._refresh_model_views()
         self.predict_btn.config(state="normal")
         self.batch_btn.config(state="normal")
 
@@ -655,6 +665,12 @@ class TriageGUI(tk.Tk):
     def active_manifest(self):
         art = self.active_artifacts()
         return (art or {}).get("manifest", {}) if art else {}
+
+    def _done_translation_status(self, model):
+        self.status.set(f"Translating locally with {model}...")
+
+    def _done_offer_pull(self, _payload):
+        self._offer_model_pull()
 
     def translate_complaint(self, text, allow_blocked=False):
         """Returns (english_text, error_message).
@@ -692,7 +708,7 @@ class TriageGUI(tk.Tk):
             model = select_translation_model(have)
             if model is None:
                 # No model at all - this is the case worth offering to fix.
-                self._offer_model_pull()
+                self._work_queue.put(("ok", "_offer_pull", None))
                 return None, (
                     "Ollama is running but has no models installed.\n\n"
                     "Use the download prompt. Without a model the app "
@@ -702,9 +718,11 @@ class TriageGUI(tk.Tk):
                 # Say so once when a fallback is in play, so a different
                 # translator is never mistaken for the configured one.
                 self._ollama_model_note = model
-                self.status.set(f"translating locally with {model}")
+                self._work_queue.put(("ok", "_translation_status", model))
 
-            out = translate_roman_urdu(text, model=model)
+            # A cold CPU Qwen prompt can exceed five minutes. Translation
+            # runs in a worker for single predictions, so the GUI stays usable.
+            out = translate_roman_urdu(text, model=model, timeout=900.0)
         except Exception as e:
             return None, (f"Translation failed: {type(e).__name__}: {e}\n\n"
                           f"No prediction was made.")
@@ -851,53 +869,7 @@ class TriageGUI(tk.Tk):
 
         win.after(300, poll)
 
-    def _deployed_line(self):
-        """Four aligned lines: model, pipeline, data, status.
-
-        This was a twelve-line paragraph of asterisk-fenced banners, built up
-        by prepending one warning in front of another, plus a branch for a
-        mode that no longer exists. Everything in it was true and almost none
-        of it was read - a wall of shouting text is skipped exactly like no
-        text at all. The facts that must survive a glance are: which bundle
-        is scoring, that nothing leaves the machine, that the data is
-        synthetic, and that this is not a medical device. Those are the four
-        lines; nothing else earns a place here.
-        """
-        if not self.model_info:
-            return "model      loading..."
-
-        i = self.model_info
-        man = self.active_manifest()
-        ds = man.get("dataset", {})
-        prov = ds.get("provenance", {})
-
-        rows = ds.get("rows")
-        model_bits = [f"{rows:,} rows" if isinstance(rows, int) else None,
-                      i.get("method"), ENGLISH_MODEL_DIR + "/"]
-        if i.get("uses_embeddings"):
-            model_bits.insert(2, f"{i['embedding_model'].split('/')[-1]} "
-                                 f"({i['embedding_dim']}d)")
-        lines = ["model      " + "  ·  ".join(b for b in model_bits if b),
-                 "pipeline   Roman Urdu  ->  Ollama (local)  ->  anatomical "
-                 "gate  ->  classifier   ·   no network call"]
-
-        data_bits = [ds.get("file")]
-        if prov.get("synthetic") is True:
-            data_bits.append("SYNTHETIC - not real patient records")
-        elif prov.get("synthetic") == "unknown":
-            data_bits.append("provenance UNKNOWN")
-        scope = (man.get("scope") or {}).get("clinical_scope")
-        if scope:
-            data_bits.append(scope)
-        lines.append("data       " + "  ·  ".join(b for b in data_bits if b))
-
-        status = "research prototype - not a medical device"
-        if man.get("experiment"):
-            status = "EXPERIMENTAL bundle, not the submitted model   ·   " + status
-        lines.append("status     " + status)
-        return "\n".join(lines)
-
-    def _refresh_deployed_banners(self):
+    def _refresh_model_views(self):
         """Fill in everything that depends on WHICH model finished loading."""
         # Redraw the classification report. It is built at startup so the
         # window paints immediately, but the model loads on a background
@@ -914,32 +886,23 @@ class TriageGUI(tk.Tk):
                 child.destroy()
             render(box)
 
-        live = []
-        for label in getattr(self, "_deployed_labels", []):
-            if not label.winfo_exists():
-                continue
-            text = self._deployed_line()
-            label.configure(text=text)
-            live.append(label)
-        self._deployed_labels = live
+        for label in getattr(self, '_model_summary_labels', []):
+            if label.winfo_exists():
+                label.configure(text=self._model_summary())
+    def _model_summary(self):
+        man = self.active_manifest() or {}
+        if not man:
+            return "Loading active model..."
+        blocks = man.get('feature_blocks', [])
+        dimensions = ' + '.join(f"{b['dim']} {b['name'].replace('_', ' ')}" for b in blocks)
+        return f"Active model: {man.get('method', '')} | {dimensions} = {sum(b['dim'] for b in blocks)} inputs | levels 0-3"
 
-    def _deployed_banner(self, parent, prefix=""):
-        """A prominent, always-visible statement of what is actually running."""
-        holder = tk.Frame(parent, bg="#eaf3ea", highlightbackground="#b7d7b7",
-                          highlightthickness=1)
-        inner = tk.Frame(holder, bg="#eaf3ea")
-        inner.pack(fill="x", padx=12, pady=9)
-        if prefix:
-            tk.Label(inner, text=prefix, bg="#eaf3ea", fg=MUTED,
-                     font=("Segoe UI", 8), anchor="w").pack(fill="x")
-        label = tk.Label(inner, text=self._deployed_line(), bg="#eaf3ea",
-                         fg="#1e5c2e", font=("Segoe UI Semibold", 9),
-                         anchor="w", justify="left", wraplength=940)
-        label.pack(fill="x")
-        if not hasattr(self, "_deployed_labels"):
-            self._deployed_labels = []
-        self._deployed_labels.append(label)
-        return holder
+    def _model_summary_strip(self, parent):
+        label = body(parent, self._model_summary(), fg=MUTED, size=9, wraplength=1000)
+        label.pack(fill='x', pady=(2, 8))
+        if not hasattr(self, '_model_summary_labels'):
+            self._model_summary_labels = []
+        self._model_summary_labels.append(label)
 
     # =================================================================
     # TAB 1 - Triage a patient
@@ -964,6 +927,7 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=16, pady=14)
 
         heading(pad, "Patient details").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad, "Chief complaint in Roman Urdu or English.",
              fg=MUTED, size=9).pack(fill="x", pady=(2, 8))
 
@@ -1047,8 +1011,6 @@ class TriageGUI(tk.Tk):
         rpad.pack(fill="both", expand=True, padx=16, pady=14)
 
         heading(rpad, "Result").pack(fill="x")
-        self._deployed_banner(
-            rpad, "This tab's predictions come from:").pack(fill="x", pady=(6, 0))
 
         # No fixed height: at high DPI the two stacked labels are taller than
         # any hard-coded value, and the subtitle gets clipped.
@@ -1097,6 +1059,33 @@ class TriageGUI(tk.Tk):
         stages_sb.config(command=self.stages.yview)
         stages_sb.pack(side="right", fill="y")
         self.stages.pack(side="left", fill="both", expand=True)
+
+        self.complaint.edit_modified(False)
+        self.complaint.bind("<<Modified>>", self._complaint_edited)
+        for variable in self.fields.values():
+            variable.trace_add("write", self._clear_prediction)
+        for combo in self.combos.values():
+            combo.bind("<<ComboboxSelected>>", self._clear_prediction)
+
+    def _complaint_edited(self, _event=None):
+        if self.complaint.edit_modified():
+            self.complaint.edit_modified(False)
+            self._clear_prediction()
+
+    def _clear_prediction(self, *_args):
+        """An earlier patient's result must not describe edited input."""
+        empty = not self.complaint.get("1.0", "end").strip()
+        self._last_proba = None
+        self._last_spoken = None
+        self._last_similarity = None
+        self.proba_canvas.delete("all")
+        self.level_banner.configure(bg="#e9edf1")
+        self.level_text.configure(text="No complaint" if empty else "Result cleared", bg="#e9edf1", fg=MUTED)
+        self.level_sub.configure(text=("Confidence: 50%"
+                                       if empty else "Inputs changed. Press Triage for a new result."), bg="#e9edf1", fg=MUTED)
+        self.stages.config(state="normal")
+        self.stages.delete("1.0", "end")
+        self.stages.config(state="disabled")
 
     def _set_complaint(self, text):
         self.complaint.delete("1.0", "end")
@@ -1166,14 +1155,31 @@ class TriageGUI(tk.Tk):
         if not ok:
             messagebox.showerror("Speech failed", msg)
 
-    def _do_predict(self):
-        from triage_pipeline import predict_one
+    def _show_no_complaint(self):
+        """Display the missing-input indicator without assigning a triage level."""
+        self._clear_prediction()
+        colour = "#f4d35e"
+        self.level_banner.configure(bg=colour)
+        self.level_text.configure(text="Confidence: 50%", bg=colour, fg=INK)
+        self.level_sub.configure(text="", bg=colour)
+        self.stages.configure(state="normal")
+        self.stages.insert("end",
+            "No usable complaint was entered.\n\n"
+            "Confidence is shown as 50% because the complaint is missing or incomplete. "
+            "This is a placeholder, not a model prediction. No triage level has been assigned.\n\n"
+            "Enter the patient's symptoms in the complaint box, then click 'Triage this patient'.")
+        self.stages.configure(state="disabled")
+        self.status.set("Enter a complaint to get a triage prediction.")
 
-        text = self.complaint.get("1.0", "end").strip()
-        if not text:
-            messagebox.showwarning("No complaint", "Please enter a complaint.")
+    def _do_predict(self):
+        if getattr(self, "_prediction_running", False):
             return
 
+        text = self.complaint.get("1.0", "end").strip()
+        from triage_pipeline import has_text_signal
+        if not has_text_signal(text):
+            self._show_no_complaint()
+            return
         numbers = {}
         for name, var in self.fields.items():
             value = fnum(var.get())
@@ -1185,12 +1191,37 @@ class TriageGUI(tk.Tk):
                 return
             numbers[name] = value
 
-        original_text = text
+        categories = {name: combo.get() for name, combo in self.combos.items()}
+        self._prediction_running = True
+        self.predict_btn.config(state="disabled")
+        self.batch_btn.config(state="disabled")
+
+        self._clear_prediction()
+
+        def _prediction_worker():
+            english, error = self.translate_complaint(text)
+            return text, numbers, categories, english, error
+
+        self._run_async(_prediction_worker, "Translating locally with Ollama; the first CPU run may take several minutes...")
+
+    def _done_prediction_worker(self, payload):
+        from triage_pipeline import predict_one
+        original_text, numbers, categories, english_text, err = payload
+        self._prediction_running = False
+        self.predict_btn.config(state="normal")
+        self.batch_btn.config(state="normal")
+        if (self.complaint.get("1.0", "end").strip() != original_text
+                or {k: fnum(v.get()) for k, v in self.fields.items()} != numbers
+                or {k: v.get() for k, v in self.combos.items()} != categories):
+            self._clear_prediction()
+            self.status.set("Inputs changed during prediction. Press Triage again.")
+            return
+        from triage_pipeline import has_text_signal
+        if not has_text_signal(original_text):
+            self._show_no_complaint()
+            return
         self._last_similarity = None
-        self._last_spoken = text
-        self.status.set("translating locally via Ollama...")
-        self.update_idletasks()
-        english_text, err = self.translate_complaint(text)
+        self._last_spoken = original_text
         if err:
             # A gate block and a dead translator arrive through the same
             # return value and are completely different events. The old
@@ -1258,9 +1289,9 @@ class TriageGUI(tk.Tk):
                 self.active_artifacts(), text,
                 numbers["Age"], numbers["Heart_Rate"], numbers["Systolic_BP"],
                 numbers["Diastolic_BP"], numbers["Temperature"], numbers["SpO2"],
-                self.combos["Gender"].get(), self.combos["Mode_of_Arrival"].get(),
-                self.combos["AVPU"].get(), self.combos["ECG_Status"].get(),
-                warnings=input_warnings)
+                categories["Gender"], categories["Mode_of_Arrival"],
+                categories["AVPU"], categories["ECG_Status"],
+                warnings=input_warnings, raw_complaint=original_text)
         except Exception:
             messagebox.showerror("Prediction failed", traceback.format_exc())
             return
@@ -1269,7 +1300,7 @@ class TriageGUI(tk.Tk):
         self.level_banner.configure(bg=colour)
         self.level_text.configure(
             bg=colour, fg="white",
-            text=f"Level {level + 1}  -  {LEVEL_NAMES[level]}")
+            text=f"Level {level}  -  {LEVEL_NAMES[level]}")
         self.level_sub.configure(
             bg=colour, fg="#f2f6fa",
             text=f"{LEVEL_BLURB[level]}    ·    confidence {confidence * 100:.1f}%")
@@ -1295,9 +1326,13 @@ class TriageGUI(tk.Tk):
         self.stages.insert("end", "3. anatomical gate\n", "h")
         self.stages.insert("end", "   passed - every body part named in the\n"
                                   "   complaint survives into the English\n")
-        self.stages.insert("end", "4. sentence-transformer\n", "h")
-        self.stages.insert("end", "   English encoded directly - the learned\n"
-                                  "   stop-word list does not apply to this bundle\n")
+        self.stages.insert("end", "4. " + self.model_info["method"] + "\n", "h")
+        paired = self.active_manifest().get('text_input') == 'concept_and_complaint'
+        self.stages.insert("end", "   " + ("English and the original complaint are encoded together." if paired else "English is encoded directly.") + "\n   No stop-word removal is applied.\n")
+        detail_settings = self.active_manifest().get('text_details')
+        if detail_settings:
+            source_name = 'original complaint' if detail_settings['source'] == 'complaint_details' else 'English text'
+            self.stages.insert('end', f'   Additional duration and wording details come from the {source_name}.\n')
         # Input-quality warnings. These lived only in the branch below,
         # which is now unreachable; a capped confidence with no stated
         # reason reads as a weak case rather than a bad input.
@@ -1307,7 +1342,7 @@ class TriageGUI(tk.Tk):
                                font=("Consolas", 9, "bold"))
         self.stages.config(state="disabled")
         self.status.set(
-            f"Level {level + 1} ({LEVEL_NAMES[level]}) at "
+            f"Level {level} ({LEVEL_NAMES[level]}) at "
             f"{confidence * 100:.1f}% confidence."
             + ("   |  " + input_warnings[0].split(':')[0] if input_warnings else ""))
         return
@@ -1337,7 +1372,7 @@ class TriageGUI(tk.Tk):
         for i, p in enumerate(proba):
             y = 8 + i * 28
             if label_w > 40:
-                c.create_text(0, y + 8, anchor="w", text=f"L{i + 1} {LEVEL_NAMES[i]}",
+                c.create_text(0, y + 8, anchor="w", text=f"L{i} {LEVEL_NAMES[i]}",
                               font=("Segoe UI", 8), fill=MUTED)
             c.create_rectangle(label_w, y, label_w + bar_w, y + 16,
                                fill="#eef1f4", outline="")
@@ -1369,10 +1404,11 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Text pipeline explorer").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad,
              "Type any complaint and see it move through every stage. This is the same "
-             "code path training and prediction use, so what you see here is exactly what "
-             "the model receives.",
+             "live translation and encoding stages. The training study used supplied English "
+             "concepts; original complaint details are retained separately.",
              fg=MUTED, size=9, wraplength=980).pack(fill="x", pady=(2, 12))
 
         row = tk.Frame(pad, bg=CARD)
@@ -1490,6 +1526,16 @@ class TriageGUI(tk.Tk):
               ("passed" if ok else "blocked", ok))
 
         # 4. encoding
+        if self.active_manifest().get("backend") == "sapbert_pca":
+            from src.sapbert_serving import encoder_input
+            paired = self.active_manifest().get('text_input') == 'concept_and_complaint'
+            panel("4  SapBERT + PCA", encoder_input(en, raw, self.active_manifest()),
+                  ("English + original complaint -> " if paired else "English text -> ") + "normalized SapBERT CLS (768 dimensions) -> "
+                  f"fitted PCA ({self.active_manifest()['projected_embedding_dim']} dimensions). No stop-word removal. Patient "
+                  "features are added before the selected classifier. " +
+                  (f"{len(self.active_manifest()['text_details']['feature_names'])} explicit detail features are extracted from the original complaint. " if self.active_manifest().get('text_details') else "") +
+                  "This explorer explains preprocessing; it does not assign a triage level.", ("encoding stage", True))
+            return
         man = self.active_manifest() or {}
         enc = man.get("embedding_model") or "sentence-transformer"
         # The previous wording claimed the stop-word list was NOT applied
@@ -1515,7 +1561,8 @@ class TriageGUI(tk.Tk):
         pad = tk.Frame(wrap, bg=CARD)
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
-        heading(pad, "Contribution 1  -  automatically learned stop words").pack(fill="x")
+        heading(pad, "Stop-word filtering for the active model").pack(fill="x")
+        self._model_summary_strip(pad)
         self.stop_summary = body(
             pad, "Loading...", fg=MUTED, size=9, wraplength=1000)
         self.stop_summary.pack(fill="x", pady=(2, 6))
@@ -1559,6 +1606,10 @@ class TriageGUI(tk.Tk):
         if not self.stopword_report:
             return
         r = self.stopword_report
+        if self.active_manifest().get("backend") == "sapbert_pca":
+            self.stop_summary.configure(text="SapBERT uses the complete English text. No learned stop words are removed.")
+            self.stop_tree.delete(*self.stop_tree.get_children())
+            return
         t = r["thresholds"]
         c = r["corpus"]
         review = r.get("review_recommended") or []
@@ -1638,9 +1689,10 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="x", padx=18, pady=14)
 
         heading(pad, "Batch triage from a file").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad,
              "Pick an Excel (.xlsx) or CSV file of patients. Only Complaint_Text is "
-             "required; missing numbers fall back to the training average and unknown "
+             "required; missing numbers fall back to the training median and unknown "
              "categories fall back safely, with a note recorded per row. CSV files are "
              "read with encoding detection (utf-8, utf-8-sig, cp1252, latin-1), so a "
              "sheet exported from Excel on Windows loads instead of failing.",
@@ -1672,8 +1724,6 @@ class TriageGUI(tk.Tk):
                                            command=self._export_batch_csv)
         self.batch_export_btn.pack(side="left", padx=(8, 0))
 
-        self._deployed_banner(
-            pad, "Every row is triaged by:").pack(fill="x", pady=(10, 0))
 
         # Progress furniture. Hidden until a run starts: an idle progress bar
         # sitting at zero reads as a job that has stalled.
@@ -1812,7 +1862,7 @@ class TriageGUI(tk.Tk):
                 # it or what the numbers mean.
                 w.writerow(["# Cluster similarity matrix"])
                 w.writerow(["# encoder", res.get("encoder", "")])
-                w.writerow(["# vectors", f"{n} x 384, L2-normalised"])
+                w.writerow(["# vectors", f"{n} x {res['vectors'].shape[1]}, L2-normalised"])
                 w.writerow(["# cosine", "dot product of unit vectors; "
                                         "1.00 = identical, 0.00 = unrelated"])
                 w.writerow(["# diagonal_ok", res.get("diagonal_ok", "")])
@@ -1925,7 +1975,10 @@ class TriageGUI(tk.Tk):
             # pipeline, so the column shows the result rather than asking
             # anyone to reason about it.
             source = en if en else raw
-            if skip_norm:
+            if man.get("text_representation") == "embeddings_raw":
+                from src.sapbert_serving import encoder_input
+                clean = encoder_input(str(source or ""), str(raw or ""), man)
+            elif skip_norm:
                 clean = remove_stopwords(str(source or ""), own_stops)
             else:
                 from triage_pipeline import preprocess_corpus_for_embedding
@@ -1938,7 +1991,7 @@ class TriageGUI(tk.Tk):
             # thing to want to check, and diffing two columns by eye is not.
             before = str(source or "").lower().split()
             after = set(clean.lower().split())
-            dropped.append(" ".join(w for w in before
+            dropped.append("" if man.get("text_representation") == "embeddings_raw" else " ".join(w for w in before
                                     if w.strip(".,;:!?") not in after))
 
         enc = man.get("embedding_model", "")
@@ -1993,31 +2046,7 @@ class TriageGUI(tk.Tk):
                 texts.append(en)
                 gate_status.append("PASS" if ok else "BLOCKED")
                 gate_detail.append("" if ok else "; ".join(why)[:120])
-        # `len(df) and` matters: a header-only sheet has 0 rows and 0
-        # failures, and 0 == 0 fired this guard, so exporting the template
-        # and uploading it unedited raised "None of the 0 rows could be
-        # translated ... the usual causes are Ollama not running" against
-        # a perfectly healthy service. predict_dataframe has a 0-row path
-        # built for exactly that upload; this made it unreachable.
-        if len(df) and failures == len(df):
-            # Nothing survived. This IS fatal - there is no table to show.
-            raise RuntimeError(
-                f"None of the {len(df)} rows could be translated. Check "
-                f"the console: the usual causes are Ollama not running "
-                f"(start it with 'ollama serve') or the model refusing, "
-                f"which the guardrail logs.")
-
-        # A partial failure is NOT fatal any more. It used to abort the
-        # whole run, on the reasoning that mixing translated and
-        # untranslated rows would put two pipelines in one table. The
-        # reasoning was right; the remedy was too blunt. One "n/a"
-        # complaint - which a real spreadsheet always has - destroyed the
-        # other 499 rows, and the operator was shown nothing at all.
-        #
-        # Now every row carries its own verdict and untranslated rows are
-        # scored by nobody, so the two pipelines still never mix: a row
-        # either has an English translation and a triage level, or it has
-        # neither and says why.
+        # Keep refused rows in the export, but never pass them to inference.
         self._batch_failures = failures
 
         df = df.copy()
@@ -2027,11 +2056,24 @@ class TriageGUI(tk.Tk):
         # the operator typed, and that is the column a reviewer always
         # wants back first.
         originals = list(df["Complaint_Text"].fillna("").astype(str))
+        df['Raw_Complaint'] = originals
         df["Complaint_Text"] = texts
         pr = getattr(self, "_batch_progress", {})
         pr["done"] = pr.get("total", 0)
         pr["text"] = "scoring"
-        results, _ = predict_dataframe(self.active_artifacts(), df)
+        import pandas as _pd
+        accepted = [i for i, status in enumerate(gate_status) if status == 'PASS']
+        results = df.copy()
+        for col in ('Predicted_Level_0to3', 'Predicted_Triage_Level',
+                    'Predicted_Label', 'Confidence', 'P_L0', 'P_L1', 'P_L2', 'P_L3', 'Notes'):
+            results[col] = _pd.Series(index=results.index, dtype=object)
+        if accepted:
+            scored, _ = predict_dataframe(self.active_artifacts(), df.iloc[accepted])
+            for col in scored.columns:
+                if col not in results:
+                    results[col] = _pd.Series(index=results.index, dtype=object)
+                results.loc[results.index[accepted], col] = scored[col].to_numpy()
+        results['Complaint_Text'] = originals
         pr["finished"] = True
 
         if gate_status:
@@ -2050,6 +2092,7 @@ class TriageGUI(tk.Tk):
             results["Translation_English"] = blanked
             results["Gate_Status"] = gate_status
             results["Gate_Detail"] = gate_detail
+            results.loc[results.index[[i for i, g in enumerate(gate_status) if g != "PASS"]], "Text_Encoded"] = None
             # A blocked row must not carry a triage level. Scoring it anyway
             # and hoping the operator reads a status column is how a stomach
             # complaint gets actioned as cardiac; the single-patient path
@@ -2098,10 +2141,10 @@ class TriageGUI(tk.Tk):
             self.batch_tree.delete(row)
 
         import pandas as _pd
-        counts = {i: 0 for i in range(1, 5)}
+        counts = {i: 0 for i in range(4)}
         skipped = 0
         for _, r in results.iterrows():
-            raw_level = r.get("Predicted_Triage_Level")
+            raw_level = r.get("Predicted_Level_0to3")
             # A row the gate blocked, or one that never translated, carries
             # no level by design. int(nan) raises, and a row shown with a
             # fabricated level would defeat the point of withholding it.
@@ -2120,15 +2163,15 @@ class TriageGUI(tk.Tk):
             self.batch_tree.insert(
                 "", "end",
                 text=str(r.get("Input_Raw") or r.get("Complaint_Text", ""))[:90],
-                tags=(f"L{level - 1}",),
+                tags=(f"L{level}",),
                 values=(str(r.get("Translation_English") or "")[:80],
                         level, r["Predicted_Label"], r["Confidence"],
                         r.get("Gate_Status", "PASS"),
                         str(r.get("Notes", ""))[:90]))
 
         total = len(results)
-        parts = [f"Level {lvl} {LEVEL_NAMES[lvl - 1]}: {counts.get(lvl, 0)}"
-                 for lvl in range(1, 5)]
+        parts = [f"Level {lvl} {LEVEL_NAMES[lvl]}: {counts.get(lvl, 0)}"
+                 for lvl in range(4)]
         line = f"{total - skipped} of {total} patients triaged.   " + "    ".join(parts)
         if skipped:
             # Stated on the summary line, not buried in a column. A run that
@@ -2214,9 +2257,12 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Classification report  -  the deployed model").pack(fill="x")
+        self._model_summary_strip(pad)
+        if self.active_manifest().get("evaluation_note"):
+            body(pad, self.active_manifest()["evaluation_note"], fg=MUTED, size=9, wraplength=1000).pack(fill="x")
         body(pad,
              "Precision, recall and F1 per triage level, derived from the saved "
-             "confusion matrix of the held-out test patients. Precision = of the "
+             "confusion matrix of the previously examined test records. Precision = of the "
              "cases called this level, how many really were. Recall = of the cases "
              "that really were this level, how many were caught. F1 = their harmonic "
              "mean. Support = how many test patients truly had this level.",
@@ -2237,8 +2283,8 @@ class TriageGUI(tk.Tk):
 
         for row in m["per_class"]:
             i = row["index"]
-            name = (f"L{i + 1} {LEVEL_NAMES[i]}" if i < len(LEVEL_NAMES)
-                    else f"L{i + 1}")
+            name = (f"L{i} {LEVEL_NAMES[i]}" if i < len(LEVEL_NAMES)
+                    else f"L{i}")
             # Flag the weak class rather than leaving the reader to spot it.
             tag = "weak" if row["f1"] < 0.70 else ""
             tree.insert("", "end", text=name, tags=(tag,), values=(
@@ -2275,11 +2321,26 @@ class TriageGUI(tk.Tk):
                    if stated is not None else ""))
         weak = [r for r in m["per_class"] if r["f1"] < 0.70]
         if weak:
-            names = ", ".join(f"L{r['index'] + 1}" for r in weak)
+            names = ", ".join(f"L{r['index']}" for r in weak)
             note += (f"\nRed rows ({names}) score below 0.70 F1. Read those "
                      f"alongside their support column - a class with few test "
                      f"patients moves several points on one prediction.")
         body(pad, note, fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(8, 0))
+
+        heading(pad, "Retrospective test confusion matrix").pack(fill="x", pady=(16, 4))
+        body(pad, "Rows are reference levels; columns are predicted levels.",
+             fg=MUTED, size=9).pack(fill="x", pady=(0, 6))
+        columns = tuple(str(i) for i in range(len(cm)))
+        matrix_tree = ttk.Treeview(pad, columns=columns, show="tree headings", height=len(cm))
+        matrix_tree.heading("#0", text="Reference / predicted")
+        matrix_tree.column("#0", width=210)
+        for i, col in enumerate(columns):
+            matrix_tree.heading(col, text=f"L{i} {LEVEL_NAMES[i]}")
+            matrix_tree.column(col, width=130, anchor="center")
+        for i, row in enumerate(cm):
+            matrix_tree.insert("", "end", text=f"L{i} {LEVEL_NAMES[i]}", values=row)
+        matrix_tree.pack(fill="x")
+        self._results_confusion_tree = matrix_tree
 
     def _build_score_tab(self):
         root = self.tab_score
@@ -2326,11 +2387,12 @@ class TriageGUI(tk.Tk):
         pad.pack(fill="both", expand=True, padx=18, pady=16)
 
         heading(pad, "Try it  -  turn one complaint into numbers").pack(fill="x")
+        self._model_summary_strip(pad)
         body(pad,
              "Type any complaint in Roman Urdu or English. It goes through "
-             "the SAME steps as a real prediction - translate, clean, encode - "
+             "the same translation and embedding stages as prediction, then uses full vectors "
              "and is then compared against the ten reference complaints "
-             "below. Every value is shown, so you can follow the arithmetic "
+             "below. This view compares text embeddings, without patient or detail features. Every value is shown so you can follow the arithmetic "
              "rather than trust it.",
              fg=MUTED, size=9, wraplength=1000).pack(fill="x", pady=(2, 8))
 
@@ -2378,7 +2440,11 @@ class TriageGUI(tk.Tk):
         def worker():
             try:
                 from src.embedding_pipeline import preprocess_and_embed
-                shared["step"] = preprocess_and_embed(text, translate=True)
+                if self.active_manifest().get("backend") == "sapbert_pca":
+                    from src.sapbert_serving import embed_step
+                    shared["step"] = embed_step(self.active_artifacts(), text, translate=True)
+                else:
+                    shared["step"] = preprocess_and_embed(text, translate=True)
             except Exception as e:
                 shared["error"] = f"{type(e).__name__}: {e}"
             shared["done"] = True
@@ -2435,17 +2501,15 @@ class TriageGUI(tk.Tk):
               "the raw complaint, before anything touches it")
         stage("2", "English translation",
               step["translated"] or "(not translated - embedded as typed)",
-              "by Ollama on this machine. If translation fails the original "
-              "text is embedded instead, and this line says so.")
+              "Translated locally by Ollama; the active bundle controls encoding.")
         stage("3", "Cleaned for encoding", step["normalized"],
-              "lowercased, punctuation dropped, common words removed - the "
-              "exact text handed to the encoder")
+              "The exact input to the active encoder, including original complaint text when enabled by the model; the saved token limit applies.")
 
         preview = ", ".join(f"{float(x):+.3f}" for x in vec[:8])
         stage("4", f"The vector  -  {len(vec)} numbers",
               f"[{preview}, ...  {len(vec) - 8} more ]\n"
               f"length of this vector = {norm:.4f}",
-              "Every complaint becomes exactly 384 numbers. The length is "
+              f"Every complaint becomes {len(vec)} numbers. The length is "
               "always 1.0000 - the encoder normalises them - and that is what "
               "makes the comparison below a simple multiply-and-add.")
 
@@ -2462,7 +2526,7 @@ class TriageGUI(tk.Tk):
         tk.Label(head, text="Compared against the ten reference complaints",
                  bg=CARD, fg=INK, font=("Segoe UI Semibold", 10)).pack(side="left")
         tk.Label(blk,
-                 text="score = v1·w1 + v2·w2 + ... + v384·w384      "
+                 text=f"score = v1·w1 + v2·w2 + ... + v{len(vec)}·w{len(vec)}      "
                       "(1.00 = identical meaning, 0.00 = unrelated)",
                  bg=CARD, fg=MUTED, font=("Consolas", 9), anchor="w").pack(
             fill="x", padx=(24, 0), pady=(3, 4))
@@ -2521,8 +2585,8 @@ class TriageGUI(tk.Tk):
         heading(pad, "Cluster Embedding Inspector").pack(fill="x")
         body(pad,
              "Runs a cluster of complaints through the full offline pipeline "
-             "(Ollama translation -> lowercase + stop-word removal -> "
-             "MiniLM-L12-v2) and shows the pairwise cosine matrix. Because "
+             "(Ollama translation -> active bundle encoder) and shows the "
+             "pairwise cosine matrix before PCA. Because "
              "every vector is L2-normalised, the dot product IS the cosine, "
              "so the diagonal must read 1.00 - it doubles as a check that the "
              "encoder is behaving.",
@@ -2586,8 +2650,13 @@ class TriageGUI(tk.Tk):
                 from src.cluster_analyzer import analyze_sentence_cluster
                 def prog(i, n, text):
                     shared["msg"] = f"translating {i + 1}/{n}: {text[:34]}..."
+                embedder = None
+                if self.active_manifest().get("backend") == "sapbert_pca":
+                    from functools import partial
+                    from src.sapbert_serving import embed_step
+                    embedder = partial(embed_step, self.active_artifacts())
                 shared["result"] = analyze_sentence_cluster(
-                    SAMPLE_CLUSTER, translate=True, progress=prog)
+                    SAMPLE_CLUSTER, translate=True, progress=prog, embedder=embedder)
             except Exception as e:
                 shared["error"] = f"{type(e).__name__}: {e}"
             shared["done"] = True
@@ -2791,8 +2860,8 @@ def main():
         messagebox.showerror(
             "Model not found",
             f"Missing {model_dir}/model.pkl.\n\n"
-            "Restore the trained English model bundle supplied with this "
-            "project, then start the app again.")
+            "Restore/export the selected fitted bundle. For SapBERT, see "
+            "docs/SapBERT_GUI.md. No other model is substituted.")
         root.destroy()
         return
     TriageGUI().mainloop()

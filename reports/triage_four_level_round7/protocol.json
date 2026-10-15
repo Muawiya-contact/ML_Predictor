@@ -1,0 +1,6381 @@
+{
+  "candidates": {
+    "lr_pca64_c10_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      }
+    },
+    "lr_pca64_c10_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": false
+      }
+    },
+    "lr_pca64_c100_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "lr_pca64_c100_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 100,
+        "balance": false
+      }
+    },
+    "lr_pca64_c1000_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1000,
+        "balance": true
+      }
+    },
+    "lr_pca64_c1000_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1000,
+        "balance": false
+      }
+    },
+    "lr_pca64_whiten": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full",
+        "whiten": true
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      }
+    },
+    "lr_pca128_c10_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      }
+    },
+    "lr_pca128_c10_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": false
+      }
+    },
+    "lr_pca128_c100_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "lr_pca128_c100_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "C": 100,
+        "balance": false
+      }
+    },
+    "lr_pca128_c1000_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1000,
+        "balance": true
+      }
+    },
+    "lr_pca128_c1000_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1000,
+        "balance": false
+      }
+    },
+    "lr_pca128_whiten": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full",
+        "whiten": true
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      }
+    },
+    "lr_pca256_c10_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 256,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      }
+    },
+    "lr_pca256_c10_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 256,
+        "solver": "full"
+      },
+      "params": {
+        "C": 10,
+        "balance": false
+      }
+    },
+    "lr_pca256_c100_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 256,
+        "solver": "full"
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "lr_pca256_c100_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 256,
+        "solver": "full"
+      },
+      "params": {
+        "C": 100,
+        "balance": false
+      }
+    },
+    "lr_pca256_c1000_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 256,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1000,
+        "balance": true
+      }
+    },
+    "lr_pca256_c1000_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 256,
+        "solver": "full"
+      },
+      "params": {
+        "C": 1000,
+        "balance": false
+      }
+    },
+    "lr_pca256_whiten": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 256,
+        "solver": "full",
+        "whiten": true
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      }
+    },
+    "hgb_structured_0_leaf7": {
+      "classifier": "hgb",
+      "features": {
+        "view": "structured",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "hgb_structured_0_leaf15": {
+      "classifier": "hgb",
+      "features": {
+        "view": "structured",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 15,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "hgb_fused_64_leaf7": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "hgb_fused_64_leaf15": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 15,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "hgb_fused_128_leaf7": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "hgb_fused_128_leaf15": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 128,
+        "solver": "full"
+      },
+      "params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 15,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "rf_structured_0": {
+      "classifier": "rf",
+      "features": {
+        "view": "structured",
+        "encoder": "sapbert_concept",
+        "pca": 0,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 5,
+        "max_features": 0.8,
+        "balance": true
+      }
+    },
+    "rf_fused_64": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full"
+      },
+      "params": {
+        "n_estimators": 300,
+        "min_samples_leaf": 5,
+        "max_features": 0.8,
+        "balance": true
+      }
+    },
+    "lr_quadratic64_c1_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full",
+        "polynomial": true
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      }
+    },
+    "lr_quadratic64_c1_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full",
+        "polynomial": true
+      },
+      "params": {
+        "C": 1,
+        "balance": false
+      }
+    },
+    "lr_quadratic64_c10_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full",
+        "polynomial": true
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      }
+    },
+    "lr_quadratic64_c10_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full",
+        "polynomial": true
+      },
+      "params": {
+        "C": 10,
+        "balance": false
+      }
+    },
+    "lr_quadratic64_c100_balanced1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full",
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "lr_quadratic64_c100_balanced0": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "pca": 64,
+        "solver": "full",
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": false
+      }
+    },
+    "lr_refine64_c30": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "C": 30,
+        "balance": true
+      }
+    },
+    "lr_refine64_c300": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "C": 300,
+        "balance": true
+      }
+    },
+    "lr_refine128_c30": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "C": 30,
+        "balance": true
+      }
+    },
+    "lr_refine128_c300": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "C": 300,
+        "balance": true
+      }
+    },
+    "lr_quad128_c100": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "lr_quad128_c300": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 300,
+        "balance": true
+      }
+    },
+    "lr_quad256_c100": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 256,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      }
+    },
+    "lr_quad256_c300": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 256,
+        "polynomial": true
+      },
+      "params": {
+        "C": 300,
+        "balance": true
+      }
+    },
+    "hgb_refine64_leaf7": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 10,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "hgb_refine64_leaf31": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "max_iter": 400,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 31,
+        "min_samples_leaf": 10,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      }
+    },
+    "rf_refine64_leaf1": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "balance": true
+      }
+    },
+    "rf_refine64_leaf3": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 3,
+        "max_features": "sqrt",
+        "balance": true
+      }
+    },
+    "rf_refine128_leaf1": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "balance": true
+      }
+    },
+    "rf_refine128_leaf3": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 3,
+        "max_features": "sqrt",
+        "balance": true
+      }
+    },
+    "logreg__concept_details": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "concept_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "logreg__complaint_details": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "hgb__concept_details": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 10,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      },
+      "text_details": {
+        "source": "concept_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "hgb__complaint_details": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 10,
+        "l2_regularization": 5,
+        "early_stopping": false,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "rf__concept_details": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "balance": true
+      },
+      "text_details": {
+        "source": "concept_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "rf__complaint_details": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 1,
+        "max_features": "sqrt",
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail128_c1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail128_c10": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail128_c30": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 30,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail128_c300": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 300,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail128_c1000": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 1000,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail128_unbalanced": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": false
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail64_c100": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_detail256_c100": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 256,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "hgb_detail64_leaf7_l220": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": false
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 7,
+        "min_samples_leaf": 20,
+        "l2_regularization": 20,
+        "early_stopping": false,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "hgb_detail64_leaf15_l210": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": false
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 15,
+        "min_samples_leaf": 20,
+        "l2_regularization": 10,
+        "early_stopping": false,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "hgb_detail64_leaf31_l220": {
+      "classifier": "hgb",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": false
+      },
+      "params": {
+        "max_iter": 800,
+        "learning_rate": 0.05,
+        "max_leaf_nodes": 31,
+        "min_samples_leaf": 20,
+        "l2_regularization": 20,
+        "early_stopping": false,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "rf_detail64_fraction0.3": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": false
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 2,
+        "max_features": 0.3,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "rf_detail64_fraction0.7": {
+      "classifier": "rf",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": false
+      },
+      "params": {
+        "n_estimators": 500,
+        "min_samples_leaf": 2,
+        "max_features": 0.7,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cat_detail64_depth4": {
+      "classifier": "catboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "iterations": 800,
+        "depth": 4,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 5,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "xgb_detail64_depth4": {
+      "classifier": "xgboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 600,
+        "max_depth": 4,
+        "learning_rate": 0.04,
+        "min_child_weight": 5,
+        "reg_lambda": 10,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cat_detail64_depth6": {
+      "classifier": "catboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "iterations": 800,
+        "depth": 6,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 5,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "xgb_detail64_depth6": {
+      "classifier": "xgboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64
+      },
+      "params": {
+        "n_estimators": 600,
+        "max_depth": 6,
+        "learning_rate": 0.04,
+        "min_child_weight": 5,
+        "reg_lambda": 10,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cat_detail128_depth4": {
+      "classifier": "catboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "iterations": 800,
+        "depth": 4,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 5,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "xgb_detail128_depth4": {
+      "classifier": "xgboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "n_estimators": 600,
+        "max_depth": 4,
+        "learning_rate": 0.04,
+        "min_child_weight": 5,
+        "reg_lambda": 10,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "cat_detail128_depth6": {
+      "classifier": "catboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "iterations": 800,
+        "depth": 6,
+        "learning_rate": 0.05,
+        "l2_leaf_reg": 5,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "xgb_detail128_depth6": {
+      "classifier": "xgboost",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128
+      },
+      "params": {
+        "n_estimators": 600,
+        "max_depth": 6,
+        "learning_rate": 0.04,
+        "min_child_weight": 5,
+        "reg_lambda": 10,
+        "subsample": 0.9,
+        "colsample_bytree": 0.9,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "svc_detail128_c1": {
+      "classifier": "svc",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 1,
+        "gamma": "scale",
+        "kernel": "rbf",
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "svc_detail128_c10": {
+      "classifier": "svc",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 10,
+        "gamma": "scale",
+        "kernel": "rbf",
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "svc_detail128_c100": {
+      "classifier": "svc",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "gamma": "scale",
+        "kernel": "rbf",
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d2_p64_c0.1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 2
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d2_p64_c1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 2
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d2_p64_c10": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 2
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_cubic64_c0.1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d3_p64_c0.1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_cubic64_c1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d3_p64_c1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_cubic64_c10": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d3_p64_c10": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "mlp_p64_a0.1": {
+      "classifier": "mlp",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "hidden_layer_sizes": [
+          64
+        ],
+        "alpha": 0.1,
+        "learning_rate_init": 0.001,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "mlp_p64_a1": {
+      "classifier": "mlp",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "hidden_layer_sizes": [
+          64
+        ],
+        "alpha": 1,
+        "learning_rate_init": 0.001,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "mlp_p64_a10": {
+      "classifier": "mlp",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "hidden_layer_sizes": [
+          64
+        ],
+        "alpha": 10,
+        "learning_rate_init": 0.001,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d2_p128_c0.1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 2
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d2_p128_c1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 2
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d2_p128_c10": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 2
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_cubic128_c0.1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d3_p128_c0.1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 0.1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_cubic128_c1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d3_p128_c1": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_cubic128_c10": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "ordinal_d3_p128_c10": {
+      "classifier": "ordinal",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": 3
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "mlp_p128_a0.1": {
+      "classifier": "mlp",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "hidden_layer_sizes": [
+          64
+        ],
+        "alpha": 0.1,
+        "learning_rate_init": 0.001,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "mlp_p128_a1": {
+      "classifier": "mlp",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "hidden_layer_sizes": [
+          64
+        ],
+        "alpha": 1,
+        "learning_rate_init": 0.001,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "mlp_p128_a10": {
+      "classifier": "mlp",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "hidden_layer_sizes": [
+          64
+        ],
+        "alpha": 10,
+        "learning_rate_init": 0.001,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_pair64_c1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_pair64_c10": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_pair64_c100": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 64,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_pair128_c1": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 1,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_pair128_c10": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 10,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "lr_pair128_c100": {
+      "classifier": "logreg",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_pair",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {
+        "C": 100,
+        "balance": true
+      },
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      }
+    },
+    "blend_lr_lr64_0.1": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.9,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "lr_detail64_c100",
+          "weight": 0.1,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64,
+              "polynomial": true
+            },
+            "params": {
+              "C": 100,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_lr64_0.25": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.75,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "lr_detail64_c100",
+          "weight": 0.25,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64,
+              "polynomial": true
+            },
+            "params": {
+              "C": 100,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_lr64_0.5": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.5,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "lr_detail64_c100",
+          "weight": 0.5,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64,
+              "polynomial": true
+            },
+            "params": {
+              "C": 100,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.1": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.9,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.1,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.25": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.75,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.25,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.5": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.5,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.5,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_cat_0.1": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.9,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "cat_detail64_depth6",
+          "weight": 0.1,
+          "config": {
+            "classifier": "catboost",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "iterations": 800,
+              "depth": 6,
+              "learning_rate": 0.05,
+              "l2_leaf_reg": 5,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_cat_0.25": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.75,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "cat_detail64_depth6",
+          "weight": 0.25,
+          "config": {
+            "classifier": "catboost",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "iterations": 800,
+              "depth": 6,
+              "learning_rate": 0.05,
+              "l2_leaf_reg": 5,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_cat_0.5": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.5,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "cat_detail64_depth6",
+          "weight": 0.5,
+          "config": {
+            "classifier": "catboost",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "iterations": 800,
+              "depth": 6,
+              "learning_rate": 0.05,
+              "l2_leaf_reg": 5,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_xgb_0.1": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.9,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "xgb_detail64_depth4",
+          "weight": 0.1,
+          "config": {
+            "classifier": "xgboost",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "n_estimators": 600,
+              "max_depth": 4,
+              "learning_rate": 0.04,
+              "min_child_weight": 5,
+              "reg_lambda": 10,
+              "subsample": 0.9,
+              "colsample_bytree": 0.9,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_xgb_0.25": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.75,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "xgb_detail64_depth4",
+          "weight": 0.25,
+          "config": {
+            "classifier": "xgboost",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "n_estimators": 600,
+              "max_depth": 4,
+              "learning_rate": 0.04,
+              "min_child_weight": 5,
+              "reg_lambda": 10,
+              "subsample": 0.9,
+              "colsample_bytree": 0.9,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_xgb_0.5": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.5,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "xgb_detail64_depth4",
+          "weight": 0.5,
+          "config": {
+            "classifier": "xgboost",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "n_estimators": 600,
+              "max_depth": 4,
+              "learning_rate": 0.04,
+              "min_child_weight": 5,
+              "reg_lambda": 10,
+              "subsample": 0.9,
+              "colsample_bytree": 0.9,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_cat": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.6,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.2,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "cat_detail64_depth6",
+          "weight": 0.2,
+          "config": {
+            "classifier": "catboost",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "iterations": 800,
+              "depth": 6,
+              "learning_rate": 0.05,
+              "l2_leaf_reg": 5,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.35": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.65,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.35,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.4": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.6,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.4,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.45": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.55,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.45,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.55": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.44999999999999996,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.55,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.6": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.4,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.6,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.65": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.35,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.65,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.75": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.25,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.75,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_0.9": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.09999999999999998,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.9,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_ordinal_442": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.4,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.4,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "ordinal_d2_p128_c10",
+          "weight": 0.2,
+          "config": {
+            "classifier": "ordinal",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": 2
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_ordinal_252": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.25,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.5,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "ordinal_d2_p128_c10",
+          "weight": 0.25,
+          "config": {
+            "classifier": "ordinal",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": 2
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "blend_lr_hgb_ordinal_154": {
+      "classifier": "soft_vote",
+      "features": {
+        "view": "fused",
+        "encoder": "sapbert_concept",
+        "solver": "full",
+        "pca": 128,
+        "polynomial": true
+      },
+      "params": {},
+      "text_details": {
+        "source": "complaint_details",
+        "version": 1,
+        "feature_names": [
+          "mild_word",
+          "strong_word",
+          "sudden_word",
+          "exertion_word",
+          "radiation_phrase",
+          "breathing_phrase",
+          "fainting_word",
+          "sweating_word",
+          "nausea_word",
+          "family_word",
+          "history_word",
+          "hypertension_word",
+          "diabetes_word",
+          "negation_word",
+          "night_word",
+          "morning_word",
+          "duration_known",
+          "log_duration_minutes",
+          "duration_ambiguous"
+        ]
+      },
+      "components": [
+        {
+          "candidate": "lr_detail128_c10",
+          "weight": 0.1,
+          "config": {
+            "classifier": "logreg",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": true
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "hgb__complaint_details",
+          "weight": 0.5,
+          "config": {
+            "classifier": "hgb",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 64
+            },
+            "params": {
+              "max_iter": 800,
+              "learning_rate": 0.05,
+              "max_leaf_nodes": 7,
+              "min_samples_leaf": 10,
+              "l2_regularization": 5,
+              "early_stopping": false,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        },
+        {
+          "candidate": "ordinal_d2_p128_c10",
+          "weight": 0.4,
+          "config": {
+            "classifier": "ordinal",
+            "features": {
+              "view": "fused",
+              "encoder": "sapbert_concept",
+              "solver": "full",
+              "pca": 128,
+              "polynomial": 2
+            },
+            "params": {
+              "C": 10,
+              "balance": true
+            },
+            "text_details": {
+              "source": "complaint_details",
+              "version": 1,
+              "feature_names": [
+                "mild_word",
+                "strong_word",
+                "sudden_word",
+                "exertion_word",
+                "radiation_phrase",
+                "breathing_phrase",
+                "fainting_word",
+                "sweating_word",
+                "nausea_word",
+                "family_word",
+                "history_word",
+                "hypertension_word",
+                "diabetes_word",
+                "negation_word",
+                "night_word",
+                "morning_word",
+                "duration_known",
+                "log_duration_minutes",
+                "duration_ambiguous"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "baseline": "lr_pca64_c10_balanced1",
+  "selection": "Highest mean development macro F1 subject to emergency recall no more than one percentage point below the original reference; accuracy then name break ties.",
+  "evaluation": "Previously examined holdout: retrospective comparison, not a fresh independent test.",
+  "source_data_sha256": "ef98a8be2b6ba56a04211e7bfa1b8d87b8a19deeb17a9a46aba6ba9bd1da287a",
+  "embedding_sha256": "3f70bfdb7827a11817ac800e499f650ae7ca0345cf4f9ccb9a7a51f34b5192d7",
+  "encoder_finetuned": false,
+  "labels_changed": false,
+  "seed": 42,
+  "label_assignment_rules": "Provider has none available; all supplied labels remain unchanged.",
+  "supplement": "24 nonlinear/ordinal/neural-head candidates, six paired-text candidates and 24 fixed-weight probability blends. Blends reuse OOF predictions; no meta-model is trained.",
+  "additional_embedding_sha256": "d770ff7cd9e259ce470fb5b7defe79b27e690df4f1e269fb5cc70f6cdf26efe4",
+  "followup_inputs": {
+    "triage_advanced_classifiers": {
+      "protocol.json": "04018bb4b73ed576e88065f7180425346af3938abb242af806fa1aa0d382d188",
+      "oof.npz": "0d3a99264c27649e812a5e9df6aa6ff01ced3386da0abafc3a7dedc15cd578b8",
+      "cross_validation.csv": "3669420ad7aa6ff545aeaf7ed363c5568057aba160829cea53650b6cdf7c7b4b"
+    },
+    "triage_paired_classifiers": {
+      "protocol.json": "1434aac28583bb217f7da59c68d2dd3a2a0cfdd8b6fc5f0f2feb2616e19f1135",
+      "oof.npz": "7b98dc0fc4fae3bce1d6e77ea220755687cf5268001154d097192fce35dd17c5",
+      "cross_validation.csv": "c9b494e5a6c7cf0dbdca73c4b52dca012e5949783e6ad1054d568dc1830229bc"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "unit_tests": 25,
+  "cache_and_protocol_tests": 13,
+  "gui_audit": "passed",
+  "gui_checks": [
+    "four-class held-out matrix",
+    "all zero-based level banners and probability bars",
+    "explained missing-complaint placeholder",
+    "stale-input result rejection",
+    "four-level batch display"
+  ],
+  "gui_scope": "Controlled class decisions exercise rendering; real encoder/classifier parity is independently verified in serving_verification.json.",
+  "source_reproduction": "Fresh workbook preparation reproduced every input, target, group and split assignment.",
+  "pdf_pages": 8,
+  "pdf_visual_review": "All eight rendered pages inspected; no clipping or overflow.",
+  "live_translation_smoke_test": "Ollama timed out; request correctly returned NOT TRANSLATED with no score. Live end-to-end translation success is not verified."
+}

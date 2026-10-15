@@ -1,0 +1,10 @@
+{
+  "status": "passed",
+  "verified_fits": 90,
+  "verified_learning_memberships": 20,
+  "full_size_baselines_reproduced": true,
+  "source_hashes_verified": true,
+  "untouched_labels": true,
+  "test_rows_used": false,
+  "interpretation": "Development diagnostics conditional on earlier model selection; not an independent estimate."
+}

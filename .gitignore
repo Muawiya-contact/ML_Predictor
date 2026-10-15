@@ -55,3 +55,10 @@ tests/fixtures/*_predictions.csv
 tests/fixtures/*_predictions.xlsx
 tests/fixtures/batch_empty*.csv
 tests/fixtures/batch_empty*.xlsx
+
+# Private four-level study inputs/caches; publish aggregate reports separately.
+output/results/
+output/pdf/
+tmp/
+data/current/
+:memory:.ses

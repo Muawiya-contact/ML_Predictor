@@ -1,0 +1,22 @@
+{
+  "excluded_target_columns": [
+    "Triage_Level (renamed target only)",
+    "Triage_Label"
+  ],
+  "text_label_phrase_counts": {
+    "explicit_triage_level": 0,
+    "urgency_words": 0
+  },
+  "structured_input_columns": [
+    "Age",
+    "Heart_Rate",
+    "Systolic_BP",
+    "Diastolic_BP",
+    "Temperature",
+    "SpO2",
+    "AVPU",
+    "Gender",
+    "Mode_of_Arrival",
+    "ECG_Status"
+  ]
+}

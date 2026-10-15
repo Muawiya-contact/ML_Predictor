@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "fits": 55,
+  "source_hashes_verified": true,
+  "group_separation_verified": true,
+  "all_oof_metrics_verified": true,
+  "test_rows_used": false,
+  "incumbent_cv_macro_f1": 0.8964761527471519,
+  "minimum_emergency_recall": 0.9238173767846758,
+  "best_eligible": {
+    "candidate": "cat_detail64_depth6",
+    "macro_f1": 0.8723336639064222,
+    "accuracy": 0.8687678794503435,
+    "emergency_recall": 0.9325978874692783
+  },
+  "paired_bootstrap_vs_incumbent": {
+    "iterations": 1000,
+    "seed": 20261001,
+    "pooled_macro_f1_gain": -0.024191900195214,
+    "ci95": [
+      -0.03162710395647121,
+      -0.01702506010321809
+    ],
+    "interpretation": "Conditional paired group interval; excludes repeated model-selection uncertainty."
+  }
+}

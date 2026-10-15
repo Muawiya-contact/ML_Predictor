@@ -1,0 +1,20 @@
+{
+  "verified_conditions": 13,
+  "verified_cv_fits": 50,
+  "shared_holdout_groups": 0,
+  "test_rows": 1999,
+  "selected_candidate": "logreg_c10",
+  "selected_group_bootstrap_95_ci": {
+    "accuracy": [
+      0.8373263892001513,
+      0.8675265694513099
+    ],
+    "macro_f1": [
+      0.8436125678015657,
+      0.8724084191264323
+    ]
+  },
+  "bootstrap_replicates": 1000,
+  "bootstrap_seed": 2026,
+  "status": "passed"
+}

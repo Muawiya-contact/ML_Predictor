@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "baseline_matrices_verified": 24,
+  "test_rows_per_matrix": 1999,
+  "shared_test_records": 438,
+  "old_pdf_sha256": "fe73cf0164950f9877f4ab63eddabd899b1794bbd68414b4325c44a566a3f7d4",
+  "latest_pdf_sha256": "fa45bd4aa4a1703006be9d1c10794f0a8822604b97349f7291a011e7d518133e"
+}

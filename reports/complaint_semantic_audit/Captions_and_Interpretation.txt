@@ -1,0 +1,8 @@
+Four-run exploratory complaint-mention diagnostic. Model artifacts unchanged.
+
+Figure 1: 100 complaints per seed (42, 99, 404, 777), 20 per rule-derived mention group, projected using the first two fitted serving PCA components. Colours indicate literal mentions, not verified clinical categories.
+Figure 2: Same records and coordinates as Figure 1, coloured by supplied urgency levels 0-3. This demonstrates that semantic and urgency labels ask different questions.
+Figure 3: Same four samples projected using a separate label-blind PCA fitted once on the eligible development pool. This diagnostic projection is not deployed. All predeclared seeds are retained.
+
+Mention groups are derived from the Clinical_Concept text by the rules in protocol.json. They are not independent category annotations. No test records are used; samples can overlap across runs. Do not label these plots as classification accuracy or as reproductions of the old complaint-category experiment.
+Full-run quantitative metrics and the sampling protocol are included. Nearest-mention matching is not triage accuracy. Private sampled records are intentionally excluded.
